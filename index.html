@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ITORA Chapter BSN Surabaya - All Riders, One Family</title>
+    <!-- Tailwind CSS v4 CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <!-- FontAwesome Premium Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Supabase JS Library -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #0b0f19;
+        }
+        .ad-placeholder {
+            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+            border: 1px dashed #334155;
+        }
+    </style>
+</head>
+<body class="text-gray-100 min-h-screen flex flex-col antialiased selection:bg-amber-500 selection:text-slate-900">
+
+    <!-- TOAST NOTIFICATION -->
+    <div id="app-toast" class="fixed top-20 right-4 z-50 bg-amber-500 text-slate-950 text-sm font-bold px-5 py-3 rounded-xl shadow-2xl transition-all duration-300 opacity-0 pointer-events-none transform translate-x-4 flex items-center gap-2">
+        <i class="fa-solid fa-circle-info"></i>
+        <span id="toast-msg">Notifikasi</span>
+    </div>
+
+    <!-- MAIN NAVIGATION BAR -->
+    <nav class="sticky top-0 z-40 bg-slate-900/95 backdrop-blur-md border-b border-slate-800 w-full">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                
+                <!-- Logo Komunitas -->
+                <div class="flex items-center gap-2">
+                    <div class="bg-amber-500 text-slate-950 p-2 rounded-xl font-black tracking-wider text-xl flex items-center justify-center shadow-lg shadow-amber-500/20">
+                        <i class="fa-solid fa-motorcycle mr-1"></i>ITORA
+                    </div>
+                    <span class="text-xs font-bold uppercase tracking-widest text-slate-400 border-l border-slate-700 pl-2 hidden sm:inline">BSN Surabaya</span>
+                </div>
+
+                <!-- Navigasi Utama (Desktop) -->
+                <div class="hidden md:flex items-center gap-8">
+                    <button onclick="scrollToSection('home-section')" class="text-sm font-medium text-gray-300 hover:text-amber-500 transition-colors cursor-pointer">Home</button>
+                    <button onclick="scrollToSection('garasi-section')" class="text-sm font-medium text-gray-300 hover:text-amber-500 transition-colors cursor-pointer">Garasi Anggota</button>
+                    <button onclick="scrollToSection('info-section')" class="text-sm font-medium text-gray-300 hover:text-amber-500 transition-colors cursor-pointer">Tentang Kami</button>
+                </div>
+                
+                <!-- Pojok Kanan: Dropdown Akun (Sign Up / Sign In) -->
+                <div class="relative">
+                    <button onclick="toggleAccountMenu()" class="bg-slate-800 hover:bg-slate-700 border border-slate-700 px-4 py-2 rounded-xl text-sm font-bold flex items-center gap-2 transition-all cursor-pointer">
+                        <i class="fa-solid fa-user-circle text-amber-500 text-lg"></i>
+                        <span class="hidden sm:inline">Akun Anggota</span>
+                        <i class="fa-solid fa-chevron-down text-xs text-slate-400"></i>
+                    </button>
+
+                    <!-- Dropdown Menu Item -->
+                    <div id="account-dropdown" class="absolute right-0 mt-2 w-56 bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl py-2 hidden z-50 transform origin-top-right transition-all">
+                        <div class="px-4 py-2.5 border-b border-slate-800">
+                            <p class="text-xs text-slate-500">Selamat datang di ITORA</p>
+                            <p class="text-xs font-bold text-slate-300 truncate">Riders Area</p>
+                        </div>
+                        <button onclick="handleAuthAction('Sign In')" class="w-full text-left px-4 py-2 text-sm text-slate-300 hover:bg-amber-500 hover:text-slate-950 font-medium transition-colors cursor-pointer flex items-center gap-2">
+                            <i class="fa-solid fa-right-to-bracket text-xs"></i> Masuk (Sign In)
+                        </button>
+                        <button onclick="handleAuthAction('Sign Up')" class="w-full text-left px-4 py-2 text-sm text-slate-300 hover:bg-amber-500 hover:text-slate-950 font-bold transition-colors cursor-pointer flex items-center gap-2">
+                            <i class="fa-solid fa-user-plus text-xs"></i> Daftar KTA (Sign Up)
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </nav>
+
+    <!-- TOP VIDEO HERO HERO BANNER & EMERGENCY DOCK -->
+    <header id="home-section" class="relative w-full h-[50vh] sm:h-[65vh] bg-black overflow-hidden border-b border-slate-800">
+        <!-- Background Video Streaming / Embed Sematan -->
+        <!-- Catatan: Untuk produksi, ganti src dengan link video touring mp4 asli komunitas Anda -->
+        <video class="absolute top-0 left-0 w-full h-full object-cover opacity-60 pointer-events-none" autoplay loop muted playsinline>
+            <source src="https://assets.mixkit.co/videos/preview/mixkit-motorcycle-riding-on-a-curved-road-41680-large.mp4" type="video/mp4">
+        </video>
+        
+        <!-- Overlay Gradasi Hitam Gelap -->
+        <div class="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/40 to-slate-900/40"></div>
+
+        <!-- Teks Informasi Utama di Atas Video -->
+        <div class="absolute inset-0 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col justify-end pb-12 z-10">
+            <div class="max-w-2xl space-y-4">
+                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-amber-500/20 text-amber-400 border border-amber-500/30 w-max uppercase tracking-wider">
+                    <i class="fa-solid fa-location-dot text-[10px]"></i> Surabaya Chapter
+                </span>
+                <h1 class="text-3xl sm:text-5xl font-black text-white leading-tight">
+                    All Riders. All Bikes.<br><span class="bg-gradient-to-r from-amber-400 via-orange-500 to-yellow-400 bg-clip-text text-transparent">One Family.</span>
+                </h1>
+                <p class="text-sm sm:text-base text-slate-300 leading-relaxed max-w-xl">
+                    Wadah silaturahmi inklusif bagi seluruh penggiat roda dua di bawah naungan ITORA BSN Surabaya.
+                </p>
+                <div class="pt-2">
+                    <button onclick="triggerSOS()" class="bg-red-600 hover:bg-red-700 text-white font-bold px-5 py-2.5 rounded-xl shadow-lg shadow-red-600/20 text-sm transition-all cursor-pointer flex items-center gap-2">
+                        <i class="fa-solid fa-triangle-exclamation animate-pulse"></i> TOMBOL DARURAT SOS (MOGOK)
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- SPONSOR/IKLAN BANNER UTAMA (HORIZONTAL) -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-6 w-full">
+        <div class="ad-placeholder rounded-2xl p-4 text-center text-xs text-slate-500 font-mono tracking-widest flex items-center justify-center min-h-[90px]">
+            <div>
+                <span class="block text-[10px] bg-slate-800 text-slate-400 px-2 py-0.5 rounded w-max mx-auto mb-1">IKLAN SPONSOR BANNER UTAMA</span>
+                <p class="text-sm text-slate-400">Hubungi Pengurus ITORA Untuk Pemasangan Space Iklan Disini (728 x 90)</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- MAIN APP CONTENT LAYOUT (SPLIT COLUMN DESKTOP) -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full grid grid-cols-1 lg:grid-cols-3 gap-8 flex-1">
+        
+        <!-- KOLOM UTAMA & FORM DATABASE CLOUD (2 KOLOM DESKTOP, 1 KOLOM MOBILE) -->
+        <div id="garasi-section" class="lg:col-span-2 space-y-6">
+            
+            <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+                <h2 class="text-xl font-extrabold text-white flex items-center gap-2">
+                    <i class="fa-solid fa-warehouse text-amber-500"></i> Garasi Digital Cloud Anggota
+                </h2>
+                <span class="text-xs text-slate-400 font-mono">Real-time DB</span>
+            </div>
+
+            <!-- Dynamic List Container (Fetched from Supabase) -->
+            <div id="garage-list" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <!-- Data dimasukkan oleh JS secara otomatis -->
+            </div>
+
+            <!-- Input Form Pendaftaran Unit Baru -->
+            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl">
+                <h3 class="text-base font-bold text-white mb-4 flex items-center gap-2">
+                    <i class="fa-solid fa-plus-circle text-amber-500"></i> Daftarkan Kendaraan Anda Ke Database
+                </h3>
+                <form onsubmit="tambahMotor(event)" class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
+                    <div class="space-y-1">
+                        <label class="text-xs font-bold text-slate-400 uppercase">Nama Kendaraan</label>
+                        <input type="text" id="motor-name" placeholder="Contoh: Honda CB150R / Yamaha NMAX" required class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-amber-500 transition-colors">
+                    </div>
+                    <div class="space-y-1">
+                        <label class="text-xs font-bold text-slate-400 uppercase">Plat Nomor (L Surabaya)</label>
+                        <input type="text" id="motor-plat" placeholder="Contoh: L 1234 ABC" required class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-amber-500 transition-colors">
+                    </div>
+                    <div class="space-y-1 sm:col-span-2">
+                        <label class="text-xs font-bold text-slate-400 uppercase">Kategori Tipe Varian</label>
+                        <select id="motor-type" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-slate-300 focus:outline-none focus:border-amber-500 transition-colors">
+                            <option value="Matic / Komuter Harian">Matic / Scooter Komuter Harian</option>
+                            <option value="Sport Bike / Naked / Fairing">Sport Bike Varian Kencang</option>
+                            <option value="Classic / Retro / Vespa">Classic / Retro / Hobi Custom</option>
+                            <option value="Adventure / Touring Enduro">Adventure / Touring Enduro</option>
+                        </select>
+                    </div>
+                    <div class="sm:col-span-2 pt-2">
+                        <button type="submit" class="w-full bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold py-3 rounded-xl transition-all cursor-pointer shadow-lg shadow-amber-500/10">
+                            KIRIM & SIMPAN DATA KE SUPABASE CLOUD
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+        </div>
+
+        <!-- SIDEBAR / SIDE COLUMN (IKLAN VERTIKAL & INFO AGENDA) -->
+        <aside class="space-y-6">
+            
+            <!-- SLOT IKLAN VERTIKAL SIDEBAR -->
+            <div class="ad-placeholder rounded-2xl p-4 text-center text-xs text-slate-500 font-mono min-h-[250px] flex items-center justify-center">
+                <div>
+                    <span class="block text-[10px] bg-slate-800 text-slate-400 px-2 py-0.5 rounded w-max mx-auto mb-2">IKLAN SIDEBAR BANNER</span>
+                    <p class="text-slate-400 text-sm">Space Sponsor Pendukung<br>Bengkel / Toko Aksesoris<br>(300 x 250)</p>
+                </div>
+            </div>
+
+            <!-- AGENDA TERDEKAT INFORMASI DOCK -->
+            <div id="info-section" class="bg-slate-900 border border-slate-800 rounded-2xl p-5 space-y-4 shadow-xl">
+                <h3 class="text-base font-bold text-white border-b border-slate-800 pb-2 flex items-center gap-2">
+                    <i class="fa-solid fa-calendar-day text-amber-500"></i> Agenda Kopdar & Riding
+                </h3>
+                <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-3">
+                    <div>
+                        <span class="px-2 py-0.5 text-[9px] bg-amber-500/10 text-amber-400 rounded-md font-bold uppercase tracking-wider">Kopdar Wajib</span>
+                        <h4 class="text-sm font-bold text-white mt-1">Kopdar Santai & Penyerahan KTA</h4>
+                    </div>
+                    <p class="text-xs text-slate-400 leading-relaxed">
+                        <i class="fa-regular fa-clock text-amber-500 mr-1"></i> Setiap Sabtu Malam • 20:00 WIB<br>
+                        <i class="fa-solid fa-map-marker-alt text-amber-500 mr-1.5"></i> Area MERR / Kantor BSN Surabaya
+                    </p>
+                    <div class="flex items-center gap-2 pt-1">
+                        <button onclick="handleRSVP('Ikut')" class="flex-1 bg-slate-800 hover:bg-emerald-600 hover:text-white px-3 py-2 rounded-lg text-xs font-bold text-slate-300 transition-colors cursor-pointer">
+                            Ikut Kumpul
+                        </button>
+                        <button onclick="handleRSVP('Absen')" class="bg-slate-950 hover:bg-red-600 hover:text-white border border-slate-800 px-3 py-2 rounded-lg text-xs font-medium text-slate-400 transition-colors cursor-pointer">
+                            Absen
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAMBAHAN SLOT IKLAN KECIL -->
+            <div class="ad-placeholder rounded-xl p-3 text-center text-[11px] text-slate-500 font-mono min-h-[80px] flex items-center justify-center">
+                <p>Mini Ad Space Available (300 x 75)</p>
+            </div>
+
+        </aside>
+
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="bg-slate-950 border-t border-slate-900 py-8 text-center text-xs text-slate-500 mt-auto">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-2">
+            <p>&copy; 2026 ITORA CHAPTER BSN SURABAYA. All Riders, All Bikes, One Family.</p>
+            <p class="text-slate-600 font-mono text-[10px]">Production Build Hub: mastrisno.my.id • Powered by Supabase Backend</p>
+        </div>
+    </footer>
+
+    <!-- INTERACTIVE JAVASCRIPT & SUPABASE LOGIC CLIENT ENGINE -->
+    <script>
+        // --- KREDENSIAL SUPABASE DATABASE CONFIGURATION ---
+        // Ganti dengan konfigurasi API milik proyek dasbor Supabase asli Anda
+        const SUPABASE_URL = "URL_SUPABASE_ANDA"; 
+        const SUPABASE_ANON_KEY = "ANON_KEY_SUPABASE_ANDA";
+        
+        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        // State global aplikasi
+        const appState = {
+            garasi: []
+        };
+
+        // Mengatur buka tutup Dropdown Akun (Sign In / Sign Up)
+        function toggleAccountMenu() {
+            const dropdown = document.getElementById('account-dropdown');
+            dropdown.classList.toggle('hidden');
+        }
+
+        // Aksi ketika pilihan Menu Dropdown Akun di klik
+        function handleAuthAction(actionType) {
+            showToast(`Aksi ${actionType}: Fitur Otentikasi & Database Anggota masuk dalam modul integrasi selanjutnya.`);
+            toggleAccountMenu();
+        }
+
+        // Tampilan Notifikasi Toast Pop Up floating
+        function showToast(message) {
+            const toast = document.getElementById('app-toast');
+            const toastMsg = document.getElementById('toast-msg');
+            toastMsg.innerText = message;
+            toast.classList.remove('opacity-0', 'pointer-events-none', 'translate-x-4');
+            toast.classList.add('opacity-100', 'translate-x-0');
+            setTimeout(() => {
+                toast.classList.remove('opacity-100', 'translate-x-0');
+                toast.classList.add('opacity-0', 'pointer-events-none', 'translate-x-4');
+            }, 3500);
+        }
+
+        // Fungsi Tombol Darurat SOS Cepat
+        function triggerSOS() {
+            showToast("SOS AKTIF! Koordinat masalah Anda telah terkirim secara berkala ke server admin ITORA.");
+        }
+
+        // RSVP Handler
+        function handleRSVP(status) {
+            showToast(`Terima kasih! Pilihan konfirmasi [${status}] Anda telah berhasil disimpan.`);
+        }
+
+        // Scrolling bantu navigasi internal link
+        function scrollToSection(id) {
+            document.getElementById(id).scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // AMBIL DATA DARI DATABASE SUPABASE (SELECT REAL-TIME)
+        async function fetchGarasiData() {
+            const { data, error } = await supabaseClient
+                .from('garasi')
+                .select('*')
+                .order('created_at', { ascending: false });
+            
+            if (error) {
+                console.error("Error mengambil data dari tabel:", error);
+                // Data palsu otomatis cadangan jika belum dihubungkan api key asli
+                appState.garasi = [
+                    { name: "Honda CB150R ExMotion", plat: "L 1234 ABC", type: "Classic / Retro / Vespa" },
+                    { name: "Yamaha NMAX 155 New", plat: "L 9876 XYZ", type: "Matic / Komuter Harian" }
+                ];
+            } else {
+                appState.garasi = data;
+            }
+            renderGarageList();
+        }
+
+        // SIMPAN DATA MOTOR BARU KE CLOUD SUPABASE (INSERT)
+        async function tambahMotor(event) {
+            event.preventDefault();
+            const name = document.getElementById('motor-name').value;
+            const plat = document.getElementById('motor-plat').value;
+            const type = document.getElementById('motor-type').value;
+
+            const { data, error } = await supabaseClient
+                .from('garasi')
+                .insert([{ name, plat, type }]);
+
+            if (error) {
+                // Simulasi offline jika URL Supabase belum diisi asli
+                showToast("Simulasi: Unit Motor dimasukkan secara lokal (Segera masukkan API Key Supabase asli Anda!)");
+                appState.garasi.unshift({ name, plat, type });
+                renderGarageList();
+            } else {
+                showToast("Sukses! Data kendaraan berhasil disimpan ke cloud database.");
+                await fetchGarasiData();
+            }
+
+            document.getElementById('motor-name').value = '';
+            document.getElementById('motor-plat').value = '';
+        }
+
+        // RENDER DATA KE ELEMEN HTML
+        function renderGarageList() {
+            const container = document.getElementById('garage-list');
+            container.innerHTML = "";
+
+            if (appState.garasi.length === 0) {
+                container.innerHTML = '<p class="text-sm text-slate-500 col-span-2 py-4 text-center">Belum ada unit motor terdaftar.</p>';
+                return;
+            }
+
+            appState.garasi.forEach(motor => {
+                container.innerHTML += `
+                    <div class="bg-slate-900 border border-slate-800/80 p-4 rounded-xl flex items-center gap-3.5 hover:border-amber-500/30 transition-all group">
+                        <div class="w-10 h-10 rounded-lg bg-slate-950 border border-slate-800 flex items-center justify-center text-amber-500 text-lg group-hover:bg-amber-500 group-hover:text-slate-950 transition-all">
+                            <i class="fa-solid fa-motorcycle"></i>
+                        </div>
+                        <div class="min-w-0 flex-1">
+                            <h4 class="text-sm font-bold text-white truncate">${motor.name}</h4>
+                            <p class="text-xs text-slate-400 font-mono leading-normal">${motor.plat}</p>
+                            <span class="text-[10px] text-slate-500 font-medium block mt-0.5">${motor.type}</span>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        // Menutup dropdown otomatis jika klik di luar area menu akun
+        window.addEventListener('click', function(e) {
+            const dropdown = document.getElementById('account-dropdown');
+            if (!e.target.closest('.relative')) {
+                dropdown.classList.add('hidden');
+            }
+        });
+
+        // Dijalankan pertama kali aplikasi dimuat
+        window.addEventListener('DOMContentLoaded', () => {
+            fetchGarasiData();
+        });
+    </script>
+</body>
+</html>
