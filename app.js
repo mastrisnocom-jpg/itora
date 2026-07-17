@@ -1,14 +1,16 @@
+// INISIALISASI SUPABASE
 const SUPABASE_URL = "https://kmynkqlkhmryptzpxidq.supabase.co";
 const SUPABASE_ANON_KEY = "sb_publishable_WnHWZXwVatUB8WTgaKI2fg_eWY-T6b3";
 const db = window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
 
+// STATE UTAMA
 let products = [];
 let serverTransactions = [];
 let cart = [];
 let isSignUpMode = false;
 let currentShopEmail = "";
 
-// STATE SEKARANG DIAMBIL DARI SUPABASE CLOUD (Bukan LocalStorage)
+// STATE PENGATURAN SYSTEM (CLOUD)
 let appSettings = {
     shopName: "LitePOS Store",
     receiptDateOverride: "",
@@ -16,19 +18,21 @@ let appSettings = {
 };
 let currentUserRole = "Kasir"; 
 
+// FITUR ANTI LAG PENCARIAN
 let searchDebounceTimeout;
 
 document.addEventListener("DOMContentLoaded", () => {
     startLiveClock();
     checkUserSession();
 
+    // Event Listener dengan sistem Anti-Lag
     const searchInput = document.getElementById('barcode-search');
     if (searchInput) {
         searchInput.addEventListener('input', (e) => {
             clearTimeout(searchDebounceTimeout);
             searchDebounceTimeout = setTimeout(() => {
                 renderCatalog(e.target.value.toLowerCase());
-            }, 250);
+            }, 250); 
         });
     }
 
@@ -40,19 +44,17 @@ document.addEventListener("DOMContentLoaded", () => {
 
 async function syncSettingsAndRole() {
     if(!db) return;
-
     try {
-        // 1. Ambil / Buat Role Berdasarkan Email User
+        // Ambil profil / role berdasarkan email
         const { data: profile } = await db.from('profiles').select('role').eq('email', currentShopEmail).single();
         if (profile) {
             currentUserRole = profile.role;
         } else {
-            // Jika akun baru login pertama kali, jadikan Kasir otomatis
             await db.from('profiles').insert([{ email: currentShopEmail, role: 'Kasir' }]);
             currentUserRole = 'Kasir';
         }
 
-        // 2. Ambil Global Settings Toko
+        // Ambil Global Settings Toko
         const { data: settings } = await db.from('settings').select('*').eq('id', 1).single();
         if (settings) {
             appSettings.shopName = settings.shop_name;
@@ -80,9 +82,11 @@ function applySettingsUI() {
         document.documentElement.classList.remove('dark');
     }
 
-    // Role Based Access Control Enforcement (RBAC)
+    // SISTEM KEAMANAN & ANTI LOCKOUT
     const restrictedElements = document.querySelectorAll('.role-restricted');
-    if (currentUserRole === "Kasir") {
+    
+    // Khusus mastrisnocom@gmail.com kebal terhadap penguncian menu
+    if (currentUserRole === "Kasir" && currentShopEmail !== "mastrisnocom@gmail.com") {
         restrictedElements.forEach(el => el.classList.add('hidden'));
         switchTab('pos'); 
     } else {
@@ -97,11 +101,9 @@ async function saveSettings() {
     const sRole = document.getElementById('set-user-role').value;
 
     try {
-        // Update ke Supabase
         await db.from('settings').update({ shop_name: sName || "LitePOS Store", receipt_date: sDate, dark_mode: sDark }).eq('id', 1);
         await db.from('profiles').update({ role: sRole }).eq('email', currentShopEmail);
 
-        // Update UI Lokal
         appSettings = { shopName: sName, receiptDateOverride: sDate, darkMode: sDark };
         currentUserRole = sRole;
         
@@ -122,6 +124,7 @@ function startLiveClock() {
     }, 1000);
 }
 
+// UI UTILITIES
 function showCustomModal(title, message, type = 'success') {
     const modal = document.getElementById('custom-modal');
     document.getElementById('modal-title').innerText = title;
@@ -155,6 +158,7 @@ function showToast(message) {
     setTimeout(() => { toast.classList.add('opacity-0', 'translate-x-2'); setTimeout(() => toast.remove(), 300); }, 3000);
 }
 
+// OTENTIKASI SISTEM
 async function checkUserSession() {
     const authGate = document.getElementById('auth-gate');
     if (!db) return;
@@ -164,7 +168,6 @@ async function checkUserSession() {
             currentShopEmail = session.user.email;
             authGate.classList.add('hidden'); authGate.classList.remove('flex');
             
-            // Sinkronisasi data cloud dulu sebelum loading transaksi
             await syncSettingsAndRole();
             loadServerData();
         } else {
@@ -221,13 +224,14 @@ function toggleMobileCart() {
     if (sidebar) sidebar.classList.toggle('translate-x-full');
 }
 
+// LOGIKA DATABASE & TRANSAKSI
 async function loadServerData() {
     if(!db) return;
     const { data } = await db.from('products').select('*').order('name');
     if(data) products = data;
     renderCatalog();
     
-    if(currentUserRole !== "Kasir"){
+    if(currentUserRole !== "Kasir" || currentShopEmail === "mastrisnocom@gmail.com"){
         const tx = await db.from('transactions').select('*').order('created_at', { ascending: false });
         if(tx.data) {
             serverTransactions = tx.data;
@@ -246,6 +250,7 @@ async function loadServerData() {
     }
 }
 
+// RENDERING KATALOG
 function renderCatalog(filter = '') {
     const grid = document.getElementById('product-grid');
     if(!grid) return;
@@ -276,6 +281,7 @@ function renderCatalog(filter = '') {
     }).join('');
 }
 
+// LOGIKA KERANJANG
 function addToCart(id) {
     const prod = products.find(p => p.id === id);
     if (!prod || prod.stock <= 0) return showToast("Stok barang habis!");
