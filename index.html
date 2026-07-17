@@ -3,15 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LitePOS Pro - Ultimate SaaS Version</title>
-    <!-- Tailwind CSS -->
+    <title>LitePOS Pro - Cloud Edition</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = { darkMode: 'class' }
-    </script>
-    <!-- FontAwesome Icons -->
+    <script>tailwind.config = { darkMode: 'class' }</script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Pustaka UMD Supabase JS SDK -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.43.4/dist/umd/supabase.js"></script>
     <style>
         .active-menu { background-color: #1e293b; border-left: 4px solid #3b82f6; color: #3b82f6; font-weight: 600; }
@@ -19,8 +14,6 @@
         @media (max-width: 767px) {
             .active-menu, .light .active-menu { background-color: transparent; border-left: none; border-top: 4px solid #3b82f6; border-radius: 0; }
         }
-        
-        /* DESAIN CETAK STRUK PREMIUM */
         @media print {
             body * { display: none !important; }
             #receipt-print-area, #receipt-print-area * { display: block !important; }
@@ -31,14 +24,11 @@
 </head>
 <body class="bg-slate-50 dark:bg-[#0f172a] text-slate-800 dark:text-slate-100 font-sans h-screen flex flex-col md:flex-row overflow-hidden select-none transition-colors duration-200">
 
-    <!-- TOAST & MODAL NOTIFIKASI -->
     <div id="toast-container" class="fixed top-4 right-4 z-[200] space-y-2 pointer-events-none"></div>
 
     <div id="custom-modal" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm items-center justify-center z-[150] p-4 transition-all duration-300">
         <div class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 p-6 rounded-2xl w-full max-w-sm shadow-2xl text-center transform scale-95 transition-transform">
-            <div id="modal-icon-container" class="mx-auto w-12 h-12 rounded-full flex items-center justify-center text-xl mb-4">
-                <i id="modal-icon" class="fa-solid"></i>
-            </div>
+            <div id="modal-icon-container" class="mx-auto w-12 h-12 rounded-full flex items-center justify-center text-xl mb-4"><i id="modal-icon" class="fa-solid"></i></div>
             <h3 id="modal-title" class="text-lg font-bold text-slate-900 dark:text-white mb-2">Judul</h3>
             <p id="modal-message" class="text-sm text-slate-500 dark:text-slate-400 mb-6">Pesan notifikasi...</p>
             <button onclick="closeCustomModal()" class="w-full py-2 bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 rounded-xl text-sm font-semibold text-slate-800 dark:text-white cursor-pointer transition-colors">Oke, Mengerti</button>
@@ -55,16 +45,13 @@
         <div class="print-sep"></div>
         <div id="p-items" class="space-y-1 text-[11px]"></div>
         <div class="print-sep"></div>
-        
         <div class="flex justify-between text-[11px] mt-1"><span>Subtotal:</span><span id="p-subtotal">Rp 0</span></div>
         <div class="flex justify-between text-[11px]"><span>Diskon:</span><span id="p-discount">Rp 0</span></div>
         <div class="flex justify-between text-[11px]"><span>PPN:</span><span id="p-tax">Rp 0</span></div>
-        
         <div class="print-sep"></div>
         <div class="flex justify-between font-bold text-xs"><span>TOTAL BAYAR:</span><span id="p-total">Rp 0</span></div>
         <div class="flex justify-between text-[11px] mt-0.5"><span>Metode Bayar:</span><span id="p-method">CASH</span></div>
         <div class="flex justify-between text-[11px] mt-0.5"><span>Kasir:</span><span id="p-cashier">Admin</span></div>
-        
         <div class="print-sep"></div>
         <div class="text-center text-[10px] mt-3 tracking-wide"><p>Terima Kasih Atas Kunjungan Anda</p></div>
     </div>
@@ -75,7 +62,7 @@
             <div class="text-center mb-6">
                 <i class="fa-solid fa-cash-register text-blue-600 dark:text-blue-500 text-4xl mb-2 animate-pulse"></i>
                 <h2 id="auth-title" class="text-xl font-bold text-slate-900 dark:text-white tracking-wide">LitePOS Pro Login</h2>
-                <p id="auth-subtitle" class="text-xs text-slate-500 dark:text-slate-400 mt-1">Masuk untuk mengelola sistem kasir</p>
+                <p id="auth-subtitle" class="text-xs text-slate-500 dark:text-slate-400 mt-1">Sistem tersinkronisasi dengan Cloud</p>
             </div>
             <form id="auth-form" class="space-y-4" onsubmit="handleAuth(event)">
                 <div>
@@ -96,7 +83,6 @@
 
     <!-- MAIN APLIKASI -->
     <main class="flex-1 flex flex-col overflow-hidden pb-16 md:pb-0 order-first md:order-last">
-        <!-- HEADER TOP -->
         <header class="h-14 md:h-16 bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between px-4 md:px-6 shrink-0 shadow-sm transition-colors z-20">
             <div class="flex items-center gap-4">
                 <h1 id="page-title" class="text-base md:text-lg font-semibold text-slate-900 dark:text-white tracking-wide">Dashboard</h1>
@@ -104,13 +90,12 @@
             </div>
             <div class="flex items-center gap-2 md:gap-4">
                 <span class="text-[10px] md:text-xs text-slate-600 dark:text-slate-400 font-bold bg-blue-50 dark:bg-slate-900 px-2 py-1.5 rounded-lg border border-blue-200 dark:border-slate-700 flex items-center gap-1">
-                    <i class="fa-solid fa-user-shield text-blue-500"></i> <span id="role-display">Admin</span>
+                    <i class="fa-solid fa-user-shield text-blue-500"></i> <span id="role-display">Memuat...</span>
                 </span>
                 <button onclick="handleLogout()" class="text-xs bg-rose-50 dark:bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-200 dark:border-rose-500/20 px-3 py-1.5 rounded-xl hover:bg-rose-500 hover:text-white transition-all cursor-pointer"><i class="fa-solid fa-sign-out-alt"></i></button>
             </div>
         </header>
 
-        <!-- CONTENT AREA (Y-SCROLL) -->
         <div class="flex-1 overflow-y-auto bg-slate-50 dark:bg-[#0f172a] p-4 md:p-6 transition-colors">
             
             <!-- VIEW: DASHBOARD -->
@@ -126,7 +111,7 @@
                     </div>
                     <div class="bg-white dark:bg-slate-800 p-4 md:p-5 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm col-span-2 lg:col-span-1">
                         <p class="text-[10px] md:text-xs text-slate-500 dark:text-slate-400 uppercase font-bold tracking-wider">Keamanan</p>
-                        <h3 class="text-sm font-bold mt-1.5 text-blue-500"><i class="fa-solid fa-shield-halved mr-1"></i> Cloud Secured</h3>
+                        <h3 class="text-sm font-bold mt-1.5 text-blue-500"><i class="fa-solid fa-cloud mr-1"></i> Cloud DB Secured</h3>
                     </div>
                 </div>
                 <div class="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 p-4 md:p-5 shadow-sm">
@@ -153,12 +138,9 @@
                         <i class="fa-solid fa-magnifying-glass absolute left-4 top-3 text-slate-400"></i>
                         <input type="text" id="barcode-search" placeholder="Cari barang atau scan barcode..." class="w-full pl-10 pr-4 py-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:border-blue-500 text-sm shadow-sm transition-colors text-slate-900 dark:text-white">
                     </div>
-                    <div id="product-grid" class="flex-1 grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-3 overflow-y-auto pr-1 pb-16 lg:pb-0 content-start">
-                        <!-- Render dari JS -->
-                    </div>
+                    <div id="product-grid" class="flex-1 grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-3 overflow-y-auto pr-1 pb-16 lg:pb-0 content-start"></div>
                 </div>
 
-                <!-- PANEL KERANJANG KANAN -->
                 <div id="cart-sidebar" class="fixed lg:relative inset-y-0 right-0 w-full sm:w-96 lg:w-[340px] xl:w-96 bg-white dark:bg-slate-800 border-l border-slate-200 dark:border-slate-700 flex flex-col justify-between transform translate-x-full lg:translate-x-0 transition-transform duration-300 z-50 lg:z-0 shadow-2xl lg:shadow-none pb-16 lg:pb-0 h-full">
                     <div class="p-4 border-b border-slate-200 dark:border-slate-700 flex justify-between items-center shrink-0">
                         <h3 class="font-bold text-sm text-slate-900 dark:text-white"><i class="fa-solid fa-basket-shopping text-emerald-500 mr-2"></i>Keranjang</h3>
@@ -168,9 +150,7 @@
                         </div>
                     </div>
                     
-                    <div id="cart-items" class="flex-1 overflow-y-auto p-4 space-y-3">
-                        <!-- Render item keranjang dari JS -->
-                    </div>
+                    <div id="cart-items" class="flex-1 overflow-y-auto p-4 space-y-3"></div>
                     
                     <div class="p-4 border-t border-slate-200 dark:border-slate-700 space-y-3 shrink-0 bg-slate-50 dark:bg-slate-900/40">
                         <div class="grid grid-cols-2 gap-3 text-xs">
@@ -195,7 +175,6 @@
                     </div>
                 </div>
 
-                <!-- Tombol Floating Keranjang Mobile -->
                 <button onclick="toggleMobileCart()" id="mobile-cart-badge" class="lg:hidden fixed bottom-20 right-4 bg-emerald-600 text-white px-4 py-3 rounded-full shadow-2xl flex items-center justify-center gap-2 z-40 active:scale-95 transition-transform">
                     <i class="fa-solid fa-basket-shopping text-base"></i>
                     <span id="mobile-cart-count" class="bg-white text-emerald-700 text-[10px] font-bold rounded-full w-5 h-5 flex items-center justify-center">0</span>
@@ -219,7 +198,8 @@
             <!-- VIEW: PENGATURAN SYSTEM -->
             <section id="view-settings" class="hidden space-y-6 role-restricted">
                 <div class="max-w-2xl bg-white dark:bg-slate-800 p-5 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-5">
-                    <h3 class="text-base font-bold text-slate-900 dark:text-white border-b border-slate-200 dark:border-slate-700 pb-3"><i class="fa-solid fa-cogs mr-2"></i>Pengaturan Sistem</h3>
+                    <h3 class="text-base font-bold text-slate-900 dark:text-white border-b border-slate-200 dark:border-slate-700 pb-3"><i class="fa-solid fa-cloud mr-2"></i>Pengaturan Database Cloud</h3>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 mb-4">Perubahan ini akan tersimpan di Supabase dan berlaku untuk semua perangkat.</p>
                     
                     <div>
                         <label class="block text-xs font-bold text-slate-600 dark:text-slate-400 mb-2">Nama Toko (Header Struk)</label>
@@ -233,31 +213,30 @@
                     </div>
 
                     <div>
-                        <label class="block text-xs font-bold text-slate-600 dark:text-slate-400 mb-2">Hak Akses Role Akun</label>
+                        <label class="block text-xs font-bold text-slate-600 dark:text-slate-400 mb-2">Ubah Role Akun Saya Saat Ini</label>
                         <select id="set-user-role" class="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-lg dark:text-white text-sm focus:outline-none focus:border-blue-500">
-                            <option value="Super Admin">Super Admin (Akses Penuh)</option>
-                            <option value="Admin">Admin (Akses Penuh)</option>
-                            <option value="Kasir">Kasir (Hanya Mesin Kasir)</option>
+                            <option value="Super Admin">Super Admin</option>
+                            <option value="Admin">Admin</option>
+                            <option value="Kasir">Kasir</option>
                         </select>
-                        <p class="text-[10px] text-rose-500 mt-1">*Role Kasir akan menyembunyikan Dashboard dan Master Stok.</p>
+                        <p class="text-[10px] text-rose-500 mt-1">*Perubahan role akan langsung mengubah hak akses email Anda di database.</p>
                     </div>
 
                     <div class="flex items-center justify-between pt-4 border-t border-slate-200 dark:border-slate-700 mt-4">
-                        <span class="text-sm font-bold text-slate-900 dark:text-white"><i class="fa-solid fa-moon mr-2"></i>Mode Gelap (Dark Mode)</span>
+                        <span class="text-sm font-bold text-slate-900 dark:text-white"><i class="fa-solid fa-moon mr-2"></i>Mode Gelap (Global Default)</span>
                         <label class="relative inline-flex items-center cursor-pointer">
                             <input type="checkbox" id="set-dark-mode" class="sr-only peer">
                             <div class="w-11 h-6 bg-slate-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-slate-600 peer-checked:bg-blue-600"></div>
                         </label>
                     </div>
 
-                    <button onclick="saveSettings()" class="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg shadow-md mt-6 text-sm transition-colors"><i class="fa-solid fa-save mr-2"></i> Simpan Konfigurasi</button>
+                    <button onclick="saveSettings()" class="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg shadow-md mt-6 text-sm transition-colors"><i class="fa-solid fa-cloud-arrow-up mr-2"></i> Simpan Ke Supabase</button>
                 </div>
             </section>
-
         </div>
     </main>
 
-    <!-- SIDEBAR NAV BAWAH (MOBILE & DESKTOP) -->
+    <!-- SIDEBAR NAV -->
     <aside class="fixed bottom-0 inset-x-0 h-16 bg-white dark:bg-slate-800 border-t border-slate-200 dark:border-slate-700 flex flex-row justify-around items-center z-50 md:relative md:bottom-auto md:inset-x-auto md:h-screen md:w-64 md:border-t-0 md:border-r md:flex-col md:justify-between shrink-0 shadow-xl transition-colors">
         <div class="flex flex-row md:flex-col w-full h-full md:h-auto">
             <div class="hidden md:flex p-6 items-center justify-center md:justify-start gap-3 border-b border-slate-200 dark:border-slate-700 w-full">
