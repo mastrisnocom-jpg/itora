@@ -1,6 +1,6 @@
 // INITIALIZE SUPABASE CLIENT (Silakan ganti URL dan KEY dengan akun Supabase Anda)
-const SUPABASE_URL = "https://YOUR_PROJECT_REF.supabase.co";
-const SUPABASE_ANON_KEY = "YOUR_ANON_PUBLIC_KEY";
+const SUPABASE_URL = "https://kmynkqlkhmryptzpxidq.supabase.co";
+const SUPABASE_ANON_KEY = "sb_publishable_WnHWZXwVatUB8WTgaKI2fg_eWY-T6b3";
 const supabase = (typeof supabase !== 'undefined') ? supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
 
 let products = [];
