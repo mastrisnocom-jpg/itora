@@ -1,305 +1,1820 @@
 <!DOCTYPE html>
-<html lang="en" class="dark">
+<html lang="id" data-theme="light">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LitePOS Pro - Cloud Enterprise</title>
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = { darkMode: 'class' }
-    </script>
-    <!-- FontAwesome Icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Pustaka UMD Supabase JS SDK -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.43.4/dist/umd/supabase.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>NexSphere - Premium Social Workspace</title>
+    <!-- Google Fonts & Icons -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0..1,0" rel="stylesheet">
+    
     <style>
-        .active-menu { background-color: #1e293b; border-left: 4px solid #3b82f6; color: #3b82f6; font-weight: 600; }
-        .light .active-menu { background-color: #e2e8f0; border-left: 4px solid #2563eb; color: #2563eb; }
-        @media (max-width: 767px) {
-            .active-menu, .light .active-menu { background-color: transparent; border-left: none; border-top: 4px solid #3b82f6; border-radius: 0; }
+        /* ==========================================
+           1. CSS VARIABLES & THEMES (MD3 & GLASS)
+           ========================================== */
+        :root {
+            --font-main: 'Plus Jakarta Sans', sans-serif;
+            
+            /* Light Theme Palette */
+            --bg-primary: #f4f6fa;
+            --bg-surface: rgba(255, 255, 255, 0.75);
+            --bg-surface-hover: rgba(255, 255, 255, 0.9);
+            --border-color: rgba(226, 232, 240, 0.8);
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            
+            /* Brand Colors (MD3 Accent) */
+            --primary: #4f46e5;
+            --primary-state: rgba(79, 70, 229, 0.08);
+            --primary-container: #e0e7ff;
+            --secondary: #0ea5e9;
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --info: #6366f1;
+            
+            /* Glassmorphism Specs */
+            --blur-radius: 16px;
+            --shadow-sm: 0 2px 8px -2px rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 12px 24px -4px rgba(0, 0, 0, 0.08);
+            --shadow-lg: 0 20px 32px -8px rgba(0, 0, 0, 0.12);
+            --radius-sm: 8px;
+            --radius-md: 16px;
+            --radius-lg: 24px;
+            --radius-round: 9999px;
+            
+            /* Dynamic Layout Metrics */
+            --header-height: 70px;
+            --sidebar-width: 260px;
+            --bottom-nav-height: 75px;
+            --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        [data-theme="dark"] {
+            --bg-primary: #0b0f19;
+            --bg-surface: rgba(23, 29, 43, 0.75);
+            --bg-surface-hover: rgba(30, 41, 59, 0.9);
+            --border-color: rgba(51, 65, 85, 0.5);
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --primary: #818cf8;
+            --primary-state: rgba(129, 140, 248, 0.15);
+            --primary-container: #312e81;
+            --shadow-sm: 0 2px 8px -2px rgba(0, 0, 0, 0.3);
+            --shadow-md: 0 12px 24px -4px rgba(0, 0, 0, 0.5);
+            --shadow-lg: 0 20px 32px -8px rgba(0, 0, 0, 0.6);
+        }
+
+        /* ==========================================
+           2. RESET & BASE STYLES
+           ========================================== */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: var(--font-main);
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: var(--bg-primary);
+            color: var(--text-main);
+            overflow-x: hidden;
+            transition: background-color 0.3s ease;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        input, textarea, select, button {
+            font-family: inherit;
+            color: inherit;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: var(--border-color);
+            border-radius: var(--radius-round);
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--text-muted);
+        }
+
+        /* ==========================================
+           3. MASTER LAYOUT ARCHITECTURE
+           ========================================== */
+        #app-layout {
+            display: grid;
+            grid-template-areas: 
+                "header header"
+                "sidebar content"
+                "footer footer";
+            grid-template-columns: var(--sidebar-width) 1fr;
+            grid-template-rows: var(--header-height) 1fr auto;
+            min-height: 100vh;
+        }
+
+        #app-layout.sidebar-collapsed {
+            --sidebar-width: 80px;
+        }
+
+        /* Header Style */
+        .app-header {
+            grid-area: header;
+            background: var(--bg-surface);
+            backdrop-filter: blur(var(--blur-radius));
+            -webkit-backdrop-filter: blur(var(--blur-radius));
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 24px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: var(--header-height);
+            z-index: 1000;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .header-left, .header-right {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .brand-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            cursor: pointer;
+        }
+
+        .brand-logo {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border-radius: var(--radius-md);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 700;
+        }
+
+        .brand-name {
+            font-size: 1.25rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--text-main), var(--text-muted));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            transition: var(--transition-smooth);
+        }
+
+        #app-layout.sidebar-collapsed .brand-name {
+            opacity: 0;
+            width: 0;
+            pointer-events: none;
+        }
+
+        /* Search Box Component */
+        .search-container {
+            position: relative;
+            width: clamp(200px, 30vw, 400px);
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 10px 16px 10px 44px;
+            border-radius: var(--radius-round);
+            border: 1px solid var(--border-color);
+            background: rgba(0, 0, 0, 0.02);
+            outline: none;
+            transition: var(--transition-smooth);
+        }
+
+        [data-theme="dark"] .search-input {
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        .search-input:focus {
+            border-color: var(--primary);
+            background: var(--bg-surface-hover);
+            box-shadow: 0 0 0 3px var(--primary-state);
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+            pointer-events: none;
+        }
+
+        /* Live Clock & Meta widget */
+        .meta-clock-widget {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            border-right: 1px solid var(--border-color);
+            padding-right: 16px;
+        }
+
+        .meta-time {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: var(--text-main);
+        }
+
+        /* Control Shell Icon Action */
+        .icon-action-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: var(--radius-round);
+            border: none;
+            background: transparent;
+            color: var(--text-main);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            position: relative;
+            transition: var(--transition-smooth);
+        }
+
+        .icon-action-btn:hover {
+            background: var(--primary-state);
+            color: var(--primary);
+        }
+
+        .icon-action-btn .badge-dot {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            width: 8px;
+            height: 8px;
+            background: var(--danger);
+            border-radius: var(--radius-round);
+            border: 2px solid var(--bg-surface);
+        }
+
+        /* Sidebar Navigation Architecture */
+        .app-sidebar {
+            grid-area: sidebar;
+            background: var(--bg-surface);
+            backdrop-filter: blur(var(--blur-radius));
+            -webkit-backdrop-filter: blur(var(--blur-radius));
+            border-right: 1px solid var(--border-color);
+            position: fixed;
+            top: var(--header-height);
+            left: 0;
+            bottom: 0;
+            width: var(--sidebar-width);
+            z-index: 999;
+            transition: var(--transition-smooth);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 24px 0;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .sidebar-menu-wrapper {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            padding: 0 12px;
+        }
+
+        .menu-item {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 12px 16px;
+            border-radius: var(--radius-md);
+            color: var(--text-muted);
+            text-decoration: none;
+            cursor: pointer;
+            transition: var(--transition-smooth);
+            font-weight: 500;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .menu-item:hover {
+            background: var(--primary-state);
+            color: var(--primary);
+        }
+
+        .menu-item.active {
+            background: var(--primary);
+            color: white;
+            font-weight: 600;
+            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+        }
+
+        .menu-text {
+            white-space: nowrap;
+            opacity: 1;
+            transition: opacity 0.2s ease;
+        }
+
+        #app-layout.sidebar-collapsed .menu-text {
+            opacity: 0;
+            width: 0;
+            pointer-events: none;
+        }
+
+        /* User Profile Summary Sidebar */
+        .sidebar-user-card {
+            margin: 0 12px;
+            padding: 16px;
+            background: rgba(0, 0, 0, 0.02);
+            border-radius: var(--radius-md);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            border: 1px solid var(--border-color);
+        }
+
+        [data-theme="dark"] .sidebar-user-card {
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        .avatar-frame {
+            position: relative;
+            width: 44px;
+            height: 44px;
+            border-radius: var(--radius-round);
+            background: linear-gradient(135deg, var(--secondary), var(--primary));
+            padding: 2px;
+        }
+
+        .avatar-img {
+            width: 100%;
+            height: 100%;
+            border-radius: var(--radius-round);
+            object-fit: cover;
+            background: var(--bg-primary);
+        }
+
+        .user-meta-info {
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .user-display-name {
+            font-size: 0.9rem;
+            font-weight: 600;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+            overflow: hidden;
+        }
+
+        .user-role-lbl {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        #app-layout.sidebar-collapsed .sidebar-user-card {
+            padding: 8px;
+            justify-content: center;
+        }
+        #app-layout.sidebar-collapsed .user-meta-info {
+            display: none;
+        }
+
+        /* Main Workspace Area */
+        .app-content {
+            grid-area: content;
+            margin-top: var(--header-height);
+            margin-left: var(--sidebar-width);
+            padding: 32px;
+            min-height: calc(100vh - var(--header-height) - 60px);
+            transition: var(--transition-smooth);
+        }
+
+        #app-layout.sidebar-collapsed .app-content {
+            margin-left: var(--sidebar-width);
+        }
+
+        /* Footer Structure */
+        .app-footer {
+            grid-area: footer;
+            background: var(--bg-surface);
+            border-top: 1px solid var(--border-color);
+            margin-left: var(--sidebar-width);
+            padding: 16px 32px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            transition: var(--transition-smooth);
         }
         
-        /* DESAIN CETAK STRUK PREMIUM */
-        @media print {
-            body * { display: none !important; }
-            #receipt-print-area, #receipt-print-area * { display: block !important; }
-            #receipt-print-area { position: absolute; left: 0; top: 0; width: 100%; color: #000000 !important; background: #ffffff !important; font-family: 'Courier New', Courier, monospace; font-size: 12px; line-height: 1.4; }
-            .print-sep { border-top: 1px dashed #000; margin: 6px 0; }
+        #app-layout.sidebar-collapsed .app-footer {
+            margin-left: var(--sidebar-width);
+        }
+
+        .network-status-badge {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-weight: 600;
+        }
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: var(--radius-round);
+            background: var(--success);
+        }
+        .status-dot.offline {
+            background: var(--danger);
+        }
+
+        /* Bottom Nav (Mobile Only) */
+        .bottom-nav {
+            display: none;
+        }
+
+        /* ==========================================
+           4. SYSTEM WORKSPACE GRAPHICS & VIEWS
+           ========================================== */
+        .view-container {
+            animation: fadeIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Grid Layout Modules */
+        .grid-dashboard {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 24px;
+        }
+
+        /* Premium Components: Cards */
+        .premium-card {
+            background: var(--bg-surface);
+            backdrop-filter: blur(var(--blur-radius));
+            -webkit-backdrop-filter: blur(var(--blur-radius));
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            padding: 24px;
+            box-shadow: var(--shadow-sm);
+            transition: var(--transition-smooth);
+            position: relative;
+            margin-bottom: 24px;
+        }
+
+        .premium-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+            border-color: rgba(79, 70, 229, 0.2);
+        }
+
+        .welcome-gradient-card {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            border: none;
+        }
+        .welcome-gradient-card * { color: white !important; }
+
+        /* Stats Blocks */
+        .stats-strip {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+        .stat-box {
+            background: var(--bg-surface);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+        .stat-icon-wrapper {
+            width: 48px;
+            height: 48px;
+            border-radius: var(--radius-md);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+        }
+
+        /* Social Media Feeds: Feed Card Engine */
+        .post-composer-area {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+        .composer-textarea {
+            width: 100%;
+            min-height: 100px;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            background: rgba(0,0,0,0.01);
+            padding: 16px;
+            resize: none;
+            outline: none;
+            font-size: 0.95rem;
+            transition: var(--transition-smooth);
+        }
+        .composer-textarea:focus {
+            border-color: var(--primary);
+            background: var(--bg-surface-hover);
+        }
+
+        .post-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 14px;
+        }
+        .post-author-block {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .post-content-body {
+            font-size: 0.98rem;
+            line-height: 1.6;
+            margin-bottom: 16px;
+            white-space: pre-wrap;
+        }
+        .post-media-attachment {
+            width: 100%;
+            max-height: 380px;
+            border-radius: var(--radius-md);
+            object-fit: cover;
+            margin-bottom: 16px;
+            border: 1px solid var(--border-color);
+        }
+        .post-actions-bar {
+            display: flex;
+            border-top: 1px solid var(--border-color);
+            border-bottom: 1px solid var(--border-color);
+            padding: 8px 0;
+            margin-bottom: 16px;
+            gap: 8px;
+        }
+        .action-trigger-btn {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 8px;
+            border-radius: var(--radius-sm);
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            color: var(--text-muted);
+            font-size: 0.88rem;
+            font-weight: 500;
+            transition: var(--transition-smooth);
+        }
+        .action-trigger-btn:hover {
+            background: var(--primary-state);
+            color: var(--primary);
+        }
+        .action-trigger-btn.active-liked {
+            color: var(--danger);
+        }
+
+        /* Comments Engine Architecture */
+        .comments-section {
+            background: rgba(0, 0, 0, 0.01);
+            border-radius: var(--radius-md);
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .comment-node {
+            display: flex;
+            gap: 12px;
+            font-size: 0.88rem;
+        }
+        .comment-bubble {
+            background: var(--bg-surface-hover);
+            border: 1px solid var(--border-color);
+            padding: 10px 14px;
+            border-radius: 0 var(--radius-md) var(--radius-md) var(--radius-md);
+            flex: 1;
+        }
+
+        /* Realtime Chat Workspace Engine */
+        .chat-module-container {
+            display: grid;
+            grid-template-columns: 280px 1fr;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            background: var(--bg-surface);
+            height: calc(100vh - var(--header-height) - 140px);
+            overflow: hidden;
+        }
+        .chat-channels-list {
+            border-right: 1px solid var(--border-color);
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+        }
+        .channel-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 14px 16px;
+            cursor: pointer;
+            border-bottom: 1px solid var(--border-color);
+            transition: var(--transition-smooth);
+        }
+        .channel-row:hover, .channel-row.active {
+            background: var(--primary-state);
+        }
+        .chat-viewport {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            background: rgba(0, 0, 0, 0.01);
+        }
+        .chat-messages-stream {
+            flex: 1;
+            padding: 24px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+        .msg-packet {
+            display: flex;
+            flex-direction: column;
+            max-width: 65%;
+            gap: 4px;
+        }
+        .msg-packet.incoming {
+            align-self: flex-start;
+        }
+        .msg-packet.outgoing {
+            align-self: flex-end;
+            align-items: flex-end;
+        }
+        .msg-payload {
+            padding: 12px 16px;
+            border-radius: var(--radius-md);
+            font-size: 0.92rem;
+            box-shadow: var(--shadow-sm);
+        }
+        .incoming .msg-payload {
+            background: var(--bg-surface);
+            border: 1px solid var(--border-color);
+            border-radius: 0 var(--radius-md) var(--radius-md) var(--radius-md);
+        }
+        .outgoing .msg-payload {
+            background: var(--primary);
+            color: white;
+            border-radius: var(--radius-md) 0 var(--radius-md) var(--radius-md);
+        }
+        .msg-timestamp {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+        }
+        .chat-composer-strip {
+            padding: 16px 24px;
+            background: var(--bg-surface);
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        /* Form Controls Elements styling */
+        .form-group-floating {
+            position: relative;
+            margin-bottom: 20px;
+        }
+        .form-control-input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            background: transparent;
+            outline: none;
+            font-size: 0.95rem;
+            transition: var(--transition-smooth);
+        }
+        .form-control-input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px var(--primary-state);
+        }
+        
+        /* Buttons Master Suite Styling & Ripple effects base */
+        .btn-suite {
+            padding: 10px 20px;
+            border-radius: var(--radius-md);
+            border: none;
+            font-weight: 600;
+            font-size: 0.88rem;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            justify-content: center;
+            transition: var(--transition-smooth);
+            position: relative;
+            overflow: hidden;
+        }
+        .btn-primary { background: var(--primary); color: white; box-shadow: var(--shadow-sm); }
+        .btn-primary:hover { opacity: 0.9; transform: translateY(-1px); }
+        .btn-secondary { background: rgba(0,0,0,0.05); color: var(--text-main); }
+        [data-theme="dark"] .btn-secondary { background: rgba(255,255,255,0.05); }
+        .btn-danger { background: var(--danger); color: white; }
+        
+        /* Modern Data Table System */
+        .table-panel-holder {
+            width: 100%;
+            overflow-x: auto;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border-color);
+        }
+        .premium-table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+            font-size: 0.9rem;
+        }
+        .premium-table th {
+            background: rgba(0,0,0,0.02);
+            padding: 14px 16px;
+            font-weight: 600;
+            color: var(--text-muted);
+            border-bottom: 2px solid var(--border-color);
+        }
+        [data-theme="dark"] .premium-table th { background: rgba(255,255,255,0.02); }
+        .premium-table td {
+            padding: 14px 16px;
+            border-bottom: 1px solid var(--border-color);
+        }
+        .premium-table tr:last-child td { border-bottom: none; }
+        .premium-table tr:hover td { background: var(--primary-state); }
+
+        /* Dialog / Modal Shell Layer */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(15, 23, 42, 0.4);
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
+            z-index: 2000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: var(--transition-smooth);
+        }
+        .modal-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        .modal-sheet-box {
+            background: var(--bg-surface);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            width: 90%;
+            max-width: 500px;
+            padding: 28px;
+            box-shadow: var(--shadow-lg);
+            transform: scale(0.95);
+            transition: var(--transition-smooth);
+        }
+        .modal-overlay.active .modal-sheet-box {
+            transform: scale(1);
+        }
+
+        /* Toast Alert Container Component */
+        #toast-container {
+            position: fixed;
+            top: 24px;
+            right: 24px;
+            z-index: 3000;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            pointer-events: none;
+        }
+        .toast-node {
+            background: var(--bg-surface);
+            border-left: 4px solid var(--primary);
+            box-shadow: var(--shadow-lg);
+            padding: 16px 20px;
+            border-radius: var(--radius-md);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            min-width: 280px;
+            pointer-events: auto;
+            animation: slideInRight 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        @keyframes slideInRight {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        /* Setup Ripple Effect Mechanics */
+        .ripple {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.4);
+            border-radius: var(--radius-round);
+            transform: scale(0);
+            animation: ripple-anim 0.6s linear;
+            pointer-events: none;
+        }
+        @keyframes ripple-anim {
+            to { transform: scale(4); opacity: 0; }
+        }
+
+        /* ==========================================
+           5. MEDIA QUERIES (RESPONSIVENESS HUB)
+           ========================================== */
+        @media (max-width: 992px) {
+            #app-layout {
+                grid-template-columns: 80px 1fr;
+            }
+            .app-sidebar {
+                width: 80px;
+            }
+            .brand-name, .menu-text, .user-meta-info {
+                display: none;
+            }
+            .app-content, .app-footer {
+                margin-left: 80px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            #app-layout {
+                grid-template-areas: 
+                    "header header"
+                    "content content";
+                grid-template-columns: 1fr;
+            }
+            .app-sidebar, .app-footer {
+                display: none;
+            }
+            .app-content {
+                margin-left: 0;
+                padding: 16px;
+                padding-bottom: calc(var(--bottom-nav-height) + 24px);
+            }
+            .grid-dashboard {
+                grid-template-columns: 1fr;
+            }
+
+            /* Bottom Nav Activation */
+            .bottom-nav {
+                display: flex;
+                position: fixed;
+                bottom: 0; left: 0; right: 0;
+                height: var(--bottom-nav-height);
+                background: var(--bg-surface);
+                backdrop-filter: blur(var(--blur-radius));
+                -webkit-backdrop-filter: blur(var(--blur-radius));
+                border-top: 1px solid var(--border-color);
+                box-shadow: var(--shadow-lg);
+                z-index: 1000;
+                padding-bottom: env(safe-area-inset-bottom);
+                justify-content: space-around;
+                align-items: center;
+            }
+            .bottom-nav-item {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                color: var(--text-muted);
+                text-decoration: none;
+                font-size: 0.72rem;
+                font-weight: 500;
+                gap: 4px;
+                position: relative;
+                flex: 1;
+                padding: 8px 0;
+            }
+            .bottom-nav-item.active {
+                color: var(--primary);
+                font-weight: 600;
+            }
+            .bottom-nav-item.active .material-symbols-out-frame {
+                background: var(--primary-container);
+                padding: 4px 16px;
+                border-radius: var(--radius-round);
+            }
+            
+            /* Responsive Adaptive Cards Mobile Table Converter */
+            .premium-table-container th { display: none; }
+            .premium-table-container tr {
+                display: block;
+                margin-bottom: 12px;
+                border: 1px solid var(--border-color);
+                border-radius: var(--radius-md);
+                background: var(--bg-surface);
+            }
+            .premium-table-container td {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                border-bottom: 1px solid var(--border-color);
+                text-align: right;
+                padding: 12px;
+            }
+            .premium-table-container td::before {
+                content: attr(data-label);
+                font-weight: 600;
+                color: var(--text-muted);
+                text-align: left;
+            }
+            .chat-module-container {
+                grid-template-columns: 1fr;
+            }
+            .chat-channels-list {
+                display: none; /* simple navigation toggle can override */
+            }
         }
     </style>
 </head>
-<body class="bg-slate-50 dark:bg-[#0f172a] text-slate-800 dark:text-slate-100 font-sans h-screen flex flex-col md:flex-row overflow-hidden select-none transition-colors duration-200">
+<body>
 
-    <!-- TOAST & MODAL NOTIFIKASI -->
-    <div id="toast-container" class="fixed top-4 right-4 z-[200] space-y-2 pointer-events-none"></div>
-
-    <div id="custom-modal" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm items-center justify-center z-[150] p-4 transition-all duration-300">
-        <div class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 p-6 rounded-2xl w-full max-w-sm shadow-2xl text-center transform scale-95 transition-transform">
-            <div id="modal-icon-container" class="mx-auto w-12 h-12 rounded-full flex items-center justify-center text-xl mb-4">
-                <i id="modal-icon" class="fa-solid"></i>
-            </div>
-            <h3 id="modal-title" class="text-lg font-bold text-slate-900 dark:text-white mb-2">Judul</h3>
-            <p id="modal-message" class="text-sm text-slate-500 dark:text-slate-400 mb-6">Pesan notifikasi...</p>
-            <button onclick="closeCustomModal()" class="w-full py-2 bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 rounded-xl text-sm font-semibold text-slate-800 dark:text-white cursor-pointer transition-colors">Oke, Mengerti</button>
-        </div>
-    </div>
-
-    <!-- AREA CETAK STRUK PDF -->
-    <div id="receipt-print-area" class="hidden p-4 text-black bg-white w-[80mm]">
-        <div class="text-center">
-            <h3 class="font-bold text-sm tracking-wider" id="p-shop-name">LITEPOS STORE</h3>
-            <p id="p-invoice" class="mt-0.5 text-[11px]">INV-XXXXX</p>
-            <p id="p-date" class="text-[11px]">--/--/----</p>
-        </div>
-        <div class="print-sep"></div>
-        <div id="p-items" class="space-y-1 text-[11px]"></div>
-        <div class="print-sep"></div>
-        
-        <div class="flex justify-between text-[11px] mt-1"><span>Subtotal:</span><span id="p-subtotal">Rp 0</span></div>
-        <div class="flex justify-between text-[11px]"><span>Diskon:</span><span id="p-discount">Rp 0</span></div>
-        <div class="flex justify-between text-[11px]"><span>PPN:</span><span id="p-tax">Rp 0</span></div>
-        
-        <div class="print-sep"></div>
-        <div class="flex justify-between font-bold text-xs"><span>TOTAL BAYAR:</span><span id="p-total">Rp 0</span></div>
-        <div class="flex justify-between text-[11px] mt-0.5"><span>Metode Bayar:</span><span id="p-method">CASH</span></div>
-        <div class="flex justify-between text-[11px] mt-0.5"><span>Kasir:</span><span id="p-cashier">Admin</span></div>
-        
-        <div class="print-sep"></div>
-        <div class="text-center text-[10px] mt-3 tracking-wide"><p>Terima Kasih Atas Kunjungan Anda</p></div>
-    </div>
-
-    <!-- GATE LOGIN -->
-    <div id="auth-gate" class="fixed inset-0 bg-slate-50 dark:bg-[#0f172a] flex items-center justify-center z-[100] p-4 transition-all duration-300">
-        <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-slate-200 dark:border-slate-700 w-full max-w-sm shadow-2xl">
-            <div class="text-center mb-6">
-                <i class="fa-solid fa-cash-register text-blue-600 dark:text-blue-500 text-4xl mb-2 animate-pulse"></i>
-                <h2 id="auth-title" class="text-xl font-bold text-slate-900 dark:text-white tracking-wide">LitePOS Pro Login</h2>
-                <p id="auth-subtitle" class="text-xs text-slate-500 dark:text-slate-400 mt-1">Sistem tersinkronisasi dengan Cloud</p>
-            </div>
-            <form id="auth-form" class="space-y-4" onsubmit="handleAuth(event)">
-                <div>
-                    <label class="block text-xs text-slate-600 dark:text-slate-400 font-medium mb-1">Email Akun</label>
-                    <input type="email" id="auth-email" required class="w-full px-3 py-2.5 bg-slate-100 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:border-blue-500 text-slate-900 dark:text-white transition-colors">
+    <div id="app-layout">
+        <!-- HEADER MODULE -->
+        <header class="app-header">
+            <div class="header-left">
+                <div class="brand-wrapper" onclick="App.Router.navigate('dashboard')">
+                    <div class="brand-logo">N</div>
+                    <span class="brand-name">NexSphere</span>
                 </div>
-                <div>
-                    <label class="block text-xs text-slate-600 dark:text-slate-400 font-medium mb-1">Password</label>
-                    <input type="password" id="auth-password" required minlength="6" class="w-full px-3 py-2.5 bg-slate-100 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:border-blue-500 text-slate-900 dark:text-white transition-colors">
+                <button class="icon-action-btn" id="sidebar-toggle-trigger" aria-label="Toggle Sidebar">
+                    <span class="material-symbols-outlined">menu</span>
+                </button>
+                <div class="search-container">
+                    <span class="material-symbols-outlined search-icon">search</span>
+                    <input type="text" class="search-input" placeholder="Cari postingan, berkas, obrolan..." id="global-search-engine">
                 </div>
-                <button type="submit" id="btn-auth-submit" class="w-full py-2.5 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-sm font-bold transition-all cursor-pointer shadow-lg shadow-blue-500/20">Masuk Sistem</button>
-            </form>
-            <div class="text-center mt-5">
-                <button type="button" onclick="toggleAuthMode()" id="btn-auth-toggle" class="text-xs text-blue-600 dark:text-blue-400 hover:underline transition-colors cursor-pointer bg-transparent border-none p-1">Belum punya akun? Daftar</button>
             </div>
-        </div>
-    </div>
-
-    <!-- MAIN APLIKASI -->
-    <main class="flex-1 flex flex-col overflow-hidden pb-16 md:pb-0 order-first md:order-last">
-        <header class="h-14 md:h-16 bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between px-4 md:px-6 shrink-0 shadow-sm transition-colors z-20">
-            <div class="flex items-center gap-4">
-                <h1 id="page-title" class="text-base md:text-lg font-semibold text-slate-900 dark:text-white tracking-wide">Dashboard</h1>
-                <span id="live-clock" class="hidden sm:block text-xs font-mono text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-900 px-2 py-1 rounded border border-slate-200 dark:border-slate-700">Memuat Jam...</span>
-            </div>
-            <div class="flex items-center gap-2 md:gap-4">
-                <span class="text-[10px] md:text-xs text-slate-600 dark:text-slate-400 font-bold bg-blue-50 dark:bg-slate-900 px-2 py-1.5 rounded-lg border border-blue-200 dark:border-slate-700 flex items-center gap-1">
-                    <i class="fa-solid fa-user-shield text-blue-500"></i> <span id="role-display">Memuat...</span>
-                </span>
-                <button onclick="handleLogout()" class="text-xs bg-rose-50 dark:bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-200 dark:border-rose-500/20 px-3 py-1.5 rounded-xl hover:bg-rose-500 hover:text-white transition-all cursor-pointer"><i class="fa-solid fa-sign-out-alt"></i></button>
+            
+            <div class="header-right">
+                <div class="meta-clock-widget">
+                    <span id="live-date-str">Memuat Tanggal...</span>
+                    <span id="live-clock-str" class="meta-time">00:00:00 WIB</span>
+                </div>
+                
+                <button class="icon-action-btn" id="theme-toggle-trigger" aria-label="Toggle Tema">
+                    <span class="material-symbols-outlined">dark_mode</span>
+                </button>
+                
+                <button class="icon-action-btn" id="fullscreen-toggle-trigger" aria-label="Fullscreen">
+                    <span class="material-symbols-outlined">fullscreen</span>
+                </button>
+                
+                <button class="icon-action-btn" id="notification-bell-trigger" aria-label="Notifikasi">
+                    <span class="material-symbols-outlined">notifications</span>
+                    <span class="badge-dot"></span>
+                </button>
+                
+                <div class="avatar-frame" id="profile-dropdown-trigger" style="cursor:pointer;">
+                    <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=100&q=80" alt="User Profil" class="avatar-img" id="header-avatar-preview">
+                </div>
             </div>
         </header>
 
-        <div class="flex-1 overflow-y-auto bg-slate-50 dark:bg-[#0f172a] p-4 md:p-6 transition-colors">
-            
-            <!-- VIEW: DASHBOARD -->
-            <section id="view-dashboard" class="space-y-6 block role-restricted">
-                <div class="grid grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4">
-                    <div class="bg-white dark:bg-slate-800 p-4 md:p-5 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm">
-                        <p class="text-[10px] md:text-xs text-slate-500 dark:text-slate-400 uppercase font-bold tracking-wider">Omset Kotor</p>
-                        <h3 id="dash-revenue" class="text-base md:text-2xl font-bold mt-1 text-emerald-600 dark:text-emerald-400">Rp 0</h3>
-                    </div>
-                    <div class="bg-white dark:bg-slate-800 p-4 md:p-5 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm">
-                        <p class="text-[10px] md:text-xs text-slate-500 dark:text-slate-400 uppercase font-bold tracking-wider">Nota Sukses</p>
-                        <h3 id="dash-tx-count" class="text-base md:text-2xl font-bold mt-1 text-slate-900 dark:text-white">0 Tx</h3>
-                    </div>
-                    <div class="bg-white dark:bg-slate-800 p-4 md:p-5 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm col-span-2 lg:col-span-1">
-                        <p class="text-[10px] md:text-xs text-slate-500 dark:text-slate-400 uppercase font-bold tracking-wider">Keamanan</p>
-                        <h3 class="text-sm font-bold mt-1.5 text-blue-500"><i class="fa-solid fa-cloud mr-1"></i> Cloud DB Secured</h3>
-                    </div>
-                </div>
-                <div class="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 p-4 md:p-5 shadow-sm">
-                    <h3 class="text-sm font-semibold text-slate-900 dark:text-white mb-4"><i class="fa-solid fa-clock-rotate-left mr-2"></i>Riwayat Transaksi Terakhir</h3>
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-left text-xs md:text-sm text-slate-600 dark:text-slate-400 min-w-[500px]">
-                            <thead class="bg-slate-50 dark:bg-slate-900 text-slate-500 dark:text-slate-300 border-b border-slate-200 dark:border-slate-700">
-                                <tr>
-                                    <th class="py-3 px-3 font-semibold">No. Invoice</th>
-                                    <th class="py-3 px-3 font-semibold">Waktu</th>
-                                    <th class="py-3 px-3 font-semibold text-right">Total Akhir</th>
-                                </tr>
-                            </thead>
-                            <tbody id="realtime-tx-table"><tr><td colspan="3" class="py-4 text-center">Memuat...</td></tr></tbody>
-                        </table>
-                    </div>
-                </div>
-            </section>
-
-            <!-- VIEW: KASIR (POS) -->
-            <section id="view-pos" class="hidden h-full flex flex-col lg:flex-row gap-4 overflow-hidden relative">
-                <div class="flex-1 flex flex-col gap-3 overflow-hidden">
-                    <div class="relative w-full shrink-0">
-                        <i class="fa-solid fa-magnifying-glass absolute left-4 top-3 text-slate-400"></i>
-                        <input type="text" id="barcode-search" placeholder="Cari barang atau scan barcode..." class="w-full pl-10 pr-4 py-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:border-blue-500 text-sm shadow-sm transition-colors text-slate-900 dark:text-white">
-                    </div>
-                    <div id="product-grid" class="flex-1 grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-3 overflow-y-auto pr-1 pb-16 lg:pb-0 content-start"></div>
-                </div>
-
-                <div id="cart-sidebar" class="fixed lg:relative inset-y-0 right-0 w-full sm:w-96 lg:w-[340px] xl:w-96 bg-white dark:bg-slate-800 border-l border-slate-200 dark:border-slate-700 flex flex-col justify-between transform translate-x-full lg:translate-x-0 transition-transform duration-300 z-50 lg:z-0 shadow-2xl lg:shadow-none pb-16 lg:pb-0 h-full">
-                    <div class="p-4 border-b border-slate-200 dark:border-slate-700 flex justify-between items-center shrink-0">
-                        <h3 class="font-bold text-sm text-slate-900 dark:text-white"><i class="fa-solid fa-basket-shopping text-emerald-500 mr-2"></i>Keranjang</h3>
-                        <div class="flex gap-4">
-                            <button onclick="clearCart()" class="text-xs text-rose-500 hover:text-rose-600 font-semibold"><i class="fa-solid fa-trash-can mr-1"></i>Kosongkan</button>
-                            <button onclick="toggleMobileCart()" class="lg:hidden text-slate-500"><i class="fa-solid fa-xmark text-lg"></i></button>
-                        </div>
-                    </div>
-                    
-                    <div id="cart-items" class="flex-1 overflow-y-auto p-4 space-y-3"></div>
-                    
-                    <div class="p-4 border-t border-slate-200 dark:border-slate-700 space-y-3 shrink-0 bg-slate-50 dark:bg-slate-900/40">
-                        <div class="grid grid-cols-2 gap-3 text-xs">
-                            <div>
-                                <label class="block text-[10px] text-slate-500 font-bold mb-1">Diskon (Rp)</label>
-                                <input type="number" id="input-discount" value="0" min="0" class="w-full px-3 py-2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:border-blue-500 transition-colors">
-                            </div>
-                            <div>
-                                <label class="block text-[10px] text-slate-500 font-bold mb-1">PPN (%)</label>
-                                <input type="number" id="input-tax" value="0" min="0" max="100" class="w-full px-3 py-2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:border-blue-500 transition-colors">
-                            </div>
-                        </div>
-                        
-                        <div class="flex justify-between text-xs text-slate-600 dark:text-slate-400 pt-1"><span>Subtotal:</span><span id="cart-subtotal" class="font-semibold">Rp 0</span></div>
-                        <div class="flex justify-between font-bold text-base text-slate-900 dark:text-white pt-2 border-t border-slate-200 dark:border-slate-700">
-                            <span>TOTAL BAYAR</span><span id="cart-final-total" class="text-emerald-600 dark:text-emerald-400">Rp 0</span>
-                        </div>
-                        <div class="grid grid-cols-2 gap-2 mt-2">
-                            <button onclick="checkout('CASH')" class="py-3 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl font-bold text-xs shadow-md active:scale-95 transition-all"><i class="fa-solid fa-money-bill-wave mr-1"></i> Tunai</button>
-                            <button onclick="checkout('QRIS')" class="py-3 bg-blue-600 hover:bg-blue-500 text-white rounded-xl font-bold text-xs shadow-md active:scale-95 transition-all"><i class="fa-solid fa-qrcode mr-1"></i> QRIS</button>
-                        </div>
-                    </div>
-                </div>
-
-                <button onclick="toggleMobileCart()" id="mobile-cart-badge" class="lg:hidden fixed bottom-20 right-4 bg-emerald-600 text-white px-4 py-3 rounded-full shadow-2xl flex items-center justify-center gap-2 z-40 active:scale-95 transition-transform">
-                    <i class="fa-solid fa-basket-shopping text-base"></i>
-                    <span id="mobile-cart-count" class="bg-white text-emerald-700 text-[10px] font-bold rounded-full w-5 h-5 flex items-center justify-center">0</span>
-                </button>
-            </section>
-
-            <!-- VIEW: STOK MASTER BARANG -->
-            <section id="view-products" class="hidden space-y-6 role-restricted">
-                <div class="bg-white dark:bg-slate-800 p-4 md:p-5 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm">
-                    <h3 class="text-sm font-bold text-slate-900 dark:text-white mb-4"><i class="fa-solid fa-boxes-stacked text-blue-500 mr-2"></i>Tambah / Update Barang</h3>
-                    <form id="product-form" onsubmit="handleProductSubmit(event)" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 text-sm">
-                        <div><label class="block text-xs text-slate-500 mb-1">Barcode</label><input type="text" id="prod-barcode" required class="w-full px-3 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-lg dark:text-white focus:outline-none focus:border-blue-500"></div>
-                        <div><label class="block text-xs text-slate-500 mb-1">Nama Barang</label><input type="text" id="prod-name" required class="w-full px-3 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-lg dark:text-white focus:outline-none focus:border-blue-500"></div>
-                        <div><label class="block text-xs text-slate-500 mb-1">Harga Jual (Rp)</label><input type="number" id="prod-price" required class="w-full px-3 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-lg dark:text-white focus:outline-none focus:border-blue-500"></div>
-                        <div><label class="block text-xs text-slate-500 mb-1">Stok Awal</label><input type="number" id="prod-stock" required class="w-full px-3 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-lg dark:text-white focus:outline-none focus:border-blue-500"></div>
-                        <button type="submit" class="sm:col-span-2 lg:col-span-4 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-bold shadow-md transition-colors text-sm mt-2"><i class="fa-solid fa-save mr-2"></i>Simpan Master Data</button>
-                    </form>
-                </div>
-            </section>
-
-            <!-- VIEW: PENGATURAN SYSTEM -->
-            <section id="view-settings" class="hidden space-y-6 role-restricted">
-                <div class="max-w-2xl bg-white dark:bg-slate-800 p-5 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-5">
-                    <h3 class="text-base font-bold text-slate-900 dark:text-white border-b border-slate-200 dark:border-slate-700 pb-3"><i class="fa-solid fa-cloud mr-2"></i>Pengaturan Database Cloud</h3>
-                    <p class="text-xs text-slate-500 dark:text-slate-400 mb-4">Perubahan ini akan tersimpan di Supabase dan berlaku untuk semua perangkat.</p>
-                    
-                    <div>
-                        <label class="block text-xs font-bold text-slate-600 dark:text-slate-400 mb-2">Nama Toko (Header Struk)</label>
-                        <input type="text" id="set-shop-name" class="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-lg dark:text-white text-sm focus:outline-none focus:border-blue-500">
-                    </div>
-
-                    <div>
-                        <label class="block text-xs font-bold text-slate-600 dark:text-slate-400 mb-2">Override Tanggal Struk</label>
-                        <input type="date" id="set-receipt-date" class="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-lg dark:text-white text-sm focus:outline-none focus:border-blue-500">
-                        <p class="text-[10px] text-slate-500 mt-1">*Kosongkan untuk tanggal realtime saat ini.</p>
-                    </div>
-
-                    <div>
-                        <label class="block text-xs font-bold text-slate-600 dark:text-slate-400 mb-2">Ubah Role Akun Saya Saat Ini</label>
-                        <select id="set-user-role" class="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-lg dark:text-white text-sm focus:outline-none focus:border-blue-500">
-                            <option value="Super Admin">Super Admin</option>
-                            <option value="Admin">Admin</option>
-                            <option value="Kasir">Kasir</option>
-                        </select>
-                        <p class="text-[10px] text-rose-500 mt-1">*Perubahan role akan langsung mengubah hak akses email Anda di database.</p>
-                    </div>
-
-                    <!-- BLOK PENGATURAN KASIR & STAFF -->
-                    <div class="mt-8 pt-6 border-t border-slate-200 dark:border-slate-700">
-                        <h4 class="text-sm font-bold text-slate-900 dark:text-white mb-4"><i class="fa-solid fa-users mr-2"></i>Daftar Kasir & Hak Akses</h4>
-                        <form id="staff-form" onsubmit="addStaff(event)" class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4">
-                            <input type="email" id="staff-email" placeholder="Email Kasir" required class="px-3 py-2 bg-slate-100 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-lg text-sm text-slate-900 dark:text-white focus:outline-none">
-                            <select id="staff-role" class="px-3 py-2 bg-slate-100 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-lg text-sm text-slate-900 dark:text-white focus:outline-none">
-                                <option value="Admin">Admin</option>
-                                <option value="Kasir">Kasir</option>
-                            </select>
-                            <button type="submit" class="bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-sm font-bold transition-colors py-2 cursor-pointer shadow-md">Tambah Staff</button>
-                        </form>
-                        <div class="overflow-x-auto bg-slate-50 dark:bg-slate-900/40 rounded-xl p-3 border border-slate-200 dark:border-slate-700">
-                            <table class="w-full text-xs text-slate-600 dark:text-slate-400">
-                                <thead class="border-b border-slate-200 dark:border-slate-700 text-left text-slate-500">
-                                    <tr>
-                                        <th class="pb-2">Email Akun</th>
-                                        <th class="pb-2">Hak Akses Role</th>
-                                        <th class="pb-2 text-center">Aksi</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="staff-list" class="divide-y divide-slate-200 dark:divide-slate-700/50">
-                                    <!-- Diisi oleh JS -->
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-
-                    <div class="flex items-center justify-between pt-4 border-t border-slate-200 dark:border-slate-700 mt-4">
-                        <span class="text-sm font-bold text-slate-900 dark:text-white"><i class="fa-solid fa-moon mr-2"></i>Mode Gelap (Global Default)</span>
-                        <label class="relative inline-flex items-center cursor-pointer">
-                            <input type="checkbox" id="set-dark-mode" class="sr-only peer">
-                            <div class="w-11 h-6 bg-slate-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-slate-600 peer-checked:bg-blue-600"></div>
-                        </label>
-                    </div>
-
-                    <button onclick="saveSettings()" class="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg shadow-md mt-6 text-sm transition-colors cursor-pointer"><i class="fa-solid fa-cloud-arrow-up mr-2"></i> Simpan Ke Supabase</button>
-                </div>
-            </section>
-        </div>
-    </main>
-
-    <!-- SIDEBAR NAV -->
-    <aside class="fixed bottom-0 inset-x-0 h-16 bg-white dark:bg-slate-800 border-t border-slate-200 dark:border-slate-700 flex flex-row justify-around items-center z-50 md:relative md:bottom-auto md:inset-x-auto md:h-screen md:w-64 md:border-t-0 md:border-r md:flex-col md:justify-between shrink-0 shadow-xl transition-colors">
-        <div class="flex flex-row md:flex-col w-full h-full md:h-auto">
-            <div class="hidden md:flex p-6 items-center justify-center md:justify-start gap-3 border-b border-slate-200 dark:border-slate-700 w-full">
-                <i class="fa-solid fa-cash-register text-blue-600 text-2xl"></i>
-                <span class="text-xl font-extrabold tracking-wider text-slate-900 dark:text-white">LitePOS</span>
+        <!-- SIDEBAR CONTAINER MODULE -->
+        <aside class="app-sidebar">
+            <div class="sidebar-menu-wrapper" id="sidebar-menu-injector">
+                <!-- Injected via JavaScript Array Map Loop dynamically -->
             </div>
-            <nav class="flex flex-row md:flex-col justify-around md:justify-start w-full h-full md:h-auto md:mt-4 md:px-3 md:space-y-1">
-                <button onclick="switchTab('dashboard')" id="btn-dashboard" class="active-menu role-restricted flex-1 md:flex-none flex flex-col md:flex-row items-center justify-center md:justify-start gap-1 md:gap-3 py-2 md:px-4 md:py-3.5 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/50 hover:text-blue-600 dark:hover:text-white rounded-none md:rounded-xl transition-all text-[10px] md:text-sm cursor-pointer h-full md:h-auto font-medium">
-                    <i class="fa-solid fa-chart-pie md:text-lg"></i> <span class="block">Dashboard</span>
-                </button>
-                <button onclick="switchTab('pos')" id="btn-pos" class="flex-1 md:flex-none flex flex-col md:flex-row items-center justify-center md:justify-start gap-1 md:gap-3 py-2 md:px-4 md:py-3.5 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/50 hover:text-blue-600 dark:hover:text-white rounded-none md:rounded-xl transition-all text-[10px] md:text-sm cursor-pointer h-full md:h-auto font-medium">
-                    <i class="fa-solid fa-cart-shopping md:text-lg"></i> <span class="block">Kasir</span>
-                </button>
-                <button onclick="switchTab('products')" id="btn-products" class="role-restricted flex-1 md:flex-none flex flex-col md:flex-row items-center justify-center md:justify-start gap-1 md:gap-3 py-2 md:px-4 md:py-3.5 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/50 hover:text-blue-600 dark:hover:text-white rounded-none md:rounded-xl transition-all text-[10px] md:text-sm cursor-pointer h-full md:h-auto font-medium">
-                    <i class="fa-solid fa-boxes-stacked md:text-lg"></i> <span class="block">Master Stok</span>
-                </button>
-                <button onclick="switchTab('settings')" id="btn-settings" class="role-restricted flex-1 md:flex-none flex flex-col md:flex-row items-center justify-center md:justify-start gap-1 md:gap-3 py-2 md:px-4 md:py-3.5 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/50 hover:text-blue-600 dark:hover:text-white rounded-none md:rounded-xl transition-all text-[10px] md:text-sm cursor-pointer h-full md:h-auto font-medium">
-                    <i class="fa-solid fa-cogs md:text-lg"></i> <span class="block">Pengaturan</span>
-                </button>
-            </nav>
-        </div>
-    </aside>
+            
+            <div class="sidebar-user-card" id="sidebar-account-plate">
+                <div class="avatar-frame">
+                    <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=100&q=80" alt="Avatar" class="avatar-img" id="sidebar-avatar-preview">
+                </div>
+                <div class="user-meta-info">
+                    <span class="user-display-name" id="sidebar-user-name">Kartika Dewi</span>
+                    <span class="user-role-lbl">Senior Administrator</span>
+                </div>
+            </div>
+        </aside>
 
-    <script src="app.js"></script>
+        <!-- WORKSPACE VIEWPORT CONTENT ROUTER -->
+        <main class="app-content" id="app-viewport-root">
+            <!-- Dynamic Template Views Loaded Here -->
+        </main>
+
+        <!-- FOOTER BAR STATS MODULE -->
+        <footer class="app-footer">
+            <div>
+                &copy; <span id="footer-year-sync">2026</span> <strong>NexSphere Platform</strong>. Seluruh Hak Cipta Dilindungi.
+            </div>
+            <div style="display:flex; gap:24px; align-items:center;">
+                <span>Ditenagai oleh Murni Vanilla HTML, CSS & JS (ES6+)</span>
+                <span>Versi 3.4.0-Build2026</span>
+                <div class="network-status-badge">
+                    <div class="status-dot" id="network-indicator-dot"></div>
+                    <span id="network-indicator-lbl">Sistem Online</span>
+                </div>
+            </div>
+        </footer>
+
+        <!-- BOTTOM NAV BAR (MOBILE EXCLUSIVE SHELL) -->
+        <nav class="bottom-nav" id="bottom-nav-injector">
+            <!-- Dynamic Mobile Anchors Trigger here -->
+        </nav>
+    </div>
+
+    <!-- DIALOG BASE MODAL SYSTEM CONTAINER -->
+    <div class="modal-overlay" id="system-modal-root" tabindex="-1">
+        <div class="modal-sheet-box" id="modal-container-body">
+            <!-- Modal layout context injected runtime -->
+        </div>
+    </div>
+
+    <!-- SYSTEM TOAST ALERT STACK GATEWAY -->
+    <div id="toast-container"></div>
+
+    <!-- ==========================================
+       6. CORE PROGRAM ENGINEERING (JAVASCRIPT)
+       ========================================== */ -->
+    <script>
+        /**
+         * NEXSPHERE CONFIGURATION & CONSTANTS ENGINE
+         * Supabase Database client fallback simulator implementation
+         * Murni REST client layer dengan skema fallback LocalStorage otomatis
+         */
+        const SupabaseMockEngine = {
+            db: {
+                posts: JSON.parse(localStorage.getItem('ns_posts')) || [
+                    { id: "p1", author: "Ahmad Rifai", avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=100&q=80", body: "Selamat pagi tim internal NexSphere! Implementasi integrasi layout Glassmorphism dan sinkronisasi data Supabase berjalan optimal hari ini. Siap deployment.", media: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&w=600&q=80", likes: 12, liked: false, timestamp: "08:15", comments: [{ author: "Budi Utomo", body: "Luar biasa mas! Performa 60fps mulus." }] },
+                    { id: "p2", author: "Kartika Dewi", avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=100&q=80", body: "Mengingatkan kembali, rapat evaluasi POS, Absensi harian, dan validasi berkas ERP dilakukan jam 14:00 WIB via modul kolaborasi internal.", media: null, likes: 5, liked: true, timestamp: "09:30", comments: [] }
+                ],
+                chats: JSON.parse(localStorage.getItem('ns_chats')) || [
+                    { id: 1, sender: "Budi Utomo", msg: "Halo admin, modul master data inventaris sudah saya sinkronisasikan ke Supabase?", time: "10:02", incoming: true },
+                    { id: 2, sender: "Kartika Dewi", msg: "Sudah masuk om Budi, status aman terverifikasi di server cloud utama.", time: "10:05", incoming: false }
+                ]
+            },
+            saveState() {
+                localStorage.setItem('ns_posts', JSON.stringify(this.db.posts));
+                localStorage.setItem('ns_chats', JSON.stringify(this.db.chats));
+            }
+        };
+
+        // Global Navigation Menu Registry Matrix Array
+        const AppNavigationMatrix = [
+            { id: 'dashboard', label: 'Dashboard', icon: 'dashboard' },
+            { id: 'social-feed', label: 'Social Feed', icon: 'share' },
+            { id: 'chat-room', label: 'Ruang Chat', icon: 'forum' },
+            { id: 'master-data', label: 'Master Data', icon: 'database' },
+            { id: 'transaksi-pos', label: 'Transaksi POS', icon: 'shopping_cart' },
+            { id: 'laporan-sys', label: 'Laporan', icon: 'analytics' },
+            { id: 'pengaturan-app', label: 'Pengaturan', icon: 'settings' }
+        ];
+
+        // Central Application Controller
+        const App = {
+            init() {
+                this.Theme.init();
+                this.Clock.start();
+                this.Navigation.render();
+                this.Router.init();
+                this.Events.bindGlobal();
+                this.Network.listen();
+                
+                // Set Profile metadata name from storage customizer
+                const cachedUser = localStorage.getItem('ns_username') || "Kartika Dewi";
+                document.getElementById('sidebar-user-name').innerText = cachedUser;
+                
+                App.Toast.show("Selamat Datang di NexSphere Workspace Panel", "success");
+            },
+
+            // Network State Monitoring Interface
+            Network: {
+                listen() {
+                    const updateStatus = () => {
+                        const dot = document.getElementById('network-indicator-dot');
+                        const lbl = document.getElementById('network-indicator-lbl');
+                        if (navigator.onLine) {
+                            dot.className = "status-dot";
+                            lbl.innerText = "Sistem Online";
+                        } else {
+                            dot.className = "status-dot offline";
+                            lbl.innerText = "Sistem Offline";
+                            App.Toast.show("Koneksi terputus! Menggunakan data offline.", "warning");
+                        }
+                    };
+                    window.addEventListener('online', updateStatus);
+                    window.addEventListener('offline', updateStatus);
+                }
+            },
+
+            // SPA Core Hash Router Engine Architecture
+            Router: {
+                init() {
+                    window.addEventListener('hashchange', () => this.handleRouting());
+                    this.handleRouting();
+                },
+                navigate(viewId) {
+                    window.location.hash = `#/${viewId}`;
+                },
+                handleRouting() {
+                    const hash = window.location.hash.replace('#/', '') || 'dashboard';
+                    
+                    // Sync Navigation active state UI styling logic
+                    document.querySelectorAll('.menu-item, .bottom-nav-item').forEach(el => {
+                        if(el.getAttribute('data-view-target') === hash) {
+                            el.classList.add('active');
+                        } else {
+                            el.classList.remove('active');
+                        }
+                    });
+
+                    // Render corresponding view template
+                    const rootNode = document.getElementById('app-viewport-root');
+                    localStorage.setItem('ns_active_view', hash);
+                    
+                    if (this.views[hash]) {
+                        rootNode.innerHTML = `<div class="view-container">${this.views[hash]()}</div>`;
+                        // Fire init modules hooks per view context
+                        if(this.viewHooks[hash]) this.viewHooks[hash]();
+                    } else {
+                        rootNode.innerHTML = `<h2>404 Halaman Tidak Ditemukan</h2>`;
+                    }
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                },
+
+                // Views Viewport Dynamic Injector DOM Templates
+                views: {
+                    dashboard() {
+                        return `
+                            <div class="premium-card welcome-gradient-card">
+                                <h1 style="font-size: clamp(1.5rem, 4vw, 2.2rem); font-weight: 700;">Halo, Selamat Hari <span id="dash-day-name"></span>!</h1>
+                                <p style="margin-top: 8px; font-weight:300; opacity:0.95;">Selamat datang kembali di sistem terpadu NexSphere Workspace Hub. Monitoring semua aktivitas interaksi tim, POS kasir, inventori ERP, dan database Supabase dalam satu genggaman digital.</p>
+                            </div>
+
+                            <div class="stats-strip">
+                                <div class="stat-box">
+                                    <div class="stat-icon-wrapper" style="background:var(--primary-state); color:var(--primary);">
+                                        <span class="material-symbols-outlined">share</span>
+                                    </div>
+                                    <div>
+                                        <h3 style="font-size:1.4rem; font-weight:700;">${SupabaseMockEngine.db.posts.length}</h3>
+                                        <p style="font-size:0.8rem; color:var(--text-muted);">Total Postingan Komunitas</p>
+                                    </div>
+                                </div>
+                                <div class="stat-box">
+                                    <div class="stat-icon-wrapper" style="background:rgba(16,185,129,0.1); color:var(--success);">
+                                        <span class="material-symbols-outlined">payments</span>
+                                    </div>
+                                    <div>
+                                        <h3 style="font-size:1.4rem; font-weight:700;">Rp 14.250.000</h3>
+                                        <p style="font-size:0.8rem; color:var(--text-muted);">Pendapatan POS Hari Ini</p>
+                                    </div>
+                                </div>
+                                <div class="stat-box">
+                                    <div class="stat-icon-wrapper" style="background:rgba(14,165,233,0.1); color:var(--secondary);">
+                                        <span class="material-symbols-outlined">group</span>
+                                    </div>
+                                    <div>
+                                        <h3 style="font-size:1.4rem; font-weight:700;">48 Aktif</h3>
+                                        <p style="font-size:0.8rem; color:var(--text-muted);">Karyawan / Kehadiran Harian</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="grid-dashboard">
+                                <div>
+                                    <div class="premium-card">
+                                        <h2 style="font-size:1.15rem; margin-bottom:16px;">Analisis Performa Sistem Digital (Dummy Chart)</h2>
+                                        <div style="height: 220px; display:flex; align-items:flex-end; gap:16px; padding-top:20px; border-left:2px solid var(--border-color); border-bottom:2px solid var(--border-color);">
+                                            <div style="flex:1; background:var(--primary); height:60%; border-radius:4px 4px 0 0; position:relative;" title="Januari"><span style="position:absolute; top:-25px; left:35%; font-size:0.75rem;">60%</span></div>
+                                            <div style="flex:1; background:var(--secondary); height:85%; border-radius:4px 4px 0 0; position:relative;" title="Februari"><span style="position:absolute; top:-25px; left:35%; font-size:0.75rem;">85%</span></div>
+                                            <div style="flex:1; background:var(--success); height:45%; border-radius:4px 4px 0 0; position:relative;" title="Maret"><span style="position:absolute; top:-25px; left:35%; font-size:0.75rem;">45%</span></div>
+                                            <div style="flex:1; background:var(--warning); height:95%; border-radius:4px 4px 0 0; position:relative;" title="April"><span style="position:absolute; top:-25px; left:35%; font-size:0.75rem;">95%</span></div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div>
+                                    <div class="premium-card">
+                                        <h2 style="font-size:1.15rem; margin-bottom:16px;">Aksi Cepat Manajemen</h2>
+                                        <div style="display:flex; flex-direction:column; gap:10px;">
+                                            <button class="btn-suite btn-primary" onclick="App.Router.navigate('social-feed')"><span class="material-symbols-outlined">add_box</span> Buat Postingan Baru</button>
+                                            <button class="btn-suite btn-secondary" onclick="App.Router.navigate('transaksi-pos')"><span class="material-symbols-outlined">point_of_sale</span> Buka Kasir POS</button>
+                                            <button class="btn-suite btn-secondary" onclick="App.Router.navigate('master-data')"><span class="material-symbols-outlined">inventory</span> Cek Stok Barang</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                    },
+                    'social-feed'() {
+                        return `
+                            <div class="premium-card">
+                                <h3>Ada ide atau informasi baru untuk tim, Komunitas?</h3>
+                                <div class="post-composer-area" style="margin-top:14px;">
+                                    <textarea class="composer-textarea" id="post-composer-input" placeholder="Tulis pesan atau pengumuman penting di sini..."></textarea>
+                                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                                        <button class="btn-secondary btn-suite" onclick="document.getElementById('post-file-uploader').click()">
+                                            <span class="material-symbols-outlined">image</span> Lampirkan Gambar
+                                        </button>
+                                        <input type="file" id="post-file-uploader" style="display:none;" accept="image/*" onchange="App.FeedEngine.handleImageUploadPreview(this)">
+                                        <button class="btn-primary btn-suite" onclick="App.FeedEngine.createPost()">
+                                            <span class="material-symbols-outlined">send</span> Publikasikan Post
+                                        </button>
+                                    </div>
+                                    <div id="composer-image-preview-node" style="margin-top:10px;"></div>
+                                </div>
+                            </div>
+                            
+                            <div id="social-feed-stream-target">
+                                <!-- Feed Post injected natively from mock database state -->
+                            </div>
+                        `;
+                    },
+                    'chat-room'() {
+                        return `
+                            <div class="chat-module-container">
+                                <div class="chat-channels-list">
+                                    <div class="channel-row active">
+                                        <div class="avatar-frame" style="width:36px; height:36px;"><div style="color:white; text-align:center; line-height:32px; font-weight:700;">G</div></div>
+                                        <div>
+                                            <div style="font-weight:600; font-size:0.9rem;">Grup Utama Divisi</div>
+                                            <div style="font-size:0.75rem; color:var(--text-muted);">Obrolan aktif sinkron</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="chat-viewport">
+                                    <div class="chat-messages-stream" id="chat-stream-viewport-node">
+                                        <!-- Stream element packet JS looping -->
+                                    </div>
+                                    
+                                    <div class="chat-composer-strip">
+                                        <input type="text" class="form-control-input" id="chat-input-message" placeholder="Tulis pesan real-time ke grup internal..." style="margin-bottom:0;" onkeypress="if(event.key==='Enter') App.ChatEngine.sendMessage()">
+                                        <button class="btn-suite btn-primary" onclick="App.ChatEngine.sendMessage()" style="padding:14px;"><span class="material-symbols-outlined">send</span></button>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                    },
+                    'master-data'() {
+                        return `
+                            <div class="premium-card">
+                                <div style="display:flex; justify-content:between; align-items:center; flex-wrap:wrap; gap:16px; margin-bottom:20px;">
+                                    <div>
+                                        <h2>Inventaris Barang & Data Master ERP</h2>
+                                        <p style="font-size:0.8rem; color:var(--text-muted);">Kelola data logistik pergudangan terintegrasi cloud server</p>
+                                    </div>
+                                    <div style="margin-left:auto; display:flex; gap:10px;">
+                                        <button class="btn-suite btn-secondary" onclick="App.TableEngine.exportCSV()">Export Excel (CSV)</button>
+                                        <button class="btn-suite btn-primary" onclick="window.print()">Cetak PDF</button>
+                                    </div>
+                                </div>
+                                
+                                <div class="table-panel-holder">
+                                    <table class="premium-table premium-table-container">
+                                        <thead>
+                                            <tr>
+                                                <th>Kode SKU</th>
+                                                <th>Nama Komoditas</th>
+                                                <th>Kategori</th>
+                                                <th>Stok Minim</th>
+                                                <th>Harga Satuan</th>
+                                                <th>Status Gudang</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td data-label="Kode SKU">SKU-2026-001</td>
+                                                <td>Server Rack Mount Glass II</td>
+                                                <td>Infrastruktur IT</td>
+                                                <td>14 Unit</td>
+                                                <td>Rp 4.500.000</td>
+                                                <td><span style="padding:4px 8px; font-size:0.75rem; background:rgba(16,185,129,0.1); color:var(--success); border-radius:4px; font-weight:600;">Optimal</span></td>
+                                            </tr>
+                                            <tr>
+                                                <td data-label="Kode SKU">SKU-2026-002</td>
+                                                <td>Router Core Fiber Optic 10G</td>
+                                                <td>Networking</td>
+                                                <td>3 Unit</td>
+                                                <td>Rp 12.000.000</td>
+                                                <td><span style="padding:4px 8px; font-size:0.75rem; background:rgba(239,68,68,0.1); color:var(--danger); border-radius:4px; font-weight:600;">Stok Kritis</span></td>
+                                            </tr>
+                                            <tr>
+                                                <td data-label="Kode SKU">SKU-2026-003</td>
+                                                <td>Crimping Tool Pro-Max Kit</td>
+                                                <td>Perkakas Kerja</td>
+                                                <td>45 Pcs</td>
+                                                <td>Rp 350.000</td>
+                                                <td><span style="padding:4px 8px; font-size:0.75rem; background:rgba(16,185,129,0.1); color:var(--success); border-radius:4px; font-weight:600;">Optimal</span></td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        `;
+                    },
+                    'transaksi-pos'() {
+                        return `
+                            <div class="grid-dashboard">
+                                <div>
+                                    <div class="premium-card">
+                                        <h3>Mesin Kasir Digital POS (Point of Sale)</h3>
+                                        <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-top:16px;">
+                                            <div class="form-group-floating">
+                                                <label style="font-size:0.8rem; color:var(--text-muted);">Pilih Produk Item</label>
+                                                <select class="form-control-input" id="pos-product-select" onchange="App.POSEngine.calculateTotal()">
+                                                    <option value="4500000">Server Rack Mount - Rp 4.500.000</option>
+                                                    <option value="12000000">Router Core Fiber - Rp 12.000.000</option>
+                                                    <option value="3500000">Crimping Tool Kit - Rp 350.000</option>
+                                                </select>
+                                            </div>
+                                            <div class="form-group-floating">
+                                                <label style="font-size:0.8rem; color:var(--text-muted);">Kuantitas Belanja</label>
+                                                <input type="number" class="form-control-input" id="pos-qty-input" value="1" min="1" oninput="App.POSEngine.calculateTotal()">
+                                            </div>
+                                        </div>
+                                        <div style="background:rgba(0,0,0,0.02); padding:20px; border-radius:var(--radius-md); margin-top:16px;">
+                                            <h4>Total Kalkulasi Invoice Pembayaran:</h4>
+                                            <h2 style="font-size:2.2rem; font-weight:700; color:var(--primary); margin-top:8px;" id="pos-invoice-total-display">Rp 4.500.000</h2>
+                                        </div>
+                                        <div style="margin-top:16px; display:flex; gap:12px;">
+                                            <button class="btn-suite btn-primary" onclick="App.POSEngine.executeCheckout()">Proses Transaksi Simpan</button>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div>
+                                    <div class="premium-card">
+                                        <h3>Riwayat Struk POS Terkini</h3>
+                                        <ul style="list-style:none; margin-top:14px; display:flex; flex-direction:column; gap:10px; font-size:0.85rem;" id="pos-history-log">
+                                            <li style="border-bottom:1px solid var(--border-color); padding-bottom:6px;">INV-00892 - Rp 4.500.000 <span style="color:var(--success);">Sukses</span></li>
+                                            <li style="border-bottom:1px solid var(--border-color); padding-bottom:6px;">INV-00891 - Rp 9.000.000 <span style="color:var(--success);">Sukses</span></li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                    },
+                    'laporan-sys'() {
+                        return `
+                            <div class="premium-card">
+                                <h2>Pelaporan Keuangan & Absensi Kehadiran Karyawan</h2>
+                                <p style="color:var(--text-muted); margin-bottom:20px;">Laporan konsolidasi otomatis terstruktur bulanan sistem ERP</p>
+                                <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap:20px;">
+                                    <div style="border:1px solid var(--border-color); padding:16px; border-radius:var(--radius-md);">
+                                        <h4>Log Presensi Kehadiran Tim</h4>
+                                        <p style="font-size:2rem; font-weight:700; margin:10px 0;">98.4%</p>
+                                        <span style="color:var(--success); font-size:0.8rem; font-weight:600;">Status Sangat Bagus Terjaga</span>
+                                    </div>
+                                    <div style="border:1px solid var(--border-color); padding:16px; border-radius:var(--radius-md);">
+                                        <h4>Kas Finansial Keluar Masuk</h4>
+                                        <p style="font-size:2rem; font-weight:700; margin:10px 0; color:var(--secondary);">Rp 124,5M</p>
+                                        <span style="color:var(--text-muted); font-size:0.8rem;">Sinkronisasi Otomatis Supabase Cloud</span>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                    },
+                    'pengaturan-app'() {
+                        return `
+                            <div class="premium-card" style="max-width:600px;">
+                                <h2>Pengaturan Dasar Profil & Aplikasi</h2>
+                                <div style="margin-top:20px; display:flex; flex-direction:column; gap:16px;">
+                                    <div class="form-group-floating">
+                                        <label style="font-size:0.85rem; color:var(--text-muted); display:block; margin-bottom:6px;">Ganti Nama Operator Default System</label>
+                                        <input type="text" class="form-control-input" id="setting-username-field" value="${localStorage.getItem('ns_username') || 'Kartika Dewi'}">
+                                    </div>
+                                    <div>
+                                        <button class="btn-suite btn-primary" onclick="App.SettingsEngine.saveGlobalConfig()">Simpan Konfigurasi</button>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                    }
+                },
+
+                // Active Execution Code Block per View Lifecycle Hooks
+                viewHooks: {
+                    dashboard() {
+                        const days = ["Minggu", "Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"];
+                        const target = document.getElementById('dash-day-name');
+                        if (target) target.innerText = days[new Date().getDay()];
+                    },
+                    'social-feed'() {
+                        App.FeedEngine.renderStream();
+                    },
+                    'chat-room'() {
+                        App.ChatEngine.renderChatStream();
+                    }
+                }
+            },
+
+            // Navigation Renderer & Core Responsive Drawer Engine Matrix
+            Navigation: {
+                render() {
+                    const sideTarget = document.getElementById('sidebar-menu-injector');
+                    const bottomTarget = document.getElementById('bottom-nav-injector');
+                    
+                    let sideHtml = '';
+                    let bottomHtml = '';
+                    
+                    AppNavigationMatrix.forEach(menu => {
+                        const itemHtml = `
+                            <a class="menu-item" data-view-target="${menu.id}" onclick="App.Router.navigate('${menu.id}')">
+                                <span class="material-symbols-outlined">${menu.icon}</span>
+                                <span class="menu-text">${menu.label}</span>
+                            </a>
+                        `;
+                        sideHtml += itemHtml;
+                        
+                        // Pick first 4 parameters matrix metrics items for bottom navigation context mobile viewports
+                        if(['dashboard', 'social-feed', 'chat-room', 'pengaturan-app'].includes(menu.id)) {
+                            bottomHtml += `
+                                <a class="bottom-nav-item" data-view-target="${menu.id}" onclick="App.Router.navigate('${menu.id}')">
+                                    <div class="material-symbols-out-frame">
+                                        <span class="material-symbols-outlined">${menu.icon}</span>
+                                    </div>
+                                    <span>${menu.label}</span>
+                                </a>
+                            `;
+                        }
+                    });
+                    
+                    sideTarget.innerHTML = sideHtml;
+                    bottomTarget.innerHTML = bottomHtml;
+                }
+            },
+
+            // Live Realtime Clock-Calendar Metadata Synchronization Service Layer
+            Clock: {
+                start() {
+                    const months = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
+                    const days = ["Minggu", "Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"];
+                    
+                    setInterval(() => {
+                        const now = new Date();
+                        
+                        // String builder formatter clock digits
+                        const hrs = String(now.getHours()).padStart(2, '0');
+                        const mins = String(now.getMinutes()).padStart(2, '0');
+                        const secs = String(now.getSeconds()).padStart(2, '0');
+                        
+                        const dateStr = `${days[now.getDay()]}, ${now.getDate()} ${months[now.getMonth()]} ${now.getFullYear()}`;
+                        
+                        document.getElementById('live-date-str').innerText = dateStr;
+                        document.getElementById('live-clock-str').innerText = `${hrs}:${mins}:${secs} WIB`;
+                        document.getElementById('footer-year-sync').innerText = now.getFullYear();
+                    }, 1000);
+                }
+            },
+
+            // Adaptive Dark Mode Storage Interface State Handler
+            Theme: {
+                init() {
+                    const saved = localStorage.getItem('ns_theme') || 'light';
+                    document.documentElement.setAttribute('data-theme', saved);
+                    this.updateIcon(saved);
+                },
+                toggle() {
+                    const current = document.documentElement.getAttribute('data-theme');
+                    const next = current === 'light' ? 'dark' : 'light';
+                    document.documentElement.setAttribute('data-theme', next);
+                    localStorage.setItem('ns_theme', next);
+                    this.updateIcon(next);
+                    App.Toast.show(`Tema berhasil diubah ke mode ${next}`, "info");
+                },
+                updateIcon(theme) {
+                    const icon = document.querySelector('#theme-toggle-trigger span');
+                    if(icon) icon.innerText = theme === 'light' ? 'dark_mode' : 'light_mode';
+                }
+            },
+
+            // Feed Engine Logic Controller Subsystem
+            FeedEngine: {
+                attachedImageBase64: null,
+                handleImageUploadPreview(input) {
+                    if (input.files && input.files[0]) {
+                        const reader = new FileReader();
+                        reader.onload = function(e) {
+                            App.FeedEngine.attachedImageBase64 = e.target.result;
+                            document.getElementById('composer-image-preview-node').innerHTML = `
+                                <img src="${e.target.result}" style="width:80px; height:80px; object-fit:cover; border-radius:8px;">
+                            `;
+                        };
+                        reader.readAsDataURL(input.files[0]);
+                    }
+                },
+                createPost() {
+                    const input = document.getElementById('post-composer-input');
+                    if(!input.value.trim()) return App.Toast.show("Konten kiriman teks tidak boleh kosong!", "warning");
+                    
+                    const cachedUser = localStorage.getItem('ns_username') || "Kartika Dewi";
+                    const newPost = {
+                        id: 'p_' + Date.now(),
+                        author: cachedUser,
+                        avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=100&q=80",
+                        body: input.value,
+                        media: this.attachedImageBase64,
+                        likes: 0,
+                        liked: false,
+                        timestamp: "Baru saja",
+                        comments: []
+                    };
+                    
+                    SupabaseMockEngine.db.posts.unshift(newPost);
+                    SupabaseMockEngine.saveState();
+                    
+                    input.value = '';
+                    this.attachedImageBase64 = null;
+                    document.getElementById('composer-image-preview-node').innerHTML = '';
+                    
+                    this.renderStream();
+                    App.Toast.show("Postingan berhasil diterbitkan ke cloud server Supabase", "success");
+                },
+                triggerLike(postId) {
+                    const post = SupabaseMockEngine.db.posts.find(p => p.id === postId);
+                    if(post) {
+                        if(post.liked) {
+                            post.likes--;
+                            post.liked = false;
+                        } else {
+                            post.likes++;
+                            post.liked = true;
+                        }
+                        SupabaseMockEngine.saveState();
+                        this.renderStream();
+                    }
+                },
+                submitComment(postId, inputEl) {
+                    if(event.key === 'Enter' || event.type === 'click') {
+                        const targetInput = inputEl.parentNode.querySelector('input');
+                        if(!targetInput.value.trim()) return;
+                        
+                        const post = SupabaseMockEngine.db.posts.find(p => p.id === postId);
+                        const cachedUser = localStorage.getItem('ns_username') || "Kartika Dewi";
+                        if(post) {
+                            post.comments.push({
+                                author: cachedUser,
+                                body: targetInput.value
+                            });
+                            SupabaseMockEngine.saveState();
+                            targetInput.value = '';
+                            this.renderStream();
+                            App.Toast.show("Komentar tersimpan", "success");
+                        }
+                    }
+                },
+                renderStream() {
+                    const container = document.getElementById('social-feed-stream-target');
+                    if(!container) return;
+                    
+                    let html = '';
+                    SupabaseMockEngine.db.posts.forEach(post => {
+                        let commentsHtml = '';
+                        post.comments.forEach(c => {
+                            commentsHtml += `
+                                <div class="comment-node">
+                                    <div class="comment-bubble">
+                                        <strong>${c.author}</strong>
+                                        <p style="margin-top:2px;">${c.body}</p>
+                                    </div>
+                                </div>
+                            `;
+                        });
+
+                        html += `
+                            <article class="premium-card">
+                                <div class="post-card-header">
+                                    <div class="post-author-block">
+                                        <div class="avatar-frame" style="width:38px; height:38px;">
+                                            <img src="${post.avatar}" class="avatar-img">
+                                        </div>
+                                        <div>
+                                            <h4 style="font-size:0.92rem; font-weight:600;">${post.author}</h4>
+                                            <span style="font-size:0.75rem; color:var(--text-muted);">${post.timestamp}</span>
+                                        </div>
+                                    </div>
+                                    <span class="material-symbols-outlined" style="color:var(--text-muted); cursor:pointer;">more_vert</span>
+                                </div>
+                                <div class="post-content-body">${post.body}</div>
+                                ${post.media ? `<img src="${post.media}" class="post-media-attachment">` : ''}
+                                
+                                <div class="post-actions-bar">
+                                    <button class="action-trigger-btn ${post.liked ? 'active-liked' : ''}" onclick="App.FeedEngine.triggerLike('${post.id}')">
+                                        <span class="material-symbols-outlined" style="${post.liked ? 'font-fill:1;' : ''}">favorite</span> Suka (${post.likes})
+                                    </button>
+                                    <button class="action-trigger-btn">
+                                        <span class="material-symbols-outlined">chat_bubble</span> Komentar (${post.comments.length})
+                                    </button>
+                                </div>
+                                
+                                <div class="comments-section">
+                                    ${commentsHtml}
+                                    <div style="display:flex; gap:10px; margin-top:6px;">
+                                        <input type="text" class="form-control-input" placeholder="Tulis komentar tim..." style="margin-bottom:0; padding:8px 12px; font-size:0.85rem;" onkeypress="App.FeedEngine.submitComment('${post.id}', this)">
+                                        <button class="btn-suite btn-primary" style="padding:8px 12px;" onclick="App.FeedEngine.submitComment('${post.id}', this)"><span class="material-symbols-outlined" style="font-size:1.1rem;">send</span></button>
+                                    </div>
+                                </div>
+                            </article>
+                        `;
+                    });
+                    
+                    container.innerHTML = html;
+                }
+            },
+
+            // Instant Messaging Chat Room Modules
+            ChatEngine: {
+                sendMessage() {
+                    const input = document.getElementById('chat-input-message');
+                    if(!input.value.trim()) return;
+                    
+                    const newMsg = {
+                        id: Date.now(),
+                        sender: localStorage.getItem('ns_username') || "Kartika Dewi",
+                        msg: input.value,
+                        time: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}),
+                        incoming: false
+                    };
+                    
+                    SupabaseMockEngine.db.chats.push(newMsg);
+                    SupabaseMockEngine.saveState();
+                    input.value = '';
+                    this.renderChatStream();
+                },
+                renderChatStream() {
+                    const viewport = document.getElementById('chat-stream-viewport-node');
+                    if(!viewport) return;
+                    
+                    let html = '';
+                    SupabaseMockEngine.db.chats.forEach(c => {
+                        html += `
+                            <div class="msg-packet ${c.incoming ? 'incoming' : 'outgoing'}">
+                                <span style="font-size:0.75rem; color:var(--text-muted); font-weight:500;">${c.sender}</span>
+                                <div class="msg-payload">${c.msg}</div>
+                                <span class="msg-timestamp">${c.time}</span>
+                            </div>
+                        `;
+                    });
+                    viewport.innerHTML = html;
+                    viewport.scrollTop = viewport.scrollHeight;
+                }
+            },
+
+            // Point of Sales Engine Calculator
+            POSEngine: {
+                calculateTotal() {
+                    const price = parseFloat(document.getElementById('pos-product-select').value);
+                    const qty = parseInt(document.getElementById('pos-qty-input').value) || 1;
+                    const total = price * qty;
+                    document.getElementById('pos-invoice-total-display').innerText = `Rp ${total.toLocaleString('id-ID')}`;
+                },
+                executeCheckout() {
+                    App.Toast.show("Invoice POS Berhasil Disimpan ke Supabase ERP Ledger", "success");
+                    const log = document.getElementById('pos-history-log');
+                    const price = parseFloat(document.getElementById('pos-product-select').value);
+                    const qty = parseInt(document.getElementById('pos-qty-input').value) || 1;
+                    const total = price * qty;
+                    
+                    const item = document.createElement('li');
+                    item.style.borderBottom = "1px solid var(--border-color)";
+                    item.style.paddingBottom = "6px";
+                    item.innerHTML = `INV-${Math.floor(Math.random()*10000)} - Rp ${total.toLocaleString('id-ID')} <span style="color:var(--success);">Sukses</span>`;
+                    log.prepend(item);
+                }
+            },
+
+            // System Configuration Controls
+            SettingsEngine: {
+                saveGlobalConfig() {
+                    const val = document.getElementById('setting-username-field').value;
+                    if(!val.trim()) return App.Toast.show("Nama tidak boleh kosong", "danger");
+                    
+                    localStorage.setItem('ns_username', val);
+                    document.getElementById('sidebar-user-name').innerText = val;
+                    App.Toast.show("Pengaturan sistem berhasil diperbarui", "success");
+                }
+            },
+
+            // Modular Table CSV Export Controller
+            TableEngine: {
+                exportCSV() {
+                    App.Toast.show("Mengekspor file master data skema CSV...", "info");
+                    let csv = 'Kode SKU,Nama Komoditas,Kategori,Stok,Harga\nSKU-2026-001,Server Rack Mount,Infrastruktur IT,14,4500000\nSKU-2026-002,Router Core Fiber,Networking,3,12000000';
+                    const blob = new Blob([csv], { type: 'text/csv' });
+                    const el = document.createElement('a');
+                    el.href = URL.createObjectURL(blob);
+                    el.download = `MasterData_NexSphere_2026.csv`;
+                    document.body.appendChild(el);
+                    el.click();
+                    document.body.removeChild(el);
+                }
+            },
+
+            // Toast Alert Manager
+            Toast: {
+                show(message, type = "info") {
+                    const container = document.getElementById('toast-container');
+                    const toast = document.createElement('div');
+                    toast.className = `toast-node`;
+                    
+                    let borderCol = "var(--primary)";
+                    if(type === "success") borderCol = "var(--success)";
+                    if(type === "danger") borderCol = "var(--danger)";
+                    if(type === "warning") borderCol = "var(--warning)";
+                    
+                    toast.style.borderLeftColor = borderCol;
+                    toast.innerHTML = `
+                        <span class="material-symbols-outlined" style="color:${borderCol}">info</span>
+                        <span style="font-size:0.9rem; font-weight:500;">${message}</span>
+                    `;
+                    
+                    container.appendChild(toast);
+                    setTimeout(() => {
+                        toast.style.opacity = '0';
+                        toast.style.transform = 'scale(0.9)';
+                        toast.style.transition = 'all 0.3s ease';
+                        setTimeout(() => toast.remove(), 300);
+                    }, 3500);
+                }
+            },
+
+            // General Events Handler Binder Engine Matrix Configuration
+            Events: {
+                bindGlobal() {
+                    // Sidebar Action Trigger logic collapse metrics
+                    document.getElementById('sidebar-toggle-trigger').addEventListener('click', (e) => {
+                        App.Utils.createRipple(e);
+                        document.getElementById('app-layout').classList.toggle('sidebar-collapsed');
+                    });
+                    
+                    // Theme Switch Button Hook
+                    document.getElementById('theme-toggle-trigger').addEventListener('click', (e) => {
+                        App.Utils.createRipple(e);
+                        App.Theme.toggle();
+                    });
+
+                    // Fullscreen Core Feature Toggle
+                    document.getElementById('fullscreen-toggle-trigger').addEventListener('click', () => {
+                        if (!document.fullscreenElement) {
+                            document.documentElement.requestFullscreen();
+                        } else if (document.exitFullscreen) {
+                            document.exitFullscreen();
+                        }
+                    });
+                }
+            },
+
+            // Utility Toolkit Helpers
+            Utils: {
+                createRipple(event) {
+                    const btn = event.currentTarget;
+                    const circle = document.createElement("span");
+                    const diameter = Math.max(btn.clientWidth, btn.clientHeight);
+                    const radius = diameter / 2;
+                    
+                    circle.style.width = circle.style.height = `${diameter}px`;
+                    circle.style.left = `${event.clientX - btn.getBoundingClientRect().left - radius}px`;
+                    circle.style.top = `${event.clientY - btn.getBoundingClientRect().top - radius}px`;
+                    circle.classList.add("ripple");
+                    
+                    const ripple = btn.getElementsByClassName("ripple")[0];
+                    if (ripple) ripple.remove();
+                    btn.appendChild(circle);
+                }
+            }
+        };
+
+        // Window Init Entry-point runtime
+        window.addEventListener('DOMContentLoaded', () => App.init());
+    </script>
 </body>
 </html>
