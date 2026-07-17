@@ -1,9 +1,8 @@
-// INITIALIZE SUPABASE CLIENT
+// INITIALIZE SUPABASE CLIENT (Lebih kokoh untuk menghindari error variabel)
 const SUPABASE_URL = "https://kmynkqlkhmryptzpxidq.supabase.co";
 const SUPABASE_ANON_KEY = "sb_publishable_WnHWZXwVatUB8WTgaKI2fg_eWY-T6b3";
 
-const supabaseClient = window.supabase ? window.supabase : null;
-const supabase = supabaseClient ? supabaseClient.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
+const db = window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
 
 let products = [];
 let serverTransactions = [];
@@ -29,7 +28,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 });
 
-// ENGINE NOTIFIKASI KUSTOM ELEGAN (Menggantikan Alert Kaku)
+// ENGINE NOTIFIKASI KUSTOM ELEGAN
 function showCustomModal(title, message, type = 'success') {
     const modal = document.getElementById('custom-modal');
     const mTitle = document.getElementById('modal-title');
@@ -40,7 +39,6 @@ function showCustomModal(title, message, type = 'success') {
     mTitle.innerText = title;
     mMsg.innerText = message;
 
-    // Reset warna
     mIconContainer.className = "mx-auto w-12 h-12 rounded-full flex items-center justify-center text-xl mb-4";
     mIcon.className = "fa-solid";
 
@@ -95,21 +93,28 @@ function showToast(message, type = 'success') {
 
 // SYSTEM AUTHENTICATION ENGINE
 async function checkUserSession() {
-    if (!supabase) return;
+    const authGate = document.getElementById('auth-gate');
+    if (!db) return;
     try {
-        const { data: { session }, error } = await supabase.auth.getSession();
+        const { data: { session }, error } = await db.auth.getSession();
         if (error) throw error;
         
         if (session && session.user) {
             currentShopEmail = session.user.email;
-            document.getElementById('auth-gate').style.display = 'none';
+            
+            // Menyembunyikan form login dengan aman via Tailwind classes
+            authGate.classList.add('hidden');
+            authGate.classList.remove('flex');
+            
             document.getElementById('user-display').innerText = currentShopEmail;
             loadServerData();
         } else {
-            document.getElementById('auth-gate').style.display = 'flex';
+            authGate.classList.remove('hidden');
+            authGate.classList.add('flex');
         }
     } catch (e) {
-        document.getElementById('auth-gate').style.display = 'flex';
+        authGate.classList.remove('hidden');
+        authGate.classList.add('flex');
     }
 }
 
@@ -135,7 +140,7 @@ function toggleAuthMode() {
 
 async function handleAuth(e) {
     e.preventDefault();
-    if (!supabase) return showCustomModal("Sistem Error", "Koneksi ke Supabase terputus!", "error");
+    if (!db) return showCustomModal("Sistem Error", "Koneksi ke server terputus!", "error");
     
     const email = document.getElementById('auth-email').value.trim();
     const password = document.getElementById('auth-password').value;
@@ -146,7 +151,7 @@ async function handleAuth(e) {
     
     try {
         if (isSignUpMode) {
-            const { data, error } = await supabase.auth.signUp({ email, password });
+            const { data, error } = await db.auth.signUp({ email, password });
             if (error) throw error;
             
             if (data && data.session) {
@@ -158,7 +163,7 @@ async function handleAuth(e) {
                 toggleAuthMode();
             }
         } else {
-            const { error } = await supabase.auth.signInWithPassword({ email, password });
+            const { error } = await db.auth.signInWithPassword({ email, password });
             if (error) throw error;
             showToast("Berhasil masuk sistem!");
             checkUserSession();
@@ -172,8 +177,8 @@ async function handleAuth(e) {
 }
 
 async function handleLogout() {
-    if (supabase) {
-        await supabase.auth.signOut();
+    if (db) {
+        await db.auth.signOut();
         window.location.reload();
     }
 }
@@ -207,9 +212,9 @@ function toggleMobileCart() {
 
 // REAL SERVERSIDE CRUD & CALCULATION ENGINE
 async function loadServerData() {
-    if (!supabase) return;
+    if (!db) return;
     try {
-        let { data, error } = await supabase.from('products').select('*').order('name', { ascending: true });
+        let { data, error } = await db.from('products').select('*').order('name', { ascending: true });
         if (!error && data) products = data;
         
         renderCatalog();
@@ -221,7 +226,7 @@ async function loadServerData() {
 
 async function handleProductSubmit(e) {
     e.preventDefault();
-    if (!supabase) return;
+    if (!db) return;
 
     const barcode = document.getElementById('prod-barcode').value.trim();
     const name = document.getElementById('prod-name').value.trim();
@@ -230,7 +235,7 @@ async function handleProductSubmit(e) {
     const category = document.getElementById('prod-category').value.trim();
 
     try {
-        const { error } = await supabase.from('products').upsert([
+        const { error } = await db.from('products').upsert([
             { barcode, name, price, stock, category }
         ], { onConflict: 'barcode' });
 
@@ -340,16 +345,16 @@ async function checkout(method) {
     const invoiceNum = "INV-" + Date.now().toString().slice(-5);
     let totalAmount = cart.reduce((acc, i) => acc + (i.price * i.quantity), 0);
     
-    if(supabase) {
+    if(db) {
         try {
-            const { error: txError } = await supabase.from('transactions').insert([
+            const { error: txError } = await db.from('transactions').insert([
                 { invoice_number: invoiceNum, total_price: totalAmount, payment_method: method }
             ]);
             if(txError) throw txError;
 
             for(let item of cart) {
                 const updatedStock = item.stock - item.quantity;
-                await supabase.from('products').update({ stock: updatedStock }).eq('id', item.id);
+                await db.from('products').update({ stock: updatedStock }).eq('id', item.id);
             }
         } catch (err) {
             return showCustomModal("Gagal Transaksi", err.message, "error");
@@ -393,9 +398,9 @@ function printReceiptPDF(invoice, total, method, itemsArray) {
 }
 
 async function loadRecentTransactions() {
-    if (!supabase) return;
+    if (!db) return;
     try {
-        let { data: transactions, error } = await supabase.from('transactions').select('*').order('created_at', { ascending: false });
+        let { data: transactions, error } = await db.from('transactions').select('*').order('created_at', { ascending: false });
             
         if (!error && transactions) {
             serverTransactions = transactions;
