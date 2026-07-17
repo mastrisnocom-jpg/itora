@@ -2,7 +2,6 @@
 const SUPABASE_URL = "https://kmynkqlkhmryptzpxidq.supabase.co";
 const SUPABASE_ANON_KEY = "sb_publishable_WnHWZXwVatUB8WTgaKI2fg_eWY-T6b3";
 
-// Proteksi inisialisasi UMD SDK dari CDN paket stabil
 const supabaseClient = window.supabase ? window.supabase : null;
 const supabase = supabaseClient ? supabaseClient.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
 
@@ -21,7 +20,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 });
 
-// MEMPROSES TAMPILAN DAN HAK AKSES SISTEM AUTH
+// SYSTEM AUTHENTICATION ENGINE
 async function checkUserSession() {
     if (!supabase) return;
     try {
@@ -77,12 +76,11 @@ async function handleAuth(e) {
             const { data, error } = await supabase.auth.signUp({ email, password });
             if (error) throw error;
             
-            // Cek jika akun langsung ter-login otomatis (jika konfirmasi email off di Supabase)
             if (data && data.session) {
                 alert("Registrasi sukses! Toko Anda langsung diaktifkan.");
                 checkUserSession();
             } else {
-                alert("Registrasi berhasil diajukan! Silakan login menggunakan akun tersebut.");
+                alert("Registrasi berhasil! Silakan login menggunakan akun tersebut.");
                 isSignUpMode = false;
                 toggleAuthMode();
             }
@@ -158,9 +156,10 @@ async function handleProductSubmit(e) {
     const category = document.getElementById('prod-category').value.trim();
 
     try {
+        // Fix: Diubah ke 'barcode' agar serasi dengan bawaan struktur tabel standard Supabase
         const { error } = await supabase.from('products').upsert([
             { barcode, name, price, stock, category }
-        ], { onConflict: 'user_id, barcode' });
+        ], { onConflict: 'barcode' });
 
         if (error) throw error;
         
