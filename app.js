@@ -1,57 +1,78 @@
-// INISIALISASI SUPABASE SECARA AMAN
 const SUPABASE_URL = "https://kmynkqlkhmryptzpxidq.supabase.co";
 const SUPABASE_ANON_KEY = "sb_publishable_WnHWZXwVatUB8WTgaKI2fg_eWY-T6b3";
 const db = window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
 
-// STATE UTAMA
 let products = [];
 let serverTransactions = [];
 let cart = [];
 let isSignUpMode = false;
 let currentShopEmail = "";
 
-// STATE PENGATURAN SYSTEM
+// STATE SEKARANG DIAMBIL DARI SUPABASE CLOUD (Bukan LocalStorage)
 let appSettings = {
-    shopName: localStorage.getItem('pos_shopName') || "LitePOS Store",
-    receiptDateOverride: localStorage.getItem('pos_receiptDate') || "",
-    userRole: localStorage.getItem('pos_userRole') || "Super Admin",
-    darkMode: localStorage.getItem('pos_darkMode') === 'false' ? false : true
+    shopName: "LitePOS Store",
+    receiptDateOverride: "",
+    darkMode: true
 };
+let currentUserRole = "Kasir"; 
 
-// FITUR ANTI LAG (DEBOUNCE) UNTUK PENCARIAN
 let searchDebounceTimeout;
 
 document.addEventListener("DOMContentLoaded", () => {
-    applySettingsOnLoad();
     startLiveClock();
     checkUserSession();
 
-    // Event Listener dengan sistem Anti-Lag
     const searchInput = document.getElementById('barcode-search');
     if (searchInput) {
         searchInput.addEventListener('input', (e) => {
             clearTimeout(searchDebounceTimeout);
             searchDebounceTimeout = setTimeout(() => {
                 renderCatalog(e.target.value.toLowerCase());
-            }, 250); // Jeda 250ms agar browser tidak nge-lag saat user mengetik cepat
+            }, 250);
         });
     }
 
-    // Kalkulasi Keranjang Otomatis saat input Diskon/PPN berubah
     const disInput = document.getElementById('input-discount');
     const taxInput = document.getElementById('input-tax');
     if(disInput) disInput.addEventListener('input', () => calculateTotal());
     if(taxInput) taxInput.addEventListener('input', () => calculateTotal());
 });
 
-// PENGATURAN TEMA DAN ROLE
-function applySettingsOnLoad() {
+async function syncSettingsAndRole() {
+    if(!db) return;
+
+    try {
+        // 1. Ambil / Buat Role Berdasarkan Email User
+        const { data: profile } = await db.from('profiles').select('role').eq('email', currentShopEmail).single();
+        if (profile) {
+            currentUserRole = profile.role;
+        } else {
+            // Jika akun baru login pertama kali, jadikan Kasir otomatis
+            await db.from('profiles').insert([{ email: currentShopEmail, role: 'Kasir' }]);
+            currentUserRole = 'Kasir';
+        }
+
+        // 2. Ambil Global Settings Toko
+        const { data: settings } = await db.from('settings').select('*').eq('id', 1).single();
+        if (settings) {
+            appSettings.shopName = settings.shop_name;
+            appSettings.receiptDateOverride = settings.receipt_date;
+            appSettings.darkMode = settings.dark_mode;
+        }
+
+        applySettingsUI();
+    } catch (e) {
+        console.error("Gagal sinkronisasi data cloud:", e);
+    }
+}
+
+function applySettingsUI() {
     document.getElementById('set-shop-name').value = appSettings.shopName;
     document.getElementById('set-receipt-date').value = appSettings.receiptDateOverride;
-    document.getElementById('set-user-role').value = appSettings.userRole;
+    document.getElementById('set-user-role').value = currentUserRole;
     document.getElementById('set-dark-mode').checked = appSettings.darkMode;
     
-    document.getElementById('role-display').innerText = appSettings.userRole;
+    document.getElementById('role-display').innerText = currentUserRole;
 
     if (appSettings.darkMode) {
         document.documentElement.classList.add('dark');
@@ -59,30 +80,36 @@ function applySettingsOnLoad() {
         document.documentElement.classList.remove('dark');
     }
 
-    // Role Based Access Control
+    // Role Based Access Control Enforcement (RBAC)
     const restrictedElements = document.querySelectorAll('.role-restricted');
-    if (appSettings.userRole === "Kasir") {
+    if (currentUserRole === "Kasir") {
         restrictedElements.forEach(el => el.classList.add('hidden'));
-        switchTab('pos');
+        switchTab('pos'); 
     } else {
         restrictedElements.forEach(el => el.classList.remove('hidden'));
     }
 }
 
-function saveSettings() {
+async function saveSettings() {
     const sName = document.getElementById('set-shop-name').value.trim();
     const sDate = document.getElementById('set-receipt-date').value;
-    const sRole = document.getElementById('set-user-role').value;
     const sDark = document.getElementById('set-dark-mode').checked;
+    const sRole = document.getElementById('set-user-role').value;
 
-    localStorage.setItem('pos_shopName', sName || "LitePOS Store");
-    localStorage.setItem('pos_receiptDate', sDate);
-    localStorage.setItem('pos_userRole', sRole);
-    localStorage.setItem('pos_darkMode', sDark);
+    try {
+        // Update ke Supabase
+        await db.from('settings').update({ shop_name: sName || "LitePOS Store", receipt_date: sDate, dark_mode: sDark }).eq('id', 1);
+        await db.from('profiles').update({ role: sRole }).eq('email', currentShopEmail);
 
-    appSettings = { shopName: sName, receiptDateOverride: sDate, userRole: sRole, darkMode: sDark };
-    applySettingsOnLoad();
-    showToast("Pengaturan sistem berhasil disimpan dan diterapkan!");
+        // Update UI Lokal
+        appSettings = { shopName: sName, receiptDateOverride: sDate, darkMode: sDark };
+        currentUserRole = sRole;
+        
+        applySettingsUI();
+        showToast("Pengaturan & Role berhasil disimpan ke Cloud!");
+    } catch(err) {
+        showCustomModal("Error Simpan", "Gagal menyimpan ke Supabase", "error");
+    }
 }
 
 function startLiveClock() {
@@ -95,7 +122,6 @@ function startLiveClock() {
     }, 1000);
 }
 
-// SISTEM UI MODAL & TOAST
 function showCustomModal(title, message, type = 'success') {
     const modal = document.getElementById('custom-modal');
     document.getElementById('modal-title').innerText = title;
@@ -106,16 +132,10 @@ function showCustomModal(title, message, type = 'success') {
     mIconContainer.className = "mx-auto w-12 h-12 rounded-full flex items-center justify-center text-xl mb-4";
     mIcon.className = "fa-solid";
     
-    if (type === 'success') { 
-        mIconContainer.classList.add('bg-emerald-100', 'dark:bg-emerald-500/20', 'text-emerald-500'); 
-        mIcon.classList.add('fa-check'); 
-    } else { 
-        mIconContainer.classList.add('bg-rose-100', 'dark:bg-rose-500/20', 'text-rose-500'); 
-        mIcon.classList.add('fa-times'); 
-    }
+    if (type === 'success') { mIconContainer.classList.add('bg-emerald-100', 'dark:bg-emerald-500/20', 'text-emerald-500'); mIcon.classList.add('fa-check'); } 
+    else { mIconContainer.classList.add('bg-rose-100', 'dark:bg-rose-500/20', 'text-rose-500'); mIcon.classList.add('fa-times'); }
 
-    modal.classList.remove('hidden'); 
-    modal.classList.add('flex');
+    modal.classList.remove('hidden'); modal.classList.add('flex');
     setTimeout(() => { modal.firstElementChild.classList.remove('scale-95'); }, 10);
 }
 
@@ -129,13 +149,12 @@ function showToast(message) {
     const container = document.getElementById('toast-container');
     const toast = document.createElement('div');
     toast.className = "px-4 py-2.5 rounded-xl text-xs font-bold shadow-xl border bg-slate-900 border-slate-700 text-white dark:bg-emerald-900/90 dark:border-emerald-700 dark:text-emerald-300 flex items-center gap-2 transform translate-y-2 opacity-0 transition-all duration-300 z-50";
-    toast.innerHTML = `<i class="fa-solid fa-circle-info text-blue-400 dark:text-emerald-400"></i> ${message}`;
+    toast.innerHTML = `<i class="fa-solid fa-cloud-check text-blue-400 dark:text-emerald-400"></i> ${message}`;
     container.appendChild(toast);
     setTimeout(() => { toast.classList.remove('translate-y-2', 'opacity-0'); }, 10);
     setTimeout(() => { toast.classList.add('opacity-0', 'translate-x-2'); setTimeout(() => toast.remove(), 300); }, 3000);
 }
 
-// OTENTIKASI SISTEM
 async function checkUserSession() {
     const authGate = document.getElementById('auth-gate');
     if (!db) return;
@@ -144,6 +163,9 @@ async function checkUserSession() {
         if (session && session.user) {
             currentShopEmail = session.user.email;
             authGate.classList.add('hidden'); authGate.classList.remove('flex');
+            
+            // Sinkronisasi data cloud dulu sebelum loading transaksi
+            await syncSettingsAndRole();
             loadServerData();
         } else {
             authGate.classList.remove('hidden'); authGate.classList.add('flex');
@@ -190,7 +212,6 @@ function switchTab(tabId) {
     document.getElementById(`view-${tabId}`)?.classList.remove('hidden');
     document.getElementById(`btn-${tabId}`)?.classList.add('active-menu');
     
-    // Tutup mobile cart saat ganti tab
     const sidebar = document.getElementById('cart-sidebar');
     if (sidebar && window.innerWidth < 1024) sidebar.classList.add('translate-x-full');
 }
@@ -200,14 +221,13 @@ function toggleMobileCart() {
     if (sidebar) sidebar.classList.toggle('translate-x-full');
 }
 
-// LOGIKA DATABASE & KASIR TRANSAKSI
 async function loadServerData() {
     if(!db) return;
     const { data } = await db.from('products').select('*').order('name');
     if(data) products = data;
     renderCatalog();
     
-    if(appSettings.userRole !== "Kasir"){
+    if(currentUserRole !== "Kasir"){
         const tx = await db.from('transactions').select('*').order('created_at', { ascending: false });
         if(tx.data) {
             serverTransactions = tx.data;
@@ -226,7 +246,6 @@ async function loadServerData() {
     }
 }
 
-// RESTORASI TAMPILAN ELEGAN KOTAK BARANG
 function renderCatalog(filter = '') {
     const grid = document.getElementById('product-grid');
     if(!grid) return;
@@ -237,7 +256,6 @@ function renderCatalog(filter = '') {
         return;
     }
 
-    // Pembuatan DOM menggunakan Map + Join sangat efisien (Anti Lag Rendering)
     grid.innerHTML = filtered.map(p => {
         const isLow = p.stock <= 5;
         return `
@@ -277,7 +295,6 @@ function updateCartQty(productId, delta) {
     const item = cart.find(i => i.id === productId);
     if (!item) return;
     
-    // Cegah melebihi stok
     const prod = products.find(p => p.id === productId);
     if (delta > 0 && item.quantity >= prod.stock) return showToast("Maksimal stok tercapai!");
 
@@ -293,7 +310,6 @@ function clearCart() { cart = []; updateCartUI(); }
 function calculateTotal() {
     let subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
     
-    // Parsing input aman agar tidak error NaN
     let inputDis = document.getElementById('input-discount').value;
     let inputTax = document.getElementById('input-tax').value;
     let discount = parseFloat(inputDis === "" ? 0 : inputDis);
@@ -311,10 +327,8 @@ function calculateTotal() {
     return { subtotal, discount, taxAmount, finalTotal };
 }
 
-// RESTORASI TAMPILAN KERANJANG DENGAN TOMBOL PLUS MINUS
 function updateCartUI() {
     const container = document.getElementById('cart-items');
-    
     const totalCount = cart.reduce((sum, item) => sum + item.quantity, 0);
     if (document.getElementById('mobile-cart-count')) document.getElementById('mobile-cart-count').innerText = totalCount;
 
@@ -369,7 +383,6 @@ async function checkout(method) {
         try {
             await db.from('transactions').insert([{ invoice_number: invoiceNum, total_price: finalTotal, payment_method: method }]);
             
-            // Kurangi Stok di server
             for(let item of cart) {
                 const updatedStock = item.stock - item.quantity;
                 await db.from('products').update({ stock: updatedStock }).eq('id', item.id);
@@ -379,7 +392,6 @@ async function checkout(method) {
         }
     }
     
-    // CETAK STRUK
     document.getElementById('p-shop-name').innerText = appSettings.shopName;
     let dateStr = appSettings.receiptDateOverride ? new Date(appSettings.receiptDateOverride).toLocaleDateString('id-ID') : new Date().toLocaleString('id-ID');
     
@@ -398,9 +410,9 @@ async function checkout(method) {
     document.getElementById('p-tax').innerText = "+ Rp " + taxAmount.toLocaleString('id-ID');
     document.getElementById('p-total').innerText = "Rp " + finalTotal.toLocaleString('id-ID');
     document.getElementById('p-method').innerText = method;
-    document.getElementById('p-cashier').innerText = appSettings.userRole;
+    document.getElementById('p-cashier').innerText = currentUserRole;
     
-    showCustomModal("Transaksi Berhasil", `Invoice: ${invoiceNum}\nMetode: ${method}\nTotal: Rp ${finalTotal.toLocaleString('id-ID')}`, "success");
+    showCustomModal("Transaksi Berhasil", `Invoice: ${invoiceNum}\nTotal: Rp ${finalTotal.toLocaleString('id-ID')}`, "success");
     
     setTimeout(() => { window.print(); clearCart(); loadServerData(); }, 300);
 }
