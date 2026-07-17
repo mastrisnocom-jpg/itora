@@ -1,14 +1,16 @@
 // INITIALIZE SUPABASE CLIENT
 const SUPABASE_URL = "https://kmynkqlkhmryptzpxidq.supabase.co";
 const SUPABASE_ANON_KEY = "sb_publishable_WnHWZXwVatUB8WTgaKI2fg_eWY-T6b3";
-const supabase = (typeof supabase !== 'undefined') ? supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
+
+// Proteksi inisialisasi UMD SDK dari CDN paket stabil
+const supabaseClient = window.supabase ? window.supabase : null;
+const supabase = supabaseClient ? supabaseClient.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
 
 let products = [];
 let cart = [];
 let isSignUpMode = false;
 
 document.addEventListener("DOMContentLoaded", () => {
-    // Jalankan pengecekan sesi login user saat aplikasi dibuka
     checkUserSession();
 
     const searchInput = document.getElementById('barcode-search');
@@ -19,45 +21,81 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 });
 
-// SYSTEM AUTHENTICATION ENGINE (Login / Registrasi Multi-Tenant)
+// MEMPROSES TAMPILAN DAN HAK AKSES SISTEM AUTH
 async function checkUserSession() {
     if (!supabase) return;
-    const { data: { session } } = await supabase.auth.getSession();
-    if (session) {
-        document.getElementById('auth-gate').classList.add('hidden');
-        document.getElementById('user-display').innerText = session.user.email;
-        loadServerData();
-    } else {
-        document.getElementById('auth-gate').classList.remove('hidden');
+    try {
+        const { data: { session }, error } = await supabase.auth.getSession();
+        if (error) throw error;
+        
+        if (session && session.user) {
+            document.getElementById('auth-gate').style.display = 'none';
+            document.getElementById('user-display').innerText = session.user.email;
+            loadServerData();
+        } else {
+            document.getElementById('auth-gate').style.display = 'flex';
+        }
+    } catch (e) {
+        console.error("Session check error:", e);
+        document.getElementById('auth-gate').style.display = 'flex';
     }
 }
 
 function toggleAuthMode() {
     isSignUpMode = !isSignUpMode;
-    document.getElementById('btn-auth-submit').innerText = isSignUpMode ? "Daftar Toko Baru" : "Masuk Ke Sistem";
-    document.getElementById('btn-auth-toggle').innerText = isSignUpMode ? "Sudah punya akun? Login" : "Belum punya akun? Daftar Toko Baru";
+    const title = document.getElementById('auth-title');
+    const subtitle = document.getElementById('auth-subtitle');
+    const submitBtn = document.getElementById('btn-auth-submit');
+    const toggleBtn = document.getElementById('btn-auth-toggle');
+
+    if (isSignUpMode) {
+        title.innerText = "LitePOS Pro Registrasi";
+        subtitle.innerText = "Buat akun toko baru untuk usaha Anda";
+        submitBtn.innerText = "Daftar Toko Baru";
+        toggleBtn.innerText = "Sudah punya akun toko? Login disini";
+    } else {
+        title.innerText = "LitePOS Pro Login";
+        subtitle.innerText = "Masuk untuk mengelola kasir & toko Anda";
+        submitBtn.innerText = "Masuk Ke Sistem";
+        toggleBtn.innerText = "Belum punya akun? Daftar Toko Baru";
+    }
 }
 
 async function handleAuth(e) {
     e.preventDefault();
-    const email = document.getElementById('auth-email').value;
+    if (!supabase) return alert("Koneksi pustaka server Supabase terputus!");
+    
+    const email = document.getElementById('auth-email').value.trim();
     const password = document.getElementById('auth-password').value;
+    const submitBtn = document.getElementById('btn-auth-submit');
+    
+    submitBtn.disabled = true;
+    submitBtn.innerText = "Memproses...";
     
     try {
-        let result;
         if (isSignUpMode) {
-            result = await supabase.auth.signUp({ email, password });
-            if (result.error) throw result.error;
-            alert("Registrasi sukses! Silakan cek email masuk untuk verifikasi akun toko Anda.");
+            const { data, error } = await supabase.auth.signUp({ email, password });
+            if (error) throw error;
+            
+            // Cek jika akun langsung ter-login otomatis (jika konfirmasi email off di Supabase)
+            if (data && data.session) {
+                alert("Registrasi sukses! Toko Anda langsung diaktifkan.");
+                checkUserSession();
+            } else {
+                alert("Registrasi berhasil diajukan! Silakan login menggunakan akun tersebut.");
+                isSignUpMode = false;
+                toggleAuthMode();
+            }
         } else {
-            result = await supabase.auth.signInWithPassword({ email, password });
-            if (result.error) throw result.error;
-            document.getElementById('auth-gate').classList.add('hidden');
-            document.getElementById('user-display').innerText = email;
-            loadServerData();
+            const { error } = await supabase.auth.signInWithPassword({ email, password });
+            if (error) throw error;
+            checkUserSession();
         }
     } catch(err) {
-        alert("Otentikasi Gagal: " + err.message);
+        alert("Gagal Otentikasi: " + err.message);
+    } finally {
+        submitBtn.disabled = false;
+        submitBtn.innerText = isSignUpMode ? "Daftar Toko Baru" : "Masuk Ke Sistem";
     }
 }
 
@@ -68,7 +106,7 @@ async function handleLogout() {
     }
 }
 
-// ROUTING NAVIGASI INTERAKTIF
+// ROUTING SPA NAVIGASI INTERAKTIF
 function switchTab(tabId) {
     const tabs = ['dashboard', 'pos', 'products'];
     tabs.forEach(id => {
@@ -106,28 +144,27 @@ async function loadServerData() {
         renderInventory();
         calculateDashboardMetrics();
         loadRecentTransactions();
-    } catch(e) { console.log(e); }
+    } catch(e) { console.error("Load Server Data Error:", e); }
 }
 
 async function handleProductSubmit(e) {
     e.preventDefault();
     if (!supabase) return;
 
-    const barcode = document.getElementById('prod-barcode').value;
-    const name = document.getElementById('prod-name').value;
+    const barcode = document.getElementById('prod-barcode').value.trim();
+    const name = document.getElementById('prod-name').value.trim();
     const price = parseInt(document.getElementById('prod-price').value);
     const stock = parseInt(document.getElementById('prod-stock').value);
-    const category = document.getElementById('prod-category').value;
+    const category = document.getElementById('prod-category').value.trim();
 
     try {
-        // Menggunakan upsert: Otomatis tambah baru, atau update data jika Barcode sudah terdaftar
         const { error } = await supabase.from('products').upsert([
             { barcode, name, price, stock, category }
-        ], { onConflict: 'barcode' });
+        ], { onConflict: 'user_id, barcode' });
 
         if (error) throw error;
         
-        alert("Barang berhasil disimpan ke database!");
+        alert("Barang berhasil disimpan!");
         document.getElementById('product-form').reset();
         loadServerData();
     } catch(err) {
@@ -232,25 +269,23 @@ async function checkout(method) {
     
     if(supabase) {
         try {
-            // Jalankan transaksi penjualan ke server
             const { error: txError } = await supabase.from('transactions').insert([
                 { invoice_number: invoiceNum, total_price: totalAmount, payment_method: method }
             ]);
             if(txError) throw txError;
 
-            // Kurangi stok riil produk satu per satu di server Supabase
             for(let item of cart) {
                 const updatedStock = item.stock - item.quantity;
                 await supabase.from('products').update({ stock: updatedStock }).eq('id', item.id);
             }
         } catch (err) {
-            return alert("Gagal memproses Checkout ke server: " + err.message);
+            return alert("Gagal memproses Checkout: " + err.message);
         }
     }
     
     alert(`Transaksi Berhasil!\n${invoiceNum} - Total: Rp ${totalAmount.toLocaleString('id-ID')}`);
     clearCart();
-    loadServerData(); // Ambil kondisi stok & penjualan terupdate dari server
+    loadServerData();
 }
 
 async function loadRecentTransactions() {
@@ -279,7 +314,7 @@ async function loadRecentTransactions() {
             document.getElementById('dash-revenue').innerText = `Rp ${totalRevenue.toLocaleString('id-ID')}`;
             document.getElementById('dash-tx-count').innerText = `${transactions.length} Tx`;
         }
-    } catch(e) { console.log(e); }
+    } catch(e) { console.error("Recent Transactions error:", e); }
 }
 
 function calculateDashboardMetrics() {
