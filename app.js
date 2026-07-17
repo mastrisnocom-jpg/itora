@@ -18,6 +18,52 @@ let appSettings = {
 };
 let currentUserRole = "Kasir"; 
 
+
+// 1. Fungsi Tambah Kasir ke Database
+async function addStaff(e) {
+    e.preventDefault();
+    const email = document.getElementById('staff-email').value;
+    const role = document.getElementById('staff-role').value;
+    
+    try {
+        const { error } = await db.from('profiles').upsert([{ email, role }]);
+        if (error) throw error;
+        showToast("Kasir berhasil ditambahkan!");
+        document.getElementById('staff-form').reset();
+        loadStaffList();
+    } catch (err) {
+        showCustomModal("Gagal", err.message, "error");
+    }
+}
+
+// 2. Fungsi Ambil Data Kasir
+async function loadStaffList() {
+    const { data } = await db.from('profiles').select('*');
+    const list = document.getElementById('staff-list');
+    if (!list) return;
+    
+    list.innerHTML = data.map(s => `
+        <tr class="border-b dark:border-slate-700">
+            <td class="py-2">${s.email}</td>
+            <td class="py-2 font-bold">${s.role}</td>
+            <td class="py-2 text-right">
+                <button onclick="deleteStaff('${s.email}')" class="text-rose-500"><i class="fa-solid fa-trash"></i></button>
+            </td>
+        </tr>
+    `).join('');
+}
+
+// 3. Fungsi Hapus Kasir
+async function deleteStaff(email) {
+    if(!confirm("Hapus akses staff ini?")) return;
+    await db.from('profiles').delete().eq('email', email);
+    loadStaffList();
+    showToast("Staff dihapus");
+}
+
+// Panggil loadStaffList() di dalam fungsi loadServerData() agar muncul saat menu dibuka
+
+
 // FITUR ANTI LAG PENCARIAN
 let searchDebounceTimeout;
 
