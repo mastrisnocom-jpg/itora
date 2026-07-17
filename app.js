@@ -1,4 +1,4 @@
-// INITIALIZE SUPABASE CLIENT
+// INITIALIZE SUPABASE CLIENT (Silakan ganti URL dan KEY dengan akun Supabase Anda)
 const SUPABASE_URL = "https://YOUR_PROJECT_REF.supabase.co";
 const SUPABASE_ANON_KEY = "YOUR_ANON_PUBLIC_KEY";
 const supabase = (typeof supabase !== 'undefined') ? supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
@@ -11,23 +11,44 @@ document.addEventListener("DOMContentLoaded", () => {
     loadMockOrSupabaseData();
 });
 
+// FUNGSI NAVIGASI MENU UTAMA (Desktop & Mobile)
 function switchTab(tabId) {
-    ['dashboard', 'pos', 'products'].forEach(id => {
-        document.getElementById(`view-${id}`).classList.add('hidden');
-        document.getElementById(`btn-${id}`).classList.remove('active-menu');
+    const tabs = ['dashboard', 'pos', 'products'];
+    
+    tabs.forEach(id => {
+        const viewElement = document.getElementById(`view-${id}`);
+        const btnElement = document.getElementById(`btn-${id}`);
+        
+        if (viewElement) viewElement.classList.add('hidden');
+        if (btnElement) btnElement.classList.remove('active-menu');
     });
     
-    document.getElementById(`view-${tabId}`).classList.remove('hidden');
-    document.getElementById(`btn-${tabId}`).classList.add('active-menu');
+    const activeView = document.getElementById(`view-${tabId}`);
+    const activeBtn = document.getElementById(`btn-${tabId}`);
     
-    const titles = { 'dashboard': 'Dashboard Overview', 'pos': 'Mesin Kasir / POS', 'products': 'Inventori Stok' };
-    document.getElementById('page-title').innerText = titles[tabId];
+    if (activeView) activeView.classList.remove('hidden');
+    if (activeBtn) activeBtn.classList.add('active-menu');
     
-    // Close mobile drawer cart automatically if switching tabs
-    document.getElementById('cart-sidebar').classList.add('translate-x-full');
+    const titles = { 
+        'dashboard': 'Dashboard Overview', 
+        'pos': 'Mesin Kasir / POS', 
+        'products': 'Inventori Stok' 
+    };
+    document.getElementById('page-title').innerText = titles[tabId] || 'LitePOS';
+    
+    // Tutup drawer cart otomatis di mobile saat ganti halaman
+    const sidebar = document.getElementById('cart-sidebar');
+    if (sidebar) sidebar.classList.add('translate-x-full');
+    
+    if (tabId === 'pos') {
+        setTimeout(() => {
+            const searchInput = document.getElementById('barcode-search');
+            if (searchInput) searchInput.focus();
+        }, 50);
+    }
 }
 
-// Mobile Cart Panel Drawer Toggle
+// Buka/Tutup Keranjang di Mobile
 function toggleMobileCart() {
     const sidebar = document.getElementById('cart-sidebar');
     sidebar.classList.toggle('translate-x-full');
@@ -98,7 +119,6 @@ function updateCartQty(productId, delta) {
     updateCartUI();
 }
 
-// Syncing Cart items counters to UI & Mobile Badges
 function updateCartUI() {
     const container = document.getElementById('cart-items');
     const totalCount = cart.reduce((sum, item) => sum + item.quantity, 0);
@@ -165,7 +185,7 @@ async function checkout(method) {
     renderCatalog();
     renderInventory();
     calculateDashboardMetrics();
-    document.getElementById('cart-sidebar').classList.add('translate-x-full'); // Auto close drawer mobile
+    document.getElementById('cart-sidebar').classList.add('translate-x-full');
 }
 
 function calculateDashboardMetrics() {
