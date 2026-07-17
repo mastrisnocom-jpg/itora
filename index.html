@@ -3,10 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LitePOS Pro - Cloud Edition</title>
+    <title>LitePOS Pro - Cloud Enterprise</title>
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <script>tailwind.config = { darkMode: 'class' }</script>
+    <script>
+        tailwind.config = { darkMode: 'class' }
+    </script>
+    <!-- FontAwesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Pustaka UMD Supabase JS SDK -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.43.4/dist/umd/supabase.js"></script>
     <style>
         .active-menu { background-color: #1e293b; border-left: 4px solid #3b82f6; color: #3b82f6; font-weight: 600; }
@@ -14,6 +19,8 @@
         @media (max-width: 767px) {
             .active-menu, .light .active-menu { background-color: transparent; border-left: none; border-top: 4px solid #3b82f6; border-radius: 0; }
         }
+        
+        /* DESAIN CETAK STRUK PREMIUM */
         @media print {
             body * { display: none !important; }
             #receipt-print-area, #receipt-print-area * { display: block !important; }
@@ -24,11 +31,14 @@
 </head>
 <body class="bg-slate-50 dark:bg-[#0f172a] text-slate-800 dark:text-slate-100 font-sans h-screen flex flex-col md:flex-row overflow-hidden select-none transition-colors duration-200">
 
+    <!-- TOAST & MODAL NOTIFIKASI -->
     <div id="toast-container" class="fixed top-4 right-4 z-[200] space-y-2 pointer-events-none"></div>
 
     <div id="custom-modal" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm items-center justify-center z-[150] p-4 transition-all duration-300">
         <div class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 p-6 rounded-2xl w-full max-w-sm shadow-2xl text-center transform scale-95 transition-transform">
-            <div id="modal-icon-container" class="mx-auto w-12 h-12 rounded-full flex items-center justify-center text-xl mb-4"><i id="modal-icon" class="fa-solid"></i></div>
+            <div id="modal-icon-container" class="mx-auto w-12 h-12 rounded-full flex items-center justify-center text-xl mb-4">
+                <i id="modal-icon" class="fa-solid"></i>
+            </div>
             <h3 id="modal-title" class="text-lg font-bold text-slate-900 dark:text-white mb-2">Judul</h3>
             <p id="modal-message" class="text-sm text-slate-500 dark:text-slate-400 mb-6">Pesan notifikasi...</p>
             <button onclick="closeCustomModal()" class="w-full py-2 bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 rounded-xl text-sm font-semibold text-slate-800 dark:text-white cursor-pointer transition-colors">Oke, Mengerti</button>
@@ -45,13 +55,16 @@
         <div class="print-sep"></div>
         <div id="p-items" class="space-y-1 text-[11px]"></div>
         <div class="print-sep"></div>
+        
         <div class="flex justify-between text-[11px] mt-1"><span>Subtotal:</span><span id="p-subtotal">Rp 0</span></div>
         <div class="flex justify-between text-[11px]"><span>Diskon:</span><span id="p-discount">Rp 0</span></div>
         <div class="flex justify-between text-[11px]"><span>PPN:</span><span id="p-tax">Rp 0</span></div>
+        
         <div class="print-sep"></div>
         <div class="flex justify-between font-bold text-xs"><span>TOTAL BAYAR:</span><span id="p-total">Rp 0</span></div>
         <div class="flex justify-between text-[11px] mt-0.5"><span>Metode Bayar:</span><span id="p-method">CASH</span></div>
         <div class="flex justify-between text-[11px] mt-0.5"><span>Kasir:</span><span id="p-cashier">Admin</span></div>
+        
         <div class="print-sep"></div>
         <div class="text-center text-[10px] mt-3 tracking-wide"><p>Terima Kasih Atas Kunjungan Anda</p></div>
     </div>
@@ -221,23 +234,33 @@
                         </select>
                         <p class="text-[10px] text-rose-500 mt-1">*Perubahan role akan langsung mengubah hak akses email Anda di database.</p>
                     </div>
-<!-- TAMBAHKAN BLOK INI DI DALAM view-settings -->
-<div class="mt-8 pt-6 border-t border-slate-200 dark:border-slate-700">
-    <h4 class="text-sm font-bold text-slate-900 dark:text-white mb-4"><i class="fa-solid fa-users mr-2"></i>Daftar Kasir & Hak Akses</h4>
-    <form id="staff-form" onsubmit="addStaff(event)" class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4">
-        <input type="email" id="staff-email" placeholder="Email Kasir" required class="px-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-lg text-sm dark:text-white">
-        <select id="staff-role" class="px-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-lg text-sm dark:text-white">
-            <option value="Admin">Admin</option>
-            <option value="Kasir">Kasir</option>
-        </select>
-        <button type="submit" class="bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-sm font-bold transition-colors">Tambah Staff</button>
-    </form>
-    <div class="overflow-x-auto">
-        <table class="w-full text-xs text-slate-600 dark:text-slate-400">
-            <tbody id="staff-list"></tbody>
-        </table>
-    </div>
-</div>
+
+                    <!-- BLOK PENGATURAN KASIR & STAFF -->
+                    <div class="mt-8 pt-6 border-t border-slate-200 dark:border-slate-700">
+                        <h4 class="text-sm font-bold text-slate-900 dark:text-white mb-4"><i class="fa-solid fa-users mr-2"></i>Daftar Kasir & Hak Akses</h4>
+                        <form id="staff-form" onsubmit="addStaff(event)" class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4">
+                            <input type="email" id="staff-email" placeholder="Email Kasir" required class="px-3 py-2 bg-slate-100 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-lg text-sm text-slate-900 dark:text-white focus:outline-none">
+                            <select id="staff-role" class="px-3 py-2 bg-slate-100 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-lg text-sm text-slate-900 dark:text-white focus:outline-none">
+                                <option value="Admin">Admin</option>
+                                <option value="Kasir">Kasir</option>
+                            </select>
+                            <button type="submit" class="bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-sm font-bold transition-colors py-2 cursor-pointer shadow-md">Tambah Staff</button>
+                        </form>
+                        <div class="overflow-x-auto bg-slate-50 dark:bg-slate-900/40 rounded-xl p-3 border border-slate-200 dark:border-slate-700">
+                            <table class="w-full text-xs text-slate-600 dark:text-slate-400">
+                                <thead class="border-b border-slate-200 dark:border-slate-700 text-left text-slate-500">
+                                    <tr>
+                                        <th class="pb-2">Email Akun</th>
+                                        <th class="pb-2">Hak Akses Role</th>
+                                        <th class="pb-2 text-center">Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="staff-list" class="divide-y divide-slate-200 dark:divide-slate-700/50">
+                                    <!-- Diisi oleh JS -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
 
                     <div class="flex items-center justify-between pt-4 border-t border-slate-200 dark:border-slate-700 mt-4">
                         <span class="text-sm font-bold text-slate-900 dark:text-white"><i class="fa-solid fa-moon mr-2"></i>Mode Gelap (Global Default)</span>
@@ -247,7 +270,7 @@
                         </label>
                     </div>
 
-                    <button onclick="saveSettings()" class="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg shadow-md mt-6 text-sm transition-colors"><i class="fa-solid fa-cloud-arrow-up mr-2"></i> Simpan Ke Supabase</button>
+                    <button onclick="saveSettings()" class="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg shadow-md mt-6 text-sm transition-colors cursor-pointer"><i class="fa-solid fa-cloud-arrow-up mr-2"></i> Simpan Ke Supabase</button>
                 </div>
             </section>
         </div>
