@@ -3,18 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LitePOS - Fix Mobile & Desktop</title>
-    <!-- Tailwind CSS -->
+    <title>LitePOS Pro - Multi Tenant SaaS</title>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
-    <!-- FontAwesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Supabase JS SDK CDN -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        /* Gaya menu aktif untuk Desktop */
         .active-menu { background-color: #374151; border-left: 4px solid #3b82f6; color: #ffffff; }
-        
-        /* Gaya menu aktif untuk Mobile Navigasi Bawah */
         @media (max-width: 767px) {
             .active-menu { background-color: transparent; border-left: none; border-top: 4px solid #3b82f6; color: #3b82f6; border-radius: 0; }
         }
@@ -22,16 +16,39 @@
 </head>
 <body class="bg-gray-900 text-gray-100 font-sans h-screen flex flex-col md:flex-row overflow-hidden select-none">
 
-    <!-- MAIN APP AREA (Diatur agar scrollable mandiri dan tidak tertimpa menu bawah mobile) -->
+    <!-- SCREEN 1: AUTHENTICATION GATE (Tampilan pertama jika belum login) -->
+    <div id="auth-gate" class="fixed inset-0 bg-gray-900 flex items-center justify-center z-[100] p-4">
+        <div class="bg-gray-800 p-6 rounded-2xl border border-gray-700 w-full max-w-sm shadow-2xl">
+            <div class="text-center mb-6">
+                <i class="fa-solid fa-cash-register text-blue-500 text-4xl mb-2"></i>
+                <h2 class="text-xl font-bold text-white">LitePOS Pro Login</h2>
+                <p class="text-xs text-gray-400 mt-1">Masuk untuk mengelola kasir & toko Anda</p>
+            </div>
+            <form id="auth-form" class="space-y-4" onsubmit="handleAuth(event)">
+                <div>
+                    <label class="block text-xs text-gray-400 font-medium mb-1">Email Toko</label>
+                    <input type="email" id="auth-email" required class="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-xl text-sm focus:outline-none focus:border-blue-500 text-white">
+                </div>
+                <div>
+                    <label class="block text-xs text-gray-400 font-medium mb-1">Password</label>
+                    <input type="password" id="auth-password" required class="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-xl text-sm focus:outline-none focus:border-blue-500 text-white">
+                </div>
+                <button type="submit" id="btn-auth-submit" class="w-full py-2.5 bg-blue-600 hover:bg-blue-500 rounded-xl text-sm font-bold transition-all cursor-pointer">Masuk Ke Sistem</button>
+            </form>
+            <div class="text-center mt-4">
+                <button onclick="toggleAuthMode()" id="btn-auth-toggle" class="text-xs text-blue-400 hover:underline cursor-pointer">Belum punya akun? Daftar Toko Baru</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MAIN APP AREA -->
     <main class="flex-1 flex flex-col overflow-hidden pb-16 md:pb-0 order-first md:order-last">
-        
         <!-- HEADER -->
         <header class="h-14 md:h-16 bg-gray-800 border-b border-gray-700 flex items-center justify-between px-4 md:px-6 shrink-0">
             <h1 id="page-title" class="text-base md:text-lg font-semibold text-white">Dashboard Overview</h1>
             <div class="flex items-center gap-2 md:gap-4">
-                <span class="text-xs md:text-sm text-gray-400"><i class="fa-regular fa-calendar mr-1"></i> <span id="current-date">--/--</span></span>
-                <div class="h-6 w-px bg-gray-700 hidden sm:block"></div>
-                <span class="text-xs md:text-sm font-medium bg-gray-700 px-2.5 py-1 rounded-full"><i class="fa-solid fa-user-tie text-blue-400 mr-1"></i> Admin</span>
+                <span class="text-xs md:text-sm text-gray-400 font-mono" id="user-display">Memuat...</span>
+                <button onclick="handleLogout()" class="text-xs bg-rose-900/40 text-rose-400 border border-rose-700/50 px-2.5 py-1 rounded-full hover:bg-rose-900 transition-all cursor-pointer"><i class="fa-solid fa-sign-out-alt"></i></button>
             </div>
         </header>
 
@@ -40,29 +57,28 @@
             
             <!-- VIEW 1: DASHBOARD -->
             <section id="view-dashboard" class="space-y-6 block">
-                <!-- Top Matrix Cards -->
                 <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
                     <div class="bg-gray-800 p-4 md:p-5 rounded-xl border border-gray-700 shadow-lg">
-                        <p class="text-[10px] md:text-xs text-gray-400 uppercase font-semibold">Pendapatan</p>
-                        <h3 id="dash-revenue" class="text-base md:text-2xl font-bold mt-1 text-white">Rp 0</h3>
+                        <p class="text-[10px] md:text-xs text-gray-400 uppercase font-semibold">Total Omset</p>
+                        <h3 id="dash-revenue" class="text-base md:text-2xl font-bold mt-1 text-emerald-400">Rp 0</h3>
                     </div>
                     <div class="bg-gray-800 p-4 md:p-5 rounded-xl border border-gray-700 shadow-lg">
-                        <p class="text-[10px] md:text-xs text-gray-400 uppercase font-semibold">Transaksi</p>
+                        <p class="text-[10px] md:text-xs text-gray-400 uppercase font-semibold">Nota Sukses</p>
                         <h3 id="dash-tx-count" class="text-base md:text-2xl font-bold mt-1 text-white">0 Tx</h3>
                     </div>
                     <div class="bg-gray-800 p-4 md:p-5 rounded-xl border border-gray-700 shadow-lg">
-                        <p class="text-[10px] md:text-xs text-gray-400 uppercase font-semibold">Stok Tipis</p>
+                        <p class="text-[10px] md:text-xs text-gray-400 uppercase font-semibold">Stok Kritis</p>
                         <h3 id="dash-low-stock" class="text-base md:text-2xl font-bold mt-1 text-amber-500">0 Item</h3>
                     </div>
                     <div class="bg-gray-800 p-4 md:p-5 rounded-xl border border-gray-700 shadow-lg">
-                        <p class="text-[10px] md:text-xs text-gray-400 uppercase font-semibold">Metode</p>
-                        <h3 id="dash-payment-method" class="text-base md:text-2xl font-bold mt-1 text-purple-400">QRIS</h3>
+                        <p class="text-[10px] md:text-xs text-gray-400 uppercase font-semibold">Sistem Multi-Tenant</p>
+                        <h3 class="text-xs md:text-sm font-bold mt-1 text-blue-400"><i class="fa-solid fa-shield-halved mr-1"></i> RLS Secured</h3>
                     </div>
                 </div>
 
                 <!-- Recent Logs Table -->
                 <div class="bg-gray-800 rounded-xl border border-gray-700 p-4 md:p-5">
-                    <h3 class="text-sm md:text-md font-semibold text-white mb-3"><i class="fa-solid fa-clock-rotate-left text-gray-400 mr-2"></i> Log Penjualan Hari Ini</h3>
+                    <h3 class="text-sm md:text-md font-semibold text-white mb-3"><i class="fa-solid fa-clock-rotate-left text-gray-400 mr-2"></i> Log Penjualan Realtime</h3>
                     <div class="overflow-x-auto">
                         <table class="w-full text-left text-xs md:text-sm text-gray-400 min-w-[400px]">
                             <thead class="bg-gray-750 text-gray-300 uppercase text-[10px] md:text-xs border-b border-gray-700">
@@ -74,7 +90,7 @@
                                 </tr>
                             </thead>
                             <tbody id="realtime-tx-table">
-                                <tr><td colspan="4" class="py-4 text-center text-gray-500">Belum ada transaksi masuk.</td></tr>
+                                <tr><td colspan="4" class="py-4 text-center text-gray-500">Memuat transaksi server...</td></tr>
                             </tbody>
                         </table>
                     </div>
@@ -83,19 +99,17 @@
 
             <!-- VIEW 2: MESIN KASIR -->
             <section id="view-pos" class="hidden h-full flex flex-col lg:flex-row gap-4 overflow-hidden relative">
-                <!-- Left Column: Catalog & Search -->
                 <div class="flex-1 flex flex-col gap-3 overflow-hidden">
                     <div class="relative w-full">
                         <i class="fa-solid fa-magnifying-glass absolute left-4 top-3 text-gray-500 text-sm"></i>
                         <input type="text" id="barcode-search" placeholder="Cari nama barang..." class="w-full pl-10 pr-4 py-2 bg-gray-800 border border-gray-700 rounded-xl focus:outline-none focus:border-blue-500 text-white text-sm">
                     </div>
-                    <!-- Catalog Grid -->
                     <div id="product-grid" class="flex-1 grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-3 overflow-y-auto pr-1 pb-16 lg:pb-0">
                         <!-- Rendered by JS -->
                     </div>
                 </div>
 
-                <!-- Right Column: Cart Panel (Fixed untuk drawer seluler modern) -->
+                <!-- Right Column: Cart Panel -->
                 <div id="cart-sidebar" class="fixed lg:relative inset-y-0 right-0 w-full sm:w-96 lg:w-80 xl:w-96 bg-gray-800 border-l lg:border border-gray-700 lg:rounded-2xl flex flex-col justify-between transform translate-x-full lg:translate-x-0 transition-transform duration-300 ease-in-out z-50 lg:z-0 shadow-2xl lg:shadow-none">
                     <div class="p-4 border-b border-gray-700 bg-gray-750 flex justify-between items-center shrink-0">
                         <h3 class="font-bold text-white text-sm flex items-center gap-2"><i class="fa-solid fa-basket-shopping text-emerald-400"></i> Keranjang</h3>
@@ -105,7 +119,7 @@
                         </div>
                     </div>
                     <div id="cart-items" class="flex-1 overflow-y-auto p-4 space-y-2.5">
-                        <!-- Items Loaded dynamically -->
+                        <!-- Items -->
                     </div>
                     <div class="p-4 border-t border-gray-700 bg-gray-750 space-y-3 shrink-0">
                         <div class="flex justify-between text-white font-bold text-base pt-1">
@@ -118,24 +132,31 @@
                     </div>
                 </div>
 
-                <!-- Floating Cart Button for Mobile -->
                 <button onclick="toggleMobileCart()" id="mobile-cart-badge" class="lg:hidden fixed bottom-20 right-4 bg-emerald-600 text-white px-4 py-3 rounded-full shadow-2xl flex items-center justify-center gap-2 z-40 active:scale-95 cursor-pointer">
                     <i class="fa-solid fa-basket-shopping text-base"></i>
-                    <span class="text-xs font-semibold">Keranjang</span>
                     <span id="mobile-cart-count" class="bg-white text-emerald-700 text-[10px] font-bold rounded-full w-5 h-5 flex items-center justify-center">0</span>
                 </button>
             </section>
 
-            <!-- VIEW 3: PRODUCTS & INVENTORY -->
-            <section id="view-products" class="hidden space-y-4">
-                <div class="flex justify-between items-center">
-                    <h2 class="text-sm md:text-lg font-semibold text-white">Stok Barang</h2>
+            <!-- VIEW 3: PRODUCTS & INVENTORY (DENGAN FORM INPUT TAMBAH BARANG LANGSUNG DI WEB) -->
+            <section id="view-products" class="hidden space-y-6">
+                <div class="bg-gray-800 p-4 md:p-5 rounded-xl border border-gray-700 shadow-md">
+                    <h3 class="text-sm font-bold text-white mb-3"><i class="fa-solid fa-plus-circle text-blue-400 mr-2"></i>Tambah / Update Master Barang</h3>
+                    <form id="product-form" onsubmit="handleProductSubmit(event)" class="grid grid-cols-1 sm:grid-cols-4 gap-3 text-xs">
+                        <input type="text" id="prod-barcode" placeholder="Barcode / Kode" required class="px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white">
+                        <input type="text" id="prod-name" placeholder="Nama Barang" required class="px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white">
+                        <input type="number" id="prod-price" placeholder="Harga Jual (Rp)" required class="px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white">
+                        <input type="number" id="prod-stock" placeholder="Jumlah Stok" required class="px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white">
+                        <input type="text" id="prod-category" placeholder="Kategori (Mkn/Mnm)" required class="px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white sm:col-span-2">
+                        <button type="submit" class="sm:col-span-2 py-2 bg-blue-600 hover:bg-blue-500 font-bold text-white rounded-lg cursor-pointer transition-all"><i class="fa-solid fa-save mr-1"></i> Simpan Ke Database</button>
+                    </form>
                 </div>
                 <div class="bg-gray-800 rounded-xl border border-gray-700 overflow-hidden">
                     <div class="overflow-x-auto">
                         <table class="w-full text-left text-xs md:text-sm text-gray-400 min-w-[500px]">
                             <thead class="bg-gray-750 text-gray-300 uppercase text-[10px] md:text-xs border-b border-gray-700">
                                 <tr>
+                                    <th class="py-3 px-4">Barcode</th>
                                     <th class="py-3 px-4">Nama Barang</th>
                                     <th class="py-3 px-4">Kategori</th>
                                     <th class="py-3 px-4 text-right">Harga</th>
@@ -143,7 +164,7 @@
                                 </tr>
                             </thead>
                             <tbody id="inventory-table-body">
-                                <!-- Loaded dynamically -->
+                                <tr><td colspan="5" class="py-4 text-center text-gray-500">Memuat data barang server...</td></tr>
                             </tbody>
                         </table>
                     </div>
@@ -153,33 +174,27 @@
         </div>
     </main>
 
-    <!-- SIDEBAR / BOTTOM NAVIGATION (Fixed: Posisi absolut bawah pada mobile, posisi kiri pada desktop) -->
+    <!-- SIDEBAR / BOTTOM NAVIGATION -->
     <aside class="fixed bottom-0 inset-x-0 h-16 bg-gray-800 border-t border-gray-700 flex flex-row justify-around items-center z-50 md:relative md:bottom-auto md:inset-x-auto md:h-screen md:w-64 md:border-t-0 md:border-r md:flex-col md:justify-between shrink-0">
         <div class="flex flex-row md:flex-col w-full h-full md:h-auto">
-            <!-- Logo (Hidden di mobile) -->
             <div class="hidden md:flex p-5 items-center gap-3 border-b border-gray-700 w-full">
                 <i class="fa-solid fa-cash-register text-blue-500 text-2xl"></i>
-                <span class="text-xl font-bold tracking-wider text-white">LitePOS</span>
+                <span class="text-xl font-bold tracking-wider text-white">LitePOS Pro</span>
             </div>
-            <!-- Menu Items -->
             <nav class="flex flex-row md:flex-col justify-around md:justify-start w-full h-full md:h-auto md:mt-6 md:px-3 md:space-y-1">
                 <button onclick="switchTab('dashboard')" id="btn-dashboard" class="active-menu flex-1 md:flex-none flex flex-col md:flex-row items-center justify-center md:justify-start gap-1 md:gap-3 py-1 md:px-4 md:py-3 text-gray-400 hover:text-white rounded-none md:rounded-lg transition-all text-center md:text-left text-[10px] md:text-sm cursor-pointer h-full md:h-auto">
-                    <i class="fa-solid fa-chart-pie text-base md:text-base"></i> <span class="block">Dashboard</span>
+                    <i class="fa-solid fa-chart-pie text-base"></i> <span class="block">Dashboard</span>
                 </button>
                 <button onclick="switchTab('pos')" id="btn-pos" class="flex-1 md:flex-none flex flex-col md:flex-row items-center justify-center md:justify-start gap-1 md:gap-3 py-1 md:px-4 md:py-3 text-gray-400 hover:text-white rounded-none md:rounded-lg transition-all text-center md:text-left text-[10px] md:text-sm cursor-pointer h-full md:h-auto">
-                    <i class="fa-solid fa-cart-shopping text-base md:text-base"></i> <span class="block">Kasir</span>
+                    <i class="fa-solid fa-cart-shopping text-base"></i> <span class="block">Kasir</span>
                 </button>
                 <button onclick="switchTab('products')" id="btn-products" class="flex-1 md:flex-none flex flex-col md:flex-row items-center justify-center md:justify-start gap-1 md:gap-3 py-1 md:px-4 md:py-3 text-gray-400 hover:text-white rounded-none md:rounded-lg transition-all text-center md:text-left text-[10px] md:text-sm cursor-pointer h-full md:h-auto">
-                    <i class="fa-solid fa-boxes-stacked text-base md:text-base"></i> <span class="block">Stok</span>
+                    <i class="fa-solid fa-boxes-stacked text-base"></i> <span class="block">Stok</span>
                 </button>
             </nav>
         </div>
-        <!-- Connection Status (Hidden di mobile) -->
-        <div class="hidden md:block p-4 border-t border-gray-700 bg-gray-850 w-full">
-            <div class="flex items-center gap-3">
-                <div class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
-                <span class="text-xs text-gray-400">Database Ready</span>
-            </div>
+        <div class="hidden md:block p-4 border-t border-gray-700 bg-gray-850 w-full text-center text-[10px] text-gray-500 font-mono">
+            SaaS Version 1.0.0
         </div>
     </aside>
 
