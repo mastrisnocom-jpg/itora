@@ -4,9 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>LitePOS Pro - Multi Tenant SaaS</title>
+    <!-- Tailwind CSS -->
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <!-- FontAwesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <!-- Pustaka UMD Supabase JS SDK (Lebih Stabil untuk Vanilla JS) -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.43.4/dist/umd/supabase.js"></script>
     <style>
         .active-menu { background-color: #374151; border-left: 4px solid #3b82f6; color: #ffffff; }
         @media (max-width: 767px) {
@@ -16,13 +19,13 @@
 </head>
 <body class="bg-gray-900 text-gray-100 font-sans h-screen flex flex-col md:flex-row overflow-hidden select-none">
 
-    <!-- SCREEN 1: AUTHENTICATION GATE (Tampilan pertama jika belum login) -->
+    <!-- SCREEN 1: AUTHENTICATION GATE -->
     <div id="auth-gate" class="fixed inset-0 bg-gray-900 flex items-center justify-center z-[100] p-4">
         <div class="bg-gray-800 p-6 rounded-2xl border border-gray-700 w-full max-w-sm shadow-2xl">
             <div class="text-center mb-6">
                 <i class="fa-solid fa-cash-register text-blue-500 text-4xl mb-2"></i>
-                <h2 class="text-xl font-bold text-white">LitePOS Pro Login</h2>
-                <p class="text-xs text-gray-400 mt-1">Masuk untuk mengelola kasir & toko Anda</p>
+                <h2 id="auth-title" class="text-xl font-bold text-white">LitePOS Pro Login</h2>
+                <p id="auth-subtitle" class="text-xs text-gray-400 mt-1">Masuk untuk mengelola kasir & toko Anda</p>
             </div>
             <form id="auth-form" class="space-y-4" onsubmit="handleAuth(event)">
                 <div>
@@ -30,13 +33,13 @@
                     <input type="email" id="auth-email" required class="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-xl text-sm focus:outline-none focus:border-blue-500 text-white">
                 </div>
                 <div>
-                    <label class="block text-xs text-gray-400 font-medium mb-1">Password</label>
-                    <input type="password" id="auth-password" required class="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-xl text-sm focus:outline-none focus:border-blue-500 text-white">
+                    <label class="block text-xs text-gray-400 font-medium mb-1">Password (Minimal 6 Karakter)</label>
+                    <input type="password" id="auth-password" required minlength="6" class="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-xl text-sm focus:outline-none focus:border-blue-500 text-white">
                 </div>
                 <button type="submit" id="btn-auth-submit" class="w-full py-2.5 bg-blue-600 hover:bg-blue-500 rounded-xl text-sm font-bold transition-all cursor-pointer">Masuk Ke Sistem</button>
             </form>
             <div class="text-center mt-4">
-                <button onclick="toggleAuthMode()" id="btn-auth-toggle" class="text-xs text-blue-400 hover:underline cursor-pointer">Belum punya akun? Daftar Toko Baru</button>
+                <button type="button" onclick="toggleAuthMode()" id="btn-auth-toggle" class="text-xs text-blue-400 hover:underline cursor-pointer bg-transparent border-none p-1">Belum punya akun? Daftar Toko Baru</button>
             </div>
         </div>
     </div>
@@ -138,7 +141,7 @@
                 </button>
             </section>
 
-            <!-- VIEW 3: PRODUCTS & INVENTORY (DENGAN FORM INPUT TAMBAH BARANG LANGSUNG DI WEB) -->
+            <!-- VIEW 3: PRODUCTS & INVENTORY -->
             <section id="view-products" class="hidden space-y-6">
                 <div class="bg-gray-800 p-4 md:p-5 rounded-xl border border-gray-700 shadow-md">
                     <h3 class="text-sm font-bold text-white mb-3"><i class="fa-solid fa-plus-circle text-blue-400 mr-2"></i>Tambah / Update Master Barang</h3>
