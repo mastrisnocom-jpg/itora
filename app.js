@@ -1,4 +1,4 @@
-// INITIALIZE SUPABASE CLIENT (Silakan ganti URL dan KEY dengan akun Supabase Anda)
+// INITIALIZE SUPABASE CLIENT
 const SUPABASE_URL = "https://kmynkqlkhmryptzpxidq.supabase.co";
 const SUPABASE_ANON_KEY = "sb_publishable_WnHWZXwVatUB8WTgaKI2fg_eWY-T6b3";
 const supabase = (typeof supabase !== 'undefined') ? supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
@@ -55,22 +55,29 @@ function toggleMobileCart() {
 }
 
 async function loadMockOrSupabaseData() {
+    // Data cadangan jika tabel Supabase Anda masih kosong
     products = [
-        { id: 1, barcode: '8991001', name: 'Kopi Susu Instan', price: 15000, stock: 42, category: 'Minuman' },
-        { id: 2, barcode: '8991002', name: 'Keripik Singkong BBQ', price: 12000, stock: 3, category: 'Makanan' },
-        { id: 3, barcode: '8991003', name: 'Air Mineral 600ml', price: 5000, stock: 98, category: 'Minuman' },
-        { id: 4, barcode: '8991004', name: 'Roti Bakar Cokelat', price: 18000, stock: 12, category: 'Makanan' }
+        { id: 1, barcode: '8991001', name: 'Kopi Susu Instan (Mock)', price: 15000, stock: 42, category: 'Minuman' },
+        { id: 2, barcode: '8991002', name: 'Keripik Singkong BBQ (Mock)', price: 12000, stock: 3, category: 'Makanan' },
+        { id: 3, barcode: '8991003', name: 'Air Mineral 600ml (Mock)', price: 5000, stock: 98, category: 'Minuman' },
+        { id: 4, barcode: '8991004', name: 'Roti Bakar Cokelat (Mock)', price: 18000, stock: 12, category: 'Makanan' }
     ];
 
-    if (supabase && SUPABASE_URL !== "https://YOUR_PROJECT_REF.supabase.co") {
+    // Kondisi diperbaiki agar langsung membaca database Supabase Anda yang asli
+    if (supabase) {
         try {
             let { data, error } = await supabase.from('products').select('*');
-            if (!error && data.length > 0) products = data;
-        } catch(e) { console.log("Using Mock Data."); }
+            if (!error && data && data.length > 0) {
+                products = data;
+            }
+        } catch(e) { 
+            console.log("Gagal memuat data Supabase, menggunakan data cadangan.", e); 
+        }
     }
     renderCatalog();
     renderInventory();
     calculateDashboardMetrics();
+    loadRecentTransactions(); // Memuat riwayat penjualan saat web dibuka
 }
 
 function renderCatalog() {
@@ -160,32 +167,66 @@ async function checkout(method) {
     const invoiceNum = "INV-" + Date.now().toString().slice(-5);
     let totalAmount = cart.reduce((acc, i) => acc + (i.price * i.quantity), 0);
     
-    if(supabase && SUPABASE_URL !== "https://YOUR_PROJECT_REF.supabase.co") {
-        await supabase.from('transactions').insert([{ invoice_number: invoiceNum, total_price: totalAmount, payment_method: method }]);
+    // Kirim data langsung ke Supabase tanpa terhalang text 'YOUR_PROJECT_REF'
+    if(supabase) {
+        try {
+            const { error } = await supabase.from('transactions').insert([
+                { invoice_number: invoiceNum, total_price: totalAmount, payment_method: method }
+            ]);
+            if(error) throw error;
+        } catch (err) {
+            return alert("Gagal menyimpan transaksi ke Supabase: " + err.message);
+        }
     }
     
     alert(`Sukses! ${invoiceNum} - Total: Rp ${totalAmount.toLocaleString('id-ID')}`);
     
-    cart.forEach(item => { let p = products.find(prod => prod.id === item.id); if(p) p.stock -= item.quantity; });
+    // Potong stok lokal
+    cart.forEach(item => { 
+        let p = products.find(prod => prod.id === item.id); 
+        if(p) p.stock -= item.quantity; 
+    });
     
-    const table = document.getElementById('realtime-tx-table');
-    if (table.innerHTML.includes('Belum ada transaksi')) table.innerHTML = '';
-    const timeStr = new Date().toLocaleTimeString('id-ID', {hour: '2-digit', minute:'2-digit'});
-    
-    table.innerHTML = `
-        <tr class="border-b border-gray-700 text-xs">
-            <td class="py-2 px-3 text-blue-400 font-mono">${invoiceNum}</td>
-            <td class="py-2 px-3">${timeStr}</td>
-            <td class="py-2 px-3"><span class="px-1.5 py-0.5 rounded text-[9px] bg-gray-700 text-white">${method}</span></td>
-            <td class="py-2 px-3 text-right text-white font-bold">Rp ${totalAmount.toLocaleString('id-ID')}</td>
-        </tr>
-    ` + table.innerHTML;
-
     clearCart();
     renderCatalog();
     renderInventory();
-    calculateDashboardMetrics();
+    loadRecentTransactions(); // Refresh otomatis grafik/tabel di dashboard
     document.getElementById('cart-sidebar').classList.add('translate-x-full');
+}
+
+async function loadRecentTransactions() {
+    if (!supabase) return;
+    try {
+        let { data: transactions, error } = await supabase
+            .from('transactions')
+            .select('*')
+            .order('created_at', { ascending: false })
+            .limit(10);
+            
+        if (!error && transactions) {
+            const table = document.getElementById('realtime-tx-table');
+            table.innerHTML = '';
+            
+            let totalRevenue = 0;
+            
+            transactions.forEach(t => {
+                totalRevenue += t.total_price;
+                const timeStr = new Date(t.created_at).toLocaleTimeString('id-ID', {hour: '2-digit', minute:'2-digit'});
+                table.innerHTML += `
+                    <tr class="border-b border-gray-700 text-xs">
+                        <td class="py-2 px-3 text-blue-400 font-mono">${t.invoice_number}</td>
+                        <td class="py-2 px-3">${timeStr}</td>
+                        <td class="py-2 px-3"><span class="px-1.5 py-0.5 rounded text-[9px] bg-gray-700 text-white">${t.payment_method}</span></td>
+                        <td class="py-2 px-3 text-right text-white font-bold">Rp ${t.total_price.toLocaleString('id-ID')}</td>
+                    </tr>
+                `;
+            });
+            
+            // Perbarui visual metrik dashboard
+            document.getElementById('dash-revenue').innerText = `Rp ${totalRevenue.toLocaleString('id-ID')}`;
+            document.getElementById('dash-tx-count').innerText = `${transactions.length} Tx`;
+        }
+    } catch(e) { console.log("Gagal memuat log transaksi."); }
 }
 
 function calculateDashboardMetrics() {
