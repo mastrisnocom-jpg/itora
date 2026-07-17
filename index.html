@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LitePOS - Mobile & Desktop</title>
+    <title>LitePOS - Fix Mobile & Desktop</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <!-- FontAwesome Icons -->
@@ -11,49 +11,22 @@
     <!-- Supabase JS SDK CDN -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        .active-menu { background-color: #374151; border-left: 4px solid #3b82f6; }
+        /* Gaya menu aktif untuk Desktop */
+        .active-menu { background-color: #374151; border-left: 4px solid #3b82f6; color: #ffffff; }
+        
+        /* Gaya menu aktif untuk Mobile Navigasi Bawah */
         @media (max-width: 767px) {
-            .active-menu { border-left: none; border-bottom: 4px solid #3b82f6; }
+            .active-menu { background-color: transparent; border-left: none; border-top: 4px solid #3b82f6; color: #3b82f6; border-radius: 0; }
         }
     </style>
 </head>
-<body class="bg-gray-900 text-gray-100 font-sans h-screen flex flex-col md:flex-row overflow-hidden">
+<body class="bg-gray-900 text-gray-100 font-sans h-screen flex flex-col md:flex-row overflow-hidden select-none">
 
-    <!-- SIDEBAR NAVIGATION -->
-    <aside class="w-full md:w-64 bg-gray-800 flex flex-row md:flex-col justify-between border-t md:border-t-0 md:border-r border-gray-700 order-last md:order-first z-50">
-        <div class="flex flex-row md:flex-col w-full">
-            <!-- Logo (Hidden on mobile) -->
-            <div class="hidden md:flex p-5 items-center gap-3 border-b border-gray-700 w-full">
-                <i class="fa-solid fa-cash-register text-blue-500 text-2xl"></i>
-                <span class="text-xl font-bold tracking-wider text-white">LitePOS</span>
-            </div>
-            <!-- Menu Items -->
-            <nav class="flex flex-row md:flex-col justify-around md:justify-start w-full mt-0 md:mt-6 px-2 md:px-3 py-2 md:py-0 space-x-2 md:space-x-0 md:space-y-1">
-                <button onclick="switchTab('dashboard')" id="btn-dashboard" class="active-menu flex-1 md:flex-none flex flex-col md:flex-row items-center gap-1 md:gap-3 px-2 md:px-4 py-2 md:py-3 text-gray-300 hover:bg-gray-700 rounded-lg transition-all text-center md:text-left text-xs md:text-sm cursor-pointer">
-                    <i class="fa-solid fa-chart-pie text-lg md:text-base text-blue-400"></i> <span class="block md:inline">Dashboard</span>
-                </button>
-                <button onclick="switchTab('pos')" id="btn-pos" class="flex-1 md:flex-none flex flex-col md:flex-row items-center gap-1 md:gap-3 px-2 md:px-4 py-2 md:py-3 text-gray-300 hover:bg-gray-700 rounded-lg transition-all text-center md:text-left text-xs md:text-sm cursor-pointer">
-                    <i class="fa-solid fa-cart-shopping text-lg md:text-base text-emerald-400"></i> <span class="block md:inline">Kasir</span>
-                </button>
-                <button onclick="switchTab('products')" id="btn-products" class="flex-1 md:flex-none flex flex-col md:flex-row items-center gap-1 md:gap-3 px-2 md:px-4 py-2 md:py-3 text-gray-300 hover:bg-gray-700 rounded-lg transition-all text-center md:text-left text-xs md:text-sm cursor-pointer">
-                    <i class="fa-solid fa-boxes-stacked text-lg md:text-base text-amber-400"></i> <span class="block md:inline">Stok</span>
-                </button>
-            </nav>
-        </div>
-        <!-- Connection Status (Hidden on mobile) -->
-        <div class="hidden md:block p-4 border-t border-gray-700 bg-gray-850">
-            <div class="flex items-center gap-3">
-                <div class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
-                <span class="text-xs text-gray-400">Database Ready</span>
-            </div>
-        </div>
-    </aside>
-
-    <!-- MAIN APP AREA -->
-    <main class="flex-1 flex flex-col overflow-hidden">
+    <!-- MAIN APP AREA (Diatur agar scrollable mandiri dan tidak tertimpa menu bawah mobile) -->
+    <main class="flex-1 flex flex-col overflow-hidden pb-16 md:pb-0 order-first md:order-last">
         
         <!-- HEADER -->
-        <header class="h-14 md:h-16 bg-gray-800 border-b border-gray-700 flex items-center justify-between px-4 md:px-6">
+        <header class="h-14 md:h-16 bg-gray-800 border-b border-gray-700 flex items-center justify-between px-4 md:px-6 shrink-0">
             <h1 id="page-title" class="text-base md:text-lg font-semibold text-white">Dashboard Overview</h1>
             <div class="flex items-center gap-2 md:gap-4">
                 <span class="text-xs md:text-sm text-gray-400"><i class="fa-regular fa-calendar mr-1"></i> <span id="current-date">--/--</span></span>
@@ -63,10 +36,10 @@
         </header>
 
         <!-- DYNAMIC CONTENT CONTAINERS -->
-        <div class="flex-1 overflow-y-auto p-4 md:p-6 bg-gray-900 pb-24 md:pb-6">
+        <div class="flex-1 overflow-y-auto p-4 md:p-6 bg-gray-900">
             
             <!-- VIEW 1: DASHBOARD -->
-            <section id="view-dashboard" class="space-y-6">
+            <section id="view-dashboard" class="space-y-6 block">
                 <!-- Top Matrix Cards -->
                 <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
                     <div class="bg-gray-800 p-4 md:p-5 rounded-xl border border-gray-700 shadow-lg">
@@ -114,41 +87,42 @@
                 <div class="flex-1 flex flex-col gap-3 overflow-hidden">
                     <div class="relative w-full">
                         <i class="fa-solid fa-magnifying-glass absolute left-4 top-3 text-gray-500 text-sm"></i>
-                        <input type="text" id="barcode-search" placeholder="Cari nama barang atau scan..." class="w-full pl-10 pr-4 py-2 bg-gray-800 border border-gray-700 rounded-xl focus:outline-none focus:border-blue-500 text-white placeholder-gray-500 text-sm">
+                        <input type="text" id="barcode-search" placeholder="Cari nama barang..." class="w-full pl-10 pr-4 py-2 bg-gray-800 border border-gray-700 rounded-xl focus:outline-none focus:border-blue-500 text-white text-sm">
                     </div>
                     <!-- Catalog Grid -->
-                    <div id="product-grid" class="flex-1 grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-3 overflow-y-auto pr-1">
+                    <div id="product-grid" class="flex-1 grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-3 overflow-y-auto pr-1 pb-16 lg:pb-0">
                         <!-- Rendered by JS -->
                     </div>
                 </div>
 
-                <!-- Right Column: Cart Panel -->
+                <!-- Right Column: Cart Panel (Fixed untuk drawer seluler modern) -->
                 <div id="cart-sidebar" class="fixed lg:relative inset-y-0 right-0 w-full sm:w-96 lg:w-80 xl:w-96 bg-gray-800 border-l lg:border border-gray-700 lg:rounded-2xl flex flex-col justify-between transform translate-x-full lg:translate-x-0 transition-transform duration-300 ease-in-out z-50 lg:z-0 shadow-2xl lg:shadow-none">
-                    <div class="p-4 border-b border-gray-700 bg-gray-750 flex justify-between items-center">
+                    <div class="p-4 border-b border-gray-700 bg-gray-750 flex justify-between items-center shrink-0">
                         <h3 class="font-bold text-white text-sm flex items-center gap-2"><i class="fa-solid fa-basket-shopping text-emerald-400"></i> Keranjang</h3>
-                        <div class="flex items-center gap-3">
-                            <button onclick="clearCart()" class="text-xs text-rose-400 hover:text-rose-300 cursor-pointer"><i class="fa-solid fa-trash-can"></i></button>
-                            <button onclick="toggleMobileCart()" class="lg:hidden text-gray-400 text-lg cursor-pointer"><i class="fa-solid fa-xmark"></i></button>
+                        <div class="flex items-center gap-4">
+                            <button onclick="clearCart()" class="text-xs text-rose-400 hover:text-rose-300 cursor-pointer p-1"><i class="fa-solid fa-trash-can"></i></button>
+                            <button onclick="toggleMobileCart()" class="lg:hidden text-gray-400 text-xl cursor-pointer p-1"><i class="fa-solid fa-xmark"></i></button>
                         </div>
                     </div>
                     <div id="cart-items" class="flex-1 overflow-y-auto p-4 space-y-2.5">
                         <!-- Items Loaded dynamically -->
                     </div>
-                    <div class="p-4 border-t border-gray-700 bg-gray-750 space-y-3">
+                    <div class="p-4 border-t border-gray-700 bg-gray-750 space-y-3 shrink-0">
                         <div class="flex justify-between text-white font-bold text-base pt-1">
                             <span>Total</span><span id="cart-total" class="text-emerald-400">Rp 0</span>
                         </div>
                         <div class="grid grid-cols-2 gap-2">
-                            <button onclick="checkout('CASH')" class="py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl font-bold text-xs active:scale-95 transition-all cursor-pointer"><i class="fa-solid fa-money-bill-wave mr-1"></i> Tunai</button>
-                            <button onclick="checkout('QRIS')" class="py-2.5 bg-blue-600 hover:bg-blue-500 text-white rounded-xl font-bold text-xs active:scale-95 transition-all cursor-pointer"><i class="fa-solid fa-qrcode mr-1"></i> QRIS</button>
+                            <button onclick="checkout('CASH')" class="py-3 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl font-bold text-xs active:scale-95 transition-all cursor-pointer"><i class="fa-solid fa-money-bill-wave mr-1"></i> Tunai</button>
+                            <button onclick="checkout('QRIS')" class="py-3 bg-blue-600 hover:bg-blue-500 text-white rounded-xl font-bold text-xs active:scale-95 transition-all cursor-pointer"><i class="fa-solid fa-qrcode mr-1"></i> QRIS</button>
                         </div>
                     </div>
                 </div>
 
                 <!-- Floating Cart Button for Mobile -->
-                <button onclick="toggleMobileCart()" id="mobile-cart-badge" class="lg:hidden fixed bottom-20 right-4 bg-emerald-600 text-white p-4 rounded-full shadow-2xl flex items-center justify-center gap-2 z-40 active:scale-95 cursor-pointer">
-                    <i class="fa-solid fa-basket-shopping text-xl"></i>
-                    <span id="mobile-cart-count" class="bg-white text-emerald-700 text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">0</span>
+                <button onclick="toggleMobileCart()" id="mobile-cart-badge" class="lg:hidden fixed bottom-20 right-4 bg-emerald-600 text-white px-4 py-3 rounded-full shadow-2xl flex items-center justify-center gap-2 z-40 active:scale-95 cursor-pointer">
+                    <i class="fa-solid fa-basket-shopping text-base"></i>
+                    <span class="text-xs font-semibold">Keranjang</span>
+                    <span id="mobile-cart-count" class="bg-white text-emerald-700 text-[10px] font-bold rounded-full w-5 h-5 flex items-center justify-center">0</span>
                 </button>
             </section>
 
@@ -178,6 +152,36 @@
 
         </div>
     </main>
+
+    <!-- SIDEBAR / BOTTOM NAVIGATION (Fixed: Posisi absolut bawah pada mobile, posisi kiri pada desktop) -->
+    <aside class="fixed bottom-0 inset-x-0 h-16 bg-gray-800 border-t border-gray-700 flex flex-row justify-around items-center z-50 md:relative md:bottom-auto md:inset-x-auto md:h-screen md:w-64 md:border-t-0 md:border-r md:flex-col md:justify-between shrink-0">
+        <div class="flex flex-row md:flex-col w-full h-full md:h-auto">
+            <!-- Logo (Hidden di mobile) -->
+            <div class="hidden md:flex p-5 items-center gap-3 border-b border-gray-700 w-full">
+                <i class="fa-solid fa-cash-register text-blue-500 text-2xl"></i>
+                <span class="text-xl font-bold tracking-wider text-white">LitePOS</span>
+            </div>
+            <!-- Menu Items -->
+            <nav class="flex flex-row md:flex-col justify-around md:justify-start w-full h-full md:h-auto md:mt-6 md:px-3 md:space-y-1">
+                <button onclick="switchTab('dashboard')" id="btn-dashboard" class="active-menu flex-1 md:flex-none flex flex-col md:flex-row items-center justify-center md:justify-start gap-1 md:gap-3 py-1 md:px-4 md:py-3 text-gray-400 hover:text-white rounded-none md:rounded-lg transition-all text-center md:text-left text-[10px] md:text-sm cursor-pointer h-full md:h-auto">
+                    <i class="fa-solid fa-chart-pie text-base md:text-base"></i> <span class="block">Dashboard</span>
+                </button>
+                <button onclick="switchTab('pos')" id="btn-pos" class="flex-1 md:flex-none flex flex-col md:flex-row items-center justify-center md:justify-start gap-1 md:gap-3 py-1 md:px-4 md:py-3 text-gray-400 hover:text-white rounded-none md:rounded-lg transition-all text-center md:text-left text-[10px] md:text-sm cursor-pointer h-full md:h-auto">
+                    <i class="fa-solid fa-cart-shopping text-base md:text-base"></i> <span class="block">Kasir</span>
+                </button>
+                <button onclick="switchTab('products')" id="btn-products" class="flex-1 md:flex-none flex flex-col md:flex-row items-center justify-center md:justify-start gap-1 md:gap-3 py-1 md:px-4 md:py-3 text-gray-400 hover:text-white rounded-none md:rounded-lg transition-all text-center md:text-left text-[10px] md:text-sm cursor-pointer h-full md:h-auto">
+                    <i class="fa-solid fa-boxes-stacked text-base md:text-base"></i> <span class="block">Stok</span>
+                </button>
+            </nav>
+        </div>
+        <!-- Connection Status (Hidden di mobile) -->
+        <div class="hidden md:block p-4 border-t border-gray-700 bg-gray-850 w-full">
+            <div class="flex items-center gap-3">
+                <div class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
+                <span class="text-xs text-gray-400">Database Ready</span>
+            </div>
+        </div>
+    </aside>
 
     <script src="app.js"></script>
 </body>
