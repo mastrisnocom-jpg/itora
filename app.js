@@ -1,16 +1,16 @@
-// INISIALISASI SUPABASE
+// INISIALISASI SUPABASE VIA CLOUD SERVER
 const SUPABASE_URL = "https://kmynkqlkhmryptzpxidq.supabase.co";
 const SUPABASE_ANON_KEY = "sb_publishable_WnHWZXwVatUB8WTgaKI2fg_eWY-T6b3";
 const db = window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
 
-// STATE UTAMA
+// STATE MANAJEMEN APLIKASI
 let products = [];
 let serverTransactions = [];
 let cart = [];
 let isSignUpMode = false;
 let currentShopEmail = "";
 
-// STATE PENGATURAN SYSTEM (CLOUD)
+// STATE DEFAULT PENGATURAN SYSTEM CLOUD
 let appSettings = {
     shopName: "LitePOS Store",
     receiptDateOverride: "",
@@ -18,60 +18,14 @@ let appSettings = {
 };
 let currentUserRole = "Kasir"; 
 
-
-// 1. Fungsi Tambah Kasir ke Database
-async function addStaff(e) {
-    e.preventDefault();
-    const email = document.getElementById('staff-email').value;
-    const role = document.getElementById('staff-role').value;
-    
-    try {
-        const { error } = await db.from('profiles').upsert([{ email, role }]);
-        if (error) throw error;
-        showToast("Kasir berhasil ditambahkan!");
-        document.getElementById('staff-form').reset();
-        loadStaffList();
-    } catch (err) {
-        showCustomModal("Gagal", err.message, "error");
-    }
-}
-
-// 2. Fungsi Ambil Data Kasir
-async function loadStaffList() {
-    const { data } = await db.from('profiles').select('*');
-    const list = document.getElementById('staff-list');
-    if (!list) return;
-    
-    list.innerHTML = data.map(s => `
-        <tr class="border-b dark:border-slate-700">
-            <td class="py-2">${s.email}</td>
-            <td class="py-2 font-bold">${s.role}</td>
-            <td class="py-2 text-right">
-                <button onclick="deleteStaff('${s.email}')" class="text-rose-500"><i class="fa-solid fa-trash"></i></button>
-            </td>
-        </tr>
-    `).join('');
-}
-
-// 3. Fungsi Hapus Kasir
-async function deleteStaff(email) {
-    if(!confirm("Hapus akses staff ini?")) return;
-    await db.from('profiles').delete().eq('email', email);
-    loadStaffList();
-    showToast("Staff dihapus");
-}
-
-// Panggil loadStaffList() di dalam fungsi loadServerData() agar muncul saat menu dibuka
-
-
-// FITUR ANTI LAG PENCARIAN
+// DEBOUNCE TIMEOUT UNTUK ANTI-LAG RENDERING
 let searchDebounceTimeout;
 
 document.addEventListener("DOMContentLoaded", () => {
     startLiveClock();
     checkUserSession();
 
-    // Event Listener dengan sistem Anti-Lag
+    // Optimasi live search anti lag
     const searchInput = document.getElementById('barcode-search');
     if (searchInput) {
         searchInput.addEventListener('input', (e) => {
@@ -88,19 +42,21 @@ document.addEventListener("DOMContentLoaded", () => {
     if(taxInput) taxInput.addEventListener('input', () => calculateTotal());
 });
 
+// SINKRONISASI DATA SERVER DENGAN TINGKAT KEAMANAN TINGGI
 async function syncSettingsAndRole() {
     if(!db) return;
     try {
-        // Ambil profil / role berdasarkan email
+        // 1. Dapatkan atau Buat Profile Role Pengguna
         const { data: profile } = await db.from('profiles').select('role').eq('email', currentShopEmail).single();
         if (profile) {
             currentUserRole = profile.role;
         } else {
+            // Jika email baru daftar pertama kali, otomatis Kasir
             await db.from('profiles').insert([{ email: currentShopEmail, role: 'Kasir' }]);
             currentUserRole = 'Kasir';
         }
 
-        // Ambil Global Settings Toko
+        // 2. Tarik Pengaturan Global Cloud Toko
         const { data: settings } = await db.from('settings').select('*').eq('id', 1).single();
         if (settings) {
             appSettings.shopName = settings.shop_name;
@@ -109,11 +65,64 @@ async function syncSettingsAndRole() {
         }
 
         applySettingsUI();
+        loadStaffList(); // Render daftar kasir khusus hak akses manager/owner
     } catch (e) {
-        console.error("Gagal sinkronisasi data cloud:", e);
+        console.error("Sinkronisasi gagal:", e);
     }
 }
 
+// MANAGEMENT INTEGRASI STAFF KASIR BARU
+async function addStaff(e) {
+    e.preventDefault();
+    if(!db) return;
+    const email = document.getElementById('staff-email').value.trim().toLowerCase();
+    const role = document.getElementById('staff-role').value;
+    
+    try {
+        const { error } = await db.from('profiles').upsert([{ email, role }], { onConflict: 'email' });
+        if (error) throw error;
+        showToast(`Staff ${email} ditambahkan sebagai ${role}!`);
+        document.getElementById('staff-form').reset();
+        loadStaffList();
+    } catch (err) {
+        showCustomModal("Gagal Menambah", err.message, "error");
+    }
+}
+
+async function loadStaffList() {
+    if(!db || (currentUserRole === "Kasir" && currentShopEmail !== "mastrisnocom@gmail.com")) return;
+    try {
+        const { data } = await db.from('profiles').select('*').order('email');
+        const listContainer = document.getElementById('staff-list');
+        if (!listContainer) return;
+        
+        listContainer.innerHTML = data.map(s => `
+            <tr class="border-b border-slate-200 dark:border-slate-700/50 hover:bg-slate-100 dark:hover:bg-slate-800/30 transition-colors text-xs">
+                <td class="py-2.5 font-mono font-medium">${s.email}</td>
+                <td class="py-2.5"><span class="px-2 py-0.5 rounded text-[10px] ${s.role === 'Super Admin' ? 'bg-purple-100 text-rose-600 dark:bg-purple-950/40 dark:text-purple-400' : 'bg-blue-100 text-blue-600 dark:bg-slate-800 dark:text-blue-400'} font-bold">${s.role}</span></td>
+                <td class="py-2.5 text-center">
+                    ${s.email === 'mastrisnocom@gmail.com' ? 
+                        `<span class="text-slate-400 text-[10px]">Owner</span>` : 
+                        `<button onclick="deleteStaff('${s.email}')" class="text-rose-500 hover:text-rose-600 cursor-pointer p-1"><i class="fa-solid fa-trash-can"></i></button>`
+                    }
+                </td>
+            </tr>
+        `).join('');
+    } catch (e) { console.error(e); }
+}
+
+async function deleteStaff(email) {
+    if(!db) return;
+    if(email === currentShopEmail) return showCustomModal("Aksi Ditolak", "Anda tidak bisa menghapus akun Anda sendiri!", "error");
+    
+    if(confirm(`Cabut total hak akses akun: ${email}?`)) {
+        await db.from('profiles').delete().eq('email', email);
+        showToast("Hak akses staff berhasil dihapus!");
+        loadStaffList();
+    }
+}
+
+// LOGIKA ANTI LOCKOUT & INTEGRASI VISUAL INTERAKTIF
 function applySettingsUI() {
     document.getElementById('set-shop-name').value = appSettings.shopName;
     document.getElementById('set-receipt-date').value = appSettings.receiptDateOverride;
@@ -128,14 +137,15 @@ function applySettingsUI() {
         document.documentElement.classList.remove('dark');
     }
 
-    // SISTEM KEAMANAN & ANTI LOCKOUT
+    // REGULASI PEMBATASAN AKSES MENU (RBAC) DENGAN ANTI-LOCKOUT UNTUK OWNER
     const restrictedElements = document.querySelectorAll('.role-restricted');
     
-    // Khusus mastrisnocom@gmail.com kebal terhadap penguncian menu
+    // Syarat kunci: Jika status Kasir DAN email bukan mastrisnocom@gmail.com
     if (currentUserRole === "Kasir" && currentShopEmail !== "mastrisnocom@gmail.com") {
         restrictedElements.forEach(el => el.classList.add('hidden'));
         switchTab('pos'); 
     } else {
+        // Pemilik mastrisnocom@gmail.com atau Admin akan selalu melihat semua menu penuh
         restrictedElements.forEach(el => el.classList.remove('hidden'));
     }
 }
@@ -154,9 +164,9 @@ async function saveSettings() {
         currentUserRole = sRole;
         
         applySettingsUI();
-        showToast("Pengaturan & Role berhasil disimpan ke Cloud!");
+        showToast("Konfigurasi sukses disinkronkan ke Cloud database!");
     } catch(err) {
-        showCustomModal("Error Simpan", "Gagal menyimpan ke Supabase", "error");
+        showCustomModal("Error Simpan", "Gagal menyimpan perubahan ke Supabase Cloud", "error");
     }
 }
 
@@ -198,20 +208,19 @@ function showToast(message) {
     const container = document.getElementById('toast-container');
     const toast = document.createElement('div');
     toast.className = "px-4 py-2.5 rounded-xl text-xs font-bold shadow-xl border bg-slate-900 border-slate-700 text-white dark:bg-emerald-900/90 dark:border-emerald-700 dark:text-emerald-300 flex items-center gap-2 transform translate-y-2 opacity-0 transition-all duration-300 z-50";
-    toast.innerHTML = `<i class="fa-solid fa-cloud-check text-blue-400 dark:text-emerald-400"></i> ${message}`;
+    toast.innerHTML = `<i class="fa-solid fa-cloud-check text-emerald-500"></i> ${message}`;
     container.appendChild(toast);
     setTimeout(() => { toast.classList.remove('translate-y-2', 'opacity-0'); }, 10);
     setTimeout(() => { toast.classList.add('opacity-0', 'translate-x-2'); setTimeout(() => toast.remove(), 300); }, 3000);
 }
 
-// OTENTIKASI SISTEM
 async function checkUserSession() {
     const authGate = document.getElementById('auth-gate');
     if (!db) return;
     try {
         const { data: { session }, error } = await db.auth.getSession();
         if (session && session.user) {
-            currentShopEmail = session.user.email;
+            currentShopEmail = session.user.email.toLowerCase();
             authGate.classList.add('hidden'); authGate.classList.remove('flex');
             
             await syncSettingsAndRole();
@@ -232,7 +241,7 @@ function toggleAuthMode() {
 async function handleAuth(e) {
     e.preventDefault();
     if(!db) return showCustomModal("Error", "Koneksi database terputus!", "error");
-    const email = document.getElementById('auth-email').value;
+    const email = document.getElementById('auth-email').value.trim().toLowerCase();
     const password = document.getElementById('auth-password').value;
     const btn = document.getElementById('btn-auth-submit');
     
@@ -270,7 +279,7 @@ function toggleMobileCart() {
     if (sidebar) sidebar.classList.toggle('translate-x-full');
 }
 
-// LOGIKA DATABASE & TRANSAKSI
+// MANAJEMEN CORE KASIR & PRODUK
 async function loadServerData() {
     if(!db) return;
     const { data } = await db.from('products').select('*').order('name');
@@ -296,7 +305,6 @@ async function loadServerData() {
     }
 }
 
-// RENDERING KATALOG
 function renderCatalog(filter = '') {
     const grid = document.getElementById('product-grid');
     if(!grid) return;
@@ -327,7 +335,6 @@ function renderCatalog(filter = '') {
     }).join('');
 }
 
-// LOGIKA KERANJANG
 function addToCart(id) {
     const prod = products.find(p => p.id === id);
     if (!prod || prod.stock <= 0) return showToast("Stok barang habis!");
@@ -355,28 +362,6 @@ function updateCartQty(productId, delta) {
         cart = cart.filter(i => i.id !== productId);
     }
     updateCartUI();
-}
-
-function clearCart() { cart = []; updateCartUI(); }
-
-function calculateTotal() {
-    let subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-    
-    let inputDis = document.getElementById('input-discount').value;
-    let inputTax = document.getElementById('input-tax').value;
-    let discount = parseFloat(inputDis === "" ? 0 : inputDis);
-    let taxRate = parseFloat(inputTax === "" ? 0 : inputTax);
-    
-    let afterDiscount = subtotal - discount;
-    if(afterDiscount < 0) afterDiscount = 0;
-    
-    let taxAmount = afterDiscount * (taxRate / 100);
-    let finalTotal = afterDiscount + taxAmount;
-    
-    document.getElementById('cart-subtotal').innerText = `Rp ${subtotal.toLocaleString('id-ID')}`;
-    document.getElementById('cart-final-total').innerText = `Rp ${finalTotal.toLocaleString('id-ID')}`;
-    
-    return { subtotal, discount, taxAmount, finalTotal };
 }
 
 function updateCartUI() {
@@ -407,6 +392,26 @@ function updateCartUI() {
     calculateTotal();
 }
 
+function calculateTotal() {
+    let subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+    
+    let inputDis = document.getElementById('input-discount').value;
+    let inputTax = document.getElementById('input-tax').value;
+    let discount = parseFloat(inputDis === "" ? 0 : inputDis);
+    let taxRate = parseFloat(inputTax === "" ? 0 : inputTax);
+    
+    let afterDiscount = subtotal - discount;
+    if(afterDiscount < 0) afterDiscount = 0;
+    
+    let taxAmount = afterDiscount * (taxRate / 100);
+    let finalTotal = afterDiscount + taxAmount;
+    
+    document.getElementById('cart-subtotal').innerText = `Rp ${subtotal.toLocaleString('id-ID')}`;
+    document.getElementById('cart-final-total').innerText = `Rp ${finalTotal.toLocaleString('id-ID')}`;
+    
+    return { subtotal, discount, taxAmount, finalTotal };
+}
+
 async function handleProductSubmit(e) {
     e.preventDefault();
     if (!db) return;
@@ -434,7 +439,6 @@ async function checkout(method) {
     if(db) {
         try {
             await db.from('transactions').insert([{ invoice_number: invoiceNum, total_price: finalTotal, payment_method: method }]);
-            
             for(let item of cart) {
                 const updatedStock = item.stock - item.quantity;
                 await db.from('products').update({ stock: updatedStock }).eq('id', item.id);
