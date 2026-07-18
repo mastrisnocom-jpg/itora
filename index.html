@@ -104,7 +104,7 @@
         .clock-time { font-size: 1.1rem; font-weight: 700; color: var(--text-main); }
         .icon-btn { width: 44px; height: 44px; border-radius: var(--radius-round); display: flex; align-items: center; justify-content: center; background: transparent; color: var(--text-muted); cursor: pointer; position: relative; transition: var(--trans-smooth); }
         .icon-btn:hover { background: var(--bg-body); color: var(--primary); }
-        .badge { position: absolute; top: 8px; right: 8px; width: 8px; height: 8px; background: var(--danger); border-radius: var(--radius-round); }
+        .badge { position: absolute; top: 8px; right: 8px; width: 8px; height: 8px; background: var(--danger); border-radius: var(--radius-round); display: none; }
         .user-avatar { width: 44px; height: 44px; border-radius: var(--radius-round); object-fit: cover; cursor: pointer; border: 2px solid var(--primary); padding: 2px; }
 
         /* SIDEBAR */
@@ -158,6 +158,13 @@
         .toast-container { position: fixed; top: 24px; right: 24px; z-index: 4000; display: flex; flex-direction: column; gap: 12px; }
         .toast { background: var(--bg-glass-solid); border-left: 6px solid var(--primary); box-shadow: var(--shadow-soft); padding: 16px 24px; border-radius: var(--radius-md); display: flex; align-items: center; gap: 12px; font-weight: 600; animation: slideInRight 0.4s cubic-bezier(0.25, 1, 0.5, 1); }
         .ripple { position: absolute; background: rgba(255,255,255,0.4); border-radius: 50%; transform: scale(0); animation: rippleAnim 0.6s linear; pointer-events: none; }
+
+        /* NOTIFICATION BOX STYLES */
+        .notification-item { display: flex; gap: 14px; padding: 14px; border-radius: var(--radius-md); border-bottom: 1px solid var(--border-color); transition: var(--trans-smooth); align-items: flex-start; text-align: left; }
+        .notification-item:hover { background: var(--primary-state); }
+        .notification-icon-wrapper { width: 36px; height: 36px; border-radius: 50%; background: var(--primary-state); color: var(--primary); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+        .notification-info h4 { font-size: 0.95rem; font-weight: 700; margin-bottom: 2px; color: var(--text-main); }
+        .notification-info p { font-size: 0.85rem; color: var(--text-muted); line-height: 1.4; }
 
         /* MODULES (FEED, CHAT, GROUPS) */
         .composer-box { display: flex; gap: 16px; margin-bottom: 32px; }
@@ -292,7 +299,7 @@
             <form onsubmit="App.Auth.login(event)">
                 <div class="form-group">
                     <input type="email" class="form-input" id="login-email" placeholder=" " required>
-                    <label class="form-label">Email Aktif</label>
+                    <label class="form-label">Email / Username</label>
                 </div>
                 <div class="form-group">
                     <input type="password" class="form-input" id="login-pwd" placeholder=" " required>
@@ -344,7 +351,10 @@
                 <button class="icon-btn ripple-btn" id="btn-refresh" title="Refresh"><span class="material-symbols-outlined">refresh</span></button>
                 <button class="icon-btn ripple-btn" id="btn-theme" title="Ubah Tema"><span class="material-symbols-outlined">dark_mode</span></button>
                 <button class="icon-btn ripple-btn" id="btn-fullscreen" title="Layar Penuh"><span class="material-symbols-outlined">fullscreen</span></button>
-                <button class="icon-btn ripple-btn" title="Notifikasi"><span class="material-symbols-outlined">notifications</span><span class="badge"></span></button>
+                <button class="icon-btn ripple-btn" id="btn-notifications" title="Notifikasi" onclick="App.Features.showNotifications()">
+                    <span class="material-symbols-outlined">notifications</span>
+                    <span class="badge" id="noti-badge"></span>
+                </button>
                 <img src="https://i.pravatar.cc/150?img=12" alt="Profile" class="user-avatar" onclick="App.Router.navigate('profil')">
             </div>
         </header>
@@ -370,7 +380,7 @@
             <div>&copy; <span id="footer-year">2026</span> <strong>NexSocial</strong>. All Rights Reserved.</div>
             <div style="display: flex; gap: 24px; align-items: center;">
                 <span>Powered by HTML, CSS, Vanilla JS & Supabase</span>
-                <span>v4.0.0</span>
+                <span>v4.2.0</span>
                 <div class="status-indicator"><div class="status-dot" id="network-dot"></div><span id="network-text">Online</span></div>
             </div>
         </footer>
@@ -382,7 +392,7 @@
     <div class="modal-overlay" id="global-modal">
         <div class="modal-content" id="modal-content-area">
             <h2 style="margin-bottom: 16px;" id="modal-title">Judul</h2>
-            <div id="modal-body" style="color: var(--text-muted); line-height: 1.6; margin-bottom: 24px;">Konten</div>
+            <div id="modal-body" style="color: var(--text-muted); line-height: 1.6; margin-bottom: 24px; max-height: 400px; overflow-y: auto;">Konten</div>
             <div style="text-align: right; display: flex; justify-content: flex-end; gap: 12px;">
                 <button class="btn btn-secondary ripple-btn" onclick="App.Modal.close()">Tutup</button>
                 <button class="btn btn-primary ripple-btn" onclick="App.Modal.close()">Oke</button>
@@ -400,6 +410,12 @@
         
         const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
+        // List global internal RAM untuk menampung data notifikasi real-time yang masuk
+        let liveNotifications = [
+            { icon: 'build', title: 'Update Generator Cabang 3', desc: 'Laporan volume bahan bakar generator mingguan telah diperbarui oleh unit lapangan.' },
+            { icon: 'motorcycle', title: 'Grup Banten Gathering', desc: 'Penyusunan aset rundown acara untuk agenda regional touring gathering pertengahan tahun disetujui.' }
+        ];
+
         const App = {
             init() {
                 this.Theme.init();
@@ -408,8 +424,50 @@
                 this.UI.bindGlobalEvents();
                 this.Navigation.render();
                 
-                // Pengecekan status login aktif dari session Supabase langsung
                 this.Auth.checkCurrentSession();
+                
+                // Aktifkan Realtime Listener untuk tabel posts
+                this.Realtime.subscribePosts();
+            },
+
+            // ==========================================================================
+            // REALTIME LISTENER MODULE
+            // ==========================================================================
+            Realtime: {
+                subscribePosts() {
+                    supabaseClient
+                        .channel('schema-db-changes')
+                        .on(
+                            'postgres_changes',
+                            { event: 'INSERT', schema: 'public', table: 'posts' },
+                            (payload) => {
+                                const newPost = payload.new;
+                                
+                                // Jika yang memposting adalah user lain (bukan 'Adnan')
+                                if (newPost.author !== 'Adnan') {
+                                    // 1. Tampilkan Toast real-time di layar
+                                    App.Toast.show("Postingan baru dari " + newPost.author, "info");
+                                    
+                                    // 2. Tampilkan badge titik merah di tombol lonceng header
+                                    const badge = document.getElementById('noti-badge');
+                                    if (badge) badge.style.display = 'block';
+                                    
+                                    // 3. Masukkan ke dalam array daftar notifikasi
+                                    liveNotifications.unshift({
+                                        icon: 'account_circle',
+                                        title: 'Postingan Baru!',
+                                        desc: newPost.author + " baru saja membagikan kiriman baru: \"" + newPost.content.substring(0, 45) + "...\""
+                                    });
+
+                                    // 4. Jika user sedang membuka halaman feed utama, refresh otomatis agar konten langsung muncul
+                                    if (window.location.hash === '#/feed') {
+                                        App.Features.renderPosts();
+                                    }
+                                }
+                            }
+                        )
+                        .subscribe();
+                }
             },
 
             Auth: {
@@ -469,7 +527,6 @@
                         return;
                     }
 
-                    // Notifikasi sukses dan instruksi verifikasi email aktif
                     App.Modal.open(
                         "Verifikasi Email Dikirim!", 
                         "Kami telah mengirimkan tautan konfirmasi ke email aktif Anda (" + email + "). Buka pesan tersebut dan klik link konfirmasi untuk mengaktifkan akun sebelum melakukan login."
@@ -676,6 +733,25 @@
             },
 
             Features: {
+                showNotifications() {
+                    const badge = document.getElementById('noti-badge');
+                    if (badge) badge.style.display = 'none';
+
+                    const notiHTML = liveNotifications.map(item => `
+                        <div class="notification-item">
+                            <div class="notification-icon-wrapper">
+                                <span class="material-symbols-outlined">${item.icon}</span>
+                            </div>
+                            <div class="notification-info">
+                                <h4>${item.title}</h4>
+                                <p>${item.desc}</p>
+                            </div>
+                        </div>
+                    `).join('');
+
+                    App.Modal.open("Pemberitahuan & Aktivitas", notiHTML);
+                },
+
                 async renderPosts() {
                     const stream = document.getElementById('feed-stream');
                     if(!stream) return;
@@ -795,7 +871,7 @@
             },
 
             Network: { listen() { window.addEventListener('online', ()=>document.getElementById('network-text').innerText='Online'); window.addEventListener('offline', ()=>App.Toast.show("Offline","danger")); } },
-            Modal: { open(t, b) { document.getElementById('modal-title').innerText=t; document.getElementById('modal-body').innerText=b; document.getElementById('global-modal').classList.add('active'); }, close() { document.getElementById('global-modal').classList.remove('active'); } },
+            Modal: { open(t, b) { document.getElementById('modal-title').innerText=t; document.getElementById('modal-body').innerHTML=b; document.getElementById('global-modal').classList.add('active'); }, close() { document.getElementById('global-modal').classList.remove('active'); } },
             
             Toast: {
                 show(m, t="info") {
