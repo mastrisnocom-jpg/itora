@@ -2,20 +2,20 @@ const SUPABASE_URL = 'https://waaufoxlimqtesmmjhyw.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_X6icNByv3YFbekorwJ6kSw_SX0XUFM8'; 
 const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY); 
 
-// Variabel Global
+// Variabel Global Aplikasi
 let liveNotifications = [ 
     { id: 1, icon: 'shield_person', user: 'Super Admin', type: 'admin', desc: 'Sistem Workspace Tech Social versi 2.4 berhasil diperbarui ke server cloud.', isUnread: true }, 
     { id: 2, icon: 'handshake', user: 'System', type: 'admin', desc: 'Fitur network teman aktif. Sekarang Anda dapat mencari user lain di halaman Eksplor.', isUnread: false } 
 ]; 
 let activeChatFriendEmail = null; 
 let activeChatFriendName = null; 
-let composerAttachedImageBase64 = null; 
+let composerAttachedImageBase64 = null; // Dioptimasi untuk menampung Objek File Gambar Asli
 let composerAttachedFileBase64 = null; 
 let composerAttachedFileName = "Dokumen.bin"; 
 let unreadMessageCounters = {}; 
 let liveHeaderNotificationCount = 1; 
 let headerSearchFilterQueryString = ""; 
-let searchTimeout = null; // Debounce timer
+let searchTimeout = null; // Timer untuk optimasi Debounce pencarian agar ringan
 const EMOJI_LIST = ['😊', '😂', '🔥', '👍', '🙌', '💯', '❤️', '👏', '🎉', '😮', '😢', '🙏']; 
 
 const App = { 
@@ -404,21 +404,28 @@ const App = {
                 await supabaseClient.from('friends').update({ status: 'approved' }).eq('id', dbRequestId);
                 const { data: checkInverse } = await supabaseClient.from('friends').select('id').eq('user_email', myEmail).eq('friend_email', senderEmail);
                 if(!checkInverse || checkInverse.length === 0) {
-                    await supabaseClient.from('friends').insert([{ user_email: myEmail, friend_email: senderEmail, status: 'approved' }]);
+                    await supabaseClient.from('friends').insert([
+                        { user_email: myEmail, friend_email: senderEmail, status: 'approved' }
+                    ]);
                 }
                 liveNotifications = liveNotifications.filter(n => n.id !== notiId);
                 App.Toast.show("Pertemanan dikonfirmasi!", "success");
                 App.Features.showNotifications();
                 App.Features.loadPopupFriendsListSidebar();
-            } catch(err) { console.error(err); App.Toast.show("Gagal menyetujui.", "danger"); }
+                if(window.location.hash === '#/explore') App.Features.renderExploreUsers();
+            } catch(err) {
+                console.error(err);
+                App.Toast.show("Gagal menyetujui pertemanan.", "danger");
+            }
         },
 
         async rejectFriendRequestAction(notiId, dbRequestId) {
             try {
                 await supabaseClient.from('friends').delete().eq('id', dbRequestId);
                 liveNotifications = liveNotifications.filter(n => n.id !== notiId);
-                App.Toast.show("Permintaan ditolak.", "warning");
+                App.Toast.show("Permintaan pertemanan ditolak.", "warning");
                 App.Features.showNotifications();
+                if(window.location.hash === '#/explore') App.Features.renderExploreUsers();
             } catch(e) { console.error(e); }
         },
 
@@ -461,28 +468,14 @@ const App = {
         handleComposerImageSelection(event) { 
             const file = event.target.files[0]; 
             if (!file) return; 
-            const reader = new FileReader(); 
-            reader.readAsDataURL(file); 
-            reader.onload = function (e) { 
-                const img = new Image(); 
-                img.src = e.target.result; 
-                img.onload = function () { 
-                    const canvas = document.createElement('canvas'); 
-                    let width = img.width; 
-                    let height = img.height; 
-                    if (width > 1000) { 
-                        height *= 1000 / width; 
-                        width = 1000; 
-                    } 
-                    canvas.width = width; 
-                    canvas.height = height; 
-                    const ctx = canvas.getContext('2d'); 
-                    ctx.drawImage(img, 0, 0, width, height); 
-                    composerAttachedImageBase64 = canvas.toDataURL('image/jpeg', 0.65); 
-                    const previewArea = document.getElementById('composer-upload-preview-area'); 
-                    if (previewArea) previewArea.innerHTML = `<img src="${composerAttachedImageBase64}" style="max-height:120px; border-radius:8px; display:block; border:2px solid var(--primary);">`; 
-                }; 
-            }; 
+
+            composerAttachedImageBase64 = file; // Menyimpan File objek asli
+
+            const previewArea = document.getElementById('composer-upload-preview-area'); 
+            if (previewArea) { 
+                const objectUrl = URL.createObjectURL(file);
+                previewArea.innerHTML = `<img src="${objectUrl}" style="max-height:120px; border-radius:8px; display:block; border:2px solid var(--primary);">`; 
+            } 
         }, 
         handleComposerFileSelection(event) { 
             const file = event.target.files[0]; 
@@ -818,7 +811,7 @@ const App = {
                     let attachedMediaHTML = ''; 
                     let hasImage = false; 
                     if (p.image) { 
-                        if (p.image.startsWith('data:image')) { 
+                        if (p.image.startsWith('data:image') || p.image.startsWith('http')) { 
                             attachedMediaHTML = `<img src="${p.image}" class="post-attached-image" alt="Media">`; 
                             hasImage = true; 
                         } else if (p.image.startsWith('data:application') || p.image.includes('base64')) { 
@@ -850,21 +843,44 @@ const App = {
             if(!textValue && !composerAttachedImageBase64 && !composerAttachedFileBase64) { 
                 return App.Toast.show("Konten kiriman Anda masih kosong.", "warning"); 
             } 
-            let payloadAsset = null; 
-            if(composerAttachedImageBase64) payloadAsset = composerAttachedImageBase64; 
-            else if(composerAttachedFileBase64) payloadAsset = composerAttachedFileBase64; 
+            let imageUrlResult = null;
             try { 
                 const myCurrentName = App.ProfileState.getCurrentName(); 
                 const myAvatar = App.ProfileState.getCurrentAvatar(); 
-                let postPayload = { author: myCurrentName, avatar: myAvatar, content: textValue, image: payloadAsset, likes: 0 }; 
-                const { error } = await supabaseClient .from('posts') .insert([postPayload]); 
-                if (error) throw error; 
+
+                // PROSES UNGGAH FILE ASLI KE SUPABASE STORAGE BUCKET
+                if (composerAttachedImageBase64 && composerAttachedImageBase64 instanceof File) {
+                    const file = composerAttachedImageBase64;
+                    const fileExtension = file.name.split('.').pop();
+                    const fileName = `${Date.now()}_${Math.random().toString(36).substring(7)}.${fileExtension}`;
+
+                    const { data: storageData, error: storageError } = await supabaseClient
+                        .storage
+                        .from('posts-bucket')
+                        .upload(fileName, file);
+
+                    if (storageError) throw storageError;
+
+                    const { data: publicUrlData } = supabaseClient
+                        .storage
+                        .from('posts-bucket')
+                        .getPublicUrl(fileName);
+
+                    imageUrlResult = publicUrlData.publicUrl;
+                } else if (composerAttachedFileBase64) {
+                    imageUrlResult = composerAttachedFileBase64;
+                }
+
+                let postPayload = { author: myCurrentName, avatar: myAvatar, content: textValue, image: imageUrlResult, likes: 0 }; 
+                const { error: dbError } = await supabaseClient .from('posts') .insert([postPayload]); 
+                if (dbError) throw dbError; 
+
                 composerAttachedImageBase64 = null; 
                 composerAttachedFileBase64 = null; 
                 App.Modal.close(); 
                 const modalOverlay = document.getElementById('global-modal'); 
                 if(modalOverlay) modalOverlay.classList.remove('active'); 
-                App.Toast.show("Postingan berhasil diterbitkan ke News Feed!", "success"); 
+                App.Toast.show("Postingan berhasil diterbitkan!", "success"); 
                 this.renderPosts(); 
             } catch (err) { 
                 console.error(err); 
@@ -890,7 +906,7 @@ const App = {
                 
                 const { data: targetPost } = await supabaseClient.from('posts').select('author').eq('id', id).single();
                 if(targetPost && targetPost.author !== myCurrentName) {
-                    liveNotifications.unshift({ id: Date.now(), icon: 'thumb_up', user: myCurrentName, type: 'like', desc: `Menyukai postingan ID #${id} Anda di Newsfeed.`, isUnread: true }); 
+                    liveNotifications.unshift({ id: Date.now(), icon: 'thumb_up', user: myCurrentName, type: 'like', desc: `Menyukai postingan ID #${id} Anda.`, isUnread: true }); 
                     liveHeaderNotificationCount++; 
                     App.UI.refreshHeaderNotificationBadgeDOM(); 
                 }
@@ -919,7 +935,7 @@ const App = {
                 
                 const { data: targetPost } = await supabaseClient.from('posts').select('author').eq('id', id).single();
                 if(targetPost && targetPost.author !== myCurrentName) {
-                    liveNotifications.unshift({ id: Date.now(), icon: 'thumb_down', user: myCurrentName, type: 'like', desc: `Memberikan dislike pada postingan ID #${id} Anda di Newsfeed.`, isUnread: true }); 
+                    liveNotifications.unshift({ id: Date.now(), icon: 'thumb_down', user: myCurrentName, type: 'like', desc: `Memberikan dislike pada postingan ID #${id} Anda.`, isUnread: true }); 
                     liveHeaderNotificationCount++; 
                     App.UI.refreshHeaderNotificationBadgeDOM(); 
                 }
