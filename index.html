@@ -120,7 +120,6 @@
         .menu-item .menu-text { white-space: nowrap; transition: opacity 0.3s; }
         #app-layout.sidebar-collapsed .menu-text { opacity: 0; width: 0; display: none; }
         .sidebar-profile { margin-top: auto; padding: 16px; background: var(--bg-body); border-radius: var(--radius-lg); display: flex; align-items: center; gap: 12px; border: 1px solid var(--border-color); cursor: pointer; transition: var(--trans-smooth); }
-        .sidebar-profile:hover { border-color: var(--primary); }
         .sidebar-profile-info { display: flex; flex-direction: column; overflow: hidden; }
         .sp-name { font-weight: 700; font-size: 0.95rem; white-space: nowrap; }
         .sp-role { font-size: 0.8rem; color: var(--text-muted); }
@@ -159,7 +158,6 @@
         .toast { background: var(--bg-glass-solid); border-left: 6px solid var(--primary); box-shadow: var(--shadow-soft); padding: 16px 24px; border-radius: var(--radius-md); display: flex; align-items: center; gap: 12px; font-weight: 600; animation: slideInRight 0.4s cubic-bezier(0.25, 1, 0.5, 1); }
         .ripple { position: absolute; background: rgba(255,255,255,0.4); border-radius: 50%; transform: scale(0); animation: rippleAnim 0.6s linear; pointer-events: none; }
 
-        /* NOTIFICATION BOX STYLES */
         .notification-item { display: flex; gap: 14px; padding: 14px; border-radius: var(--radius-md); border-bottom: 1px solid var(--border-color); transition: var(--trans-smooth); align-items: flex-start; text-align: left; }
         .notification-item:hover { background: var(--primary-state); }
         .notification-icon-wrapper { width: 36px; height: 36px; border-radius: 50%; background: var(--primary-state); color: var(--primary); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
@@ -368,8 +366,8 @@
             <div class="sidebar-profile" onclick="App.Router.navigate('profil')">
                 <img src="https://i.pravatar.cc/150?img=12" alt="User" class="user-avatar" style="border:none;">
                 <div class="sidebar-profile-info">
-                    <span class="sp-name">Adnan</span>
-                    <span class="sp-role">Technical Operations Manager</span>
+                    <span class="sp-name" id="sidebar-user-name">User</span>
+                    <span class="sp-role">Nex Workspace Member</span>
                 </div>
             </div>
         </aside>
@@ -380,7 +378,7 @@
             <div>&copy; <span id="footer-year">2026</span> <strong>NexSocial</strong>. All Rights Reserved.</div>
             <div style="display: flex; gap: 24px; align-items: center;">
                 <span>Powered by HTML, CSS, Vanilla JS & Supabase</span>
-                <span>v4.2.0</span>
+                <span>v5.0.0</span>
                 <div class="status-indicator"><div class="status-dot" id="network-dot"></div><span id="network-text">Online</span></div>
             </div>
         </footer>
@@ -410,10 +408,8 @@
         
         const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-        // List global internal RAM untuk menampung data notifikasi real-time yang masuk
         let liveNotifications = [
-            { icon: 'build', title: 'Update Generator Cabang 3', desc: 'Laporan volume bahan bakar generator mingguan telah diperbarui oleh unit lapangan.' },
-            { icon: 'motorcycle', title: 'Grup Banten Gathering', desc: 'Penyusunan aset rundown acara untuk agenda regional touring gathering pertengahan tahun disetujui.' }
+            { icon: 'build', title: 'Update Sistem Workspace', desc: 'Sistem limit kustomisasi akun Anda di bulan Juli 2026 ini telah diperbarui secara otomatis.' }
         ];
 
         const App = {
@@ -425,14 +421,51 @@
                 this.Navigation.render();
                 
                 this.Auth.checkCurrentSession();
-                
-                // Aktifkan Realtime Listener untuk tabel posts
                 this.Realtime.subscribePosts();
             },
 
             // ==========================================================================
-            // REALTIME LISTENER MODULE
+            // KENDALI DATA IDENTITAS RAM USER
             // ==========================================================================
+            ProfileState: {
+                getCurrentName() {
+                    const savedName = localStorage.getItem('ns_display_name');
+                    if (savedName) return savedName;
+                    
+                    // Default fallback jika belum disinkronisasi dengan email supabase
+                    const currentEmail = localStorage.getItem('ns_user_email') || 'User';
+                    return currentEmail.split('@')[0];
+                },
+                getLimitConfig() {
+                    const defaultLimit = { count: 0, month: new Date().getMonth() };
+                    const saved = localStorage.getItem('ns_edit_limit_log');
+                    if (!saved) return defaultLimit;
+                    
+                    const parsed = JSON.parse(saved);
+                    // Reset otomatis jika bulan saat ini sudah berganti
+                    if (parsed.month !== new Date().getMonth()) {
+                        return defaultLimit;
+                    }
+                    return parsed;
+                },
+                updateProfileName(newName) {
+                    const config = this.getLimitConfig();
+                    
+                    if(config.count >= 3) {
+                        return { success: false, message: "Batas limit edit nama habis! Anda hanya dapat mengedit nama maksimal 3 kali dalam sebulan." };
+                    }
+
+                    config.count += 1;
+                    config.month = new Date().getMonth();
+
+                    localStorage.setItem('ns_display_name', newName);
+                    localStorage.setItem('ns_edit_limit_log', JSON.stringify(config));
+                    
+                    App.UI.syncHeaderProfileText();
+                    return { success: true, remaining: 3 - config.count };
+                }
+            },
+
             Realtime: {
                 subscribePosts() {
                     supabaseClient
@@ -442,24 +475,19 @@
                             { event: 'INSERT', schema: 'public', table: 'posts' },
                             (payload) => {
                                 const newPost = payload.new;
+                                const myCurrentName = App.ProfileState.getCurrentName();
                                 
-                                // Jika yang memposting adalah user lain (bukan 'Adnan')
-                                if (newPost.author !== 'Adnan') {
-                                    // 1. Tampilkan Toast real-time di layar
+                                if (newPost.author !== myCurrentName) {
                                     App.Toast.show("Postingan baru dari " + newPost.author, "info");
-                                    
-                                    // 2. Tampilkan badge titik merah di tombol lonceng header
                                     const badge = document.getElementById('noti-badge');
                                     if (badge) badge.style.display = 'block';
                                     
-                                    // 3. Masukkan ke dalam array daftar notifikasi
                                     liveNotifications.unshift({
                                         icon: 'account_circle',
                                         title: 'Postingan Baru!',
-                                        desc: newPost.author + " baru saja membagikan kiriman baru: \"" + newPost.content.substring(0, 45) + "...\""
+                                        desc: newPost.author + " membagikan kiriman baru: \"" + newPost.content.substring(0, 45) + "...\""
                                     });
 
-                                    // 4. Jika user sedang membuka halaman feed utama, refresh otomatis agar konten langsung muncul
                                     if (window.location.hash === '#/feed') {
                                         App.Features.renderPosts();
                                     }
@@ -475,10 +503,14 @@
                     const { data, error } = await supabaseClient.auth.getSession();
                     if(data?.session) {
                         localStorage.setItem('ns_logged_in', 'true');
+                        localStorage.setItem('ns_user_email', data.session.user.email);
+                        
+                        App.UI.syncHeaderProfileText();
                         App.Auth.showApp();
                         App.Router.init();
                     } else {
                         localStorage.removeItem('ns_logged_in');
+                        localStorage.removeItem('ns_user_email');
                         document.getElementById('auth-layout').style.display = 'flex';
                     }
                 },
@@ -506,6 +538,9 @@
 
                     App.Toast.show("Berhasil masuk ke sistem.", "success");
                     localStorage.setItem('ns_logged_in', 'true');
+                    localStorage.setItem('ns_user_email', data.user.email);
+                    
+                    App.UI.syncHeaderProfileText();
                     this.showApp();
                     App.Router.init();
                 },
@@ -535,7 +570,7 @@
                 },
                 async logout() {
                     await supabaseClient.auth.signOut();
-                    localStorage.removeItem('ns_logged_in');
+                    localStorage.clear();
                     window.location.hash = '';
                     window.location.reload();
                 },
@@ -601,11 +636,12 @@
 
             Views: {
                 feed() {
+                    const currentName = App.ProfileState.getCurrentName();
                     return `
                         <div class="glass-card composer-box">
                             <img src="https://i.pravatar.cc/150?img=12" class="user-avatar" style="width:48px;height:48px;" alt="Me">
                             <div class="composer-input-area">
-                                <textarea class="composer-textarea" id="composer-text" placeholder="Apa yang sedang Anda pikirkan, Adnan?"></textarea>
+                                <textarea class="composer-textarea" id="composer-text" placeholder="Apa yang sedang Anda pikirkan, ${currentName}?"></textarea>
                                 <div class="composer-actions">
                                     <div style="display:flex; gap:12px;">
                                         <button class="icon-btn" style="color:var(--secondary)"><span class="material-symbols-outlined">image</span></button>
@@ -633,6 +669,7 @@
                     `;
                 },
                 chat() {
+                    const currentName = App.ProfileState.getCurrentName();
                     return `
                         <div class="chat-layout">
                             <div class="chat-sidebar">
@@ -649,7 +686,7 @@
                                     <img src="https://i.pravatar.cc/150?img=5" class="user-avatar" style="width:36px;height:36px;border:none;"> Tim Maintenance HQ
                                 </div>
                                 <div class="chat-messages" id="chat-messages-container">
-                                    <div class="bubble in">Halo Pak Adnan, update untuk maintenance genset cabang 4 sudah selesai.</div>
+                                    <div class="bubble in">Halo Pak ${currentName}, update untuk maintenance genset cabang 4 sudah selesai.</div>
                                     <div class="bubble out">Terima kasih updatenya. Tolong log di spreadsheet seperti biasa ya.</div>
                                 </div>
                                 <div class="chat-input-area">
@@ -684,44 +721,49 @@
                     `;
                 },
                 profil() {
+                    const currentName = App.ProfileState.getCurrentName();
                     return `
                         <div class="glass-card profile-info-card" style="padding:0; overflow:hidden;">
                             <div class="profile-cover"></div>
                             <img src="https://i.pravatar.cc/150?img=12" class="profile-avatar-large" alt="Profile">
-                            <h2 style="font-size: 1.8rem; font-weight: 800; margin-bottom: 4px;">Adnan</h2>
-                            <p style="color: var(--primary); font-weight: 600; margin-bottom: 12px;">Technical Operations Manager & Content Creator</p>
+                            <h2 style="font-size: 1.8rem; font-weight: 800; margin-bottom: 4px;">${currentName}</h2>
+                            <p style="color: var(--primary); font-weight: 600; margin-bottom: 12px;">Nex Workspace Member</p>
                             <div class="profile-stats">
                                 <div class="stat-item"><span class="stat-val">312</span><span class="stat-lbl">Koneksi</span></div>
                                 <div class="stat-item"><span class="stat-val">2.5K</span><span class="stat-lbl">Pengikut</span></div>
                                 <div class="stat-item"><span class="stat-val">84</span><span class="stat-lbl">Postingan</span></div>
                             </div>
                             <div style="padding: 24px; display:flex; justify-content:center; gap:16px;">
-                                <button class="btn btn-primary ripple-btn" onclick="App.Router.navigate('settings')">Edit Profil</button>
+                                <button class="btn btn-primary ripple-btn" onclick="App.Router.navigate('settings')">Edit Profil & Nama</button>
                             </div>
                         </div>
                     `;
                 },
                 settings() {
+                    const currentName = App.ProfileState.getCurrentName();
+                    const limitConfig = App.ProfileState.getLimitConfig();
+                    const remainingEdit = 3 - limitConfig.count;
+
                     return `
                         <div class="glass-card" style="max-width: 600px;">
-                            <h2 style="margin-bottom: 24px;">Pengaturan Akun</h2>
+                            <h2 style="margin-bottom: 12px;">Pengaturan Akun</h2>
+                            <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 24px;">
+                                Sesuai kebijakan keamanan, Anda hanya dapat mengubah nama tampilan maksimal 3 kali dalam satu bulan berjalan.
+                            </p>
+                            
                             <div class="form-group">
-                                <input type="text" class="form-input" placeholder=" " value="Adnan">
+                                <input type="text" class="form-input" id="settings-display-name" placeholder=" " value="${currentName}">
                                 <label class="form-label">Nama Tampilan</label>
                             </div>
-                            <div class="form-group" style="display:flex; justify-content:space-between; align-items:center; padding: 16px; border:1px solid var(--border-color); border-radius:var(--radius-md);">
-                                <div>
-                                    <h4 style="margin-bottom:4px;">Notifikasi Email</h4>
-                                    <p style="font-size:0.8rem; color:var(--text-muted);">Terima update aktivitas via email</p>
-                                </div>
-                                <label style="position:relative; display:inline-block; width:50px; height:24px;">
-                                    <input type="checkbox" checked style="opacity:0; width:0; height:0;" onchange="App.Toast.show('Preferensi disimpan','success')">
-                                    <span style="position:absolute; cursor:pointer; top:0; left:0; right:0; bottom:0; background-color:var(--primary); border-radius:24px; transition:0.4s;">
-                                        <span style="position:absolute; content:''; height:16px; width:16px; left:30px; bottom:4px; background-color:white; border-radius:50%; transition:0.4s;"></span>
-                                    </span>
-                                </label>
+                            
+                            <div style="margin-bottom: 24px; padding: 14px; border-radius: var(--radius-md); background: var(--primary-state); display: flex; align-items: center; justify-content: space-between;">
+                                <span style="font-weight: 600; font-size: 0.9rem;">Sisa Kuota Perubahan Bulan Ini:</span>
+                                <span class="badge" style="display:inline-block; position:relative; top:0; right:0; padding: 6px 12px; font-weight: 800; border-radius: 8px; background: ${remainingEdit > 0 ? 'var(--secondary)' : 'var(--danger)'}; color: white;">
+                                    ${remainingEdit} Kali
+                                </span>
                             </div>
-                            <button class="btn btn-primary ripple-btn" onclick="App.Toast.show('Pengaturan berhasil diperbarui.','success')">Simpan Perubahan</button>
+
+                            <button class="btn btn-primary ripple-btn" onclick="App.Features.saveNameSettings()">Simpan Perubahan Nama</button>
                         </div>
                     `;
                 }
@@ -733,6 +775,21 @@
             },
 
             Features: {
+                saveNameSettings() {
+                    const nameInput = document.getElementById('settings-display-name');
+                    if(!nameInput || !nameInput.value.trim()) return App.Toast.show("Nama tidak boleh kosong.", "warning");
+                    
+                    const result = App.ProfileState.updateProfileName(nameInput.value.trim());
+                    
+                    if(result.success) {
+                        App.Toast.show("Nama berhasil diperbarui! Sisa limit bulan ini: " + result.remaining + " kali.", "success");
+                        App.Router.navigate('profil');
+                    } else {
+                        App.Modal.open("Batas Limit Tercapai", result.message);
+                        App.Toast.show("Gagal mengubah nama.", "danger");
+                    }
+                },
+
                 showNotifications() {
                     const badge = document.getElementById('noti-badge');
                     if (badge) badge.style.display = 'none';
@@ -793,7 +850,7 @@
                         `).join('');
                     } catch (err) {
                         console.error(err);
-                        stream.innerHTML = `<div class="glass-card" style="color:var(--danger); padding:20px;">Gagal memuat data dari database Supabase. Pastikan setup SQL Editor Anda sudah selesai dijalankan dengan benar tanpa error.</div>`;
+                        stream.innerHTML = `<div class="glass-card" style="color:var(--danger); padding:20px;">Gagal memuat data dari database Supabase.</div>`;
                     }
                 },
 
@@ -804,13 +861,15 @@
                     const btn = document.querySelector('.composer-actions .btn-primary');
                     App.UI.showLoadingBtn(btn);
 
+                    const myAuthorName = App.ProfileState.getCurrentName();
+
                     try {
                         const { error } = await supabaseClient
                             .from('posts')
                             .insert([
                                 { 
-                                    author: 'Adnan', 
-                                    role: 'Technical Operations Manager', 
+                                    author: myAuthorName, 
+                                    role: 'Nex Workspace Member', 
                                     avatar: 'https://i.pravatar.cc/150?img=12', 
                                     content: txt.value,
                                     likes: 0
@@ -865,7 +924,7 @@
                         const d = new Date(), ms = ["Jan","Feb","Mar","Apr","Mei","Jun","Jul","Ags","Sep","Okt","Nov","Des"];
                         const uiD = document.getElementById('ui-date'), uiT = document.getElementById('ui-time');
                         if(uiD) uiD.innerText = `${d.getDate()} ${ms[d.getMonth()]} ${d.getFullYear()}`;
-                        if(uiT) uiT.innerText = `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')} WIB`;
+                        if(uiT) uiT.innerText = `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}:${String(d.getSeconds()).padStart(2,'0')} WIB`;
                     }, 1000);
                 }
             },
@@ -897,6 +956,11 @@
                 closeMobileSidebar() {
                     document.getElementById('app-layout')?.classList.remove('sidebar-mobile-open');
                     document.getElementById('mobile-overlay')?.classList.remove('active');
+                },
+                syncHeaderProfileText() {
+                    const currentName = App.ProfileState.getCurrentName();
+                    const sidebarNameEl = document.getElementById('sidebar-user-name');
+                    if (sidebarNameEl) sidebarNameEl.innerText = currentName;
                 },
                 showLoadingBtn(b) {
                     const ot = b.innerText; b.innerHTML = 'Loading...'; b.style.pointerEvents='none'; b.style.opacity='0.8';
