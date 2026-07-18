@@ -236,7 +236,7 @@
            ========================================================================== */
         .fb-noti-container { display: flex; flex-direction: column; text-align: left; }
         .fb-noti-section-title { font-size: 1rem; font-weight: 800; padding: 12px 6px 6px 6px; color: var(--text-main); }
-        .fb-noti-item { display: flex; align-items: center; gap: 14px; padding: 12px 8px; border-radius: var(--radius-md); transition: var(--trans-smooth); margin-bottom: 4px; cursor: pointer; }
+        .fb-noti-item { display: flex; align-items: center; gap: 14px; padding: 12px 8px; border-radius: var(--radius-md); transition: var(--trans-smooth); margin-bottom: 4px; position: relative; cursor: pointer; }
         .fb-noti-item:hover { background: var(--primary-state); }
         .fb-noti-item.unread { background: rgba(1, 181, 116, 0.08); }
         .fb-noti-avatar-zone { position: relative; width: 54px; height: 54px; flex-shrink: 0; }
@@ -300,10 +300,6 @@
 
         .toast-container { position: fixed; top: 24px; right: 24px; z-index: 4000; display: flex; flex-direction: column; gap: 12px; }
         .toast { background: var(--bg-glass-solid); border-left: 6px solid var(--primary); box-shadow: var(--shadow-soft); padding: 16px 24px; border-radius: var(--radius-md); display: flex; align-items: center; gap: 12px; font-weight: 600; animation: slideInRight 0.4s cubic-bezier(0.25, 1, 0.5, 1); }
-
-        @keyframes slideUpFade { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
-        @keyframes fadeScale { from { opacity: 0; transform: scale(0.98); } to { opacity: 1; transform: scale(1); } }
-        @keyframes slideInRight { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
 
         @media (max-width: 768px) {
             #app-layout { grid-template-areas: "header" "content"; grid-template-columns: 1fr; grid-template-rows: 70px 1fr; }
@@ -502,6 +498,9 @@
                 },
                 getCurrentDomisili() {
                     return localStorage.getItem('ns_user_domisili') || 'Surabaya, Indonesia';
+                },
+                getCurrentAvatar() {
+                    return localStorage.getItem('ns_user_avatar_base64') || 'https://i.pravatar.cc/150?img=12';
                 },
                 getJoinDateText() {
                     let dateStr = localStorage.getItem('ns_user_join_date');
