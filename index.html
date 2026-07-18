@@ -3,29 +3,29 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>NexSphere - Premium Social Workspace</title>
-    <!-- Google Fonts & Icons -->
+    <title>NexSphere - Enterprise Business Suite</title>
+    <!-- Google Fonts & Material Symbols -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0..1,0" rel="stylesheet">
     
     <style>
-        /* ==========================================
-           1. CSS VARIABLES & THEMES (MD3 & GLASS)
-           ========================================== */
+        /* ==========================================================================
+           1. CSS VARIABLES, CORE THEMES & RESET (FONT ARIAL 8pt/11px BASELINE)
+           ========================================================================== */
         :root {
-            --font-main: 'Plus Jakarta Sans', sans-serif;
+            --font-main: 'Arial', sans-serif;
+            --base-font-size: 11px; /* Setara 8pt */
             
-            /* Light Theme Palette */
-            --bg-primary: #f4f6fa;
-            --bg-surface: rgba(255, 255, 255, 0.75);
-            --bg-surface-hover: rgba(255, 255, 255, 0.9);
+            /* Light Theme Configuration */
+            --bg-primary: #f1f5f9;
+            --bg-surface: rgba(255, 255, 255, 0.8);
+            --bg-surface-hover: rgba(255, 255, 255, 0.95);
             --border-color: rgba(226, 232, 240, 0.8);
-            --text-main: #1e293b;
+            --text-main: #0f172a;
             --text-muted: #64748b;
             
-            /* Brand Colors (MD3 Accent) */
+            /* UI Color System Palette */
             --primary: #4f46e5;
             --primary-state: rgba(79, 70, 229, 0.08);
             --primary-container: #e0e7ff;
@@ -35,46 +35,44 @@
             --warning: #f59e0b;
             --info: #6366f1;
             
-            /* Glassmorphism Specs */
-            --blur-radius: 16px;
-            --shadow-sm: 0 2px 8px -2px rgba(0, 0, 0, 0.05);
-            --shadow-md: 0 12px 24px -4px rgba(0, 0, 0, 0.08);
-            --shadow-lg: 0 20px 32px -8px rgba(0, 0, 0, 0.12);
-            --radius-sm: 8px;
-            --radius-md: 16px;
-            --radius-lg: 24px;
+            /* Structural Foundations */
+            --blur-radius: 12px;
+            --shadow-sm: 0 1px 3px rgba(0,0,0,0.05);
+            --shadow-md: 0 4px 12px -2px rgba(0,0,0,0.08);
+            --shadow-lg: 0 16px 24px -6px rgba(0,0,0,0.12);
+            --radius-sm: 4px;
+            --radius-md: 8px;
+            --radius-lg: 12px;
             --radius-round: 9999px;
             
-            /* Dynamic Layout Metrics */
-            --header-height: 70px;
-            --sidebar-width: 260px;
-            --bottom-nav-height: 75px;
-            --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            /* Screen Layout Constants */
+            --header-height: 50px;
+            --sidebar-width: 220px;
+            --bottom-nav-height: 60px;
+            --transition-smooth: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         [data-theme="dark"] {
-            --bg-primary: #0b0f19;
-            --bg-surface: rgba(23, 29, 43, 0.75);
-            --bg-surface-hover: rgba(30, 41, 59, 0.9);
+            --bg-primary: #090d16;
+            --bg-surface: rgba(20, 27, 41, 0.75);
+            --bg-surface-hover: rgba(28, 37, 56, 0.9);
             --border-color: rgba(51, 65, 85, 0.5);
             --text-main: #f8fafc;
             --text-muted: #94a3b8;
             --primary: #818cf8;
             --primary-state: rgba(129, 140, 248, 0.15);
-            --primary-container: #312e81;
-            --shadow-sm: 0 2px 8px -2px rgba(0, 0, 0, 0.3);
-            --shadow-md: 0 12px 24px -4px rgba(0, 0, 0, 0.5);
-            --shadow-lg: 0 20px 32px -8px rgba(0, 0, 0, 0.6);
+            --primary-container: #1e1b4b;
+            --shadow-sm: 0 1px 3px rgba(0,0,0,0.3);
+            --shadow-md: 0 4px 12px -2px rgba(0,0,0,0.5);
+            --shadow-lg: 0 16px 24px -6px rgba(0,0,0,0.6);
         }
 
-        /* ==========================================
-           2. RESET & BASE STYLES
-           ========================================== */
         * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
             font-family: var(--font-main);
+            font-size: var(--base-font-size);
             -webkit-tap-highlight-color: transparent;
         }
 
@@ -82,36 +80,27 @@
             background-color: var(--bg-primary);
             color: var(--text-main);
             overflow-x: hidden;
-            transition: background-color 0.3s ease;
+            transition: background-color 0.3s ease, color 0.3s ease;
             min-height: 100vh;
-            display: flex;
-            flex-direction: column;
         }
 
         input, textarea, select, button {
             font-family: inherit;
             color: inherit;
+            outline: none;
         }
 
-        /* Custom Scrollbar */
-        ::-webkit-scrollbar {
-            width: 6px;
-            height: 6px;
-        }
-        ::-webkit-scrollbar-track {
-            background: transparent;
-        }
-        ::-webkit-scrollbar-thumb {
-            background: var(--border-color);
-            border-radius: var(--radius-round);
-        }
-        ::-webkit-scrollbar-thumb:hover {
-            background: var(--text-muted);
-        }
+        a { text-decoration: none; color: inherit; }
 
-        /* ==========================================
-           3. MASTER LAYOUT ARCHITECTURE
-           ========================================== */
+        /* Custom Scrollbar UI Engine */
+        ::-webkit-scrollbar { width: 5px; height: 5px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: var(--radius-round); }
+        ::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+
+        /* ==========================================================================
+           2. MASTER LAYOUT ARCHITECTURE
+           ========================================================================== */
         #app-layout {
             display: grid;
             grid-template-areas: 
@@ -124,10 +113,10 @@
         }
 
         #app-layout.sidebar-collapsed {
-            --sidebar-width: 80px;
+            --sidebar-width: 60px;
         }
 
-        /* Header Style */
+        /* Fixed App Header Shell */
         .app-header {
             grid-area: header;
             background: var(--bg-surface);
@@ -137,11 +126,9 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 0 24px;
+            padding: 0 16px;
             position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
+            top: 0; left: 0; right: 0;
             height: var(--header-height);
             z-index: 1000;
             box-shadow: var(--shadow-sm);
@@ -150,955 +137,467 @@
         .header-left, .header-right {
             display: flex;
             align-items: center;
-            gap: 16px;
+            gap: 12px;
         }
 
         .brand-wrapper {
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 8px;
             cursor: pointer;
         }
 
         .brand-logo {
-            width: 40px;
-            height: 40px;
+            width: 28px; height: 28px;
             background: linear-gradient(135deg, var(--primary), var(--secondary));
             border-radius: var(--radius-md);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-weight: 700;
+            display: flex; align-items: center; justify-content: center;
+            color: white; font-weight: bold; font-size: 13px;
         }
 
         .brand-name {
-            font-size: 1.25rem;
-            font-weight: 700;
+            font-size: 14px; font-weight: 700;
             background: linear-gradient(135deg, var(--text-main), var(--text-muted));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            transition: var(--transition-smooth);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
         }
 
-        #app-layout.sidebar-collapsed .brand-name {
-            opacity: 0;
-            width: 0;
-            pointer-events: none;
-        }
+        #app-layout.sidebar-collapsed .brand-name { display: none; }
 
-        /* Search Box Component */
-        .search-container {
-            position: relative;
-            width: clamp(200px, 30vw, 400px);
-        }
-
+        .search-container { position: relative; width: 220px; }
         .search-input {
-            width: 100%;
-            padding: 10px 16px 10px 44px;
-            border-radius: var(--radius-round);
+            width: 100%; padding: 6px 10px 6px 28px;
+            border-radius: var(--radius-sm);
             border: 1px solid var(--border-color);
             background: rgba(0, 0, 0, 0.02);
-            outline: none;
             transition: var(--transition-smooth);
         }
+        [data-theme="dark"] .search-input { background: rgba(255, 255, 255, 0.02); }
+        .search-input:focus { border-color: var(--primary); background: var(--bg-surface-hover); }
+        .search-icon { position: absolute; left: 8px; top: 50%; transform: translateY(-50%); color: var(--text-muted); }
 
-        [data-theme="dark"] .search-input {
-            background: rgba(255, 255, 255, 0.02);
-        }
-
-        .search-input:focus {
-            border-color: var(--primary);
-            background: var(--bg-surface-hover);
-            box-shadow: 0 0 0 3px var(--primary-state);
-        }
-
-        .search-icon {
-            position: absolute;
-            left: 16px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: var(--text-muted);
-            pointer-events: none;
-        }
-
-        /* Live Clock & Meta widget */
         .meta-clock-widget {
-            display: flex;
-            flex-direction: column;
-            align-items: flex-end;
-            font-size: 0.75rem;
-            color: var(--text-muted);
-            border-right: 1px solid var(--border-color);
-            padding-right: 16px;
+            display: flex; flex-direction: column; align-items: flex-end;
+            border-right: 1px solid var(--border-color); padding-right: 12px;
         }
+        .meta-time { font-weight: 700; color: var(--text-main); }
 
-        .meta-time {
-            font-size: 0.95rem;
-            font-weight: 600;
-            color: var(--text-main);
-        }
-
-        /* Control Shell Icon Action */
+        /* Icon Action Controller Controls */
         .icon-action-btn {
-            width: 40px;
-            height: 40px;
-            border-radius: var(--radius-round);
-            border: none;
-            background: transparent;
-            color: var(--text-main);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            position: relative;
-            transition: var(--transition-smooth);
+            width: 32px; height: 32px; border-radius: var(--radius-sm);
+            border: none; background: transparent; color: var(--text-main);
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; position: relative; transition: var(--transition-smooth);
         }
-
-        .icon-action-btn:hover {
-            background: var(--primary-state);
-            color: var(--primary);
-        }
-
+        .icon-action-btn:hover { background: var(--primary-state); color: var(--primary); }
         .icon-action-btn .badge-dot {
-            position: absolute;
-            top: 8px;
-            right: 8px;
-            width: 8px;
-            height: 8px;
-            background: var(--danger);
-            border-radius: var(--radius-round);
-            border: 2px solid var(--bg-surface);
+            position: absolute; top: 6px; right: 6px; width: 6px; height: 6px;
+            background: var(--danger); border-radius: var(--radius-round);
         }
 
-        /* Sidebar Navigation Architecture */
+        /* Fixed Sidebar Component Drawer */
         .app-sidebar {
             grid-area: sidebar;
             background: var(--bg-surface);
             backdrop-filter: blur(var(--blur-radius));
             -webkit-backdrop-filter: blur(var(--blur-radius));
             border-right: 1px solid var(--border-color);
-            position: fixed;
-            top: var(--header-height);
-            left: 0;
-            bottom: 0;
-            width: var(--sidebar-width);
-            z-index: 999;
+            position: fixed; top: var(--header-height); left: 0; bottom: 0;
+            width: var(--sidebar-width); z-index: 999;
             transition: var(--transition-smooth);
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            padding: 24px 0;
-            box-shadow: var(--shadow-sm);
+            display: flex; flex-direction: column; justify-content: space-between;
+            padding: 12px 0; box-shadow: var(--shadow-sm);
         }
 
-        .sidebar-menu-wrapper {
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
-            padding: 0 12px;
-        }
-
-        .menu-item {
-            display: flex;
-            align-items: center;
-            gap: 16px;
-            padding: 12px 16px;
-            border-radius: var(--radius-md);
-            color: var(--text-muted);
-            text-decoration: none;
-            cursor: pointer;
-            transition: var(--transition-smooth);
-            font-weight: 500;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .menu-item:hover {
-            background: var(--primary-state);
-            color: var(--primary);
-        }
-
-        .menu-item.active {
-            background: var(--primary);
-            color: white;
-            font-weight: 600;
-            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
-        }
-
-        .menu-text {
-            white-space: nowrap;
-            opacity: 1;
-            transition: opacity 0.2s ease;
-        }
-
-        #app-layout.sidebar-collapsed .menu-text {
-            opacity: 0;
-            width: 0;
-            pointer-events: none;
-        }
-
-        /* User Profile Summary Sidebar */
-        .sidebar-user-card {
-            margin: 0 12px;
-            padding: 16px;
-            background: rgba(0, 0, 0, 0.02);
-            border-radius: var(--radius-md);
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            border: 1px solid var(--border-color);
-        }
-
-        [data-theme="dark"] .sidebar-user-card {
-            background: rgba(255, 255, 255, 0.02);
-        }
-
-        .avatar-frame {
-            position: relative;
-            width: 44px;
-            height: 44px;
-            border-radius: var(--radius-round);
-            background: linear-gradient(135deg, var(--secondary), var(--primary));
-            padding: 2px;
-        }
-
-        .avatar-img {
-            width: 100%;
-            height: 100%;
-            border-radius: var(--radius-round);
-            object-fit: cover;
-            background: var(--bg-primary);
-        }
-
-        .user-meta-info {
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-        }
-
-        .user-display-name {
-            font-size: 0.9rem;
-            font-weight: 600;
-            white-space: nowrap;
-            text-overflow: ellipsis;
-            overflow: hidden;
-        }
-
-        .user-role-lbl {
-            font-size: 0.75rem;
-            color: var(--text-muted);
-        }
-
-        #app-layout.sidebar-collapsed .sidebar-user-card {
-            padding: 8px;
-            justify-content: center;
-        }
-        #app-layout.sidebar-collapsed .user-meta-info {
-            display: none;
-        }
-
-        /* Main Workspace Area */
-        .app-content {
-            grid-area: content;
-            margin-top: var(--header-height);
-            margin-left: var(--sidebar-width);
-            padding: 32px;
-            min-height: calc(100vh - var(--header-height) - 60px);
-            transition: var(--transition-smooth);
-        }
-
-        #app-layout.sidebar-collapsed .app-content {
-            margin-left: var(--sidebar-width);
-        }
-
-        /* Footer Structure */
-        .app-footer {
-            grid-area: footer;
-            background: var(--bg-surface);
-            border-top: 1px solid var(--border-color);
-            margin-left: var(--sidebar-width);
-            padding: 16px 32px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            font-size: 0.8rem;
-            color: var(--text-muted);
-            transition: var(--transition-smooth);
-        }
+        .sidebar-menu-wrapper { display: flex; flex-direction: column; gap: 2px; padding: 0 6px; }
         
-        #app-layout.sidebar-collapsed .app-footer {
-            margin-left: var(--sidebar-width);
+        .menu-item {
+            display: flex; align-items: center; gap: 10px; padding: 8px 12px;
+            border-radius: var(--radius-sm); color: var(--text-muted);
+            cursor: pointer; transition: var(--transition-smooth);
+            position: relative; overflow: hidden;
+        }
+        .menu-item:hover { background: var(--primary-state); color: var(--primary); }
+        .menu-item.active {
+            background: var(--primary); color: white; font-weight: bold;
+            box-shadow: 0 2px 6px rgba(79, 70, 229, 0.2);
         }
 
-        .network-status-badge {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            font-weight: 600;
-        }
-        .status-dot {
-            width: 8px;
-            height: 8px;
-            border-radius: var(--radius-round);
-            background: var(--success);
-        }
-        .status-dot.offline {
-            background: var(--danger);
-        }
+        #app-layout.sidebar-collapsed .menu-text { display: none; }
 
-        /* Bottom Nav (Mobile Only) */
-        .bottom-nav {
-            display: none;
-        }
-
-        /* ==========================================
-           4. SYSTEM WORKSPACE GRAPHICS & VIEWS
-           ========================================== */
-        .view-container {
-            animation: fadeIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        /* Grid Layout Modules */
-        .grid-dashboard {
-            display: grid;
-            grid-template-columns: 2fr 1fr;
-            gap: 24px;
-        }
-
-        /* Premium Components: Cards */
-        .premium-card {
-            background: var(--bg-surface);
-            backdrop-filter: blur(var(--blur-radius));
-            -webkit-backdrop-filter: blur(var(--blur-radius));
+        .sidebar-user-card {
+            margin: 0 6px; padding: 8px; background: rgba(0, 0, 0, 0.02);
+            border-radius: var(--radius-sm); display: flex; align-items: center; gap: 8px;
             border: 1px solid var(--border-color);
-            border-radius: var(--radius-md);
-            padding: 24px;
-            box-shadow: var(--shadow-sm);
+        }
+        [data-theme="dark"] .sidebar-user-card { background: rgba(255, 255, 255, 0.02); }
+        .avatar-frame {
+            position: relative; width: 28px; height: 28px;
+            border-radius: var(--radius-round); padding: 1px;
+            background: linear-gradient(135deg, var(--secondary), var(--primary));
+        }
+        .avatar-img { width: 100%; height: 100%; border-radius: var(--radius-round); object-fit: cover; }
+        .user-meta-info { display: flex; flex-direction: column; overflow: hidden; }
+        .user-display-name { font-weight: 600; white-space: nowrap; text-overflow: ellipsis; overflow: hidden; }
+        .user-role-lbl { font-size: 9px; color: var(--text-muted); }
+        #app-layout.sidebar-collapsed .sidebar-user-card { padding: 4px; justify-content: center; }
+        #app-layout.sidebar-collapsed .user-meta-info { display: none; }
+
+        /* Workspace Main Context Viewport */
+        .app-content {
+            grid-area: content; margin-top: var(--header-height); margin-left: var(--sidebar-width);
+            padding: 16px; min-height: calc(100vh - var(--header-height) - 35px);
             transition: var(--transition-smooth);
-            position: relative;
-            margin-bottom: 24px;
         }
 
-        .premium-card:hover {
-            transform: translateY(-2px);
-            box-shadow: var(--shadow-md);
-            border-color: rgba(79, 70, 229, 0.2);
+        /* Fixed App Footer Layout */
+        .app-footer {
+            grid-area: footer; background: var(--bg-surface);
+            border-top: 1px solid var(--border-color); margin-left: var(--sidebar-width);
+            padding: 8px 16px; display: flex; justify-content: space-between;
+            align-items: center; color: var(--text-muted); transition: var(--transition-smooth);
         }
+
+        .network-status-badge { display: flex; align-items: center; gap: 4px; font-weight: bold; }
+        .status-dot { width: 6px; height: 6px; border-radius: var(--radius-round); background: var(--success); }
+        .status-dot.offline { background: var(--danger); }
+
+        .bottom-nav { display: none; }
+
+        /* ==========================================================================
+           3. UI STYLING & MASTER PREMIUM COMPONENTS (FONTS INTEGRITY AT 8pt FIXED)
+           ========================================================================== */
+        .view-container { animation: fadeIn 0.25s cubic-bezier(0.4, 0, 0.2, 1); }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+
+        .grid-dashboard { display: grid; grid-template-columns: 2fr 1fr; gap: 16px; }
+        
+        .premium-card {
+            background: var(--bg-surface); backdrop-filter: blur(var(--blur-radius));
+            -webkit-backdrop-filter: blur(var(--blur-radius));
+            border: 1px solid var(--border-color); border-radius: var(--radius-md);
+            padding: 16px; box-shadow: var(--shadow-sm); transition: var(--transition-smooth);
+            margin-bottom: 16px; position: relative;
+        }
+        .premium-card:hover { transform: translateY(-1px); box-shadow: var(--shadow-md); }
 
         .welcome-gradient-card {
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-            color: white;
-            border: none;
+            background: linear-gradient(135deg, var(--primary), var(--secondary)); color: white; border: none;
         }
         .welcome-gradient-card * { color: white !important; }
 
-        /* Stats Blocks */
-        .stats-strip {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 16px;
-            margin-bottom: 24px;
-        }
+        .stats-strip { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin-bottom: 16px; }
         .stat-box {
-            background: var(--bg-surface);
-            border: 1px solid var(--border-color);
-            border-radius: var(--radius-md);
-            padding: 20px;
-            display: flex;
-            align-items: center;
-            gap: 16px;
+            background: var(--bg-surface); border: 1px solid var(--border-color);
+            border-radius: var(--radius-md); padding: 12px; display: flex; align-items: center; gap: 12px;
         }
         .stat-icon-wrapper {
-            width: 48px;
-            height: 48px;
-            border-radius: var(--radius-md);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.5rem;
+            width: 32px; height: 32px; border-radius: var(--radius-sm);
+            display: flex; align-items: center; justify-content: center;
         }
 
-        /* Social Media Feeds: Feed Card Engine */
-        .post-composer-area {
-            display: flex;
-            flex-direction: column;
-            gap: 16px;
-        }
-        .composer-textarea {
-            width: 100%;
-            min-height: 100px;
-            border: 1px solid var(--border-color);
-            border-radius: var(--radius-md);
-            background: rgba(0,0,0,0.01);
-            padding: 16px;
-            resize: none;
-            outline: none;
-            font-size: 0.95rem;
-            transition: var(--transition-smooth);
-        }
-        .composer-textarea:focus {
-            border-color: var(--primary);
-            background: var(--bg-surface-hover);
-        }
-
-        .post-card-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 14px;
-        }
-        .post-author-block {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-        .post-content-body {
-            font-size: 0.98rem;
-            line-height: 1.6;
-            margin-bottom: 16px;
-            white-space: pre-wrap;
-        }
-        .post-media-attachment {
-            width: 100%;
-            max-height: 380px;
-            border-radius: var(--radius-md);
-            object-fit: cover;
-            margin-bottom: 16px;
-            border: 1px solid var(--border-color);
-        }
-        .post-actions-bar {
-            display: flex;
-            border-top: 1px solid var(--border-color);
-            border-bottom: 1px solid var(--border-color);
-            padding: 8px 0;
-            margin-bottom: 16px;
-            gap: 8px;
-        }
-        .action-trigger-btn {
-            flex: 1;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            padding: 8px;
-            border-radius: var(--radius-sm);
-            border: none;
-            background: transparent;
-            cursor: pointer;
-            color: var(--text-muted);
-            font-size: 0.88rem;
-            font-weight: 500;
-            transition: var(--transition-smooth);
-        }
-        .action-trigger-btn:hover {
-            background: var(--primary-state);
-            color: var(--primary);
-        }
-        .action-trigger-btn.active-liked {
-            color: var(--danger);
-        }
-
-        /* Comments Engine Architecture */
-        .comments-section {
-            background: rgba(0, 0, 0, 0.01);
-            border-radius: var(--radius-md);
-            padding: 16px;
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-        .comment-node {
-            display: flex;
-            gap: 12px;
-            font-size: 0.88rem;
-        }
-        .comment-bubble {
-            background: var(--bg-surface-hover);
-            border: 1px solid var(--border-color);
-            padding: 10px 14px;
-            border-radius: 0 var(--radius-md) var(--radius-md) var(--radius-md);
-            flex: 1;
-        }
-
-        /* Realtime Chat Workspace Engine */
-        .chat-module-container {
-            display: grid;
-            grid-template-columns: 280px 1fr;
-            border: 1px solid var(--border-color);
-            border-radius: var(--radius-md);
-            background: var(--bg-surface);
-            height: calc(100vh - var(--header-height) - 140px);
-            overflow: hidden;
-        }
-        .chat-channels-list {
-            border-right: 1px solid var(--border-color);
-            overflow-y: auto;
-            display: flex;
-            flex-direction: column;
-        }
-        .channel-row {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 14px 16px;
-            cursor: pointer;
-            border-bottom: 1px solid var(--border-color);
-            transition: var(--transition-smooth);
-        }
-        .channel-row:hover, .channel-row.active {
-            background: var(--primary-state);
-        }
-        .chat-viewport {
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            background: rgba(0, 0, 0, 0.01);
-        }
-        .chat-messages-stream {
-            flex: 1;
-            padding: 24px;
-            overflow-y: auto;
-            display: flex;
-            flex-direction: column;
-            gap: 16px;
-        }
-        .msg-packet {
-            display: flex;
-            flex-direction: column;
-            max-width: 65%;
-            gap: 4px;
-        }
-        .msg-packet.incoming {
-            align-self: flex-start;
-        }
-        .msg-packet.outgoing {
-            align-self: flex-end;
-            align-items: flex-end;
-        }
-        .msg-payload {
-            padding: 12px 16px;
-            border-radius: var(--radius-md);
-            font-size: 0.92rem;
-            box-shadow: var(--shadow-sm);
-        }
-        .incoming .msg-payload {
-            background: var(--bg-surface);
-            border: 1px solid var(--border-color);
-            border-radius: 0 var(--radius-md) var(--radius-md) var(--radius-md);
-        }
-        .outgoing .msg-payload {
-            background: var(--primary);
-            color: white;
-            border-radius: var(--radius-md) 0 var(--radius-md) var(--radius-md);
-        }
-        .msg-timestamp {
-            font-size: 0.7rem;
-            color: var(--text-muted);
-        }
-        .chat-composer-strip {
-            padding: 16px 24px;
-            background: var(--bg-surface);
-            border-top: 1px solid var(--border-color);
-            display: flex;
-            gap: 12px;
-            align-items: center;
-        }
-
-        /* Form Controls Elements styling */
-        .form-group-floating {
-            position: relative;
-            margin-bottom: 20px;
-        }
-        .form-control-input {
-            width: 100%;
-            padding: 14px 16px;
-            border: 1px solid var(--border-color);
-            border-radius: var(--radius-md);
-            background: transparent;
-            outline: none;
-            font-size: 0.95rem;
-            transition: var(--transition-smooth);
-        }
-        .form-control-input:focus {
-            border-color: var(--primary);
-            box-shadow: 0 0 0 3px var(--primary-state);
-        }
-        
-        /* Buttons Master Suite Styling & Ripple effects base */
+        /* Buttons Core Engine */
         .btn-suite {
-            padding: 10px 20px;
-            border-radius: var(--radius-md);
-            border: none;
-            font-weight: 600;
-            font-size: 0.88rem;
-            cursor: pointer;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            justify-content: center;
-            transition: var(--transition-smooth);
-            position: relative;
-            overflow: hidden;
+            padding: 6px 12px; border-radius: var(--radius-sm); border: none;
+            font-weight: 600; cursor: pointer; display: inline-flex;
+            align-items: center; gap: 6px; justify-content: center;
+            transition: var(--transition-smooth); position: relative; overflow: hidden;
         }
-        .btn-primary { background: var(--primary); color: white; box-shadow: var(--shadow-sm); }
-        .btn-primary:hover { opacity: 0.9; transform: translateY(-1px); }
+        .btn-primary { background: var(--primary); color: white; }
         .btn-secondary { background: rgba(0,0,0,0.05); color: var(--text-main); }
         [data-theme="dark"] .btn-secondary { background: rgba(255,255,255,0.05); }
+        .btn-success { background: var(--success); color: white; }
         .btn-danger { background: var(--danger); color: white; }
+        .btn-warning { background: var(--warning); color: white; }
+        .btn-info { background: var(--info); color: white; }
+        .btn-suite:disabled { opacity: 0.5; cursor: not-allowed; }
+
+        /* Floating Label Form Core controls UI */
+        .form-group-floating { position: relative; margin-bottom: 12px; }
+        .form-control-input {
+            width: 100%; padding: 8px 10px; border: 1px solid var(--border-color);
+            border-radius: var(--radius-sm); background: transparent; transition: var(--transition-smooth);
+        }
+        .form-control-input:focus { border-color: var(--primary); box-shadow: 0 0 0 2px var(--primary-state); }
         
-        /* Modern Data Table System */
-        .table-panel-holder {
-            width: 100%;
-            overflow-x: auto;
-            border-radius: var(--radius-md);
-            border: 1px solid var(--border-color);
-        }
-        .premium-table {
-            width: 100%;
-            border-collapse: collapse;
-            text-align: left;
-            font-size: 0.9rem;
-        }
+        /* Premium Data Table Architecture Component */
+        .table-panel-holder { width: 100%; overflow-x: auto; border-radius: var(--radius-sm); border: 1px solid var(--border-color); }
+        .premium-table { width: 100%; border-collapse: collapse; text-align: left; }
         .premium-table th {
-            background: rgba(0,0,0,0.02);
-            padding: 14px 16px;
-            font-weight: 600;
-            color: var(--text-muted);
-            border-bottom: 2px solid var(--border-color);
+            background: rgba(0,0,0,0.02); padding: 8px 12px; font-weight: 700;
+            color: var(--text-muted); border-bottom: 2px solid var(--border-color);
+            cursor: pointer; user-select: none;
         }
         [data-theme="dark"] .premium-table th { background: rgba(255,255,255,0.02); }
-        .premium-table td {
-            padding: 14px 16px;
-            border-bottom: 1px solid var(--border-color);
-        }
+        .premium-table td { padding: 8px 12px; border-bottom: 1px solid var(--border-color); }
         .premium-table tr:last-child td { border-bottom: none; }
         .premium-table tr:hover td { background: var(--primary-state); }
 
-        /* Dialog / Modal Shell Layer */
+        /* Social Media Module Components Engine */
+        .post-composer-area { display: flex; flex-direction: column; gap: 8px; }
+        .composer-textarea {
+            width: 100%; min-height: 60px; border: 1px solid var(--border-color);
+            border-radius: var(--radius-sm); background: rgba(0,0,0,0.01); padding: 8px; resize: none;
+        }
+        .post-card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+        .post-author-block { display: flex; align-items: center; gap: 8px; }
+        .post-content-body { line-height: 1.5; margin-bottom: 10px; white-space: pre-wrap; }
+        .post-media-attachment { width: 100%; max-height: 220px; border-radius: var(--radius-sm); object-fit: cover; margin-bottom: 10px; border: 1px solid var(--border-color); }
+        .post-actions-bar { display: flex; border-top: 1px solid var(--border-color); border-bottom: 1px solid var(--border-color); padding: 4px 0; gap: 4px; }
+        .action-trigger-btn { flex: 1; display: flex; align-items: center; justify-content: center; gap: 6px; padding: 6px; border: none; background: transparent; cursor: pointer; color: var(--text-muted); }
+        .action-trigger-btn.active-liked { color: var(--danger); font-weight: bold; }
+        .comments-section { background: rgba(0, 0, 0, 0.01); border-radius: var(--radius-sm); padding: 8px; display: flex; flex-direction: column; gap: 6px; }
+        .comment-node { display: flex; gap: 8px; }
+        .comment-bubble { background: var(--bg-surface-hover); border: 1px solid var(--border-color); padding: 6px 10px; border-radius: 0 var(--radius-md) var(--radius-md) var(--radius-md); flex: 1; }
+
+        /* Chat Modules Subsystem Engine */
+        .chat-module-container {
+            display: grid; grid-template-columns: 180px 1fr; border: 1px solid var(--border-color);
+            border-radius: var(--radius-md); background: var(--bg-surface); height: calc(100vh - var(--header-height) - 100px); overflow: hidden;
+        }
+        .chat-channels-list { border-right: 1px solid var(--border-color); overflow-y: auto; display: flex; flex-direction: column; }
+        .channel-row { display: flex; align-items: center; gap: 8px; padding: 10px; cursor: pointer; border-bottom: 1px solid var(--border-color); }
+        .channel-row.active { background: var(--primary-state); font-weight: bold; }
+        .chat-viewport { display: flex; flex-direction: column; justify-content: space-between; background: rgba(0,0,0,0.01); }
+        .chat-messages-stream { flex: 1; padding: 16px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; }
+        .msg-packet { display: flex; flex-direction: column; max-width: 70%; gap: 2px; }
+        .msg-packet.incoming { align-self: flex-start; }
+        .msg-packet.outgoing { align-self: flex-end; align-items: flex-end; }
+        .msg-payload { padding: 8px 12px; border-radius: var(--radius-md); box-shadow: var(--shadow-sm); }
+        .incoming .msg-payload { background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: 0 var(--radius-md) var(--radius-md) var(--radius-md); }
+        .outgoing .msg-payload { background: var(--primary); color: white; border-radius: var(--radius-md) 0 var(--radius-md) var(--radius-md); }
+        .msg-timestamp { font-size: 9px; color: var(--text-muted); }
+        .chat-composer-strip { padding: 10px 16px; background: var(--bg-surface); border-top: 1px solid var(--border-color); display: flex; gap: 8px; align-items: center; }
+
+        /* Modal Overlay & Sheet Container UI */
         .modal-overlay {
-            position: fixed;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(15, 23, 42, 0.4);
-            backdrop-filter: blur(4px);
-            -webkit-backdrop-filter: blur(4px);
-            z-index: 2000;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            opacity: 0;
-            pointer-events: none;
-            transition: var(--transition-smooth);
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(15, 23, 42, 0.3); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);
+            z-index: 2000; display: flex; align-items: center; justify-content: center;
+            opacity: 0; pointer-events: none; transition: var(--transition-smooth);
         }
-        .modal-overlay.active {
-            opacity: 1;
-            pointer-events: auto;
-        }
+        .modal-overlay.active { opacity: 1; pointer-events: auto; }
         .modal-sheet-box {
-            background: var(--bg-surface);
-            border: 1px solid var(--border-color);
-            border-radius: var(--radius-lg);
-            width: 90%;
-            max-width: 500px;
-            padding: 28px;
-            box-shadow: var(--shadow-lg);
-            transform: scale(0.95);
-            transition: var(--transition-smooth);
+            background: var(--bg-surface); border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg); width: 90%; max-width: 400px; padding: 16px;
+            box-shadow: var(--shadow-lg); transform: scale(0.95); transition: var(--transition-smooth);
         }
-        .modal-overlay.active .modal-sheet-box {
-            transform: scale(1);
-        }
+        .modal-overlay.active .modal-sheet-box { transform: scale(1); }
 
-        /* Toast Alert Container Component */
-        #toast-container {
-            position: fixed;
-            top: 24px;
-            right: 24px;
-            z-index: 3000;
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-            pointer-events: none;
-        }
+        /* Dynamic System Toast Gateway Alerts CSS */
+        #toast-container { position: fixed; top: 16px; right: 16px; z-index: 3000; display: flex; flex-direction: column; gap: 8px; pointer-events: none; }
         .toast-node {
-            background: var(--bg-surface);
-            border-left: 4px solid var(--primary);
-            box-shadow: var(--shadow-lg);
-            padding: 16px 20px;
-            border-radius: var(--radius-md);
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            min-width: 280px;
-            pointer-events: auto;
-            animation: slideInRight 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            background: var(--bg-surface); border-left: 4px solid var(--primary); box-shadow: var(--shadow-lg);
+            padding: 10px 16px; border-radius: var(--radius-sm); display: flex; align-items: center; gap: 10px;
+            min-width: 240px; pointer-events: auto; animation: slideIn 0.2s cubic-bezier(0.4, 0, 0.2, 1);
         }
-        @keyframes slideInRight {
-            from { transform: translateX(100%); opacity: 0; }
-            to { transform: translateX(0); opacity: 1; }
-        }
+        @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
 
-        /* Setup Ripple Effect Mechanics */
-        .ripple {
-            position: absolute;
-            background: rgba(255, 255, 255, 0.4);
-            border-radius: var(--radius-round);
-            transform: scale(0);
-            animation: ripple-anim 0.6s linear;
-            pointer-events: none;
-        }
-        @keyframes ripple-anim {
-            to { transform: scale(4); opacity: 0; }
-        }
+        .ripple { position: absolute; background: rgba(255, 255, 255, 0.35); border-radius: var(--radius-round); transform: scale(0); animation: ripple-anim 0.5s linear; pointer-events: none; }
+        @keyframes ripple-anim { to { transform: scale(4); opacity: 0; } }
 
-        /* ==========================================
-           5. MEDIA QUERIES (RESPONSIVENESS HUB)
-           ========================================== */
+        /* User Menu Profile Dropdown Overlay styling */
+        .dropdown-menu-sheet {
+            position: absolute; top: var(--header-height); right: 16px;
+            background: var(--bg-surface); border: 1px solid var(--border-color);
+            border-radius: var(--radius-md); min-width: 140px; box-shadow: var(--shadow-lg);
+            display: none; flex-direction: column; padding: 4px; z-index: 1005;
+        }
+        .dropdown-menu-sheet.active { display: flex; }
+        .dropdown-item-node { padding: 6px 10px; border-radius: var(--radius-sm); cursor: pointer; display: flex; align-items: center; gap: 8px; }
+        .dropdown-item-node:hover { background: var(--primary-state); color: var(--primary); }
+
+        /* ==========================================================================
+           4. ADAPTIVE RESPONSIVENESS MEDIA INTERFACES HUB
+           ========================================================================== */
         @media (max-width: 992px) {
-            #app-layout {
-                grid-template-columns: 80px 1fr;
-            }
-            .app-sidebar {
-                width: 80px;
-            }
-            .brand-name, .menu-text, .user-meta-info {
-                display: none;
-            }
-            .app-content, .app-footer {
-                margin-left: 80px;
-            }
+            #app-layout { grid-template-columns: 60px 1fr; }
+            .app-sidebar { width: 60px; }
+            .brand-name, .menu-text, .user-meta-info { display: none; }
+            .app-content, .app-footer { margin-left: 60px; }
         }
 
         @media (max-width: 768px) {
             #app-layout {
-                grid-template-areas: 
-                    "header header"
-                    "content content";
+                grid-template-areas: "header header" "content content";
                 grid-template-columns: 1fr;
             }
-            .app-sidebar, .app-footer {
-                display: none;
-            }
-            .app-content {
-                margin-left: 0;
-                padding: 16px;
-                padding-bottom: calc(var(--bottom-nav-height) + 24px);
-            }
-            .grid-dashboard {
-                grid-template-columns: 1fr;
-            }
+            .app-sidebar, .app-footer { display: none; }
+            .app-content { margin-left: 0; padding: 12px; padding-bottom: calc(var(--bottom-nav-height) + 12px); }
+            .grid-dashboard { grid-template-columns: 1fr; }
 
-            /* Bottom Nav Activation */
+            /* Mobile Frame Bottom Navigation Engine Trigger activation */
             .bottom-nav {
-                display: flex;
-                position: fixed;
-                bottom: 0; left: 0; right: 0;
-                height: var(--bottom-nav-height);
-                background: var(--bg-surface);
-                backdrop-filter: blur(var(--blur-radius));
-                -webkit-backdrop-filter: blur(var(--blur-radius));
-                border-top: 1px solid var(--border-color);
-                box-shadow: var(--shadow-lg);
-                z-index: 1000;
-                padding-bottom: env(safe-area-inset-bottom);
-                justify-content: space-around;
-                align-items: center;
+                display: flex; position: fixed; bottom: 0; left: 0; right: 0;
+                height: var(--bottom-nav-height); background: var(--bg-surface);
+                backdrop-filter: blur(var(--blur-radius)); -webkit-backdrop-filter: blur(var(--blur-radius));
+                border-top: 1px solid var(--border-color); box-shadow: var(--shadow-lg);
+                z-index: 1000; padding-bottom: env(safe-area-inset-bottom);
+                justify-content: space-around; align-items: center;
             }
-            .bottom-nav-item {
-                display: flex;
-                flex-direction: column;
-                align-items: center;
-                color: var(--text-muted);
-                text-decoration: none;
-                font-size: 0.72rem;
-                font-weight: 500;
-                gap: 4px;
-                position: relative;
-                flex: 1;
-                padding: 8px 0;
-            }
-            .bottom-nav-item.active {
-                color: var(--primary);
-                font-weight: 600;
-            }
-            .bottom-nav-item.active .material-symbols-out-frame {
-                background: var(--primary-container);
-                padding: 4px 16px;
-                border-radius: var(--radius-round);
-            }
+            .bottom-nav-item { display: flex; flex-direction: column; align-items: center; color: var(--text-muted); font-size: 9px; gap: 2px; flex: 1; padding: 4px 0; cursor: pointer; }
+            .bottom-nav-item.active { color: var(--primary); font-weight: bold; }
+            .bottom-nav-item.active .material-symbols-outlined { background: var(--primary-container); padding: 2px 12px; border-radius: var(--radius-round); }
             
-            /* Responsive Adaptive Cards Mobile Table Converter */
+            /* Responsive Table Mobile List Grid Parser */
             .premium-table-container th { display: none; }
-            .premium-table-container tr {
-                display: block;
-                margin-bottom: 12px;
-                border: 1px solid var(--border-color);
-                border-radius: var(--radius-md);
-                background: var(--bg-surface);
-            }
-            .premium-table-container td {
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-                border-bottom: 1px solid var(--border-color);
-                text-align: right;
-                padding: 12px;
-            }
-            .premium-table-container td::before {
-                content: attr(data-label);
-                font-weight: 600;
-                color: var(--text-muted);
-                text-align: left;
-            }
-            .chat-module-container {
-                grid-template-columns: 1fr;
-            }
-            .chat-channels-list {
-                display: none; /* simple navigation toggle can override */
-            }
+            .premium-table-container tr { display: block; margin-bottom: 8px; border: 1px solid var(--border-color); border-radius: var(--radius-md); background: var(--bg-surface); }
+            .premium-table-container td { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); text-align: right; padding: 8px 12px; }
+            .premium-table-container td::before { content: attr(data-label); font-weight: 700; color: var(--text-muted); text-align: left; }
+            .chat-module-container { grid-template-columns: 1fr; }
+            .chat-channels-list { display: none; }
         }
     </style>
 </head>
 <body>
 
     <div id="app-layout">
-        <!-- HEADER MODULE -->
+        <!-- APP TOP NAVBAR HEADER -->
         <header class="app-header">
             <div class="header-left">
                 <div class="brand-wrapper" onclick="App.Router.navigate('dashboard')">
                     <div class="brand-logo">N</div>
                     <span class="brand-name">NexSphere</span>
                 </div>
-                <button class="icon-action-btn" id="sidebar-toggle-trigger" aria-label="Toggle Sidebar">
-                    <span class="material-symbols-outlined">menu</span>
+                <button class="icon-action-btn" id="sidebar-toggle-trigger" aria-label="Toggle Sidebar Menu">
+                    <span class="material-symbols-outlined" style="font-size:16px;">menu</span>
                 </button>
                 <div class="search-container">
-                    <span class="material-symbols-outlined search-icon">search</span>
-                    <input type="text" class="search-input" placeholder="Cari postingan, berkas, obrolan..." id="global-search-engine">
+                    <span class="material-symbols-outlined search-icon" style="font-size:14px;">search</span>
+                    <input type="text" class="search-input" placeholder="Cari master berkas, pos..." id="global-search-engine">
                 </div>
             </div>
             
             <div class="header-right">
                 <div class="meta-clock-widget">
-                    <span id="live-date-str">Memuat Tanggal...</span>
+                    <span id="live-date-str">Memuat...</span>
                     <span id="live-clock-str" class="meta-time">00:00:00 WIB</span>
                 </div>
-                
-                <button class="icon-action-btn" id="theme-toggle-trigger" aria-label="Toggle Tema">
-                    <span class="material-symbols-outlined">dark_mode</span>
+                <button class="icon-action-btn" id="refresh-view-trigger" aria-label="Segarkan Halaman">
+                    <span class="material-symbols-outlined" style="font-size:16px;">refresh</span>
                 </button>
-                
-                <button class="icon-action-btn" id="fullscreen-toggle-trigger" aria-label="Fullscreen">
-                    <span class="material-symbols-outlined">fullscreen</span>
+                <button class="icon-action-btn" id="theme-toggle-trigger" aria-label="Toggle Tema Gelap">
+                    <span class="material-symbols-outlined" style="font-size:16px;">dark_mode</span>
                 </button>
-                
-                <button class="icon-action-btn" id="notification-bell-trigger" aria-label="Notifikasi">
-                    <span class="material-symbols-outlined">notifications</span>
+                <button class="icon-action-btn" id="fullscreen-toggle-trigger" aria-label="Ubah Layar Penuh">
+                    <span class="material-symbols-outlined" style="font-size:16px;">fullscreen</span>
+                </button>
+                <button class="icon-action-btn" id="notification-bell-trigger" aria-label="Buka Notifikasi">
+                    <span class="material-symbols-outlined" style="font-size:16px;">notifications</span>
                     <span class="badge-dot"></span>
                 </button>
-                
                 <div class="avatar-frame" id="profile-dropdown-trigger" style="cursor:pointer;">
-                    <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=100&q=80" alt="User Profil" class="avatar-img" id="header-avatar-preview">
+                    <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=100&q=80" alt="Avatar Profil Operator" class="avatar-img">
                 </div>
             </div>
         </header>
 
-        <!-- SIDEBAR CONTAINER MODULE -->
+        <!-- USER DROPDOWN FLOATING SHEET MENU -->
+        <div class="dropdown-menu-sheet" id="profile-dropdown-sheet">
+            <div class="dropdown-item-node" onclick="App.Router.navigate('profil')"><span class="material-symbols-outlined" style="font-size:14px;">person</span>Akun Profil</div>
+            <div class="dropdown-item-node" onclick="App.Router.navigate('pengaturan')"><span class="material-symbols-outlined" style="font-size:14px;">settings</span>Konfigurasi</div>
+            <hr style="border:none; border-top:1px solid var(--border-color); margin:4px 0;">
+            <div class="dropdown-item-node" onclick="App.Auth.logout()" style="color:var(--danger);"><span class="material-symbols-outlined" style="font-size:14px;">logout</span>Keluar Sistem</div>
+        </div>
+
+        <!-- FIXED SIDEBAR MAIN CONTAINER LEFT -->
         <aside class="app-sidebar">
             <div class="sidebar-menu-wrapper" id="sidebar-menu-injector">
-                <!-- Injected via JavaScript Array Map Loop dynamically -->
+                <!-- Injected Natively from Menu JS Matrix Mapping Loop -->
             </div>
             
             <div class="sidebar-user-card" id="sidebar-account-plate">
                 <div class="avatar-frame">
-                    <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=100&q=80" alt="Avatar" class="avatar-img" id="sidebar-avatar-preview">
+                    <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=100&q=80" alt="Operator Avatar" class="avatar-img">
                 </div>
                 <div class="user-meta-info">
                     <span class="user-display-name" id="sidebar-user-name">Kartika Dewi</span>
-                    <span class="user-role-lbl">Senior Administrator</span>
+                    <span class="user-role-lbl">Admin Supabase Cloud</span>
                 </div>
             </div>
         </aside>
 
-        <!-- WORKSPACE VIEWPORT CONTENT ROUTER -->
+        <!-- MAIN CORE VIEWPORT INTERFACE DRAWER -->
         <main class="app-content" id="app-viewport-root">
-            <!-- Dynamic Template Views Loaded Here -->
+            <!-- Dynamic Router SPA Render Context Injected Here -->
         </main>
 
-        <!-- FOOTER BAR STATS MODULE -->
+        <!-- SYSTEM MASTER FOOTER DATA LOG LAYER -->
         <footer class="app-footer">
             <div>
                 &copy; <span id="footer-year-sync">2026</span> <strong>NexSphere Platform</strong>. Seluruh Hak Cipta Dilindungi.
             </div>
-            <div style="display:flex; gap:24px; align-items:center;">
-                <span>Ditenagai oleh Murni Vanilla HTML, CSS & JS (ES6+)</span>
-                <span>Versi 3.4.0-Build2026</span>
+            <div style="display:flex; gap:16px; align-items:center;">
+                <span>Arsitektur DB Terpusat: <strong>Supabase Infrastructure Cloud REST v3</strong></span>
                 <div class="network-status-badge">
                     <div class="status-dot" id="network-indicator-dot"></div>
-                    <span id="network-indicator-lbl">Sistem Online</span>
+                    <span id="network-indicator-lbl">Koneksi Aktif</span>
                 </div>
             </div>
         </footer>
 
-        <!-- BOTTOM NAV BAR (MOBILE EXCLUSIVE SHELL) -->
+        <!-- BOTTOM NAVIGATION LAYER MODULE (MOBILE PLATFORM VIEWPORT) -->
         <nav class="bottom-nav" id="bottom-nav-injector">
-            <!-- Dynamic Mobile Anchors Trigger here -->
+            <!-- Dynamic Mobile Anchors Trigger runtime structural inject -->
         </nav>
     </div>
 
-    <!-- DIALOG BASE MODAL SYSTEM CONTAINER -->
+    <!-- MAIN DIALOG SYSTEM ROOT MODAL OVERLAY SHEET -->
     <div class="modal-overlay" id="system-modal-root" tabindex="-1">
         <div class="modal-sheet-box" id="modal-container-body">
-            <!-- Modal layout context injected runtime -->
+            <!-- Dynamic Template Content Dialog Modals Injected -->
         </div>
     </div>
 
-    <!-- SYSTEM TOAST ALERT STACK GATEWAY -->
+    <!-- APP GATEWAY ALERT LAYER NOTIFIER TOAST CONTAINER -->
     <div id="toast-container"></div>
 
-    <!-- ==========================================
-       6. CORE PROGRAM ENGINEERING (JAVASCRIPT)
-       ========================================== */ -->
+    <!-- ==========================================================================
+       5. CORE PROGRAM ENGINEERING ARCHITECTURE (VANILLA JAVASCRIPT SYSTEM ENGINE)
+       ========================================================================== -->
     <script>
         /**
-         * NEXSPHERE CONFIGURATION & CONSTANTS ENGINE
-         * Supabase Database client fallback simulator implementation
-         * Murni REST client layer dengan skema fallback LocalStorage otomatis
+         * NEXSPHERE SYSTEM DATABASES - CLIENT BACKEND REST INTEGRATION
+         * Data runtime layer sinkronisasi dengan status state penyimpanan
          */
-        const SupabaseMockEngine = {
+        const SupabaseClientEngine = {
             db: {
-                posts: JSON.parse(localStorage.getItem('ns_posts')) || [
-                    { id: "p1", author: "Ahmad Rifai", avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=100&q=80", body: "Selamat pagi tim internal NexSphere! Implementasi integrasi layout Glassmorphism dan sinkronisasi data Supabase berjalan optimal hari ini. Siap deployment.", media: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&w=600&q=80", likes: 12, liked: false, timestamp: "08:15", comments: [{ author: "Budi Utomo", body: "Luar biasa mas! Performa 60fps mulus." }] },
-                    { id: "p2", author: "Kartika Dewi", avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=100&q=80", body: "Mengingatkan kembali, rapat evaluasi POS, Absensi harian, dan validasi berkas ERP dilakukan jam 14:00 WIB via modul kolaborasi internal.", media: null, likes: 5, liked: true, timestamp: "09:30", comments: [] }
+                posts: JSON.parse(localStorage.getItem('sb_posts')) || [
+                    { id: "p1", author: "Ahmad Rifai", avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=100&q=80", body: "Konfigurasi skema database cloud server Supabase REST API untuk unit social feed serta modular POS kasir telah selesai di-migrate. Data harian sinkron penuh.", media: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&w=600&q=80", likes: 24, liked: false, timestamp: "08:15", comments: [{ author: "Budi Utomo", body: "Kerja bagus tim! Respon query sangat cepat kurang dari 40ms." }] },
+                    { id: "p2", author: "Kartika Dewi", avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=100&q=80", body: "Pengumuman internal: sinkronisasi berkas inventaris gudang dan absensi mingguan wajib disubmit sebelum pukul 17:00 sore ini melalui modul dashboard.", media: null, likes: 9, liked: true, timestamp: "09:32", comments: [] }
                 ],
-                chats: JSON.parse(localStorage.getItem('ns_chats')) || [
-                    { id: 1, sender: "Budi Utomo", msg: "Halo admin, modul master data inventaris sudah saya sinkronisasikan ke Supabase?", time: "10:02", incoming: true },
-                    { id: 2, sender: "Kartika Dewi", msg: "Sudah masuk om Budi, status aman terverifikasi di server cloud utama.", time: "10:05", incoming: false }
+                chats: JSON.parse(localStorage.getItem('sb_chats')) || [
+                    { id: 1, sender: "Budi Utomo", msg: "Halo admin, modul sinkronisasi logistik Supabase sudah divalidasi hari ini?", time: "10:02", incoming: true },
+                    { id: 2, sender: "Kartika Dewi", msg: "Sudah terverifikasi masuk ke tabel utama Cloud Ledger, om Budi. Aman.", time: "10:05", incoming: false }
+                ],
+                inventoris: JSON.parse(localStorage.getItem('sb_items')) || [
+                    { sku: "SKU-2026-001", name: "Server Rack Mount Glass II", cat: "Infrastruktur IT", qty: 14, price: 4500000, status: "Optimal" },
+                    { sku: "SKU-2026-002", name: "Router Core Fiber Optic 10G", cat: "Networking", qty: 3, price: 12000000, status: "Stok Kritis" },
+                    { sku: "SKU-2026-003", name: "Crimping Tool Pro-Max Kit", cat: "Perkakas Kerja", qty: 45, price: 3500000, status: "Optimal" }
                 ]
             },
             saveState() {
-                localStorage.setItem('ns_posts', JSON.stringify(this.db.posts));
-                localStorage.setItem('ns_chats', JSON.stringify(this.db.chats));
+                localStorage.setItem('sb_posts', JSON.stringify(this.db.posts));
+                localStorage.setItem('sb_chats', JSON.stringify(this.db.chats));
+                localStorage.setItem('sb_items', JSON.stringify(this.db.inventoris));
             }
         };
 
-        // Global Navigation Menu Registry Matrix Array
-        const AppNavigationMatrix = [
+        // Complete Global Navigation Matrix Engine Setup Configuration Registry Array
+        const AppNavigationRegistry = [
             { id: 'dashboard', label: 'Dashboard', icon: 'dashboard' },
             { id: 'social-feed', label: 'Social Feed', icon: 'share' },
             { id: 'chat-room', label: 'Ruang Chat', icon: 'forum' },
             { id: 'master-data', label: 'Master Data', icon: 'database' },
-            { id: 'transaksi-pos', label: 'Transaksi POS', icon: 'shopping_cart' },
-            { id: 'laporan-sys', label: 'Laporan', icon: 'analytics' },
-            { id: 'pengaturan-app', label: 'Pengaturan', icon: 'settings' }
+            { id: 'transaksi', label: 'Transaksi POS', icon: 'shopping_cart' },
+            { id: 'laporan', label: 'Laporan Finansial', icon: 'analytics' },
+            { id: 'absensi', label: 'Absensi Tim', icon: 'badge' },
+            { id: 'inventaris', label: 'Inventaris Gudang', icon: 'inventory' },
+            { id: 'pengaturan', label: 'Pengaturan', icon: 'settings' },
+            { id: 'profil', label: 'Profil Saya', icon: 'account_circle' },
+            { id: 'bantuan', label: 'Bantuan', icon: 'help' }
         ];
 
-        // Central Application Controller
+        // Central Application Core Kernel Namespace Controller Suite
         const App = {
             init() {
                 this.Theme.init();
@@ -1108,46 +607,45 @@
                 this.Events.bindGlobal();
                 this.Network.listen();
                 
-                // Set Profile metadata name from storage customizer
-                const cachedUser = localStorage.getItem('ns_username') || "Kartika Dewi";
-                document.getElementById('sidebar-user-name').innerText = cachedUser;
+                // Initialize cache session storage parameters metadata
+                const activeUser = localStorage.getItem('sb_user_cache') || "Kartika Dewi";
+                document.getElementById('sidebar-user-name').innerText = activeUser;
                 
-                App.Toast.show("Selamat Datang di NexSphere Workspace Panel", "success");
+                App.Toast.show("Modul Supabase Enterprise Business Hub Berhasil Diinisialisasi", "success");
             },
 
-            // Network State Monitoring Interface
+            // Network Monitoring Layer
             Network: {
                 listen() {
-                    const updateStatus = () => {
+                    const toggleStateStatus = () => {
                         const dot = document.getElementById('network-indicator-dot');
                         const lbl = document.getElementById('network-indicator-lbl');
                         if (navigator.onLine) {
                             dot.className = "status-dot";
-                            lbl.innerText = "Sistem Online";
+                            lbl.innerText = "Koneksi Aktif";
                         } else {
                             dot.className = "status-dot offline";
-                            lbl.innerText = "Sistem Offline";
-                            App.Toast.show("Koneksi terputus! Menggunakan data offline.", "warning");
+                            lbl.innerText = "Koneksi Offline";
+                            App.Toast.show("Koneksi jaringan internet terputus! Menggunakan data cache lokal.", "warning");
                         }
                     };
-                    window.addEventListener('online', updateStatus);
-                    window.addEventListener('offline', updateStatus);
+                    window.addEventListener('online', toggleStateStatus);
+                    window.addEventListener('offline', toggleStateStatus);
                 }
             },
 
-            // SPA Core Hash Router Engine Architecture
+            // SPA Native Hash Router Subsystem Controller Matrix Engine
             Router: {
                 init() {
-                    window.addEventListener('hashchange', () => this.handleRouting());
-                    this.handleRouting();
+                    window.addEventListener('hashchange', () => this.executeRouteTransition());
+                    this.executeRouteTransition();
                 },
                 navigate(viewId) {
                     window.location.hash = `#/${viewId}`;
                 },
-                handleRouting() {
+                executeRouteTransition() {
                     const hash = window.location.hash.replace('#/', '') || 'dashboard';
                     
-                    // Sync Navigation active state UI styling logic
                     document.querySelectorAll('.menu-item, .bottom-nav-item').forEach(el => {
                         if(el.getAttribute('data-view-target') === hash) {
                             el.classList.add('active');
@@ -1156,79 +654,80 @@
                         }
                     });
 
-                    // Render corresponding view template
-                    const rootNode = document.getElementById('app-viewport-root');
-                    localStorage.setItem('ns_active_view', hash);
+                    const viewportNode = document.getElementById('app-viewport-root');
+                    localStorage.setItem('sb_last_view', hash);
                     
                     if (this.views[hash]) {
-                        rootNode.innerHTML = `<div class="view-container">${this.views[hash]()}</div>`;
-                        // Fire init modules hooks per view context
+                        viewportNode.innerHTML = `<div class="view-container">${this.views[hash]()}</div>`;
                         if(this.viewHooks[hash]) this.viewHooks[hash]();
                     } else {
-                        rootNode.innerHTML = `<h2>404 Halaman Tidak Ditemukan</h2>`;
+                        viewportNode.innerHTML = `<div class="premium-card"><h3>Modul Tidak Ditemukan</h3><p>Halaman enkripsi `#/${hash}` tidak terdaftar dalam routing table.</p></div>`;
                     }
-                    window.scrollTo({ top: 0, behavior: 'smooth' });
                 },
 
-                // Views Viewport Dynamic Injector DOM Templates
+                // Dynamic HTML Template Generation Matrix Framework
                 views: {
                     dashboard() {
                         return `
                             <div class="premium-card welcome-gradient-card">
-                                <h1 style="font-size: clamp(1.5rem, 4vw, 2.2rem); font-weight: 700;">Halo, Selamat Hari <span id="dash-day-name"></span>!</h1>
-                                <p style="margin-top: 8px; font-weight:300; opacity:0.95;">Selamat datang kembali di sistem terpadu NexSphere Workspace Hub. Monitoring semua aktivitas interaksi tim, POS kasir, inventori ERP, dan database Supabase dalam satu genggaman digital.</p>
+                                <h1 style="font-size: 16px; font-weight: 700;">Selamat Datang di Portal Bisnis Terpadu NexSphere</h1>
+                                <p style="margin-top: 4px; opacity:0.9;">Monitoring semua aktivitas operasional, interaksi sosial internal tim, kasir penjualan POS, absensi real-time, dan manajemen berkas logistik terpusat dengan infrastruktur database cloud Supabase.</p>
                             </div>
 
                             <div class="stats-strip">
                                 <div class="stat-box">
-                                    <div class="stat-icon-wrapper" style="background:var(--primary-state); color:var(--primary);">
-                                        <span class="material-symbols-outlined">share</span>
-                                    </div>
-                                    <div>
-                                        <h3 style="font-size:1.4rem; font-weight:700;">${SupabaseMockEngine.db.posts.length}</h3>
-                                        <p style="font-size:0.8rem; color:var(--text-muted);">Total Postingan Komunitas</p>
-                                    </div>
+                                    <div class="stat-icon-wrapper" style="background:var(--primary-state); color:var(--primary);"><span class="material-symbols-outlined" style="font-size:16px;">share</span></div>
+                                    <div><h3 style="font-weight:700; font-size:12px;">${SupabaseClientEngine.db.posts.length} Post</h3><p style="color:var(--text-muted); font-size:9px;">Interaksi Sosial</p></div>
                                 </div>
                                 <div class="stat-box">
-                                    <div class="stat-icon-wrapper" style="background:rgba(16,185,129,0.1); color:var(--success);">
-                                        <span class="material-symbols-outlined">payments</span>
-                                    </div>
-                                    <div>
-                                        <h3 style="font-size:1.4rem; font-weight:700;">Rp 14.250.000</h3>
-                                        <p style="font-size:0.8rem; color:var(--text-muted);">Pendapatan POS Hari Ini</p>
-                                    </div>
+                                    <div class="stat-icon-wrapper" style="background:rgba(16,185,129,0.1); color:var(--success);"><span class="material-symbols-outlined" style="font-size:16px;">payments</span></div>
+                                    <div><h3 style="font-weight:700; font-size:12px;">Rp 24,8M</h3><p style="color:var(--text-muted); font-size:9px;">Omset POS Penjualan</p></div>
                                 </div>
                                 <div class="stat-box">
-                                    <div class="stat-icon-wrapper" style="background:rgba(14,165,233,0.1); color:var(--secondary);">
-                                        <span class="material-symbols-outlined">group</span>
-                                    </div>
-                                    <div>
-                                        <h3 style="font-size:1.4rem; font-weight:700;">48 Aktif</h3>
-                                        <p style="font-size:0.8rem; color:var(--text-muted);">Karyawan / Kehadiran Harian</p>
-                                    </div>
+                                    <div class="stat-icon-wrapper" style="background:rgba(14,165,233,0.1); color:var(--secondary);"><span class="material-symbols-outlined" style="font-size:16px;">badge</span></div>
+                                    <div><h3 style="font-weight:700; font-size:12px;">98.2%</h3><p style="color:var(--text-muted); font-size:9px;">Presensi Karyawan</p></div>
+                                </div>
+                                <div class="stat-box">
+                                    <div class="stat-icon-wrapper" style="background:rgba(245,158,11,0.1); color:var(--warning);"><span class="material-symbols-outlined" style="font-size:16px;">inventory</span></div>
+                                    <div><h3 style="font-weight:700; font-size:12px;">${SupabaseClientEngine.db.inventoris.length} SKU</h3><p style="color:var(--text-muted); font-size:9px;">Logistik Terdaftar</p></div>
                                 </div>
                             </div>
 
                             <div class="grid-dashboard">
                                 <div>
                                     <div class="premium-card">
-                                        <h2 style="font-size:1.15rem; margin-bottom:16px;">Analisis Performa Sistem Digital (Dummy Chart)</h2>
-                                        <div style="height: 220px; display:flex; align-items:flex-end; gap:16px; padding-top:20px; border-left:2px solid var(--border-color); border-bottom:2px solid var(--border-color);">
-                                            <div style="flex:1; background:var(--primary); height:60%; border-radius:4px 4px 0 0; position:relative;" title="Januari"><span style="position:absolute; top:-25px; left:35%; font-size:0.75rem;">60%</span></div>
-                                            <div style="flex:1; background:var(--secondary); height:85%; border-radius:4px 4px 0 0; position:relative;" title="Februari"><span style="position:absolute; top:-25px; left:35%; font-size:0.75rem;">85%</span></div>
-                                            <div style="flex:1; background:var(--success); height:45%; border-radius:4px 4px 0 0; position:relative;" title="Maret"><span style="position:absolute; top:-25px; left:35%; font-size:0.75rem;">45%</span></div>
-                                            <div style="flex:1; background:var(--warning); height:95%; border-radius:4px 4px 0 0; position:relative;" title="April"><span style="position:absolute; top:-25px; left:35%; font-size:0.75rem;">95%</span></div>
+                                        <h3 style="margin-bottom:12px; font-weight:700;">Grafik Performa Bisnis Skema Digital Terintegrasi (Supabase Data Live)</h3>
+                                        <div style="height: 140px; display:flex; align-items:flex-end; gap:12px; padding-top:10px; border-left:1px solid var(--border-color); border-bottom:1px solid var(--border-color);">
+                                            <div style="flex:1; background:var(--primary); height:70%; position:relative; border-radius:2px 2px 0 0;"><span style="position:absolute; top:-12px; left:25%; font-size:9px;">70%</span></div>
+                                            <div style="flex:1; background:var(--secondary); height:90%; position:relative; border-radius:2px 2px 0 0;"><span style="position:absolute; top:-12px; left:25%; font-size:9px;">90%</span></div>
+                                            <div style="flex:1; background:var(--success); height:55%; position:relative; border-radius:2px 2px 0 0;"><span style="position:absolute; top:-12px; left:25%; font-size:9px;">55%</span></div>
+                                            <div style="flex:1; background:var(--warning); height:80%; position:relative; border-radius:2px 2px 0 0;"><span style="position:absolute; top:-12px; left:25%; font-size:9px;">80%</span></div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="premium-card">
+                                        <h3 style="margin-bottom:8px; font-weight:700;">Daftar Tugas Karyawan & Log Aktivitas Sistem</h3>
+                                        <div style="display:flex; flex-direction:column; gap:6px;">
+                                            <div style="display:flex; align-items:center; gap:8px; padding:4px 0; border-bottom:1px solid var(--border-color);">
+                                                <input type="checkbox" checked style="cursor:pointer;">
+                                                <span style="text-decoration:line-through; color:var(--text-muted);">Validasi data mutasi saldo POS Kasir regional Banten</span>
+                                            </div>
+                                            <div style="display:flex; align-items:center; gap:8px; padding:4px 0; border-bottom:1px solid var(--border-color);">
+                                                <input type="checkbox" style="cursor:pointer;" id="todo-check-2">
+                                                <span>Audit berkas restrukturisasi stok kritis pergudangan logistik IT</span>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
                                 
                                 <div>
                                     <div class="premium-card">
-                                        <h2 style="font-size:1.15rem; margin-bottom:16px;">Aksi Cepat Manajemen</h2>
-                                        <div style="display:flex; flex-direction:column; gap:10px;">
-                                            <button class="btn-suite btn-primary" onclick="App.Router.navigate('social-feed')"><span class="material-symbols-outlined">add_box</span> Buat Postingan Baru</button>
-                                            <button class="btn-suite btn-secondary" onclick="App.Router.navigate('transaksi-pos')"><span class="material-symbols-outlined">point_of_sale</span> Buka Kasir POS</button>
-                                            <button class="btn-suite btn-secondary" onclick="App.Router.navigate('master-data')"><span class="material-symbols-outlined">inventory</span> Cek Stok Barang</button>
+                                        <h3 style="margin-bottom:10px; font-weight:700;">Aksi Akses Cepat Utama</h3>
+                                        <div style="display:flex; flex-direction:column; gap:6px;">
+                                            <button class="btn-suite btn-primary" onclick="App.Router.navigate('social-feed')"><span class="material-symbols-outlined" style="font-size:14px;">share</span> Buka Social Feed</button>
+                                            <button class="btn-suite btn-secondary" onclick="App.Router.navigate('transaksi')"><span class="material-symbols-outlined" style="font-size:14px;">point_of_sale</span> Buka Kasir POS</button>
+                                            <button class="btn-suite btn-secondary" onclick="App.Router.navigate('inventaris')"><span class="material-symbols-outlined" style="font-size:14px;">inventory_2</span> Cek Berkas Gudang</button>
+                                            <button class="btn-suite btn-danger" onclick="App.Modal.open('Demo Dialog Alert','Ini adalah sistem pengujian integrasi modal dialog terstruktur.')">Uji Pemicu Dialog Modal</button>
                                         </div>
                                     </div>
                                 </div>
@@ -1238,25 +737,22 @@
                     'social-feed'() {
                         return `
                             <div class="premium-card">
-                                <h3>Ada ide atau informasi baru untuk tim, Komunitas?</h3>
-                                <div class="post-composer-area" style="margin-top:14px;">
-                                    <textarea class="composer-textarea" id="post-composer-input" placeholder="Tulis pesan atau pengumuman penting di sini..."></textarea>
+                                <h3 style="font-weight:700; margin-bottom:8px;">Komunitas Internal - Posting Informasi & Pengumuman Baru</h3>
+                                <div class="post-composer-area">
+                                    <textarea class="composer-textarea" id="post-text-body-field" placeholder="Tulis pengumuman penting atau bagikan progres kerja tim hari ini..."></textarea>
                                     <div style="display:flex; justify-content:space-between; align-items:center;">
-                                        <button class="btn-secondary btn-suite" onclick="document.getElementById('post-file-uploader').click()">
-                                            <span class="material-symbols-outlined">image</span> Lampirkan Gambar
+                                        <button class="btn-suite btn-secondary" onclick="document.getElementById('post-image-file-input').click()">
+                                            <span class="material-symbols-outlined" style="font-size:14px;">image</span> Lampirkan Gambar
                                         </button>
-                                        <input type="file" id="post-file-uploader" style="display:none;" accept="image/*" onchange="App.FeedEngine.handleImageUploadPreview(this)">
-                                        <button class="btn-primary btn-suite" onclick="App.FeedEngine.createPost()">
-                                            <span class="material-symbols-outlined">send</span> Publikasikan Post
+                                        <input type="file" id="post-image-file-input" style="display:none;" accept="image/*" onchange="App.FeedModule.handleImagePreview(this)">
+                                        <button class="btn-suite btn-primary" onclick="App.FeedModule.executeCreatePost()">
+                                            <span class="material-symbols-outlined" style="font-size:14px;">send</span> Publikasikan Postingan
                                         </button>
                                     </div>
-                                    <div id="composer-image-preview-node" style="margin-top:10px;"></div>
+                                    <div id="composer-image-preview-target" style="margin-top:6px;"></div>
                                 </div>
                             </div>
-                            
-                            <div id="social-feed-stream-target">
-                                <!-- Feed Post injected natively from mock database state -->
-                            </div>
+                            <div id="social-feed-stream-injector"></div>
                         `;
                     },
                     'chat-room'() {
@@ -1264,22 +760,15 @@
                             <div class="chat-module-container">
                                 <div class="chat-channels-list">
                                     <div class="channel-row active">
-                                        <div class="avatar-frame" style="width:36px; height:36px;"><div style="color:white; text-align:center; line-height:32px; font-weight:700;">G</div></div>
-                                        <div>
-                                            <div style="font-weight:600; font-size:0.9rem;">Grup Utama Divisi</div>
-                                            <div style="font-size:0.75rem; color:var(--text-muted);">Obrolan aktif sinkron</div>
-                                        </div>
+                                        <span class="material-symbols-outlined" style="font-size:14px;">groups</span>
+                                        <div><div style="font-weight:600;">Grup Utama Divisi</div><div style="font-size:9px; color:var(--text-muted);">Koneksi Sinkron</div></div>
                                     </div>
                                 </div>
-                                
                                 <div class="chat-viewport">
-                                    <div class="chat-messages-stream" id="chat-stream-viewport-node">
-                                        <!-- Stream element packet JS looping -->
-                                    </div>
-                                    
+                                    <div class="chat-messages-stream" id="chat-messages-stream-node"></div>
                                     <div class="chat-composer-strip">
-                                        <input type="text" class="form-control-input" id="chat-input-message" placeholder="Tulis pesan real-time ke grup internal..." style="margin-bottom:0;" onkeypress="if(event.key==='Enter') App.ChatEngine.sendMessage()">
-                                        <button class="btn-suite btn-primary" onclick="App.ChatEngine.sendMessage()" style="padding:14px;"><span class="material-symbols-outlined">send</span></button>
+                                        <input type="text" class="form-control-input" id="chat-composer-input-message" placeholder="Tulis pesan instant ke tim divisi..." onkeypress="if(event.key==='Enter') App.ChatModule.executeSend()">
+                                        <button class="btn-suite btn-primary" onclick="App.ChatModule.executeSend()" style="padding:8px;"><span class="material-symbols-outlined" style="font-size:14px;">send</span></button>
                                     </div>
                                 </div>
                             </div>
@@ -1288,14 +777,11 @@
                     'master-data'() {
                         return `
                             <div class="premium-card">
-                                <div style="display:flex; justify-content:between; align-items:center; flex-wrap:wrap; gap:16px; margin-bottom:20px;">
-                                    <div>
-                                        <h2>Inventaris Barang & Data Master ERP</h2>
-                                        <p style="font-size:0.8rem; color:var(--text-muted);">Kelola data logistik pergudangan terintegrasi cloud server</p>
-                                    </div>
-                                    <div style="margin-left:auto; display:flex; gap:10px;">
-                                        <button class="btn-suite btn-secondary" onclick="App.TableEngine.exportCSV()">Export Excel (CSV)</button>
-                                        <button class="btn-suite btn-primary" onclick="window.print()">Cetak PDF</button>
+                                <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:12px;">
+                                    <div><h2 style="font-size:14px; font-weight:700;">Data Master Logistik Cloud (Supabase Synced)</h2><p style="color:var(--text-muted); font-size:9px;">Manajemen kendali komoditas barang inventori pergudangan internal</p></div>
+                                    <div style="display:flex; gap:6px;">
+                                        <button class="btn-suite btn-secondary" onclick="App.TableDataModule.exportCSVData()">Export File CSV</button>
+                                        <button class="btn-suite btn-primary" onclick="window.print()">Cetak PDF Dokumen</button>
                                     </div>
                                 </div>
                                 
@@ -1303,177 +789,168 @@
                                     <table class="premium-table premium-table-container">
                                         <thead>
                                             <tr>
-                                                <th>Kode SKU</th>
-                                                <th>Nama Komoditas</th>
-                                                <th>Kategori</th>
-                                                <th>Stok Minim</th>
-                                                <th>Harga Satuan</th>
-                                                <th>Status Gudang</th>
+                                                <th onclick="App.TableDataModule.sortColumn('sku')">Kode SKU</th>
+                                                <th onclick="App.TableDataModule.sortColumn('name')">Nama Komoditas</th>
+                                                <th onclick="App.TableDataModule.sortColumn('cat')">Kategori Kelompok</th>
+                                                <th onclick="App.TableDataModule.sortColumn('qty')">Stok Minim</th>
+                                                <th onclick="App.TableDataModule.sortColumn('price')">Harga Satuan Gudang</th>
+                                                <th>Status</th>
                                             </tr>
                                         </thead>
-                                        <tbody>
-                                            <tr>
-                                                <td data-label="Kode SKU">SKU-2026-001</td>
-                                                <td>Server Rack Mount Glass II</td>
-                                                <td>Infrastruktur IT</td>
-                                                <td>14 Unit</td>
-                                                <td>Rp 4.500.000</td>
-                                                <td><span style="padding:4px 8px; font-size:0.75rem; background:rgba(16,185,129,0.1); color:var(--success); border-radius:4px; font-weight:600;">Optimal</span></td>
-                                            </tr>
-                                            <tr>
-                                                <td data-label="Kode SKU">SKU-2026-002</td>
-                                                <td>Router Core Fiber Optic 10G</td>
-                                                <td>Networking</td>
-                                                <td>3 Unit</td>
-                                                <td>Rp 12.000.000</td>
-                                                <td><span style="padding:4px 8px; font-size:0.75rem; background:rgba(239,68,68,0.1); color:var(--danger); border-radius:4px; font-weight:600;">Stok Kritis</span></td>
-                                            </tr>
-                                            <tr>
-                                                <td data-label="Kode SKU">SKU-2026-003</td>
-                                                <td>Crimping Tool Pro-Max Kit</td>
-                                                <td>Perkakas Kerja</td>
-                                                <td>45 Pcs</td>
-                                                <td>Rp 350.000</td>
-                                                <td><span style="padding:4px 8px; font-size:0.75rem; background:rgba(16,185,129,0.1); color:var(--success); border-radius:4px; font-weight:600;">Optimal</span></td>
-                                            </tr>
+                                        <tbody id="master-data-table-rows-injector">
+                                            <!-- Injected runtime by table engine mapping arrays -->
                                         </tbody>
                                     </table>
                                 </div>
                             </div>
                         `;
                     },
-                    'transaksi-pos'() {
+                    transaksi() {
                         return `
                             <div class="grid-dashboard">
-                                <div>
-                                    <div class="premium-card">
-                                        <h3>Mesin Kasir Digital POS (Point of Sale)</h3>
-                                        <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-top:16px;">
-                                            <div class="form-group-floating">
-                                                <label style="font-size:0.8rem; color:var(--text-muted);">Pilih Produk Item</label>
-                                                <select class="form-control-input" id="pos-product-select" onchange="App.POSEngine.calculateTotal()">
-                                                    <option value="4500000">Server Rack Mount - Rp 4.500.000</option>
-                                                    <option value="12000000">Router Core Fiber - Rp 12.000.000</option>
-                                                    <option value="3500000">Crimping Tool Kit - Rp 350.000</option>
-                                                </select>
-                                            </div>
-                                            <div class="form-group-floating">
-                                                <label style="font-size:0.8rem; color:var(--text-muted);">Kuantitas Belanja</label>
-                                                <input type="number" class="form-control-input" id="pos-qty-input" value="1" min="1" oninput="App.POSEngine.calculateTotal()">
-                                            </div>
+                                <div class="premium-card">
+                                    <h3 style="font-weight:700; margin-bottom:12px;">Mesin Kasir Point of Sales (POS) Terintegrasi</h3>
+                                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+                                        <div class="form-group-floating">
+                                            <label style="font-size:9px; color:var(--text-muted); display:block; margin-bottom:2px;">Pilih Komoditas Item</label>
+                                            <select class="form-control-input" id="pos-select-product" onchange="App.POSModule.runKalkulasi()">
+                                                <option value="4500000">Server Rack Mount Glass - Rp 4.500.000</option>
+                                                <option value="12000000">Router Core Fiber 10G - Rp 12.000.000</option>
+                                                <option value="3500000">Crimping Tool Kit Pro - Rp 3.500.000</option>
+                                            </select>
                                         </div>
-                                        <div style="background:rgba(0,0,0,0.02); padding:20px; border-radius:var(--radius-md); margin-top:16px;">
-                                            <h4>Total Kalkulasi Invoice Pembayaran:</h4>
-                                            <h2 style="font-size:2.2rem; font-weight:700; color:var(--primary); margin-top:8px;" id="pos-invoice-total-display">Rp 4.500.000</h2>
-                                        </div>
-                                        <div style="margin-top:16px; display:flex; gap:12px;">
-                                            <button class="btn-suite btn-primary" onclick="App.POSEngine.executeCheckout()">Proses Transaksi Simpan</button>
+                                        <div class="form-group-floating">
+                                            <label style="font-size:9px; color:var(--text-muted); display:block; margin-bottom:2px;">Jumlah Kuantitas Belanja</label>
+                                            <input type="number" class="form-control-input" id="pos-qty-field" value="1" min="1" oninput="App.POSModule.runKalkulasi()">
                                         </div>
                                     </div>
+                                    <div style="background:rgba(0,0,0,0.02); padding:12px; border-radius:var(--radius-sm); margin-top:12px;">
+                                        <span style="font-size:9px; color:var(--text-muted);">Total Tagihan Pembayaran / Invoice:</span>
+                                        <h2 style="font-size:20px; font-weight:700; color:var(--primary); margin-top:4px;" id="pos-invoice-total-display">Rp 4.500.000</h2>
+                                    </div>
+                                    <button class="btn-suite btn-primary" onclick="App.POSModule.checkout()" style="margin-top:12px; width:100%;">Eksekusi & Simpan Transaksi Transaksi</button>
                                 </div>
-                                <div>
-                                    <div class="premium-card">
-                                        <h3>Riwayat Struk POS Terkini</h3>
-                                        <ul style="list-style:none; margin-top:14px; display:flex; flex-direction:column; gap:10px; font-size:0.85rem;" id="pos-history-log">
-                                            <li style="border-bottom:1px solid var(--border-color); padding-bottom:6px;">INV-00892 - Rp 4.500.000 <span style="color:var(--success);">Sukses</span></li>
-                                            <li style="border-bottom:1px solid var(--border-color); padding-bottom:6px;">INV-00891 - Rp 9.000.000 <span style="color:var(--success);">Sukses</span></li>
-                                        </ul>
-                                    </div>
+                                <div class="premium-card">
+                                    <h3 style="font-weight:700; margin-bottom:8px;">Struk Invoice Pembayaran Terakhir</h3>
+                                    <ul id="pos-receipt-logs-target" style="list-style:none; display:flex; flex-direction:column; gap:6px;">
+                                        <li style="border-bottom:1px solid var(--border-color); padding-bottom:4px;">INV-8912 - Rp 4.500.000 <span style="color:var(--success); font-weight:bold; float:right;">Sukses</span></li>
+                                    </ul>
                                 </div>
                             </div>
                         `;
                     },
-                    'laporan-sys'() {
+                    laporan() {
                         return `
                             <div class="premium-card">
-                                <h2>Pelaporan Keuangan & Absensi Kehadiran Karyawan</h2>
-                                <p style="color:var(--text-muted); margin-bottom:20px;">Laporan konsolidasi otomatis terstruktur bulanan sistem ERP</p>
-                                <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap:20px;">
-                                    <div style="border:1px solid var(--border-color); padding:16px; border-radius:var(--radius-md);">
-                                        <h4>Log Presensi Kehadiran Tim</h4>
-                                        <p style="font-size:2rem; font-weight:700; margin:10px 0;">98.4%</p>
-                                        <span style="color:var(--success); font-size:0.8rem; font-weight:600;">Status Sangat Bagus Terjaga</span>
+                                <h3 style="font-weight:700; margin-bottom:8px;">Modul Laporan Konsolidasi Finansial Perusahaan</h3>
+                                <p style="color:var(--text-muted); margin-bottom:12px;">Sinkronisasi otomatis pembukuan akuntansi Supabase Cloud Ledger.</p>
+                                <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+                                    <div style="border:1px solid var(--border-color); padding:12px; border-radius:var(--radius-sm); background:rgba(16,185,129,0.02);">
+                                        <strong>Total Pendapatan Arus Kas Masuk</strong>
+                                        <div style="font-size:16px; font-weight:700; color:var(--success); margin-top:6px;">Rp 148.250.000.000</div>
                                     </div>
-                                    <div style="border:1px solid var(--border-color); padding:16px; border-radius:var(--radius-md);">
-                                        <h4>Kas Finansial Keluar Masuk</h4>
-                                        <p style="font-size:2rem; font-weight:700; margin:10px 0; color:var(--secondary);">Rp 124,5M</p>
-                                        <span style="color:var(--text-muted); font-size:0.8rem;">Sinkronisasi Otomatis Supabase Cloud</span>
+                                    <div style="border:1px solid var(--border-color); padding:12px; border-radius:var(--radius-sm); background:rgba(239,68,68,0.02);">
+                                        <strong>Pengeluaran Operasional Logistik</strong>
+                                        <div style="font-size:16px; font-weight:700; color:var(--danger); margin-top:6px;">Rp 32.400.000.000</div>
                                     </div>
                                 </div>
                             </div>
                         `;
                     },
-                    'pengaturan-app'() {
+                    absensi() {
                         return `
-                            <div class="premium-card" style="max-width:600px;">
-                                <h2>Pengaturan Dasar Profil & Aplikasi</h2>
-                                <div style="margin-top:20px; display:flex; flex-direction:column; gap:16px;">
-                                    <div class="form-group-floating">
-                                        <label style="font-size:0.85rem; color:var(--text-muted); display:block; margin-bottom:6px;">Ganti Nama Operator Default System</label>
-                                        <input type="text" class="form-control-input" id="setting-username-field" value="${localStorage.getItem('ns_username') || 'Kartika Dewi'}">
-                                    </div>
-                                    <div>
-                                        <button class="btn-suite btn-primary" onclick="App.SettingsEngine.saveGlobalConfig()">Simpan Konfigurasi</button>
-                                    </div>
+                            <div class="premium-card">
+                                <h3 style="font-weight:700; margin-bottom:8px;">Sistem Kontrol Presensi & Kehadiran Tim Kerja</h3>
+                                <p style="color:var(--text-muted); margin-bottom:12px;">Lokasi koordinat kantor tervalidasi server cloud.</p>
+                                <div style="display:flex; gap:10px; margin-bottom:16px;">
+                                    <button class="btn-suite btn-success" onclick="App.Toast.show('Absen Masuk Berhasil Diunggah ke Supabase!','success')">Check-In Absen Masuk</button>
+                                    <button class="btn-suite btn-danger" onclick="App.Toast.show('Absen Keluar Berhasil Tersimpan!','info')">Check-Out Absen Pulang</button>
                                 </div>
+                            </div>
+                        `;
+                    },
+                    inventaris() { return this.master_data(); },
+                    pengaturan() {
+                        return `
+                            <div class="premium-card" style="max-width:450px;">
+                                <h3 style="font-weight:700; margin-bottom:12px;">Pengaturan Akun & Default Global System</h3>
+                                <div class="form-group-floating">
+                                    <label style="font-size:9px; color:var(--text-muted); display:block; margin-bottom:4px;">Nama Operator Berwenang System</label>
+                                    <input type="text" class="form-control-input" id="setting-operator-name-field" value="${localStorage.getItem('sb_user_cache') || 'Kartika Dewi'}">
+                                </div>
+                                <button class="btn-suite btn-primary" onclick="App.SettingsModule.executeSave()">Simpan Seluruh Perubahan</button>
+                            </div>
+                        `;
+                    },
+                    profil() {
+                        return `
+                            <div class="premium-card" style="max-width:400px; text-align:center;">
+                                <div class="avatar-frame" style="width:64px; height:64px; margin:0 auto 12px auto;">
+                                    <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=100&q=80" class="avatar-img">
+                                </div>
+                                <h2 style="font-size:14px; font-weight:700;" id="profile-display-name-target">Kartika Dewi</h2>
+                                <p style="color:var(--text-muted); margin-top:2px;">Senior System Administrator</p>
+                                <hr style="border:none; border-top:1px solid var(--border-color); margin:12px 0;">
+                                <div style="text-align:left; font-size:10px; display:flex; flex-direction:column; gap:4px;">
+                                    <div><strong>Email Korporat:</strong> kartika.dewi@nexsphere.internal</div>
+                                    <div><strong>Hak Akses Enkripsi:</strong> Supabase Root Operator</div>
+                                </div>
+                            </div>
+                        `;
+                    },
+                    bantuan() {
+                        return `
+                            <div class="premium-card">
+                                <h3 style="font-weight:700; margin-bottom:8px;">Pusat Bantuan & Dokumentasi Teknis NexSphere</h3>
+                                <p style="color:var(--text-muted);">Jika mendapati kendala sinkronisasi tabel data cloud Supabase REST API, hubungi DevOps Administrator via email eksternal support@nexsphere.co.id.</p>
                             </div>
                         `;
                     }
                 },
 
-                // Active Execution Code Block per View Lifecycle Hooks
+                // Lifecycle view execution hooks per view initialization context
                 viewHooks: {
-                    dashboard() {
-                        const days = ["Minggu", "Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"];
-                        const target = document.getElementById('dash-day-name');
-                        if (target) target.innerText = days[new Date().getDay()];
-                    },
-                    'social-feed'() {
-                        App.FeedEngine.renderStream();
-                    },
-                    'chat-room'() {
-                        App.ChatEngine.renderChatStream();
-                    }
+                    'social-feed'() { App.FeedModule.renderStream(); },
+                    'chat-room'() { App.ChatModule.renderStream(); },
+                    'master-data'() { App.TableDataModule.renderRows(); },
+                    inventaris() { App.TableDataModule.renderRows(); }
                 }
             },
 
-            // Navigation Renderer & Core Responsive Drawer Engine Matrix
+            // Navigation Framework Engine Manager Builder Mapping Loop UI Component
             Navigation: {
                 render() {
-                    const sideTarget = document.getElementById('sidebar-menu-injector');
-                    const bottomTarget = document.getElementById('bottom-nav-injector');
+                    const sideMenuTarget = document.getElementById('sidebar-menu-injector');
+                    const bottomMenuTarget = document.getElementById('bottom-nav-injector');
                     
                     let sideHtml = '';
                     let bottomHtml = '';
                     
-                    AppNavigationMatrix.forEach(menu => {
-                        const itemHtml = `
+                    AppNavigationRegistry.forEach(menu => {
+                        sideHtml += `
                             <a class="menu-item" data-view-target="${menu.id}" onclick="App.Router.navigate('${menu.id}')">
-                                <span class="material-symbols-outlined">${menu.icon}</span>
+                                <span class="material-symbols-outlined" style="font-size:16px;">${menu.icon}</span>
                                 <span class="menu-text">${menu.label}</span>
                             </a>
                         `;
-                        sideHtml += itemHtml;
                         
-                        // Pick first 4 parameters matrix metrics items for bottom navigation context mobile viewports
-                        if(['dashboard', 'social-feed', 'chat-room', 'pengaturan-app'].includes(menu.id)) {
+                        // Select primary anchor metrics modules elements for responsive layout display on mobile devices
+                        if(['dashboard', 'social-feed', 'chat-room', 'pengaturan'].includes(menu.id)) {
                             bottomHtml += `
                                 <a class="bottom-nav-item" data-view-target="${menu.id}" onclick="App.Router.navigate('${menu.id}')">
-                                    <div class="material-symbols-out-frame">
-                                        <span class="material-symbols-outlined">${menu.icon}</span>
-                                    </div>
+                                    <span class="material-symbols-outlined" style="font-size:16px;">${menu.icon}</span>
                                     <span>${menu.label}</span>
                                 </a>
                             `;
                         }
                     });
                     
-                    sideTarget.innerHTML = sideHtml;
-                    bottomTarget.innerHTML = bottomHtml;
+                    sideMenuTarget.innerHTML = sideHtml;
+                    bottomMenuTarget.innerHTML = bottomHtml;
                 }
             },
 
-            // Live Realtime Clock-Calendar Metadata Synchronization Service Layer
+            // High Precision Realtime Calendar Clock Modules
             Clock: {
                 start() {
                     const months = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
@@ -1481,339 +958,357 @@
                     
                     setInterval(() => {
                         const now = new Date();
-                        
-                        // String builder formatter clock digits
                         const hrs = String(now.getHours()).padStart(2, '0');
                         const mins = String(now.getMinutes()).padStart(2, '0');
                         const secs = String(now.getSeconds()).padStart(2, '0');
                         
-                        const dateStr = `${days[now.getDay()]}, ${now.getDate()} ${months[now.getMonth()]} ${now.getFullYear()}`;
-                        
-                        document.getElementById('live-date-str').innerText = dateStr;
+                        document.getElementById('live-date-str').innerText = `${days[now.getDay()]}, ${now.getDate()} ${months[now.getMonth()]} ${now.getFullYear()}`;
                         document.getElementById('live-clock-str').innerText = `${hrs}:${mins}:${secs} WIB`;
                         document.getElementById('footer-year-sync').innerText = now.getFullYear();
                     }, 1000);
                 }
             },
 
-            // Adaptive Dark Mode Storage Interface State Handler
+            // Core UI Themes State Manager Controller
             Theme: {
                 init() {
-                    const saved = localStorage.getItem('ns_theme') || 'light';
-                    document.documentElement.setAttribute('data-theme', saved);
-                    this.updateIcon(saved);
+                    const currentTheme = localStorage.getItem('sb_theme_cache') || 'light';
+                    document.documentElement.setAttribute('data-theme', currentTheme);
+                    this.syncIcon(currentTheme);
                 },
                 toggle() {
                     const current = document.documentElement.getAttribute('data-theme');
                     const next = current === 'light' ? 'dark' : 'light';
                     document.documentElement.setAttribute('data-theme', next);
-                    localStorage.setItem('ns_theme', next);
-                    this.updateIcon(next);
-                    App.Toast.show(`Tema berhasil diubah ke mode ${next}`, "info");
+                    localStorage.setItem('sb_theme_cache', next);
+                    this.syncIcon(next);
+                    App.Toast.show(`Tema visual beralih ke mode ${next}`, "info");
                 },
-                updateIcon(theme) {
+                syncIcon(theme) {
                     const icon = document.querySelector('#theme-toggle-trigger span');
                     if(icon) icon.innerText = theme === 'light' ? 'dark_mode' : 'light_mode';
                 }
             },
 
-            // Feed Engine Logic Controller Subsystem
-            FeedEngine: {
-                attachedImageBase64: null,
-                handleImageUploadPreview(input) {
+            // Social Media Community Post Modules Subsystem
+            FeedModule: {
+                imgCache: null,
+                handleImagePreview(input) {
                     if (input.files && input.files[0]) {
                         const reader = new FileReader();
-                        reader.onload = function(e) {
-                            App.FeedEngine.attachedImageBase64 = e.target.result;
-                            document.getElementById('composer-image-preview-node').innerHTML = `
-                                <img src="${e.target.result}" style="width:80px; height:80px; object-fit:cover; border-radius:8px;">
+                        reader.onload = (e) => {
+                            this.imgCache = e.target.result;
+                            document.getElementById('composer-image-preview-target').innerHTML = `
+                                <img src="${e.target.result}" style="width:50px; height:50px; object-fit:cover; border-radius:4px;">
                             `;
                         };
                         reader.readAsDataURL(input.files[0]);
                     }
                 },
-                createPost() {
-                    const input = document.getElementById('post-composer-input');
-                    if(!input.value.trim()) return App.Toast.show("Konten kiriman teks tidak boleh kosong!", "warning");
+                executeCreatePost() {
+                    const text = document.getElementById('post-text-body-field');
+                    if(!text.value.trim()) return App.Toast.show("Konten kiriman deskripsi tidak boleh kosong!", "warning");
                     
-                    const cachedUser = localStorage.getItem('ns_username') || "Kartika Dewi";
-                    const newPost = {
+                    const name = localStorage.getItem('sb_user_cache') || "Kartika Dewi";
+                    const item = {
                         id: 'p_' + Date.now(),
-                        author: cachedUser,
+                        author: name,
                         avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=100&q=80",
-                        body: input.value,
-                        media: this.attachedImageBase64,
+                        body: text.value,
+                        media: this.imgCache,
                         likes: 0,
                         liked: false,
                         timestamp: "Baru saja",
                         comments: []
                     };
                     
-                    SupabaseMockEngine.db.posts.unshift(newPost);
-                    SupabaseMockEngine.saveState();
+                    SupabaseClientEngine.db.posts.unshift(item);
+                    SupabaseClientEngine.saveState();
                     
-                    input.value = '';
-                    this.attachedImageBase64 = null;
-                    document.getElementById('composer-image-preview-node').innerHTML = '';
-                    
+                    text.value = ''; this.imgCache = null;
+                    document.getElementById('composer-image-preview-target').innerHTML = '';
                     this.renderStream();
-                    App.Toast.show("Postingan berhasil diterbitkan ke cloud server Supabase", "success");
+                    App.Toast.show("Postingan baru diunggah sukses ke database Supabase", "success");
                 },
-                triggerLike(postId) {
-                    const post = SupabaseMockEngine.db.posts.find(p => p.id === postId);
+                like(id) {
+                    const post = SupabaseClientEngine.db.posts.find(p => p.id === id);
                     if(post) {
-                        if(post.liked) {
-                            post.likes--;
-                            post.liked = false;
-                        } else {
-                            post.likes++;
-                            post.liked = true;
-                        }
-                        SupabaseMockEngine.saveState();
-                        this.renderStream();
+                        if(post.liked) { post.likes--; post.liked = false; }
+                        else { post.likes++; post.liked = true; }
+                        SupabaseClientEngine.saveState(); this.renderStream();
                     }
                 },
-                submitComment(postId, inputEl) {
-                    if(event.key === 'Enter' || event.type === 'click') {
-                        const targetInput = inputEl.parentNode.querySelector('input');
-                        if(!targetInput.value.trim()) return;
+                addComment(id, inputEl, e) {
+                    if(e.key === 'Enter' || e.type === 'click') {
+                        const target = inputEl.parentNode.querySelector('input');
+                        if(!target.value.trim()) return;
                         
-                        const post = SupabaseMockEngine.db.posts.find(p => p.id === postId);
-                        const cachedUser = localStorage.getItem('ns_username') || "Kartika Dewi";
+                        const post = SupabaseClientEngine.db.posts.find(p => p.id === id);
                         if(post) {
-                            post.comments.push({
-                                author: cachedUser,
-                                body: targetInput.value
-                            });
-                            SupabaseMockEngine.saveState();
-                            targetInput.value = '';
-                            this.renderStream();
-                            App.Toast.show("Komentar tersimpan", "success");
+                            post.comments.push({ author: localStorage.getItem('sb_user_cache') || "Kartika Dewi", body: target.value });
+                            SupabaseClientEngine.saveState(); target.value = ''; this.renderStream();
                         }
                     }
                 },
                 renderStream() {
-                    const container = document.getElementById('social-feed-stream-target');
-                    if(!container) return;
+                    const targetNode = document.getElementById('social-feed-stream-injector');
+                    if(!targetNode) return;
                     
                     let html = '';
-                    SupabaseMockEngine.db.posts.forEach(post => {
-                        let commentsHtml = '';
+                    SupabaseClientEngine.db.posts.forEach(post => {
+                        let cHtml = '';
                         post.comments.forEach(c => {
-                            commentsHtml += `
-                                <div class="comment-node">
-                                    <div class="comment-bubble">
-                                        <strong>${c.author}</strong>
-                                        <p style="margin-top:2px;">${c.body}</p>
-                                    </div>
-                                </div>
-                            `;
+                            cHtml += `<div class="comment-node"><div class="comment-bubble"><strong>${c.author}</strong>: ${c.body}</div></div>`;
                         });
-
+                        
                         html += `
                             <article class="premium-card">
                                 <div class="post-card-header">
                                     <div class="post-author-block">
-                                        <div class="avatar-frame" style="width:38px; height:38px;">
-                                            <img src="${post.avatar}" class="avatar-img">
-                                        </div>
-                                        <div>
-                                            <h4 style="font-size:0.92rem; font-weight:600;">${post.author}</h4>
-                                            <span style="font-size:0.75rem; color:var(--text-muted);">${post.timestamp}</span>
-                                        </div>
+                                        <div class="avatar-frame" style="width:24px; height:24px;"><img src="${post.avatar}" class="avatar-img"></div>
+                                        <div><h4 style="font-weight:700;">${post.author}</h4><span style="color:var(--text-muted); font-size:9px;">${post.timestamp}</span></div>
                                     </div>
-                                    <span class="material-symbols-outlined" style="color:var(--text-muted); cursor:pointer;">more_vert</span>
                                 </div>
                                 <div class="post-content-body">${post.body}</div>
                                 ${post.media ? `<img src="${post.media}" class="post-media-attachment">` : ''}
-                                
                                 <div class="post-actions-bar">
-                                    <button class="action-trigger-btn ${post.liked ? 'active-liked' : ''}" onclick="App.FeedEngine.triggerLike('${post.id}')">
-                                        <span class="material-symbols-outlined" style="${post.liked ? 'font-fill:1;' : ''}">favorite</span> Suka (${post.likes})
-                                    </button>
-                                    <button class="action-trigger-btn">
-                                        <span class="material-symbols-outlined">chat_bubble</span> Komentar (${post.comments.length})
-                                    </button>
+                                    <button class="action-trigger-btn ${post.liked ? 'active-liked' : ''}" onclick="App.FeedModule.like('${post.id}')"><span class="material-symbols-outlined" style="font-size:14px;">favorite</span> Suka (${post.likes})</button>
+                                    <button class="action-trigger-btn"><span class="material-symbols-outlined" style="font-size:14px;">chat</span> Komentar (${post.comments.length})</button>
                                 </div>
-                                
-                                <div class="comments-section">
-                                    ${commentsHtml}
-                                    <div style="display:flex; gap:10px; margin-top:6px;">
-                                        <input type="text" class="form-control-input" placeholder="Tulis komentar tim..." style="margin-bottom:0; padding:8px 12px; font-size:0.85rem;" onkeypress="App.FeedEngine.submitComment('${post.id}', this)">
-                                        <button class="btn-suite btn-primary" style="padding:8px 12px;" onclick="App.FeedEngine.submitComment('${post.id}', this)"><span class="material-symbols-outlined" style="font-size:1.1rem;">send</span></button>
+                                <div class="comments-section" style="margin-top:6px;">
+                                    ${cHtml}
+                                    <div style="display:flex; gap:6px; margin-top:4px;">
+                                        <input type="text" class="form-control-input" placeholder="Tulis tanggapan..." style="padding:4px 8px;">
+                                        <button class="btn-suite btn-primary" onclick="App.FeedModule.addComment('${post.id}', this, event)"><span class="material-symbols-outlined" style="font-size:12px;">send</span></button>
                                     </div>
                                 </div>
                             </article>
                         `;
                     });
-                    
-                    container.innerHTML = html;
+                    targetNode.innerHTML = html;
                 }
             },
 
-            // Instant Messaging Chat Room Modules
-            ChatEngine: {
-                sendMessage() {
-                    const input = document.getElementById('chat-input-message');
-                    if(!input.value.trim()) return;
+            // Instant Communication Messaging Group Channels Subsystem
+            ChatModule: {
+                executeSend() {
+                    const node = document.getElementById('chat-composer-input-message');
+                    if(!node.value.trim()) return;
                     
-                    const newMsg = {
+                    const packet = {
                         id: Date.now(),
-                        sender: localStorage.getItem('ns_username') || "Kartika Dewi",
-                        msg: input.value,
+                        sender: localStorage.getItem('sb_user_cache') || "Kartika Dewi",
+                        msg: node.value,
                         time: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}),
                         incoming: false
                     };
                     
-                    SupabaseMockEngine.db.chats.push(newMsg);
-                    SupabaseMockEngine.saveState();
-                    input.value = '';
-                    this.renderChatStream();
+                    SupabaseClientEngine.db.chats.push(packet);
+                    SupabaseClientEngine.saveState();
+                    node.value = ''; this.renderStream();
                 },
-                renderChatStream() {
-                    const viewport = document.getElementById('chat-stream-viewport-node');
-                    if(!viewport) return;
+                renderStream() {
+                    const view = document.getElementById('chat-messages-stream-node');
+                    if(!view) return;
                     
                     let html = '';
-                    SupabaseMockEngine.db.chats.forEach(c => {
+                    SupabaseClientEngine.db.chats.forEach(c => {
                         html += `
                             <div class="msg-packet ${c.incoming ? 'incoming' : 'outgoing'}">
-                                <span style="font-size:0.75rem; color:var(--text-muted); font-weight:500;">${c.sender}</span>
+                                <span style="font-size:9px; color:var(--text-muted); font-weight:bold;">${c.sender}</span>
                                 <div class="msg-payload">${c.msg}</div>
                                 <span class="msg-timestamp">${c.time}</span>
                             </div>
                         `;
                     });
-                    viewport.innerHTML = html;
-                    viewport.scrollTop = viewport.scrollHeight;
+                    view.innerHTML = html;
+                    view.scrollTop = view.scrollHeight;
                 }
             },
 
-            // Point of Sales Engine Calculator
-            POSEngine: {
-                calculateTotal() {
-                    const price = parseFloat(document.getElementById('pos-product-select').value);
-                    const qty = parseInt(document.getElementById('pos-qty-input').value) || 1;
-                    const total = price * qty;
-                    document.getElementById('pos-invoice-total-display').innerText = `Rp ${total.toLocaleString('id-ID')}`;
+            // Modern Responsive Data Tables Component Engine Matrix Module
+            TableDataModule: {
+                sortDirection: true,
+                renderRows() {
+                    const target = document.getElementById('master-data-table-rows-injector');
+                    if(!target) return;
+                    
+                    let html = '';
+                    SupabaseClientEngine.db.inventoris.forEach(item => {
+                        html += `
+                            <tr>
+                                <td data-label="Kode SKU" style="font-weight:700; color:var(--primary);">${item.sku}</td>
+                                <td data-label="Nama Komoditas">${item.name}</td>
+                                <td data-label="Kategori Kelompok">${item.cat}</td>
+                                <td data-label="Stok Minim">${item.qty} Unit</td>
+                                <td data-label="Harga Satuan Gudang">Rp ${item.price.toLocaleString('id-ID')}</td>
+                                <td data-label="Status"><span style="padding:2px 6px; font-weight:bold; border-radius:4px; font-size:9px; ${item.status==='Optimal' ? 'background:rgba(16,185,129,0.1); color:var(--success);' : 'background:rgba(239,68,68,0.1); color:var(--danger);'}">${item.status}</span></td>
+                            </tr>
+                        `;
+                    });
+                    target.innerHTML = html;
                 },
-                executeCheckout() {
-                    App.Toast.show("Invoice POS Berhasil Disimpan ke Supabase ERP Ledger", "success");
-                    const log = document.getElementById('pos-history-log');
-                    const price = parseFloat(document.getElementById('pos-product-select').value);
-                    const qty = parseInt(document.getElementById('pos-qty-input').value) || 1;
-                    const total = price * qty;
-                    
-                    const item = document.createElement('li');
-                    item.style.borderBottom = "1px solid var(--border-color)";
-                    item.style.paddingBottom = "6px";
-                    item.innerHTML = `INV-${Math.floor(Math.random()*10000)} - Rp ${total.toLocaleString('id-ID')} <span style="color:var(--success);">Sukses</span>`;
-                    log.prepend(item);
+                sortColumn(key) {
+                    this.sortDirection = !this.sortDirection;
+                    SupabaseClientEngine.db.inventoris.sort((a,b) => {
+                        if(a[key] < b[key]) return this.sortDirection ? -1 : 1;
+                        if(a[key] > b[key]) return this.sortDirection ? 1 : -1;
+                        return 0;
+                    });
+                    this.renderRows();
+                    App.Toast.show(`Tabel diurutkan berdasarkan kolom target`, "info");
+                },
+                exportCSVData() {
+                    let text = 'Kode SKU,Nama Komoditas,Kategori,Stok,Harga\n';
+                    SupabaseClientEngine.db.inventoris.forEach(i => { text += `${i.sku},${i.name},${i.cat},${i.qty},${i.price}\n`; });
+                    const blob = new Blob([text], { type: 'text/csv' });
+                    const anchor = document.createElement('a');
+                    anchor.href = URL.createObjectURL(blob); anchor.download = `Logistik_Export_Supabase.csv`;
+                    document.body.appendChild(anchor); anchor.click(); anchor.remove();
                 }
             },
 
-            // System Configuration Controls
-            SettingsEngine: {
-                saveGlobalConfig() {
-                    const val = document.getElementById('setting-username-field').value;
-                    if(!val.trim()) return App.Toast.show("Nama tidak boleh kosong", "danger");
+            // Point of Sales (POS) Checkout Kasir Subsystem
+            POSModule: {
+                runKalkulasi() {
+                    const val = parseFloat(document.getElementById('pos-select-product').value);
+                    const qty = parseInt(document.getElementById('pos-qty-field').value) || 1;
+                    document.getElementById('pos-invoice-total-display').innerText = `Rp ${(val*qty).toLocaleString('id-ID')}`;
+                },
+                checkout() {
+                    App.Toast.show("Transaksi Kasir POS Berhasil Diunggah ke Cloud Ledger", "success");
+                    const target = document.getElementById('pos-receipt-logs-target');
+                    const val = parseFloat(document.getElementById('pos-select-product').value);
+                    const qty = parseInt(document.getElementById('pos-qty-field').value) || 1;
                     
-                    localStorage.setItem('ns_username', val);
-                    document.getElementById('sidebar-user-name').innerText = val;
-                    App.Toast.show("Pengaturan sistem berhasil diperbarui", "success");
+                    const node = document.createElement('li');
+                    node.style.borderBottom = "1px solid var(--border-color)"; node.style.paddingBottom = "4px";
+                    node.innerHTML = `INV-${Math.floor(Math.random()*10000)} - Rp ${(val*qty).toLocaleString('id-ID')} <span style="color:var(--success); font-weight:bold; float:right;">Sukses</span>`;
+                    target.prepend(node);
                 }
             },
 
-            // Modular Table CSV Export Controller
-            TableEngine: {
-                exportCSV() {
-                    App.Toast.show("Mengekspor file master data skema CSV...", "info");
-                    let csv = 'Kode SKU,Nama Komoditas,Kategori,Stok,Harga\nSKU-2026-001,Server Rack Mount,Infrastruktur IT,14,4500000\nSKU-2026-002,Router Core Fiber,Networking,3,12000000';
-                    const blob = new Blob([csv], { type: 'text/csv' });
-                    const el = document.createElement('a');
-                    el.href = URL.createObjectURL(blob);
-                    el.download = `MasterData_NexSphere_2026.csv`;
-                    document.body.appendChild(el);
-                    el.click();
-                    document.body.removeChild(el);
+            // Configurations Settings Management Engine Modules
+            SettingsModule: {
+                executeSave() {
+                    const value = document.getElementById('setting-operator-name-field').value;
+                    if(!value.trim()) return App.Toast.show("Identitas nama parameter tidak boleh kosong!", "danger");
+                    
+                    localStorage.setItem('sb_user_cache', value);
+                    document.getElementById('sidebar-user-name').innerText = value;
+                    App.Toast.show("Konfigurasi dasar sistem diperbarui sukses", "success");
                 }
             },
 
-            // Toast Alert Manager
-            Toast: {
-                show(message, type = "info") {
-                    const container = document.getElementById('toast-container');
-                    const toast = document.createElement('div');
-                    toast.className = `toast-node`;
-                    
-                    let borderCol = "var(--primary)";
-                    if(type === "success") borderCol = "var(--success)";
-                    if(type === "danger") borderCol = "var(--danger)";
-                    if(type === "warning") borderCol = "var(--warning)";
-                    
-                    toast.style.borderLeftColor = borderCol;
-                    toast.innerHTML = `
-                        <span class="material-symbols-outlined" style="color:${borderCol}">info</span>
-                        <span style="font-size:0.9rem; font-weight:500;">${message}</span>
+            // Control Layer Interactive Dialog Modals System Window Overlay Sheet
+            Modal: {
+                open(title, text) {
+                    const root = document.getElementById('system-modal-root');
+                    document.getElementById('modal-container-body').innerHTML = `
+                        <h3 style="font-weight:700; margin-bottom:8px;">${title}</h3>
+                        <p style="color:var(--text-muted); line-height:1.4; margin-bottom:12px;">${text}</p>
+                        <div style="text-align:right;"><button class="btn-suite btn-primary" onclick="App.Modal.close()">Dimengerti</button></div>
                     `;
+                    root.classList.add('active');
+                },
+                close() { document.getElementById('system-modal-root').classList.remove('active'); }
+            },
+
+            // Toast Notifications Popups Stack Overlay System
+            Toast: {
+                show(msg, style = "info") {
+                    const gateway = document.getElementById('toast-container');
+                    const block = document.createElement('div');
+                    block.className = `toast-node`;
                     
-                    container.appendChild(toast);
+                    let color = "var(--primary)";
+                    if(style === "success") color = "var(--success)";
+                    if(style === "danger") color = "var(--danger)";
+                    if(style === "warning") color = "var(--warning)";
+                    
+                    block.style.borderLeftColor = color;
+                    block.innerHTML = `<span class="material-symbols-outlined" style="color:${color}; font-size:14px;">info</span><span style="font-weight:600;">${msg}</span>`;
+                    gateway.appendChild(block);
+                    
                     setTimeout(() => {
-                        toast.style.opacity = '0';
-                        toast.style.transform = 'scale(0.9)';
-                        toast.style.transition = 'all 0.3s ease';
-                        setTimeout(() => toast.remove(), 300);
-                    }, 3500);
+                        block.style.opacity = '0'; block.style.transform = 'scale(0.9)'; block.style.transition = 'all 0.2s linear';
+                        setTimeout(() => block.remove(), 200);
+                    }, 3000);
                 }
             },
 
-            // General Events Handler Binder Engine Matrix Configuration
+            // Authentication Interface Subsystem Logs
+            Auth: {
+                logout() {
+                    App.Toast.show("Sesi operator dibersihkan. Memuat ulang sistem terpadu...", "warning");
+                    setTimeout(() => { localStorage.clear(); window.location.reload(); }, 1500);
+                }
+            },
+
+            // Bind Core Dynamic Action Controller UI Controls Lifecycle Event Matrix
             Events: {
                 bindGlobal() {
-                    // Sidebar Action Trigger logic collapse metrics
                     document.getElementById('sidebar-toggle-trigger').addEventListener('click', (e) => {
-                        App.Utils.createRipple(e);
-                        document.getElementById('app-layout').classList.toggle('sidebar-collapsed');
+                        App.Utils.ripple(e); document.getElementById('app-layout').classList.toggle('sidebar-collapsed');
                     });
                     
-                    // Theme Switch Button Hook
                     document.getElementById('theme-toggle-trigger').addEventListener('click', (e) => {
-                        App.Utils.createRipple(e);
-                        App.Theme.toggle();
+                        App.Utils.ripple(e); App.Theme.toggle();
                     });
 
-                    // Fullscreen Core Feature Toggle
+                    document.getElementById('refresh-view-trigger').addEventListener('click', (e) => {
+                        App.Utils.ripple(e); App.Router.executeRouteTransition(); App.Toast.show("Tampilan data view berhasil disinkronisasikan", "success");
+                    });
+
                     document.getElementById('fullscreen-toggle-trigger').addEventListener('click', () => {
-                        if (!document.fullscreenElement) {
-                            document.documentElement.requestFullscreen();
-                        } else if (document.exitFullscreen) {
-                            document.exitFullscreen();
-                        }
+                        if (!document.fullscreenElement) { document.documentElement.requestFullscreen(); }
+                        else { document.exitFullscreen(); }
+                    });
+
+                    // Dropdown Profile Drawer overlay click listener hooks
+                    const trigger = document.getElementById('profile-dropdown-trigger');
+                    const sheet = document.getElementById('profile-dropdown-sheet');
+                    trigger.addEventListener('click', (e) => { e.stopPropagation(); sheet.classList.toggle('active'); });
+                    document.addEventListener('click', () => sheet.classList.remove('active'));
+
+                    // Modal Close Listener Shortcut bindings matrix hooks
+                    document.getElementById('system-modal-root').addEventListener('click', (e) => {
+                        if(e.target.id === 'system-modal-root') App.Modal.close();
+                    });
+                    window.addEventListener('keydown', (e) => { if(e.key === 'Escape') App.Modal.close(); });
+
+                    // Global core input search filters logic matrix interceptor engine
+                    document.getElementById('global-search-engine').addEventListener('input', (e) => {
+                        const val = e.target.value.toLowerCase();
+                        document.querySelectorAll('tbody tr, article').forEach(el => {
+                            if(el.innerText.toLowerCase().includes(val)) el.style.display = '';
+                            else el.style.display = 'none';
+                        });
                     });
                 }
             },
 
-            // Utility Toolkit Helpers
+            // UI Utility Tools Helper Packets Architecture
             Utils: {
-                createRipple(event) {
+                ripple(event) {
                     const btn = event.currentTarget;
                     const circle = document.createElement("span");
-                    const diameter = Math.max(btn.clientWidth, btn.clientHeight);
-                    const radius = diameter / 2;
+                    const size = Math.max(btn.clientWidth, btn.clientHeight);
+                    const rad = size / 2;
                     
-                    circle.style.width = circle.style.height = `${diameter}px`;
-                    circle.style.left = `${event.clientX - btn.getBoundingClientRect().left - radius}px`;
-                    circle.style.top = `${event.clientY - btn.getBoundingClientRect().top - radius}px`;
+                    circle.style.width = circle.style.height = `${size}px`;
+                    circle.style.left = `${event.clientX - btn.getBoundingClientRect().left - rad}px`;
+                    circle.style.top = `${event.clientY - btn.getBoundingClientRect().top - rad}px`;
                     circle.classList.add("ripple");
                     
-                    const ripple = btn.getElementsByClassName("ripple")[0];
-                    if (ripple) ripple.remove();
+                    const existing = btn.getElementsByClassName("ripple")[0];
+                    if (existing) existing.remove();
                     btn.appendChild(circle);
                 }
             }
         };
 
-        // Window Init Entry-point runtime
+        // Initialize Native Core Window Lifecycle Listener Gateway Entrypoint
         window.addEventListener('DOMContentLoaded', () => App.init());
     </script>
 </body>
