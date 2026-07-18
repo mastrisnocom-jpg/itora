@@ -192,7 +192,6 @@ const App = {
                 const { data, error } = await supabaseClient.auth.getSession();
                 if (error) throw error;
                 if(data?.session) {
-                    // PERBAIKAN FIXED: Mengunci kembali status sesi lokal agar saat di-refresh tidak me-lempar ke form login
                     localStorage.setItem('ns_logged_in', 'true');
                     localStorage.setItem('ns_user_email', data.session.user.email);
                     
@@ -205,7 +204,6 @@ const App = {
                     document.getElementById('auth-layout').style.display = 'flex';
                 }
             } catch (err) {
-                localStorage.clear();
                 document.getElementById('auth-layout').style.display = 'flex';
             }
         },
@@ -583,7 +581,6 @@ const App = {
 
         async openSpecificFriendPopupObrolan(friendEmail, friendName) {
             activeChatFriendEmail = friendEmail; activeChatFriendName = friendName;
-            
             const friendAvatarUrl = `https://i.pravatar.cc/150?img=${Math.abs(friendName.hashCode() % 70)}`;
             
             const headerBox = document.getElementById('dynamic-chat-header-node');
@@ -615,7 +612,6 @@ const App = {
             this.loadPopupFriendsListSidebar();
 
             const mainArea = document.getElementById('popup-chat-main-area-pane'); if(!mainArea) return;
-
             let chatEmojiHTML = EMOJI_LIST.map(em => `<button type="button" class="emoji-item-btn" onclick="App.Features.appendEmojiToInputField('popup-chat-input-field','popup-chat-emoji-panel','${em}')">${em}</button>`).join('');
 
             mainArea.innerHTML = `
@@ -651,19 +647,10 @@ const App = {
 
             try {
                 const myCurrentName = App.ProfileState.getCurrentName();
-                const { data: messages, error } = await supabaseClient
-                    .from('posts')
-                    .select('*')
-                    .eq('image', 'private_chat_type')
-                    .order('created_at', { ascending: true });
-
+                const { data: messages, error } = await supabaseClient.from('posts').select('*').eq('image', 'private_chat_type').order('created_at', { ascending: true });
                 if (error) throw error;
 
-                const filtered = messages ? messages.filter(msg => 
-                    (msg.author === myCurrentName && msg.role === friendName) || 
-                    (msg.author === friendName && msg.role === myCurrentName)
-                ) : [];
-                
+                const filtered = messages ? messages.filter(msg => (msg.author === myCurrentName && msg.role === friendName) || (msg.author === friendName && msg.role === myCurrentName)) : [];
                 const embeddedStream = document.getElementById('chat-messages-embedded-target-stream');
                 const streamViewport = document.getElementById('popup-msg-stream-viewport');
                 
@@ -679,39 +666,23 @@ const App = {
         async sendPopupChatCloudAction() {
             const input = document.getElementById('popup-chat-input-field'); 
             if(!input || !input.value.trim() || !activeChatFriendName) return;
-            
-            const textVal = input.value.trim(); 
-            const myCurrentName = App.ProfileState.getCurrentName();
+            const textVal = input.value.trim(); const myCurrentName = App.ProfileState.getCurrentName();
 
             try {
-                const { error } = await supabaseClient
-                    .from('posts')
-                    .insert([{ 
-                        author: myCurrentName, 
-                        role: activeChatFriendName, 
-                        avatar: App.ProfileState.getCurrentAvatar(), 
-                        content: textVal, 
-                        image: 'private_chat_type', 
-                        likes: 0,
-                        dislikes: 0
-                    }]);
-
+                const { error } = await supabaseClient.from('posts').insert([{ author: myCurrentName, role: activeChatFriendName, avatar: App.ProfileState.getCurrentAvatar(), content: textVal, image: 'private_chat_type', likes: 0, dislikes: 0 }]);
                 if (error) throw error;
 
                 const embeddedStream = document.getElementById('chat-messages-embedded-target-stream');
                 const streamViewport = document.getElementById('popup-msg-stream-viewport');
                 
                 if(embeddedStream) {
-                    const b = document.createElement('div'); 
-                    b.className = 'bubble out';
+                    const b = document.createElement('div'); b.className = 'bubble out';
                     b.innerHTML = `<span class="bubble-sender-name">${myCurrentName}</span><span>${textVal}</span>`;
                     embeddedStream.appendChild(b); 
                     if(streamViewport) streamViewport.scrollTop = streamViewport.scrollHeight;
                 }
                 input.value = '';
-            } catch(err) {
-                console.error("Gagal mengirim pesan:", err);
-            }
+            } catch(err) { console.error("Gagal mengirim pesan:", err); }
         },
 
         triggerCreateCommunityPremiumModal() {
@@ -815,7 +786,6 @@ const App = {
 
             let parsedPosts = [];
             try { if(commObj.posts && commObj.posts.startsWith('[')) parsedPosts = JSON.parse(commObj.posts); } catch(e){}
-            
             parsedPosts.unshift({ author: App.ProfileState.getCurrentName(), text: input.value.trim() });
             
             await supabaseClient.from('communities').update({ posts: JSON.stringify(parsedPosts) }).eq('id', commId);
@@ -1024,6 +994,7 @@ const App = {
         }
     },
 
+    Network: { listen() { window.addEventListener('offline', ()=>App.Toast.show("Offline","danger")); } },
     Modal: { open(t, b) { document.getElementById('modal-title').innerText=t; document.getElementById('modal-body').innerHTML=b; document.getElementById('global-modal').classList.add('active'); }, close() { document.getElementById('global-modal').classList.remove('active'); } },
     Toast: {
         show(m, t="info") {
