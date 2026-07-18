@@ -291,11 +291,11 @@
             <p style="color: var(--text-muted); margin-bottom: 32px; font-size: 0.95rem;">Masuk untuk terhubung dengan koneksi profesional Anda.</p>
             <form onsubmit="App.Auth.login(event)">
                 <div class="form-group">
-                    <input type="email" class="form-input" id="login-email" placeholder=" " required value="adnan@nexsocial.id">
-                    <label class="form-label">Email / Username</label>
+                    <input type="email" class="form-input" id="login-email" placeholder=" " required>
+                    <label class="form-label">Email Aktif</label>
                 </div>
                 <div class="form-group">
-                    <input type="password" class="form-input" id="login-pwd" placeholder=" " required value="password123">
+                    <input type="password" class="form-input" id="login-pwd" placeholder=" " required>
                     <label class="form-label">Password</label>
                 </div>
                 <button type="submit" class="btn btn-primary btn-full ripple-btn" style="margin-bottom: 24px;">Masuk ke Aplikasi</button>
@@ -307,18 +307,14 @@
             <div class="auth-logo">N</div>
             <h1 style="margin-bottom: 8px; font-weight: 800; font-size: 24px;">Bergabung dengan NexSocial</h1>
             <p style="color: var(--text-muted); margin-bottom: 32px; font-size: 0.95rem;">Buat profil profesional Anda hari ini.</p>
-            <form onsubmit="App.Auth.login(event)">
+            <form onsubmit="App.Auth.signup(event)">
                 <div class="form-group">
-                    <input type="text" class="form-input" placeholder=" " required>
-                    <label class="form-label">Nama Lengkap</label>
+                    <input type="email" class="form-input" id="signup-email" placeholder=" " required>
+                    <label class="form-label">Email Aktif Anda</label>
                 </div>
                 <div class="form-group">
-                    <input type="email" class="form-input" placeholder=" " required>
-                    <label class="form-label">Email</label>
-                </div>
-                <div class="form-group">
-                    <input type="password" class="form-input" placeholder=" " required>
-                    <label class="form-label">Password</label>
+                    <input type="password" class="form-input" id="signup-pwd" placeholder=" " required>
+                    <label class="form-label">Password Akun</label>
                 </div>
                 <button type="submit" class="btn btn-primary btn-full ripple-btn" style="margin-bottom: 24px;">Daftar Akun Baru</button>
             </form>
@@ -374,7 +370,7 @@
             <div>&copy; <span id="footer-year">2026</span> <strong>NexSocial</strong>. All Rights Reserved.</div>
             <div style="display: flex; gap: 24px; align-items: center;">
                 <span>Powered by HTML, CSS, Vanilla JS & Supabase</span>
-                <span>v3.2.0</span>
+                <span>v4.0.0</span>
                 <div class="status-indicator"><div class="status-dot" id="network-dot"></div><span id="network-text">Online</span></div>
             </div>
         </footer>
@@ -412,30 +408,76 @@
                 this.UI.bindGlobalEvents();
                 this.Navigation.render();
                 
-                if(localStorage.getItem('ns_logged_in') === 'true') {
-                    this.Auth.showApp();
-                    this.Router.init();
-                } else {
-                    document.getElementById('auth-layout').style.display = 'flex';
-                }
+                // Pengecekan status login aktif dari session Supabase langsung
+                this.Auth.checkCurrentSession();
             },
 
             Auth: {
+                async checkCurrentSession() {
+                    const { data, error } = await supabaseClient.auth.getSession();
+                    if(data?.session) {
+                        localStorage.setItem('ns_logged_in', 'true');
+                        App.Auth.showApp();
+                        App.Router.init();
+                    } else {
+                        localStorage.removeItem('ns_logged_in');
+                        document.getElementById('auth-layout').style.display = 'flex';
+                    }
+                },
                 toggleView(view) {
                     document.getElementById('login-view').style.display = view === 'login' ? 'block' : 'none';
                     document.getElementById('signup-view').style.display = view === 'signup' ? 'block' : 'none';
                 },
-                login(e) {
+                async login(e) {
                     e.preventDefault();
-                    App.UI.showLoadingBtn(e.target.querySelector('button[type="submit"]'));
-                    setTimeout(() => {
-                        localStorage.setItem('ns_logged_in', 'true');
-                        this.showApp();
-                        App.Toast.show("Berhasil masuk ke sistem.", "success");
-                        App.Router.init();
-                    }, 1000);
+                    const email = document.getElementById('login-email').value;
+                    const password = document.getElementById('login-pwd').value;
+                    const btn = e.target.querySelector('button[type="submit"]');
+                    
+                    App.UI.showLoadingBtn(btn);
+
+                    const { data, error } = await supabaseClient.auth.signInWithPassword({
+                        email: email,
+                        password: password,
+                    });
+
+                    if (error) {
+                        App.Toast.show(error.message, "danger");
+                        return;
+                    }
+
+                    App.Toast.show("Berhasil masuk ke sistem.", "success");
+                    localStorage.setItem('ns_logged_in', 'true');
+                    this.showApp();
+                    App.Router.init();
                 },
-                logout() {
+                async signup(e) {
+                    e.preventDefault();
+                    const email = document.getElementById('signup-email').value;
+                    const password = document.getElementById('signup-pwd').value;
+                    const btn = e.target.querySelector('button[type="submit"]');
+
+                    App.UI.showLoadingBtn(btn);
+
+                    const { data, error } = await supabaseClient.auth.signUp({
+                        email: email,
+                        password: password,
+                    });
+
+                    if (error) {
+                        App.Toast.show(error.message, "danger");
+                        return;
+                    }
+
+                    // Notifikasi sukses dan instruksi verifikasi email aktif
+                    App.Modal.open(
+                        "Verifikasi Email Dikirim!", 
+                        "Kami telah mengirimkan tautan konfirmasi ke email aktif Anda (" + email + "). Buka pesan tersebut dan klik link konfirmasi untuk mengaktifkan akun sebelum melakukan login."
+                    );
+                    this.toggleView('login');
+                },
+                async logout() {
+                    await supabaseClient.auth.signOut();
                     localStorage.removeItem('ns_logged_in');
                     window.location.hash = '';
                     window.location.reload();
