@@ -88,8 +88,6 @@
         .search-box input { width: 100%; background: var(--bg-body); border: 1px solid var(--border-color); padding: 12px 20px 12px 46px; border-radius: var(--radius-round); color: var(--text-main); transition: var(--trans-smooth); font-size: 0.9rem; }
         .search-box input:focus { border-color: var(--primary); box-shadow: 0 0 0 4px var(--primary-state); }
         .search-box .material-symbols-outlined { position: absolute; left: 16px; color: var(--text-muted); pointer-events: none; font-size: 22px; z-index: 2; }
-        .icon-btn { width: 44px; height: 44px; border-radius: var(--radius-round); display: flex; align-items: center; justify-content: center; background: transparent; color: var(--text-muted); cursor: pointer; position: relative; transition: var(--trans-smooth); }
-        .icon-btn:hover { background: var(--bg-body); color: var(--primary); }
         .badge { position: absolute; top: 4px; right: 4px; background: var(--danger); color: white; min-width: 18px; height: 18px; padding: 0 5px; border-radius: 9px; font-size: 0.7rem; font-weight: 800; display: none; align-items: center; justify-content: center; box-shadow: 0 2px 6px rgba(238,93,80,0.4); }
 
         /* SIDEBAR & NAV */
@@ -149,6 +147,34 @@
         .post-action-item.loved { color: #EE5D50 !important; }
         .post-action-item.disliked { color: var(--danger) !important; }
 
+        .post-attached-image { max-width: 100%; border-radius: var(--radius-md); margin: 12px 0; box-shadow: var(--shadow-soft); display: block; max-height: 340px; object-fit: cover; cursor: zoom-in; }
+
+        /* AREA KOMENTAR */
+        .comments-section { margin-top: 0; padding-top: 16px; display: none; animation: slideUpFade 0.4s ease; } 
+        .comments-stream { display: flex; flex-direction: column; gap: 12px; max-height: 250px; overflow-y: auto; margin-bottom: 16px; padding: 4px; }
+        .comment-item-wrapper { display: flex; width: 100%; margin-bottom: 2px; }
+        .comment-item-wrapper.my-comment { justify-content: flex-end; }
+        .comment-item-wrapper.other-comment { justify-content: flex-start; }
+        .comment-bubble { padding: 10px 14px; border-radius: 16px; font-size: 0.85rem; text-align: left; max-width: 80%; box-shadow: 0 1px 4px rgba(0,0,0,0.03); }
+        .comment-item-wrapper.my-comment .comment-bubble { background: var(--primary-state); border-bottom-right-radius: 4px; border: 1px solid rgba(1, 181, 116, 0.2); }
+        .comment-item-wrapper.other-comment .comment-bubble { background: var(--bg-body); border-bottom-left-radius: 4px; border: 1px solid var(--border-color); }
+        .comment-bubble strong { color: var(--primary); display: block; font-size: 0.75rem; margin-bottom: 3px; cursor: pointer; }
+        .comment-row { display: flex; gap: 8px; align-items: center; margin-top: 12px; position: relative; }
+
+        /* FLOATING CLOUD CHAT WIDGET */
+        .floating-chat-widget { position: fixed; bottom: 20px; right: 24px; width: 360px; height: 460px; background: var(--bg-glass-solid); border: 1px solid var(--border-color); border-radius: var(--radius-xl); box-shadow: var(--shadow-soft); display: flex; flex-direction: column; z-index: 9999; overflow: hidden; transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.3s ease; transform: translateY(120%); opacity: 0; pointer-events: none; }
+        .floating-chat-widget.active { transform: translateY(0); opacity: 1; pointer-events: auto; }
+        .popup-chat-header { background: var(--primary); color: white; padding: 14px 18px; display: flex; align-items: center; justify-content: space-between; box-shadow: var(--shadow-float); }
+        .popup-chat-body-container { flex: 1; display: flex; background: var(--bg-body); overflow: hidden; }
+        .popup-friends-list { width: 76px; border-right: 1px solid var(--border-color); background: var(--bg-glass-solid); overflow-y: auto; display: flex; flex-direction: column; align-items: center; padding: 10px 0; gap: 14px; }
+        .popup-friend-item { width: 50px; height: 54px; position: relative; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: var(--trans-smooth); }
+        .popup-friend-item .friend-avatar-node { width: 46px; height: 44px; border-radius: 50%; object-fit: cover; border: 2px solid transparent; padding: 1px; }
+        .popup-friend-item:hover .friend-avatar-node, .popup-friend-item.active .friend-avatar-node { border-color: var(--primary); transform: scale(1.05); }
+        .friend-online-dot { width: 10px; height: 10px; background-color: var(--primary); border: 2px solid var(--bg-glass-solid); border-radius: 50%; position: absolute; bottom: 2px; right: 4px; box-shadow: 0 0 6px var(--primary); }
+        .popup-chat-main-area { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+        .popup-msg-stream { flex: 1; padding: 14px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
+        .popup-chat-input-row { padding: 10px; background: var(--bg-glass-solid); border-top: 1px solid var(--border-color); display: flex; gap: 8px; align-items: center; position: relative; }
+
         /* ==========================================================================
            2. KOMPONEN POP UP POSTINGAN BARU (PRESTISIUS - SESUAI GAMBAR)
            ========================================================================== */
@@ -163,28 +189,22 @@
         .pic-composer-avatar { width: 52px; height: 52px; border-radius: 50%; object-fit: cover; background: #e2e8f0; }
         .pic-composer-username { font-size: 1.05rem; font-weight: 800; color: var(--text-main); }
         
-        /* Barisan Tombol Tag Horizontal */
         .pic-composer-tags-strip { display: flex; gap: 8px; padding: 0 16px; overflow-x: auto; white-space: nowrap; margin-bottom: 16px; }
         .pic-composer-tags-strip::-webkit-scrollbar { display: none; }
         .pic-tag-pill { display: inline-flex; align-items: center; gap: 6px; padding: 8px 14px; border-radius: 20px; border: 1px solid rgba(0,0,0,0.08); background: var(--bg-glass-solid); color: var(--text-main); font-size: 0.82rem; font-weight: 600; cursor: pointer; }
-        .pic-tag-pill .material-symbols-outlined { font-size: 16px; color: var(--text-main); }
         
         .pic-composer-body { flex: 1; padding: 0 16px; display: flex; flex-direction: column; }
         .pic-composer-textarea { width: 100%; border: none; resize: none; background: transparent; color: var(--text-main); font-size: 1.1rem; min-height: 160px; font-family: var(--font-main); line-height: 1.5; }
         .pic-composer-preview-box { margin-top: 12px; border-radius: 12px; overflow: hidden; max-height: 140px; }
         .pic-composer-preview-box img { max-height: 130px; object-fit: cover; border: 2px solid var(--primary); border-radius: 8px; }
 
-        /* Grid Pilihan Media Bawah */
         .pic-composer-dock-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; padding: 16px; border-top: 1px solid rgba(0,0,0,0.04); }
         .pic-dock-item { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; background: var(--bg-glass-solid); border: 1px solid rgba(0,0,0,0.06); padding: 14px 8px; border-radius: 12px; cursor: pointer; box-shadow: 0 2px 6px rgba(0,0,0,0.02); transition: var(--trans-smooth); }
-        .pic-dock-item:hover { background: var(--bg-body); transform: translateY(-1px); }
         .pic-dock-item .material-symbols-outlined { font-size: 24px; color: #334155; }
         .pic-dock-lbl { font-size: 0.8rem; font-weight: 600; color: var(--text-main); }
         
-        /* Baris Pil Status Visibilitas Paling Bawah */
         .pic-composer-footer-status-row { display: flex; align-items: center; gap: 8px; padding: 0 16px 12px 16px; flex-wrap: wrap; }
         .pic-status-pill { display: inline-flex; align-items: center; gap: 6px; padding: 6px 14px; border-radius: 16px; background: #e2e8f0; color: #334155; font-size: 0.78rem; font-weight: 700; }
-        .pic-status-pill .material-symbols-outlined { font-size: 15px; }
 
         /* MULTI SHARE SHEET CSS */
         .share-grid-sheet { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; padding: 12px 0; text-align: center; }
@@ -204,12 +224,29 @@
         .badge-comment { background: var(--danger); }
         .fb-noti-text-zone { flex: 1; min-width: 0; }
         .fb-noti-desc { font-size: 0.88rem; color: var(--text-main); line-height: 1.35; }
-        .fb-noti-desc strong { font-weight: 700; }
         .fb-noti-time { font-size: 0.78rem; color: var(--text-muted); margin-top: 3px; display: block; }
+
+        .user-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 16px; text-align: left; }
+        .user-follow-card { display: flex; align-items: center; gap: 12px; padding: 14px; background: var(--bg-body); border: 1px solid var(--border-color); border-radius: var(--radius-md); }
+        .user-follow-info { flex: 1; overflow: hidden; }
+        
+        .profile-cover { height: 200px; border-radius: var(--radius-xl); background: linear-gradient(135deg, #74ebd5, var(--primary)); margin-bottom: -60px; position: relative; }
+        .profile-info-card { text-align: center; padding-top: 0; }
+        .profile-avatar-large { width: 120px; height: 120px; border-radius: var(--radius-round); border: 4px solid var(--bg-glass-solid); margin: 0 auto 16px auto; object-fit: cover; box-shadow: var(--shadow-float); position: relative; z-index: 2; }
+        .profile-stats { display: flex; justify-content: center; gap: 32px; margin-top: 24px; padding-top: 24px; border-top: 1px solid var(--border-color); }
+        .stat-item { display: flex; flex-direction: column; align-items: center; }
+        .stat-val { font-weight: 800; font-size: 1.5rem; color: var(--text-main); }
+        .stat-lbl { font-size: 0.85rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase; }
+        .avatar-edit-container { display: flex; flex-direction: column; align-items: center; gap: 14px; margin-bottom: 28px; }
+        .avatar-preview-wrapper { position: relative; width: 100px; height: 100px; }
+        .avatar-preview-circle { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; border: 3px solid var(--primary); padding: 2px; }
+        .avatar-upload-label { position: absolute; bottom: 0; right: 0; width: 32px; height: 32px; border-radius: 50%; background: var(--primary); color: white; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: var(--shadow-float); }
+
+        .global-workspace-ad-banner { display: flex; align-items: center; gap: 12px; background: linear-gradient(90deg, rgba(1,181,116,0.1), rgba(0,148,91,0.05)); border: 1px solid var(--border-color); padding: 10px 20px; border-radius: var(--radius-md); margin-bottom: 24px; text-align: left; }
 
         @media (max-width: 768px) {
             #app-layout { grid-template-areas: "header" "content"; grid-template-columns: 1fr; grid-template-rows: 70px 1fr; }
-            .app-sidebar { display: flex; transform: translateX(-100%); width: 280px; z-index: 2005; position: fixed; top: 0; left: 0; bottom: 0; transition: var(--trans-smooth); }
+            .app-sidebar { display: flex; transform: translateX(-100%); width: 280px; z-index: 2005; position: fixed; top: 0; left: 0; bottom: 0; }
             #app-layout.sidebar-mobile-open .app-sidebar { transform: translateX(0); }
             .app-header { padding: 0 12px; height: 70px; }
             .search-box { width: 140px; }
@@ -286,7 +323,7 @@
                     <span class="material-symbols-outlined">notifications</span>
                     <span class="badge" id="noti-badge">0</span>
                 </button>
-                <!-- Avatar pojok header dengan fungsi toggle buka-tutup -->
+                <!-- Avatar pojok kanan atas dengan fungsi toggle buka-tutup -->
                 <img src="https://i.pravatar.cc/150?img=12" id="header-avatar-toggle-node" alt="Profile" class="user-avatar id-user-avatar-element" onclick="App.UI.handleHeaderAvatarToggleAction()">
             </div>
         </header>
@@ -314,7 +351,7 @@
         <nav class="bottom-nav" id="bottom-nav-list"></nav>
     </div>
 
-    <!-- PREMIUM FLOATING CHAT POP-UP LAYOUT -->
+    <!-- FLOATING CHAT POP-UP LAYOUT -->
     <div class="floating-chat-widget" id="floating-chat-popup-box">
         <div class="popup-chat-header">
             <div style="display:flex; align-items:center; gap:8px;">
@@ -349,22 +386,17 @@
     </div>
     <div class="toast-container" id="toast-container"></div>
 
-    <!-- Logic Script Execution -->
+    <!-- JavaScript Application Script -->
     <script>
         const SUPABASE_URL = 'https://waaufoxlimqtesmmjhyw.supabase.co';
         const SUPABASE_KEY = 'sb_publishable_X6icNByv3YFbekorwJ6kSw_SX0XUFM8';
         const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-        // Notifikasi dibersihkan dari bawaan sistem lama, hanya melacak interaksi live
         let liveNotifications = [];
-
         let activeChatFriendEmail = null;
         let activeChatFriendName = null;
 
         let composerAttachedImageBase64 = null;
-        let composerAttachedFileBase64 = null;
-        let composerAttachedFileName = "Dokumen.bin";
-
         let unreadMessageCounters = {}; 
         let liveHeaderNotificationCount = 0; 
         let headerSearchFilterQueryString = ""; 
@@ -407,9 +439,6 @@
                 getCurrentDomisili() {
                     return localStorage.getItem('ns_user_domisili') || 'Surabaya, Indonesia';
                 },
-                getCurrentAvatar() {
-                    return localStorage.getItem('ns_user_avatar_base64') || 'https://i.pravatar.cc/150?img=12';
-                },
                 getJoinDateText() {
                     let dateStr = localStorage.getItem('ns_user_join_date');
                     if(!dateStr) {
@@ -429,9 +458,8 @@
                 },
                 updateProfileDataConfiguration(newName, newBio, newDomisili) {
                     const config = this.getLimitConfig();
-                    if(config.count >= 5) return { success: false, message: "Kuota modifikasi bulanan Anda habis (Maks 5 kali)." };
+                    if(config.count >= 5) return { success: false, message: "Kuota bulanan habis." };
                     config.count += 1;
-                    config.month = new Date().getMonth();
                     localStorage.setItem('ns_display_name', newName);
                     localStorage.setItem('ns_user_bio_status', newBio);
                     localStorage.setItem('ns_user_domisili', newDomisili);
@@ -449,13 +477,7 @@
                 subscribePosts() {
                     supabaseClient
                         .channel('schema-db-changes')
-                        .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'posts' }, async (payload) => {
-                            if (window.location.hash === '#/feed') App.Features.renderPosts();
-                        })
-                        .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'posts' }, async (payload) => {
-                            if (window.location.hash === '#/feed') App.Features.renderPosts();
-                        })
-                        .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'posts' }, async (payload) => {
+                        .on('postgres_changes', { event: '*', schema: 'public', table: 'posts' }, async () => {
                             if (window.location.hash === '#/feed') App.Features.renderPosts();
                         })
                         .subscribe();
@@ -470,26 +492,21 @@
                         if(data?.session) {
                             localStorage.setItem('ns_logged_in', 'true');
                             localStorage.setItem('ns_user_email', data.session.user.email);
-                            App.ProfileState.getJoinDateText(); // Initialize join date
+                            App.ProfileState.getJoinDateText();
                             App.UI.syncGlobalAvatarAndName();
                             App.Auth.showApp();
                             App.Router.init();
                         } else {
                             localStorage.removeItem('ns_logged_in');
-                            const authLayout = document.getElementById('auth-layout');
-                            if (authLayout) authLayout.style.display = 'flex';
+                            document.getElementById('auth-layout').style.display = 'flex';
                         }
                     } catch (err) {
-                        localStorage.clear();
-                        const authLayout = document.getElementById('auth-layout');
-                        if (authLayout) authLayout.style.display = 'flex';
+                        document.getElementById('auth-layout').style.display = 'flex';
                     }
                 },
                 toggleView(view) {
-                    const loginView = document.getElementById('login-view');
-                    const signupView = document.getElementById('signup-view');
-                    if (loginView) loginView.style.display = view === 'login' ? 'block' : 'none';
-                    if (signupView) signupView.style.display = view === 'signup' ? 'block' : 'none';
+                    document.getElementById('login-view').style.display = view === 'login' ? 'block' : 'none';
+                    document.getElementById('signup-view').style.display = view === 'signup' ? 'block' : 'none';
                 },
                 async login(e) {
                     if (e && e.preventDefault) e.preventDefault();
@@ -503,19 +520,17 @@
                         App.UI.syncGlobalAvatarAndName();
                         this.showApp();
                         App.Router.init();
-                        App.Toast.show("Selamat datang kembali!", "success");
-                    } catch (error) { alert("Gagal Masuk: " + error.message); }
+                    } catch (error) { alert("Masuk gagal: " + error.message); }
                 },
                 async signup(e) {
                     if (e && e.preventDefault) e.preventDefault();
                     const email = document.getElementById('signup-email').value.trim();
                     const password = document.getElementById('signup-pwd').value;
                     try {
-                        const { data, error } = await supabaseClient.auth.signUp({ email, password });
-                        if (error) throw error;
-                        App.Modal.open("Pendaftaran Sukses", "Akun berhasil terdaftar. Silakan lakukan masuk.");
+                        await supabaseClient.auth.signUp({ email, password });
+                        alert("Pendaftaran Sukses! Silakan langsung masuk.");
                         this.toggleView('login');
-                    } catch (error) { alert("Gagal Mendaftar: " + error.message); }
+                    } catch (error) { alert("Pendaftaran gagal: " + error.message); }
                 },
                 async logout() {
                     try { await supabaseClient.auth.signOut(); } catch(e){}
@@ -565,8 +580,6 @@
                         viewport.innerHTML = `<div class="view-container">${App.Views[hash]()}</div>`;
                         if(App.ViewControllers[hash]) App.ViewControllers[hash]();
                         window.scrollTo({ top: 0, behavior: 'smooth' });
-                    } else {
-                        viewport.innerHTML = `<div class="glass-card"><h2>404 Not Found</h2></div>`;
                     }
                 }
             },
@@ -587,8 +600,8 @@
 
                     this.menuConfig.forEach(m => {
                         if(m.isChatTrigger) {
-                            sideHTML += `<li class="menu-item-wrapper"><a class="menu-item ripple-btn" onclick="App.UI.toggleChatPopup(true)"><span class="material-symbols-outlined">${m.icon}</span><span class="menu-text">${m.label}</span></a><div class="num-counter-badge" id="main-sidebar-chat-counter" style="display:none;">0</div></li>`;
-                            if(m.mobile) bottomHTML += `<div class="bn-item-wrapper"><a class="bn-item ripple-btn" onclick="App.UI.toggleChatPopup(true)"><span class="material-symbols-outlined">${m.icon}</span><span style="font-size: 0.7rem;">${m.label}</span></a><div class="bn-counter-badge" id="mobile-bn-chat-counter" style="display:none;">0</div></div>`;
+                            sideHTML += `<li class="menu-item-wrapper"><a class="menu-item ripple-btn" onclick="App.UI.toggleChatPopup(true)"><span class="material-symbols-outlined">${m.icon}</span><span class="menu-text">${m.label}</span></a></li>`;
+                            if(m.mobile) bottomHTML += `<div class="bn-item-wrapper"><a class="bn-item ripple-btn" onclick="App.UI.toggleChatPopup(true)"><span class="material-symbols-outlined">${m.icon}</span><span style="font-size: 0.7rem;">${m.label}</span></a></div>`;
                         } else {
                             sideHTML += `<li><a class="menu-item ripple-btn" data-route="${m.id}" onclick="App.Router.navigate('${m.id}')"><span class="material-symbols-outlined">${m.icon}</span><span class="menu-text">${m.label}</span></a></li>`;
                             if(m.mobile) bottomHTML += `<a class="bn-item ripple-btn" data-route="${m.id}" onclick="App.Router.navigate('${m.id}')"><span class="material-symbols-outlined">${m.icon}</span><span style="font-size: 0.7rem;">${m.label}</span></a>`;
@@ -615,7 +628,6 @@
                     return `
                         <div class="glass-card">
                             <h2>Cari Koneksi & Teman</h2>
-                            <p style="color: var(--text-muted); font-size:0.85rem; margin-bottom: 24px;">Temukan pengguna Workspace lain.</p>
                             <div id="explore-users-stream" class="user-grid"></div>
                         </div>
                     `;
@@ -623,10 +635,8 @@
                 groups() {
                     return `
                         <div class="glass-card">
-                            <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:24px; flex-wrap:wrap; gap:12px;">
-                                <div>
-                                    <h2>Komunitas Premium</h2>
-                                </div>
+                            <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:24px;">
+                                <h2>Komunitas Premium</h2>
                                 <button class="btn btn-primary" onclick="App.Features.triggerCreateCommunityPremiumModal()"><span class="material-symbols-outlined">add_circle</span> Buat Komunitas (Rp 50.000)</button>
                             </div>
                             <div class="community-list-container" id="community-hub-list-viewport"></div>
@@ -640,7 +650,7 @@
                     const targetName = isOwnProfile ? loggedInUser : specifiedTargetName;
                     const targetAvatar = isOwnProfile ? App.ProfileState.getCurrentAvatar() : `https://i.pravatar.cc/150?img=${Math.abs(targetName.hashCode()) % 70 || 22}`;
                     const targetBio = isOwnProfile ? App.ProfileState.getCurrentRoleBioStatus() : 'Tech Workspace Professional Member';
-                    const targetDomisili = isOwnProfile ? App.ProfileState.getCurrentDomisili() : 'Jakarta, Indonesia';
+                    const targetDomisili = isOwnProfile ? App.ProfileState.getCurrentDomisili() : 'Surabaya, Indonesia';
                     const joinDate = isOwnProfile ? App.ProfileState.getJoinDateText() : '12 Januari 2026';
                     
                     const myEmail = (localStorage.getItem('ns_user_email') || '').toLowerCase();
@@ -651,19 +661,16 @@
                             <div class="profile-cover"></div>
                             <img src="${targetAvatar}" class="profile-avatar-large" alt="Profile">
                             <h2>${targetName} ${isSuperAdmin ? '<span style="font-size:0.75rem; background:var(--primary); color:white; padding:2px 8px; border-radius:10px; margin-left:6px; vertical-align:middle;">SUPER ADMIN</span>' : ''}</h2>
-                            
-                            <!-- DATA TANGGAL PENDAFTARAN DI BAWAH NAMA -->
-                            <p style="color: var(--text-muted); font-size: 0.8rem; margin-top: 2px; margin-bottom: 8px; font-weight:700;">Bergabung sejak: ${joinDate}</p>
-                            
+                            <p style="color: var(--text-muted); font-size: 0.82rem; margin-top: 2px; margin-bottom: 8px; font-weight:700;">Bergabung sejak: ${joinDate}</p>
                             <p style="color: var(--primary); font-weight: 600; margin-bottom: 4px;">${targetBio}</p>
                             <p style="color: var(--text-muted); font-size: 0.85rem; font-weight: 500; margin-bottom: 16px; display:flex; align-items:center; justify-content:center; gap:4px;">
                                 <span class="material-symbols-outlined" style="font-size:16px;">location_on</span> ${targetDomisili}
                             </p>
                             
                             <div class="profile-stats">
-                                <div class="stat-item"><span class="stat-val" id="profile-friends-count">${isOwnProfile ? '0' : '12'}</span><span class="stat-lbl">Teman</span></div>
-                                <div class="stat-item"><span class="stat-val">${isOwnProfile ? '2.5K' : '820'}</span><span class="stat-lbl">Pengikut</span></div>
-                                <div class="stat-item"><span class="stat-val">${isOwnProfile ? '84' : '15'}</span><span class="stat-lbl">Postingan</span></div>
+                                <div class="stat-item"><span class="stat-val" id="profile-friends-count">${isOwnProfile ? '0' : '15'}</span><span class="stat-lbl">Teman</span></div>
+                                <div class="stat-item"><span class="stat-val">${isOwnProfile ? '2.5K' : '410'}</span><span class="stat-lbl">Pengikut</span></div>
+                                <div class="stat-item"><span class="stat-val">${isOwnProfile ? '84' : '12'}</span><span class="stat-lbl">Postingan</span></div>
                             </div>
                             
                             <div style="padding: 24px; display:flex; flex-direction:column; gap:12px; max-width:320px; margin:0 auto;">
@@ -681,33 +688,25 @@
                     const currentAvatar = App.ProfileState.getCurrentAvatar();
                     const currentBioRole = App.ProfileState.getCurrentRoleBioStatus();
                     const currentDomisili = App.ProfileState.getCurrentDomisili();
-                    const limitConfig = App.ProfileState.getLimitConfig();
-                    const remainingEdit = 5 - limitConfig.count;
-
                     const myEmail = (localStorage.getItem('ns_user_email') || '').toLowerCase();
                     const isSuperAdmin = (myEmail === 'mastrisnocom@gmail.com');
                     
-                    let adFormHTML = '';
-                    if (isSuperAdmin) {
-                        adFormHTML = `
-                            <div class="glass-card" style="margin-top: 24px; text-align: left; border: 1px solid var(--primary);">
-                                <h3 style="margin-bottom: 8px; color: var(--primary); display: flex; align-items: center; gap: 8px;">
-                                    <span class="material-symbols-outlined">ads_click</span> Panel Pasang Iklan Super Admin
-                                </h3>
-                                <form id="global-admin-ad-form" onsubmit="App.Features.saveAdminGlobalAdBannerAction(event)">
-                                    <div class="form-group" style="margin-bottom: 14px;">
-                                        <input type="text" class="form-input" id="admin-ad-text-input" placeholder=" " value="${localStorage.getItem('ns_ad_text_global') || ''}" required>
-                                        <label class="form-label">Teks Iklan Berjalan Global</label>
-                                    </div>
-                                    <button type="submit" class="btn btn-primary btn-full">Publikasikan Banner Iklan</button>
-                                </form>
-                            </div>
-                        `;
-                    }
+                    let adFormHTML = isSuperAdmin ? `
+                        <div class="glass-card" style="margin-top: 24px; text-align: left; border: 1px solid var(--primary);">
+                            <h3 style="margin-bottom: 8px; color: var(--primary);">Panel Pasang Iklan Super Admin</h3>
+                            <form id="global-admin-ad-form" onsubmit="App.Features.saveAdminGlobalAdBannerAction(event)">
+                                <div class="form-group" style="margin-bottom: 14px;">
+                                    <input type="text" class="form-input" id="admin-ad-text-input" placeholder=" " value="${localStorage.getItem('ns_ad_text_global') || ''}" required>
+                                    <label class="form-label">Teks Iklan Berjalan Global</label>
+                                </div>
+                                <button type="submit" class="btn btn-primary btn-full">Publikasikan Banner Iklan</button>
+                            </form>
+                        </div>
+                    ` : '';
 
                     return `
                         <div class="glass-card" style="max-width: 650px; margin: 0 auto;">
-                            <h2>Pengaturan Kontrol Akun</h2>
+                            <h2>Pengaturan Akun</h2>
                             <div class="avatar-edit-container">
                                 <div class="avatar-preview-wrapper">
                                     <img src="${currentAvatar}" id="settings-avatar-preview" class="avatar-preview-circle user-avatar-reactive" alt="Preview">
@@ -721,11 +720,11 @@
                             </div>
                             <div class="form-group">
                                 <input type="text" class="form-input" id="settings-bio-status" placeholder=" " value="${currentBioRole}">
-                                <label class="form-label">Pekerjaan / Jabatan Profesional</label>
+                                <label class="form-label">Pekerjaan / Jabatan</label>
                             </div>
                             <div class="form-group">
                                 <input type="text" class="form-input" id="settings-domisili" placeholder=" " value="${currentDomisili}">
-                                <label class="form-label">Domisili / Lokasi Tempat Tinggal</label>
+                                <label class="form-label">Domisili / Lokasi</label>
                             </div>
                             <button class="btn btn-primary ripple-btn btn-full" onclick="App.Features.saveNameSettings()">Simpan Profil</button>
                         </div>
@@ -734,15 +733,7 @@
                 }
             },
 
-            ViewControllers: {
-                feed() { App.Features.renderPosts(); },
-                explore() { App.Features.renderExploreUsers(); },
-                groups() { App.Features.renderCommunityHubViewportList(); },
-                profil() { App.Features.loadFriendsCount(); }
-            },
-
             Features: {
-                // POP UP COMPOSER BARU SEPENUHNYA SESUAI GAMBAR CONTOH
                 openComposerModalPopupForm() {
                     const currentName = App.ProfileState.getCurrentName();
                     const currentAvatar = App.ProfileState.getCurrentAvatar();
@@ -762,10 +753,10 @@
                             </div>
                             
                             <div class="pic-composer-tags-strip">
-                                <div class="pic-tab-pill" onclick="App.Toast.show('Musik ditambahkan','success')"><span class="material-symbols-outlined">music_note</span> Musik</div>
-                                <div class="pic-tab-pill" onclick="App.Toast.show('Kolaborator dipilih','success')"><span class="material-symbols-outlined">person</span> Tag/kolaborasi</div>
-                                <div class="pic-tab-pill" onclick="App.Toast.show('Lokasi disematkan','success')"><span class="material-symbols-outlined">location_on</span> Lokasi</div>
-                                <div class="pic-tab-pill" onclick="App.Toast.show('Aktivitas dipilih','success')"><span class="material-symbols-outlined">mood</span> Perasaan/aktivitas</div>
+                                <div class="pic-tag-pill" onclick="App.Toast.show('Musik disematkan','success')"><span class="material-symbols-outlined">music_note</span> Musik</div>
+                                <div class="pic-tag-pill" onclick="App.Toast.show('Tag kolaborasi ditambahkan','success')"><span class="material-symbols-outlined">person</span> Tag/kolaborasi</div>
+                                <div class="pic-tag-pill" onclick="App.Toast.show('Lokasi ditambahkan','success')"><span class="material-symbols-outlined">location_on</span> Lokasi</div>
+                                <div class="pic-tag-pill" onclick="App.Toast.show('Aktivitas ditambahkan','success')"><span class="material-symbols-outlined">mood</span> Perasaan/aktivitas</div>
                             </div>
                             
                             <div class="pic-composer-body">
@@ -778,18 +769,9 @@
                                     <span class="material-symbols-outlined">image</span>
                                     <span class="pic-dock-lbl">Galeri</span>
                                 </div>
-                                <div class="pic-dock-item" onclick="App.Toast.show('GIF Segera hadir','info')">
-                                    <span class="material-symbols-outlined">gif</span>
-                                    <span class="pic-dock-lbl">GIF</span>
-                                </div>
-                                <div class="pic-dock-item" onclick="App.Toast.show('Kamera siaran aktif','warning')">
-                                    <span class="material-symbols-outlined">videocam</span>
-                                    <span class="pic-dock-lbl">Siaran Langsung</span>
-                                </div>
-                                <div class="pic-dock-item" onclick="App.Toast.show('Warna latar diubah','info')">
-                                    <span class="material-symbols-outlined">palette</span>
-                                    <span class="pic-dock-lbl">Warna latar</span>
-                                </div>
+                                <div class="pic-dock-item" onclick="App.Toast.show('GIF ditambahkan','info')"><span class="material-symbols-outlined">gif</span><span class="pic-dock-lbl">GIF</span></div>
+                                <div class="pic-dock-item" onclick="App.Toast.show('Siaran dimulai','warning')"><span class="material-symbols-outlined">videocam</span><span class="pic-dock-lbl">Siaran Langsung</span></div>
+                                <div class="pic-dock-item" onclick="App.Toast.show('Warna diubah','info')"><span class="material-symbols-outlined">palette</span><span class="pic-dock-lbl">Warna latar</span></div>
                                 <input type="file" id="composer-img-input" accept="image/*" style="display:none;" onchange="App.Features.handleComposerImageSelection(event)">
                             </div>
                             
@@ -802,11 +784,9 @@
                     `;
                     
                     App.Modal.open("", popupFormHTML);
-                    // Sembunyikan pembungkus default bawaan modal agar bersih sesuai asset rancangan gambar
                     document.getElementById('modal-title').style.display = 'none';
                     document.getElementById('modal-content-area').style.padding = '0';
                     document.getElementById('modal-content-area').style.background = 'transparent';
-                    document.getElementById('modal-content-area').nextElementSibling?.remove();
                     document.querySelector('#modal-content-area div[style*="text-align: right"]').style.display = 'none';
                 },
 
@@ -819,6 +799,7 @@
                     const el = document.getElementById(panelId);
                     if(el) el.style.display = el.style.display === 'none' ? 'grid' : 'none';
                 },
+
                 appendEmojiToInputField(inputId, panelId, emojiChar) {
                     const field = document.getElementById(inputId);
                     if(field) { field.value += emojiChar; field.focus(); }
@@ -830,25 +811,23 @@
                     const reader = new FileReader(); reader.readAsDataURL(file);
                     reader.onload = function (e) {
                         composerAttachedImageBase64 = e.target.result;
-                        const previewArea = document.getElementById('composer-upload-preview-area');
-                        if (previewArea) previewArea.innerHTML = `<img src="${composerAttachedImageBase64}">`;
+                        document.getElementById('composer-upload-preview-area').innerHTML = `<img src="${composerAttachedImageBase64}">`;
                         document.getElementById('pic-submit-btn').classList.add('ready');
                     };
                 },
 
                 async triggerChangePasswordAction() {
-                    const currentPwd = prompt("Masukkan password baru Anda:");
-                    if(!currentPwd || currentPwd.trim().length < 6) return App.Toast.show("Password minimal 6 karakter.", "warning");
+                    const currentPwd = prompt("Masukkan password baru:");
+                    if(!currentPwd || currentPwd.trim().length < 6) return;
                     try {
                         await supabaseClient.auth.updateUser({ password: currentPwd.trim() });
-                        App.Toast.show("Password diperbarui!", "success");
+                        App.Toast.show("Password akun diperbarui!", "success");
                     } catch(err) { App.Toast.show(err.message, "danger"); }
                 },
 
-                // FITUR BERBAGI SANGAT LUAS (MENCAKUP COPY LINK & SEMUA SOSIAL MEDIA UTAMA)
                 openSocialMediaShareSheetModal(postId, textContext) {
                     const encodedLink = encodeURIComponent(window.location.origin + window.location.pathname + "?post=" + postId);
-                    const encodedText = encodeURIComponent(`Lihat postingan seru ini: "${textContext.substring(0,40)}..."`);
+                    const encodedText = encodeURIComponent(`Lihat postingan menarik ini: "${textContext.substring(0,40)}..."`);
                     
                     const modalHTML = `
                         <div class="share-grid-sheet">
@@ -878,7 +857,7 @@
                             </a>
                             <a href="sms:?body=${encodedText}%20${encodedLink}" class="share-item-node">
                                 <div class="share-icon-circle" style="background:#ec4899;"><span class="material-symbols-outlined">sms</span></div>
-                                <span>Pesan SMS</span>
+                                <span>SMS</span>
                             </a>
                         </div>
                     `;
@@ -888,7 +867,7 @@
 
                 copyPostLinkToClipboardAction(textUrl) {
                     navigator.clipboard.writeText(textUrl);
-                    App.Toast.show("Tautan postingan berhasil disalin!", "success");
+                    App.Toast.show("Tautan disalin ke clipboard!", "success");
                     App.Modal.close();
                 },
 
@@ -947,7 +926,6 @@
                         <div class="popup-msg-stream" id="popup-msg-stream-viewport"></div>
                         <div class="popup-chat-input-row">
                             <input type="text" class="form-input" placeholder="Tulis pesan..." id="popup-chat-input-field" onkeypress="if(event.key==='Enter') App.Features.sendPopupChatCloudAction()">
-                            <button class="icon-btn" style="background:var(--primary); color:white; width:34px; height:34px;" onclick="App.Features.sendPopupChatCloudAction()"><span class="material-symbols-outlined" style="font-size:16px;">send</span></button>
                         </div>
                     `;
                     
@@ -980,7 +958,6 @@
                     } catch(err) {}
                 },
 
-                // MENU EDIT DAN HAPUS REAL-TIME AKTIF DENGAN MENEKAN TITIK TIGA POSTINGAN
                 openPostActionMenuDOM(postId) {
                     App.Modal.resetStyleLayout();
                     let menuBodyHTML = `
@@ -994,21 +971,21 @@
 
                 async triggerPostTextEditAction(postId) {
                     App.Modal.close();
-                    const newTxt = prompt("Masukkan revisi teks postingan baru:");
+                    const newTxt = prompt("Revisi teks postingan baru:");
                     if(!newTxt || !newTxt.trim()) return;
                     try {
                         await supabaseClient.from('posts').update({ content: newTxt.trim() }).eq('id', postId);
-                        App.Toast.show("Postingan berhasil diperbarui!", "success");
+                        App.Toast.show("Postingan diperbarui!", "success");
                         this.renderPosts();
                     } catch(e) { console.error(e); }
                 },
 
                 async triggerPostAbsoluteDeleteAction(postId) {
                     App.Modal.close();
-                    if(!confirm("Apakah Anda yakin ingin menghapus postingan ini dari database cloud?")) return;
+                    if(!confirm("Hapus postingan ini dari database cloud?")) return;
                     try {
                         await supabaseClient.from('posts').delete().eq('id', postId);
-                        App.Toast.show("Postingan berhasil dihapus permanen!", "success");
+                        App.Toast.show("Postingan dihapus!", "success");
                         this.renderPosts();
                     } catch(e) { console.error(e); }
                 },
@@ -1037,6 +1014,11 @@
                         let filteredPosts = posts ? posts.filter(p => p.image !== 'private_chat_type') : [];
                         if(headerSearchFilterQueryString !== "") {
                             filteredPosts = filteredPosts.filter(p => p.author.toLowerCase().includes(headerSearchFilterQueryString) || (p.content && p.content.toLowerCase().includes(headerSearchFilterQueryString)));
+                        }
+
+                        if (filteredPosts.length === 0) {
+                            stream.innerHTML = `<div class="glass-card" style="text-align:center; color:var(--text-muted); padding:32px 16px;">Tidak ada postingan di linimasa.</div>`;
+                            return;
                         }
 
                         const lovedLogs = JSON.parse(localStorage.getItem('ns_loved_posts_ids') || '[]');
@@ -1079,7 +1061,7 @@
                                             <span>${p.likes || 0}</span>
                                         </div>
                                         
-                                        <!-- TOMBOL REAKSI LOVE BARU BERWARNA MERAH JIKA AKTIF -->
+                                        <!-- TOMBOL REAKSI LOVE BERWARNA MERAH JIKA AKTIF -->
                                         <div class="post-action-item ${isLovedActive}" onclick="App.Features.toggleLoveReaction(${pId})">
                                             <span class="material-symbols-outlined" style="${isLovedActive ? 'font-variation-settings: \'FILL\' 1;' : ''}">favorite</span>
                                             <span>Love</span>
@@ -1096,6 +1078,7 @@
                                     </div>
                                     
                                     <div class="comments-section" id="comments-section-container-${pId}">
+                                        <div class="comments-stream">${parsedComments.map(c => `<div class="comment-item-wrapper other-comment"><div class="comment-bubble"><strong onclick="App.Router.navigate('profil?name=${encodeURIComponent(c.user)}')">${c.user}</strong><span>${c.text}</span></div></div>`).join('')}</div>
                                         <div class="comment-row">
                                             <input type="text" class="form-input" placeholder="Tulis komentar..." id="comment-input-field-${pId}" style="border-radius:20px; padding:10px 14px;">
                                             <button class="icon-btn" style="background:var(--primary); color:white; width:34px; height:34px;" onclick="App.Features.submitPostCommentAction(${pId})"><span class="material-symbols-outlined" style="font-size:16px;">send</span></button>
@@ -1131,7 +1114,7 @@
                     } else {
                         likedLogs.push(id);
                         await supabaseClient.from('posts').update({ likes: currentLikes + 1 }).eq('id', id);
-                        liveNotifications.unshift({ id: Date.now(), icon: 'thumb_up', user: myCurrentName, type: 'like', desc: `menyukai kiriman linimasa Anda.`, isUnread: true, timestamp: Date.now() });
+                        liveNotifications.unshift({ id: Date.now(), icon: 'thumb_up', user: myCurrentName, type: 'like', desc: `menyukai kiriman Anda.`, isUnread: true, timestamp: Date.now() });
                         liveHeaderNotificationCount++;
                         App.UI.refreshHeaderNotificationBadgeDOM();
                     }
@@ -1158,7 +1141,7 @@
                         return;
                     }
                     const htmlResult = `<div class="fb-noti-container"><div class="fb-noti-section-title">Baru</div>` + liveNotifications.map(item => `
-                        <div class="fb-noti-item">
+                        <div class="fb-noti-item" onclick="App.Modal.close(); App.Router.navigate('profil?name=${encodeURIComponent(item.user)}');">
                             <div class="fb-noti-avatar-zone">
                                 <img src="https://i.pravatar.cc/150?img=12" class="fb-noti-img">
                                 <div class="fb-noti-badge-icon badge-like"><span class="material-symbols-outlined" style="font-size:12px;">thumb_up</span></div>
@@ -1202,6 +1185,11 @@
                         try { if(postData && postData.role && postData.role.startsWith('[')) commentArray = JSON.parse(postData.role); } catch(ex) {}
                         commentArray.push({ user: App.ProfileState.getCurrentName(), text: commentText, date: Date.now() });
                         await supabaseClient.from('posts').update({ role: JSON.stringify(commentArray) }).eq('id', postId);
+                        
+                        liveNotifications.unshift({ id: Date.now(), icon: 'comment', user: App.ProfileState.getCurrentName(), type: 'comment', desc: `mengomentari kiriman Anda.`, isUnread: true, timestamp: Date.now() });
+                        liveHeaderNotificationCount++;
+                        App.UI.refreshHeaderNotificationBadgeDOM();
+                        
                         input.value = ''; this.renderPosts();
                     } catch(err) {}
                 }
@@ -1229,7 +1217,6 @@
                     document.getElementById('modal-title').style.display = 'block';
                     document.getElementById('modal-content-area').style.padding = '32px';
                     document.getElementById('modal-content-area').style.background = 'var(--bg-glass-solid)';
-                    document.querySelector('#modal-content-area div[style*="text-align: right"]').style.display = 'flex';
                 }
             },
             Toast: {
@@ -1242,7 +1229,7 @@
             },
 
             UI: {
-                // AVATAR POJOK HEADER DENGAN FUNGSIONALITAS TOGGLE SEPERTI DI INSTRUKSI
+                // KONTROL TOGGLE AVATAR POJOK KANAN ATAS
                 handleHeaderAvatarToggleAction() {
                     if (window.location.hash.includes('#/profil')) {
                         App.Router.navigate('feed');
@@ -1307,7 +1294,6 @@
                 showLoadingBtn(b) {
                     if (!b) return;
                     b.innerHTML = 'Memproses...';
-                    setTimeout(() => { b.innerHTML = 'Masuk'; }, 1000);
                 }
             }
         };
