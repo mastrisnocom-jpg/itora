@@ -8,7 +8,7 @@
     <!-- Google Fonts & Material Symbols -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0..1,0" rel="stylesheet">
     
     <style>
@@ -91,7 +91,6 @@
             overflow-x: hidden;
             transition: var(--trans-smooth);
             min-height: 100vh;
-            /* Animated background gradient for elegance */
             background-image: 
                 radial-gradient(at 0% 0%, rgba(67, 24, 255, 0.05) 0px, transparent 50%),
                 radial-gradient(at 100% 100%, rgba(1, 181, 116, 0.05) 0px, transparent 50%);
@@ -102,103 +101,74 @@
         ul { list-style: none; }
         button, input, textarea { font-family: inherit; outline: none; border: none; }
 
-        /* Custom Scrollbar */
         ::-webkit-scrollbar { width: 6px; height: 6px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: rgba(135, 143, 166, 0.3); border-radius: var(--radius-round); }
         ::-webkit-scrollbar-thumb:hover { background: var(--primary); }
 
         /* ==========================================================================
-           3. AUTHENTICATION LAYOUT (LOGIN/SIGNUP)
+           3. AUTHENTICATION LAYOUT
            ========================================================================== */
         #auth-layout {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            min-height: 100vh;
-            padding: 24px;
-            position: fixed;
-            top: 0; left: 0; right: 0; bottom: 0;
-            z-index: 2000;
-            background: var(--bg-body);
-            transition: var(--trans-smooth);
+            display: flex; align-items: center; justify-content: center;
+            min-height: 100vh; padding: 24px; position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0; z-index: 2000;
+            background: var(--bg-body); transition: var(--trans-smooth);
         }
 
         .auth-card {
-            background: var(--bg-glass);
-            backdrop-filter: blur(var(--blur-lg));
+            background: var(--bg-glass); backdrop-filter: blur(var(--blur-lg));
             -webkit-backdrop-filter: blur(var(--blur-lg));
-            border: 1px solid var(--border-glass);
-            border-radius: var(--radius-xl);
-            padding: 40px;
-            width: 100%;
-            max-width: 450px;
-            box-shadow: var(--shadow-soft);
-            animation: slideUpFade 0.6s cubic-bezier(0.25, 1, 0.5, 1);
+            border: 1px solid var(--border-glass); border-radius: var(--radius-xl);
+            padding: 40px; width: 100%; max-width: 450px;
+            box-shadow: var(--shadow-soft); animation: slideUpFade 0.6s cubic-bezier(0.25, 1, 0.5, 1);
             text-align: center;
         }
 
         .auth-logo {
-            width: 64px;
-            height: 64px;
-            background: linear-gradient(135deg, var(--primary), #a68cff);
-            border-radius: var(--radius-lg);
-            display: flex; align-items: center; justify-content: center;
-            color: white; font-size: 32px; font-weight: 700;
-            margin: 0 auto 24px auto;
+            width: 64px; height: 64px; background: linear-gradient(135deg, var(--primary), #a68cff);
+            border-radius: var(--radius-lg); display: flex; align-items: center; justify-content: center;
+            color: white; font-size: 32px; font-weight: 700; margin: 0 auto 24px auto;
             box-shadow: var(--shadow-float);
         }
 
         /* ==========================================================================
-           4. MAIN APP LAYOUT (HEADER, SIDEBAR, CONTENT, FOOTER)
+           4. MAIN APP LAYOUT
            ========================================================================== */
         #app-layout {
             display: grid;
-            grid-template-areas: 
-                "sidebar header"
-                "sidebar content"
-                "sidebar footer";
+            grid-template-areas: "sidebar header" "sidebar content" "sidebar footer";
             grid-template-columns: var(--sidebar-width) 1fr;
             grid-template-rows: var(--header-height) 1fr auto;
-            min-height: 100vh;
-            display: none; /* Hidden by default until logged in */
-            opacity: 0;
+            min-height: 100vh; display: none; opacity: 0;
             transition: opacity 0.5s ease;
         }
-
         #app-layout.active { display: grid; opacity: 1; }
         #app-layout.sidebar-collapsed { --sidebar-width: 90px; }
 
+        .mobile-overlay {
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(11, 20, 55, 0.5); backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px); z-index: 1000;
+            opacity: 0; pointer-events: none; transition: var(--trans-smooth);
+        }
+        .mobile-overlay.active { opacity: 1; pointer-events: auto; }
+
         /* HEADER */
         .app-header {
-            grid-area: header;
-            background: var(--bg-glass);
-            backdrop-filter: blur(var(--blur-md));
-            -webkit-backdrop-filter: blur(var(--blur-md));
-            border-bottom: 1px solid var(--border-color);
-            padding: 0 32px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            position: sticky;
-            top: 0;
-            z-index: 1000;
+            grid-area: header; background: var(--bg-glass);
+            backdrop-filter: blur(var(--blur-md)); -webkit-backdrop-filter: blur(var(--blur-md));
+            border-bottom: 1px solid var(--border-color); padding: 0 32px;
+            display: flex; align-items: center; justify-content: space-between;
+            position: sticky; top: 0; z-index: 999;
         }
-
         .header-left, .header-right { display: flex; align-items: center; gap: 16px; }
 
-        .search-box {
-            position: relative;
-            width: 300px;
-        }
+        .search-box { position: relative; width: 300px; }
         .search-box input {
-            width: 100%;
-            background: var(--bg-body);
-            border: 1px solid var(--border-color);
-            padding: 12px 20px 12px 48px;
-            border-radius: var(--radius-round);
-            color: var(--text-main);
-            transition: var(--trans-smooth);
+            width: 100%; background: var(--bg-body); border: 1px solid var(--border-color);
+            padding: 12px 20px 12px 48px; border-radius: var(--radius-round);
+            color: var(--text-main); transition: var(--trans-smooth);
         }
         .search-box input:focus { border-color: var(--primary); box-shadow: 0 0 0 4px var(--primary-state); }
         .search-box .material-symbols-outlined {
@@ -206,65 +176,39 @@
             color: var(--text-muted); pointer-events: none;
         }
 
-        .clock-widget {
-            display: flex; flex-direction: column; align-items: flex-end;
-            padding-right: 20px; border-right: 1px solid var(--border-color);
-        }
+        .clock-widget { display: flex; flex-direction: column; align-items: flex-end; padding-right: 20px; border-right: 1px solid var(--border-color); }
         .clock-date { font-size: 0.85rem; color: var(--text-muted); font-weight: 500; }
         .clock-time { font-size: 1.1rem; font-weight: 700; color: var(--text-main); }
 
         .icon-btn {
             width: 44px; height: 44px; border-radius: var(--radius-round);
             display: flex; align-items: center; justify-content: center;
-            background: transparent; color: var(--text-muted);
-            cursor: pointer; position: relative; transition: var(--trans-smooth);
+            background: transparent; color: var(--text-muted); cursor: pointer;
+            position: relative; transition: var(--trans-smooth);
         }
         .icon-btn:hover { background: var(--bg-body); color: var(--primary); }
-        .badge {
-            position: absolute; top: 8px; right: 8px; width: 8px; height: 8px;
-            background: var(--danger); border-radius: var(--radius-round);
-        }
+        .badge { position: absolute; top: 8px; right: 8px; width: 8px; height: 8px; background: var(--danger); border-radius: var(--radius-round); }
 
-        .user-avatar {
-            width: 44px; height: 44px; border-radius: var(--radius-round);
-            object-fit: cover; cursor: pointer; border: 2px solid var(--primary);
-            padding: 2px;
-        }
+        .user-avatar { width: 44px; height: 44px; border-radius: var(--radius-round); object-fit: cover; cursor: pointer; border: 2px solid var(--primary); padding: 2px; }
 
         /* SIDEBAR */
         .app-sidebar {
-            grid-area: sidebar;
-            background: var(--bg-glass-solid);
-            border-right: 1px solid var(--border-color);
-            padding: 32px 20px;
-            display: flex;
-            flex-direction: column;
-            position: fixed;
-            top: 0; left: 0; bottom: 0;
-            width: var(--sidebar-width);
-            z-index: 1001;
-            transition: var(--trans-smooth);
-            box-shadow: var(--shadow-soft);
+            grid-area: sidebar; background: var(--bg-glass-solid);
+            border-right: 1px solid var(--border-color); padding: 32px 20px;
+            display: flex; flex-direction: column; position: fixed;
+            top: 0; left: 0; bottom: 0; width: var(--sidebar-width);
+            z-index: 1001; transition: var(--trans-smooth); box-shadow: var(--shadow-soft);
         }
-
-        .brand {
-            display: flex; align-items: center; gap: 12px; margin-bottom: 40px;
-            padding: 0 12px; cursor: pointer;
-        }
-        .brand-logo {
-            width: 36px; height: 36px; background: var(--primary); color: white;
-            border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center;
-            font-weight: 800; font-size: 18px;
-        }
+        .brand { display: flex; align-items: center; gap: 12px; margin-bottom: 40px; padding: 0 12px; cursor: pointer; }
+        .brand-logo { width: 36px; height: 36px; background: var(--primary); color: white; border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 18px; }
         .brand-name { font-size: 20px; font-weight: 800; color: var(--text-main); letter-spacing: -0.5px; }
         #app-layout.sidebar-collapsed .brand-name { display: none; }
 
         .sidebar-menu { display: flex; flex-direction: column; gap: 6px; flex: 1; }
         .menu-item {
             display: flex; align-items: center; gap: 16px; padding: 14px 16px;
-            border-radius: var(--radius-md); color: var(--text-muted);
-            font-weight: 600; cursor: pointer; transition: var(--trans-smooth);
-            position: relative; overflow: hidden;
+            border-radius: var(--radius-md); color: var(--text-muted); font-weight: 600;
+            cursor: pointer; transition: var(--trans-smooth); position: relative; overflow: hidden;
         }
         .menu-item:hover { background: var(--primary-state); color: var(--primary); }
         .menu-item.active { background: var(--primary); color: white; box-shadow: var(--shadow-float); }
@@ -274,142 +218,80 @@
         .sidebar-profile {
             margin-top: auto; padding: 16px; background: var(--bg-body);
             border-radius: var(--radius-lg); display: flex; align-items: center; gap: 12px;
-            border: 1px solid var(--border-color);
+            border: 1px solid var(--border-color); cursor: pointer; transition: var(--trans-smooth);
         }
+        .sidebar-profile:hover { border-color: var(--primary); }
         .sidebar-profile-info { display: flex; flex-direction: column; overflow: hidden; }
         .sp-name { font-weight: 700; font-size: 0.95rem; white-space: nowrap; }
         .sp-role { font-size: 0.8rem; color: var(--text-muted); }
         #app-layout.sidebar-collapsed .sidebar-profile { padding: 8px; justify-content: center; }
         #app-layout.sidebar-collapsed .sidebar-profile-info { display: none; }
 
-        /* CONTENT AREA */
-        .app-content {
-            grid-area: content;
-            padding: 32px;
-            min-height: calc(100vh - var(--header-height) - 70px);
-            position: relative;
-        }
+        /* CONTENT */
+        .app-content { grid-area: content; padding: 32px; min-height: calc(100vh - var(--header-height) - 70px); position: relative; }
         .view-container { animation: fadeScale 0.4s cubic-bezier(0.25, 1, 0.5, 1); }
 
         /* FOOTER */
         .app-footer {
-            grid-area: footer;
-            padding: 24px 32px;
-            background: transparent;
+            grid-area: footer; padding: 24px 32px; background: transparent;
             display: flex; justify-content: space-between; align-items: center;
-            border-top: 1px solid var(--border-color);
-            color: var(--text-muted); font-size: 0.85rem; font-weight: 500;
+            border-top: 1px solid var(--border-color); color: var(--text-muted); font-size: 0.85rem; font-weight: 500;
         }
         .status-indicator { display: flex; align-items: center; gap: 8px; }
         .status-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--secondary); box-shadow: 0 0 10px var(--secondary); }
         .status-dot.offline { background: var(--danger); box-shadow: 0 0 10px var(--danger); }
 
-        /* BOTTOM NAVIGATION (MOBILE) */
-        .bottom-nav {
-            display: none;
-            position: fixed; bottom: 0; left: 0; right: 0;
-            height: var(--bottom-nav-height);
-            background: var(--bg-glass);
-            backdrop-filter: blur(var(--blur-lg));
-            -webkit-backdrop-filter: blur(var(--blur-lg));
-            border-top: 1px solid var(--border-color);
-            z-index: 1000;
-            padding-bottom: env(safe-area-inset-bottom);
-            box-shadow: 0 -10px 30px rgba(0,0,0,0.05);
-        }
+        .bottom-nav { display: none; }
 
         /* ==========================================================================
            5. PREMIUM UI COMPONENTS (CARDS, BUTTONS, FORMS)
            ========================================================================== */
-        
-        /* Cards */
         .glass-card {
-            background: var(--bg-glass-solid);
-            border: 1px solid var(--border-glass);
-            border-radius: var(--radius-xl);
-            padding: 24px;
-            box-shadow: var(--shadow-soft);
-            transition: var(--trans-smooth);
-            margin-bottom: 24px;
-            position: relative;
+            background: var(--bg-glass-solid); border: 1px solid var(--border-glass);
+            border-radius: var(--radius-xl); padding: 24px; box-shadow: var(--shadow-soft);
+            transition: var(--trans-smooth); margin-bottom: 24px; position: relative;
         }
-        .glass-card:hover { transform: translateY(-5px); box-shadow: var(--shadow-float); }
+        .glass-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-float); }
 
-        /* Buttons */
         .btn {
-            padding: 12px 24px; border-radius: var(--radius-round);
-            font-weight: 700; font-size: 0.95rem; cursor: pointer;
-            display: inline-flex; align-items: center; justify-content: center; gap: 8px;
-            transition: var(--trans-smooth); position: relative; overflow: hidden;
-            border: none;
+            padding: 12px 24px; border-radius: var(--radius-round); font-weight: 700; font-size: 0.95rem;
+            cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+            transition: var(--trans-smooth); position: relative; overflow: hidden; border: none;
         }
         .btn-primary { background: var(--primary); color: white; box-shadow: var(--shadow-float); }
         .btn-primary:hover { background: #3208e6; transform: translateY(-2px); }
         .btn-secondary { background: var(--primary-state); color: var(--primary); }
         .btn-secondary:hover { background: rgba(67, 24, 255, 0.15); }
-        .btn-danger { background: var(--danger); color: white; }
         .btn-full { width: 100%; }
 
-        /* Floating Label Inputs */
         .form-group { position: relative; margin-bottom: 24px; text-align: left; }
         .form-input {
-            width: 100%; padding: 16px; padding-top: 24px;
-            background: var(--bg-body); border: 1px solid var(--border-color);
-            border-radius: var(--radius-md); color: var(--text-main);
-            font-size: 1rem; transition: var(--trans-smooth);
+            width: 100%; padding: 16px; padding-top: 24px; background: var(--bg-body);
+            border: 1px solid var(--border-color); border-radius: var(--radius-md);
+            color: var(--text-main); font-size: 1rem; transition: var(--trans-smooth);
         }
         .form-input:focus { border-color: var(--primary); background: var(--bg-glass-solid); box-shadow: 0 0 0 4px var(--primary-state); }
-        .form-label {
-            position: absolute; left: 16px; top: 50%; transform: translateY(-50%);
-            color: var(--text-muted); pointer-events: none; transition: var(--trans-smooth);
-            font-weight: 500;
-        }
-        .form-input:focus ~ .form-label, .form-input:not(:placeholder-shown) ~ .form-label {
-            top: 12px; font-size: 0.75rem; color: var(--primary); font-weight: 700;
-        }
+        .form-label { position: absolute; left: 16px; top: 50%; transform: translateY(-50%); color: var(--text-muted); pointer-events: none; transition: var(--trans-smooth); font-weight: 500; }
+        .form-input:focus ~ .form-label, .form-input:not(:placeholder-shown) ~ .form-label { top: 12px; font-size: 0.75rem; color: var(--primary); font-weight: 700; }
 
-        /* Modals */
-        .modal-overlay {
-            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(11, 20, 55, 0.4); backdrop-filter: blur(8px);
-            -webkit-backdrop-filter: blur(8px);
-            z-index: 3000; display: flex; align-items: center; justify-content: center;
-            opacity: 0; pointer-events: none; transition: var(--trans-smooth);
-        }
+        .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(11, 20, 55, 0.4); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); z-index: 3000; display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: var(--trans-smooth); }
         .modal-overlay.active { opacity: 1; pointer-events: auto; }
-        .modal-content {
-            background: var(--bg-glass-solid); width: 90%; max-width: 500px;
-            border-radius: var(--radius-xl); padding: 32px; box-shadow: var(--shadow-soft);
-            transform: scale(0.9) translateY(20px); transition: var(--trans-smooth);
-        }
+        .modal-content { background: var(--bg-glass-solid); width: 90%; max-width: 500px; border-radius: var(--radius-xl); padding: 32px; box-shadow: var(--shadow-soft); transform: scale(0.9) translateY(20px); transition: var(--trans-smooth); }
         .modal-overlay.active .modal-content { transform: scale(1) translateY(0); }
 
-        /* Toasts */
         .toast-container { position: fixed; top: 24px; right: 24px; z-index: 4000; display: flex; flex-direction: column; gap: 12px; }
-        .toast {
-            background: var(--bg-glass-solid); border-left: 6px solid var(--primary);
-            box-shadow: var(--shadow-soft); padding: 16px 24px; border-radius: var(--radius-md);
-            display: flex; align-items: center; gap: 12px; font-weight: 600;
-            animation: slideInRight 0.4s cubic-bezier(0.25, 1, 0.5, 1);
-        }
+        .toast { background: var(--bg-glass-solid); border-left: 6px solid var(--primary); box-shadow: var(--shadow-soft); padding: 16px 24px; border-radius: var(--radius-md); display: flex; align-items: center; gap: 12px; font-weight: 600; animation: slideInRight 0.4s cubic-bezier(0.25, 1, 0.5, 1); }
 
-        /* Ripple Effect */
-        .ripple {
-            position: absolute; background: rgba(255,255,255,0.4); border-radius: 50%;
-            transform: scale(0); animation: rippleAnim 0.6s linear; pointer-events: none;
-        }
+        .ripple { position: absolute; background: rgba(255,255,255,0.4); border-radius: 50%; transform: scale(0); animation: rippleAnim 0.6s linear; pointer-events: none; }
 
         /* ==========================================================================
-           6. SPECIFIC SOCIAL MEDIA VIEWS (FEED, CHAT, PROFILE)
+           6. MODULES (FEED, CHAT, PROFILE, GROUPS)
            ========================================================================== */
-        
-        /* Post Composer */
         .composer-box { display: flex; gap: 16px; margin-bottom: 32px; }
         .composer-input-area { flex: 1; background: var(--bg-body); border-radius: var(--radius-lg); padding: 16px; border: 1px solid var(--border-color); }
         .composer-textarea { width: 100%; min-height: 80px; resize: none; background: transparent; font-size: 1rem; color: var(--text-main); }
         .composer-actions { display: flex; justify-content: space-between; align-items: center; margin-top: 12px; border-top: 1px solid var(--border-color); padding-top: 12px; }
 
-        /* Feed Post */
         .post-card { padding: 24px; }
         .post-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
         .post-author { display: flex; align-items: center; gap: 12px; }
@@ -423,7 +305,6 @@
         .action-btn:hover { background: var(--bg-body); color: var(--primary); }
         .action-btn.active { color: var(--accent); }
 
-        /* Chat System */
         .chat-layout { display: grid; grid-template-columns: 300px 1fr; gap: 24px; height: calc(100vh - 200px); }
         .chat-sidebar, .chat-main { background: var(--bg-glass-solid); border-radius: var(--radius-xl); border: 1px solid var(--border-color); display: flex; flex-direction: column; overflow: hidden; box-shadow: var(--shadow-soft); }
         .chat-header { padding: 20px; border-bottom: 1px solid var(--border-color); font-weight: 700; font-size: 1.1rem; }
@@ -436,7 +317,6 @@
         .bubble.out { align-self: flex-end; background: var(--primary); color: white; border-bottom-right-radius: 4px; box-shadow: var(--shadow-float); }
         .chat-input-area { padding: 16px; background: var(--bg-glass-solid); border-top: 1px solid var(--border-color); display: flex; gap: 12px; }
 
-        /* Profile Layout */
         .profile-cover { height: 200px; border-radius: var(--radius-xl); background: linear-gradient(135deg, #a68cff, var(--primary)); margin-bottom: -60px; position: relative; }
         .profile-info-card { text-align: center; padding-top: 0; }
         .profile-avatar-large { width: 120px; height: 120px; border-radius: var(--radius-round); border: 4px solid var(--bg-glass-solid); margin: 0 auto 16px auto; object-fit: cover; box-shadow: var(--shadow-float); position: relative; z-index: 2; }
@@ -445,7 +325,10 @@
         .stat-val { font-weight: 800; font-size: 1.5rem; color: var(--text-main); }
         .stat-lbl { font-size: 0.85rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 1px; }
 
-        /* Skeleton Loading */
+        .group-card { display: flex; align-items: center; gap: 16px; padding: 16px; border-radius: var(--radius-lg); border: 1px solid var(--border-color); margin-bottom: 16px; transition: var(--trans-smooth); cursor: pointer; }
+        .group-card:hover { background: var(--primary-state); border-color: var(--primary); }
+        .group-icon { width: 60px; height: 60px; border-radius: var(--radius-md); object-fit: cover; }
+
         .skeleton { background: linear-gradient(90deg, var(--bg-body) 25%, var(--border-color) 50%, var(--bg-body) 75%); background-size: 200% 100%; animation: skeletonLoading 1.5s infinite; border-radius: 8px; }
         @keyframes skeletonLoading { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
 
@@ -458,52 +341,59 @@
         @keyframes rippleAnim { to { transform: scale(4); opacity: 0; } }
 
         /* ==========================================================================
-           8. RESPONSIVE DESIGN (MEDIA QUERIES)
+           8. RESPONSIVE DESIGN (MOBILE FIXES)
            ========================================================================== */
-        @media (max-width: 1024px) {
-            #app-layout { grid-template-columns: 90px 1fr; }
-            .app-sidebar { width: 90px; }
-            .brand-name, .menu-text, .sidebar-profile-info { display: none; }
-            .sidebar-profile { padding: 8px; justify-content: center; }
-            .brand { justify-content: center; padding: 0; }
-        }
-
         @media (max-width: 768px) {
-            #app-layout { grid-template-areas: "header header" "content content"; grid-template-columns: 1fr; grid-template-rows: 70px 1fr; }
-            .app-sidebar { display: none; }
-            .app-footer { padding-bottom: calc(var(--bottom-nav-height) + 24px); flex-direction: column; gap: 12px; text-align: center; }
-            .app-content { padding: 16px; padding-bottom: calc(var(--bottom-nav-height) + 16px); }
+            #app-layout { grid-template-areas: "header" "content"; grid-template-columns: 1fr; grid-template-rows: 70px 1fr; }
             
+            /* Sidebar jadi Drawer */
+            .app-sidebar {
+                display: flex; transform: translateX(-100%); width: 280px; z-index: 1002;
+            }
+            #app-layout.sidebar-mobile-open .app-sidebar { transform: translateX(0); }
+            #app-layout.sidebar-mobile-open .brand-name,
+            #app-layout.sidebar-mobile-open .menu-text,
+            #app-layout.sidebar-mobile-open .sidebar-profile-info { display: block; opacity: 1; width: auto; }
+
             .app-header { padding: 0 16px; }
-            .search-box { display: none; }
-            .clock-widget { display: none; }
+            .search-box, .clock-widget { display: none; }
+            .app-content { padding: 16px; padding-bottom: calc(var(--bottom-nav-height) + 32px); }
+            .app-footer { padding-bottom: calc(var(--bottom-nav-height) + 24px); flex-direction: column; gap: 12px; text-align: center; }
             
+            .glass-card { padding: 16px; }
+            .composer-box { flex-direction: column; }
+            .post-image { max-height: 250px; }
+            
+            .profile-cover { height: 150px; margin-bottom: -50px; }
+            .profile-avatar-large { width: 100px; height: 100px; }
+            .profile-stats { gap: 16px; flex-wrap: wrap; }
+
+            /* Chat Mobile Layout */
+            .chat-layout { display: flex; flex-direction: column; height: calc(100vh - 180px); }
+            .chat-sidebar { display: flex; max-height: 180px; flex-shrink: 0; }
+            .chat-main { flex: 1; min-height: 300px; }
+
+            /* Bottom Nav */
             .bottom-nav {
-                display: flex; justify-content: space-around; align-items: center;
+                display: flex; position: fixed; bottom: 0; left: 0; right: 0; height: var(--bottom-nav-height);
+                background: var(--bg-glass); backdrop-filter: blur(var(--blur-lg)); -webkit-backdrop-filter: blur(var(--blur-lg));
+                border-top: 1px solid var(--border-color); z-index: 1000; padding-bottom: env(safe-area-inset-bottom);
+                box-shadow: 0 -10px 30px rgba(0,0,0,0.05); justify-content: space-around; align-items: center;
             }
-            .bn-item {
-                display: flex; flex-direction: column; align-items: center; gap: 4px;
-                color: var(--text-muted); padding: 8px 0; flex: 1; position: relative;
-            }
+            .bn-item { display: flex; flex-direction: column; align-items: center; gap: 4px; color: var(--text-muted); padding: 8px 0; flex: 1; position: relative; }
             .bn-item.active { color: var(--primary); font-weight: 700; }
             .bn-item.active .material-symbols-outlined { background: var(--primary-state); padding: 4px 16px; border-radius: var(--radius-xl); }
-            
-            .chat-layout { grid-template-columns: 1fr; }
-            .chat-sidebar { display: none; } /* On mobile, clicking a contact would show chat main */
         }
     </style>
 </head>
 <body>
 
-    <!-- ==========================================================================
-         AUTHENTICATION WRAPPER (LOGIN / SIGN UP)
-         ========================================================================== -->
+    <!-- AUTHENTICATION -->
     <div id="auth-layout">
         <div class="auth-card" id="login-view">
             <div class="auth-logo">N</div>
             <h1 style="margin-bottom: 8px; font-weight: 800; font-size: 24px;">Selamat Datang Kembali</h1>
             <p style="color: var(--text-muted); margin-bottom: 32px; font-size: 0.95rem;">Masuk untuk terhubung dengan koneksi profesional Anda.</p>
-            
             <form onsubmit="App.Auth.login(event)">
                 <div class="form-group">
                     <input type="email" class="form-input" id="login-email" placeholder=" " required value="demo@nexsocial.id">
@@ -515,18 +405,14 @@
                 </div>
                 <button type="submit" class="btn btn-primary btn-full ripple-btn" style="margin-bottom: 24px;">Masuk ke Aplikasi</button>
             </form>
-            
-            <p style="font-size: 0.9rem; color: var(--text-muted);">
-                Belum punya akun? <a href="#" style="color: var(--primary); font-weight: 700;" onclick="App.Auth.toggleView('signup')">Daftar Sekarang</a>
-            </p>
+            <p style="font-size: 0.9rem; color: var(--text-muted);">Belum punya akun? <a href="#" style="color: var(--primary); font-weight: 700;" onclick="App.Auth.toggleView('signup')">Daftar Sekarang</a></p>
         </div>
 
         <div class="auth-card" id="signup-view" style="display: none;">
             <div class="auth-logo">N</div>
             <h1 style="margin-bottom: 8px; font-weight: 800; font-size: 24px;">Bergabung dengan NexSocial</h1>
             <p style="color: var(--text-muted); margin-bottom: 32px; font-size: 0.95rem;">Buat profil profesional Anda hari ini.</p>
-            
-            <form onsubmit="App.Auth.login(event)"> <!-- using login logic for demo -->
+            <form onsubmit="App.Auth.login(event)">
                 <div class="form-group">
                     <input type="text" class="form-input" placeholder=" " required>
                     <label class="form-label">Nama Lengkap</label>
@@ -541,19 +427,14 @@
                 </div>
                 <button type="submit" class="btn btn-primary btn-full ripple-btn" style="margin-bottom: 24px;">Daftar Akun Baru</button>
             </form>
-            
-            <p style="font-size: 0.9rem; color: var(--text-muted);">
-                Sudah punya akun? <a href="#" style="color: var(--primary); font-weight: 700;" onclick="App.Auth.toggleView('login')">Masuk di sini</a>
-            </p>
+            <p style="font-size: 0.9rem; color: var(--text-muted);">Sudah punya akun? <a href="#" style="color: var(--primary); font-weight: 700;" onclick="App.Auth.toggleView('login')">Masuk di sini</a></p>
         </div>
     </div>
 
-    <!-- ==========================================================================
-         MAIN APP LAYOUT (DASHBOARD SOCIAL MEDIA)
-         ========================================================================== -->
+    <!-- MAIN APP -->
     <div id="app-layout">
+        <div class="mobile-overlay" id="mobile-overlay"></div>
         
-        <!-- HEADER -->
         <header class="app-header">
             <div class="header-left">
                 <button class="icon-btn ripple-btn" id="btn-toggle-sidebar" aria-label="Toggle Menu">
@@ -564,43 +445,26 @@
                     <input type="text" placeholder="Cari orang, grup, atau postingan...">
                 </div>
             </div>
-            
             <div class="header-right">
                 <div class="clock-widget">
                     <span class="clock-date" id="ui-date">Memuat Tanggal...</span>
                     <span class="clock-time" id="ui-time">00:00:00 WIB</span>
                 </div>
-                
-                <button class="icon-btn ripple-btn" id="btn-refresh" title="Refresh">
-                    <span class="material-symbols-outlined">refresh</span>
-                </button>
-                <button class="icon-btn ripple-btn" id="btn-theme" title="Ubah Tema">
-                    <span class="material-symbols-outlined">dark_mode</span>
-                </button>
-                <button class="icon-btn ripple-btn" id="btn-fullscreen" title="Layar Penuh">
-                    <span class="material-symbols-outlined">fullscreen</span>
-                </button>
-                <button class="icon-btn ripple-btn" title="Notifikasi">
-                    <span class="material-symbols-outlined">notifications</span>
-                    <span class="badge"></span>
-                </button>
-                
-                <img src="https://i.pravatar.cc/150?img=68" alt="Profile" class="user-avatar" id="header-avatar" onclick="App.Router.navigate('profil')">
+                <button class="icon-btn ripple-btn" id="btn-refresh" title="Refresh"><span class="material-symbols-outlined">refresh</span></button>
+                <button class="icon-btn ripple-btn" id="btn-theme" title="Ubah Tema"><span class="material-symbols-outlined">dark_mode</span></button>
+                <button class="icon-btn ripple-btn" id="btn-fullscreen" title="Layar Penuh"><span class="material-symbols-outlined">fullscreen</span></button>
+                <button class="icon-btn ripple-btn" title="Notifikasi"><span class="material-symbols-outlined">notifications</span><span class="badge"></span></button>
+                <img src="https://i.pravatar.cc/150?img=68" alt="Profile" class="user-avatar" onclick="App.Router.navigate('profil')">
             </div>
         </header>
 
-        <!-- SIDEBAR (DESKTOP) -->
         <aside class="app-sidebar" id="sidebar">
             <div class="brand" onclick="App.Router.navigate('feed')">
                 <div class="brand-logo">N</div>
                 <span class="brand-name">NexSocial</span>
             </div>
-            
-            <ul class="sidebar-menu" id="sidebar-menu-list">
-                <!-- Injected via JS -->
-            </ul>
-            
-            <div class="sidebar-profile" onclick="App.Router.navigate('profil')" style="cursor:pointer;">
+            <ul class="sidebar-menu" id="sidebar-menu-list"></ul>
+            <div class="sidebar-profile" onclick="App.Router.navigate('profil')">
                 <img src="https://i.pravatar.cc/150?img=68" alt="User" class="user-avatar" style="border:none;">
                 <div class="sidebar-profile-info">
                     <span class="sp-name">Reza Rahadian</span>
@@ -609,62 +473,36 @@
             </div>
         </aside>
 
-        <!-- CONTENT VIEWPORT -->
-        <main class="app-content" id="app-viewport">
-            <!-- Dynamic Content Injected Here -->
-        </main>
+        <main class="app-content" id="app-viewport"></main>
 
-        <!-- FOOTER -->
         <footer class="app-footer">
-            <div>
-                &copy; <span id="footer-year">2026</span> <strong>NexSocial</strong>. All Rights Reserved.
-            </div>
+            <div>&copy; <span id="footer-year">2026</span> <strong>NexSocial</strong>. All Rights Reserved.</div>
             <div style="display: flex; gap: 24px; align-items: center;">
-                <span>Powered by HTML, CSS & Vanilla JS ES6+</span>
-                <span>v2.4.0</span>
-                <div class="status-indicator">
-                    <div class="status-dot" id="network-dot"></div>
-                    <span id="network-text">Online</span>
-                </div>
+                <span>Powered by HTML, CSS & Vanilla JS</span>
+                <span>v2.5.0</span>
+                <div class="status-indicator"><div class="status-dot" id="network-dot"></div><span id="network-text">Online</span></div>
             </div>
         </footer>
 
-        <!-- BOTTOM NAVIGATION (MOBILE) -->
-        <nav class="bottom-nav" id="bottom-nav-list">
-            <!-- Injected via JS (Matches Sidebar Core Menus) -->
-        </nav>
-
+        <nav class="bottom-nav" id="bottom-nav-list"></nav>
     </div>
 
-    <!-- ==========================================================================
-         GLOBAL UI COMPONENTS (MODAL, TOAST)
-         ========================================================================== -->
+    <!-- GLOBALS (MODALS, TOAST) -->
     <div class="modal-overlay" id="global-modal">
         <div class="modal-content" id="modal-content-area">
-            <h2 style="margin-bottom: 16px;" id="modal-title">Judul Modal</h2>
-            <div id="modal-body" style="color: var(--text-muted); line-height: 1.6; margin-bottom: 24px;">
-                Isi konten modal.
-            </div>
+            <h2 style="margin-bottom: 16px;" id="modal-title">Judul</h2>
+            <div id="modal-body" style="color: var(--text-muted); line-height: 1.6; margin-bottom: 24px;">Konten</div>
             <div style="text-align: right; display: flex; justify-content: flex-end; gap: 12px;">
-                <button class="btn btn-secondary ripple-btn" onclick="App.Modal.close()">Batal</button>
-                <button class="btn btn-primary ripple-btn" onclick="App.Modal.close()">Mengerti</button>
+                <button class="btn btn-secondary ripple-btn" onclick="App.Modal.close()">Tutup</button>
+                <button class="btn btn-primary ripple-btn" onclick="App.Modal.close()">Oke</button>
             </div>
         </div>
     </div>
-
     <div class="toast-container" id="toast-container"></div>
 
-    <!-- ==========================================================================
-         JAVASCRIPT LOGIC (VANILLA ES6+)
-         ========================================================================== -->
     <script>
-        /**
-         * NEXSOCIAL SYSTEM ARCHITECTURE
-         * Modular Vanilla JS without any external libraries.
-         */
         const App = {
             init() {
-                // Initialize modules
                 this.Storage.init();
                 this.Theme.init();
                 this.Clock.start();
@@ -672,9 +510,7 @@
                 this.UI.bindGlobalEvents();
                 this.Navigation.render();
                 
-                // Check Auth State
-                const isLoggedIn = localStorage.getItem('ns_logged_in') === 'true';
-                if(isLoggedIn) {
+                if(localStorage.getItem('ns_logged_in') === 'true') {
                     this.Auth.showApp();
                     this.Router.init();
                 } else {
@@ -682,27 +518,19 @@
                 }
             },
 
-            // ==========================================
-            // 1. DATA STORAGE & MOCKS
-            // ==========================================
             Storage: {
                 init() {
-                    // Seed mock data if not exists
                     if(!localStorage.getItem('ns_posts')) {
-                        const initialPosts = [
-                            { id: 1, author: 'Budi Santoso', role: 'Software Architect', avatar: 'https://i.pravatar.cc/150?img=11', time: '2 jam yang lalu', content: 'Baru saja menyelesaikan refactoring arsitektur microservices untuk project terbaru. Performa naik 40% tanpa framework eksternal! 🚀 #VanillaJS #Architecture', image: 'https://images.unsplash.com/photo-1555066931-4365d14bab8c?auto=format&fit=crop&w=800&q=80', likes: 124, comments: 18, liked: false },
-                            { id: 2, author: 'Siska Amelia', role: 'Product Manager', avatar: 'https://i.pravatar.cc/150?img=5', time: '5 jam yang lalu', content: 'Rapat kuartal Q3 sangat produktif. Fokus kita selanjutnya adalah meningkatkan retensi user dengan desain antarmuka yang lebih clean dan responsif. Bagaimana pendapat teman-teman desain?', image: null, likes: 89, comments: 24, liked: true }
-                        ];
-                        localStorage.setItem('ns_posts', JSON.stringify(initialPosts));
+                        localStorage.setItem('ns_posts', JSON.stringify([
+                            { id: 1, author: 'Budi Santoso', role: 'Software Architect', avatar: 'https://i.pravatar.cc/150?img=11', time: '2 jam yang lalu', content: 'Baru saja menyelesaikan refactoring arsitektur microservices untuk project terbaru. Performa naik 40%! 🚀', image: 'https://images.unsplash.com/photo-1555066931-4365d14bab8c?auto=format&fit=crop&w=800&q=80', likes: 124, comments: 18, liked: false },
+                            { id: 2, author: 'Siska Amelia', role: 'Product Manager', avatar: 'https://i.pravatar.cc/150?img=5', time: '5 jam yang lalu', content: 'Fokus kita selanjutnya adalah meningkatkan retensi user dengan desain antarmuka yang lebih responsif.', image: null, likes: 89, comments: 24, liked: true }
+                        ]));
                     }
                 },
                 getPosts() { return JSON.parse(localStorage.getItem('ns_posts')) || []; },
                 savePosts(posts) { localStorage.setItem('ns_posts', JSON.stringify(posts)); }
             },
 
-            // ==========================================
-            // 2. AUTHENTICATION MODULE
-            // ==========================================
             Auth: {
                 toggleView(view) {
                     document.getElementById('login-view').style.display = view === 'login' ? 'block' : 'none';
@@ -715,7 +543,7 @@
                         localStorage.setItem('ns_logged_in', 'true');
                         this.showApp();
                         App.Toast.show("Berhasil masuk ke sistem.", "success");
-                        App.Router.init(); // Initialize routing after login
+                        App.Router.init();
                     }, 1000);
                 },
                 logout() {
@@ -727,16 +555,10 @@
                     const auth = document.getElementById('auth-layout');
                     const app = document.getElementById('app-layout');
                     auth.style.opacity = '0';
-                    setTimeout(() => {
-                        auth.style.display = 'none';
-                        app.classList.add('active');
-                    }, 400);
+                    setTimeout(() => { auth.style.display = 'none'; app.classList.add('active'); }, 400);
                 }
             },
 
-            // ==========================================
-            // 3. ROUTER (SPA HASH ROUTING)
-            // ==========================================
             Router: {
                 init() {
                     window.addEventListener('hashchange', () => this.handleRoute());
@@ -745,18 +567,17 @@
                 },
                 navigate(path) {
                     window.location.hash = `#/${path}`;
+                    App.UI.closeMobileSidebar();
                 },
                 handleRoute() {
                     const hash = window.location.hash.replace('#/', '') || 'feed';
                     const viewport = document.getElementById('app-viewport');
                     
-                    // Update Active Menu
                     document.querySelectorAll('.menu-item, .bn-item').forEach(el => {
                         if(el.getAttribute('data-route') === hash) el.classList.add('active');
                         else el.classList.remove('active');
                     });
 
-                    // Render View
                     if(App.Views[hash]) {
                         viewport.innerHTML = `<div class="view-container">${App.Views[hash]()}</div>`;
                         if(App.ViewControllers[hash]) App.ViewControllers[hash]();
@@ -767,16 +588,12 @@
                 }
             },
 
-            // ==========================================
-            // 4. NAVIGATION RENDERER
-            // ==========================================
             Navigation: {
                 menuConfig: [
                     { id: 'feed', label: 'News Feed', icon: 'home', mobile: true },
                     { id: 'explore', label: 'Eksplor', icon: 'explore', mobile: true },
                     { id: 'chat', label: 'Pesan', icon: 'chat', mobile: true },
-                    { id: 'groups', label: 'Komunitas', icon: 'groups', mobile: false },
-                    { id: 'profil', label: 'Profil Saya', icon: 'person', mobile: true },
+                    { id: 'groups', label: 'Komunitas', icon: 'groups', mobile: true }, /* Diganti true agar muncul di HP */
                     { id: 'settings', label: 'Pengaturan', icon: 'settings', mobile: false }
                 ],
                 render() {
@@ -785,64 +602,32 @@
                     let sHTML = '', bHTML = '';
 
                     this.menuConfig.forEach(m => {
-                        // Sidebar Item
-                        sHTML += `
-                            <li>
-                                <a class="menu-item ripple-btn" data-route="${m.id}" onclick="App.Router.navigate('${m.id}')">
-                                    <span class="material-symbols-outlined">${m.icon}</span>
-                                    <span class="menu-text">${m.label}</span>
-                                </a>
-                            </li>
-                        `;
-                        // Bottom Nav Item
-                        if(m.mobile) {
-                            bHTML += `
-                                <a class="bn-item ripple-btn" data-route="${m.id}" onclick="App.Router.navigate('${m.id}')">
-                                    <span class="material-symbols-outlined">${m.icon}</span>
-                                    <span style="font-size: 0.7rem;">${m.label}</span>
-                                </a>
-                            `;
-                        }
+                        sHTML += `<li><a class="menu-item ripple-btn" data-route="${m.id}" onclick="App.Router.navigate('${m.id}')"><span class="material-symbols-outlined">${m.icon}</span><span class="menu-text">${m.label}</span></a></li>`;
+                        if(m.mobile) bHTML += `<a class="bn-item ripple-btn" data-route="${m.id}" onclick="App.Router.navigate('${m.id}')"><span class="material-symbols-outlined">${m.icon}</span><span style="font-size: 0.7rem;">${m.label}</span></a>`;
                     });
 
-                    sHTML += `
-                        <li style="margin-top: auto;">
-                            <a class="menu-item ripple-btn" style="color: var(--danger);" onclick="App.Auth.logout()">
-                                <span class="material-symbols-outlined">logout</span>
-                                <span class="menu-text">Keluar</span>
-                            </a>
-                        </li>
-                    `;
-
-                    side.innerHTML = sHTML;
-                    bottom.innerHTML = bHTML;
+                    sHTML += `<li style="margin-top: auto;"><a class="menu-item ripple-btn" style="color: var(--danger);" onclick="App.Auth.logout()"><span class="material-symbols-outlined">logout</span><span class="menu-text">Keluar</span></a></li>`;
+                    side.innerHTML = sHTML; bottom.innerHTML = bHTML;
                 }
             },
 
-            // ==========================================
-            // 5. VIEWS (HTML TEMPLATES)
-            // ==========================================
             Views: {
                 feed() {
                     return `
                         <div class="glass-card composer-box">
                             <img src="https://i.pravatar.cc/150?img=68" class="user-avatar" style="width:48px;height:48px;" alt="Me">
                             <div class="composer-input-area">
-                                <textarea class="composer-textarea" id="composer-text" placeholder="Apa yang sedang Anda pikirkan, Reza?"></textarea>
+                                <textarea class="composer-textarea" id="composer-text" placeholder="Apa yang sedang Anda pikirkan?"></textarea>
                                 <div class="composer-actions">
                                     <div style="display:flex; gap:12px;">
-                                        <button class="icon-btn" title="Foto/Video" style="color:var(--secondary)"><span class="material-symbols-outlined">image</span></button>
-                                        <button class="icon-btn" title="Lampiran" style="color:var(--warning)"><span class="material-symbols-outlined">attachment</span></button>
-                                        <button class="icon-btn" title="Emoji" style="color:var(--accent)"><span class="material-symbols-outlined">mood</span></button>
+                                        <button class="icon-btn" style="color:var(--secondary)"><span class="material-symbols-outlined">image</span></button>
+                                        <button class="icon-btn" style="color:var(--warning)"><span class="material-symbols-outlined">attachment</span></button>
                                     </div>
                                     <button class="btn btn-primary ripple-btn" onclick="App.Features.createPost()">Posting</button>
                                 </div>
                             </div>
                         </div>
-                        <div id="feed-stream">
-                            <!-- Skeleton loader while rendering -->
-                            <div class="glass-card"><div class="skeleton" style="height: 60px; margin-bottom:16px;"></div><div class="skeleton" style="height: 200px;"></div></div>
-                        </div>
+                        <div id="feed-stream"></div>
                     `;
                 },
                 explore() {
@@ -852,14 +637,7 @@
                             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 16px;">
                                 <div style="height: 200px; border-radius: var(--radius-md); background: url('https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=600&q=80') center/cover; position: relative;">
                                     <div style="position: absolute; bottom:0; left:0; right:0; padding: 16px; background: linear-gradient(transparent, rgba(0,0,0,0.8)); border-bottom-left-radius: var(--radius-md); border-bottom-right-radius: var(--radius-md); color: white;">
-                                        <h3 style="font-size: 1rem; color:white;">#TechConf2026</h3>
-                                        <p style="font-size: 0.8rem; color: #ddd;">12.5k Postingan</p>
-                                    </div>
-                                </div>
-                                <div style="height: 200px; border-radius: var(--radius-md); background: url('https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=600&q=80') center/cover; position: relative;">
-                                    <div style="position: absolute; bottom:0; left:0; right:0; padding: 16px; background: linear-gradient(transparent, rgba(0,0,0,0.8)); border-bottom-left-radius: var(--radius-md); border-bottom-right-radius: var(--radius-md); color: white;">
-                                        <h3 style="font-size: 1rem; color:white;">#DesignSystem</h3>
-                                        <p style="font-size: 0.8rem; color: #ddd;">8.2k Postingan</p>
+                                        <h3 style="font-size: 1rem; color:white;">#TechConf2026</h3><p style="font-size: 0.8rem; color: #ddd;">12.5k Postingan</p>
                                     </div>
                                 </div>
                             </div>
@@ -874,32 +652,19 @@
                                 <div class="contact-list">
                                     <div class="contact-item active">
                                         <img src="https://i.pravatar.cc/150?img=5" class="user-avatar" style="width:40px;height:40px;border:none;">
-                                        <div style="overflow:hidden;">
-                                            <div style="font-weight:700; font-size:0.95rem;">Siska Amelia</div>
-                                            <div style="font-size:0.8rem; color:var(--text-muted); white-space:nowrap; text-overflow:ellipsis; overflow:hidden;">Baik, nanti saya cek desainnya.</div>
-                                        </div>
-                                    </div>
-                                    <div class="contact-item">
-                                        <img src="https://i.pravatar.cc/150?img=11" class="user-avatar" style="width:40px;height:40px;border:none;">
-                                        <div style="overflow:hidden;">
-                                            <div style="font-weight:700; font-size:0.95rem;">Budi Santoso</div>
-                                            <div style="font-size:0.8rem; color:var(--text-muted);">Siap, deploy jam 8 malam ya.</div>
-                                        </div>
+                                        <div style="overflow:hidden;"><div style="font-weight:700; font-size:0.95rem;">Siska Amelia</div><div style="font-size:0.8rem; color:var(--text-muted);">Nanti kabari ya.</div></div>
                                     </div>
                                 </div>
                             </div>
                             <div class="chat-main">
                                 <div class="chat-header" style="display:flex; align-items:center; gap:12px;">
-                                    <img src="https://i.pravatar.cc/150?img=5" class="user-avatar" style="width:36px;height:36px;border:none;">
-                                    Siska Amelia
+                                    <img src="https://i.pravatar.cc/150?img=5" class="user-avatar" style="width:36px;height:36px;border:none;"> Siska Amelia
                                 </div>
                                 <div class="chat-messages" id="chat-messages-container">
-                                    <div class="bubble in">Halo Reza, progres UI untuk dashboard klien sudah sampai mana?</div>
-                                    <div class="bubble out">Halo Siska, sudah 80%. Saya sedang menyesuaikan glassmorphism effect agar lebih smooth.</div>
-                                    <div class="bubble in">Mantap! Nanti kalau sudah selesai kabari ya, mau saya presentasikan besok.</div>
+                                    <div class="bubble in">Halo Reza, progres UI sampai mana?</div>
+                                    <div class="bubble out">Halo Siska, sudah 80%. Saya sedang menyesuaikan komponen mobile.</div>
                                 </div>
                                 <div class="chat-input-area">
-                                    <button class="icon-btn"><span class="material-symbols-outlined">add_circle</span></button>
                                     <input type="text" class="form-input" style="padding: 12px; border-radius:20px; flex:1;" placeholder="Tulis pesan..." id="chat-input-msg" onkeypress="if(event.key==='Enter') App.Features.sendChat()">
                                     <button class="icon-btn" style="background:var(--primary); color:white;" onclick="App.Features.sendChat()"><span class="material-symbols-outlined">send</span></button>
                                 </div>
@@ -908,7 +673,27 @@
                     `;
                 },
                 groups() {
-                    return `<div class="glass-card"><h2>Komunitas & Grup</h2><p style="color:var(--text-muted); margin-top:12px;">Modul dalam tahap pengembangan UI lanjutan.</p></div>`;
+                    return `
+                        <div class="glass-card">
+                            <h2 style="margin-bottom: 24px;">Komunitas Anda</h2>
+                            <div class="group-card" onclick="App.Modal.open('Frontend Dev ID', 'Bergabung ke ruang obrolan komunitas ini?')">
+                                <img src="https://images.unsplash.com/photo-1555066931-4365d14bab8c?auto=format&fit=crop&w=200&q=80" class="group-icon">
+                                <div>
+                                    <h3 style="font-size:1.1rem;">Frontend Developer Indonesia</h3>
+                                    <p style="color:var(--text-muted); font-size:0.9rem;">12.4K Anggota • 42 online</p>
+                                </div>
+                                <span class="material-symbols-outlined" style="margin-left:auto; color:var(--text-muted);">chevron_right</span>
+                            </div>
+                            <div class="group-card" onclick="App.Modal.open('UI/UX Designer', 'Bergabung ke ruang obrolan komunitas ini?')">
+                                <img src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=200&q=80" class="group-icon">
+                                <div>
+                                    <h3 style="font-size:1.1rem;">UI/UX Nusantara</h3>
+                                    <p style="color:var(--text-muted); font-size:0.9rem;">8.2K Anggota • 15 online</p>
+                                </div>
+                                <span class="material-symbols-outlined" style="margin-left:auto; color:var(--text-muted);">chevron_right</span>
+                            </div>
+                        </div>
+                    `;
                 },
                 profil() {
                     return `
@@ -916,28 +701,14 @@
                             <div class="profile-cover"></div>
                             <img src="https://i.pravatar.cc/150?img=68" class="profile-avatar-large" alt="Profile">
                             <h2 style="font-size: 1.8rem; font-weight: 800; margin-bottom: 4px;">Reza Rahadian</h2>
-                            <p style="color: var(--primary); font-weight: 600; margin-bottom: 12px;">Senior UI/UX Designer & Frontend Engineer</p>
-                            <p style="max-width: 600px; margin: 0 auto; color: var(--text-muted); line-height: 1.6;">
-                                Mendesain pengalaman pengguna yang elegan dengan fokus pada arsitektur modern. Passionate about Clean UI, Glassmorphism, dan Vanilla JavaScript.
-                            </p>
-                            
+                            <p style="color: var(--primary); font-weight: 600; margin-bottom: 12px;">Senior UI/UX Designer</p>
                             <div class="profile-stats">
-                                <div class="stat-item">
-                                    <span class="stat-val">245</span>
-                                    <span class="stat-lbl">Koneksi</span>
-                                </div>
-                                <div class="stat-item">
-                                    <span class="stat-val">1.2K</span>
-                                    <span class="stat-lbl">Pengikut</span>
-                                </div>
-                                <div class="stat-item">
-                                    <span class="stat-val">48</span>
-                                    <span class="stat-lbl">Postingan</span>
-                                </div>
+                                <div class="stat-item"><span class="stat-val">245</span><span class="stat-lbl">Koneksi</span></div>
+                                <div class="stat-item"><span class="stat-val">1.2K</span><span class="stat-lbl">Pengikut</span></div>
+                                <div class="stat-item"><span class="stat-val">48</span><span class="stat-lbl">Postingan</span></div>
                             </div>
                             <div style="padding: 24px; display:flex; justify-content:center; gap:16px;">
-                                <button class="btn btn-primary ripple-btn" style="padding-left:32px; padding-right:32px;">Edit Profil</button>
-                                <button class="btn btn-secondary ripple-btn"><span class="material-symbols-outlined">share</span></button>
+                                <button class="btn btn-primary ripple-btn" onclick="App.Router.navigate('settings')">Edit Profil</button>
                             </div>
                         </div>
                     `;
@@ -955,7 +726,6 @@
                                     <h4 style="margin-bottom:4px;">Notifikasi Email</h4>
                                     <p style="font-size:0.8rem; color:var(--text-muted);">Terima update aktivitas via email</p>
                                 </div>
-                                <!-- Custom Toggle Switch -->
                                 <label style="position:relative; display:inline-block; width:50px; height:24px;">
                                     <input type="checkbox" checked style="opacity:0; width:0; height:0;" onchange="App.Toast.show('Preferensi disimpan','success')">
                                     <span style="position:absolute; cursor:pointer; top:0; left:0; right:0; bottom:0; background-color:var(--primary); border-radius:24px; transition:0.4s;">
@@ -969,269 +739,117 @@
                 }
             },
 
-            // ==========================================
-            // 6. VIEW CONTROLLERS (LOGIC FOR VIEWS)
-            // ==========================================
             ViewControllers: {
-                feed() {
-                    App.Features.renderPosts();
-                },
-                chat() {
-                    const c = document.getElementById('chat-messages-container');
-                    c.scrollTop = c.scrollHeight;
-                }
+                feed() { App.Features.renderPosts(); },
+                chat() { const c = document.getElementById('chat-messages-container'); if(c) c.scrollTop = c.scrollHeight; }
             },
 
-            // ==========================================
-            // 7. FEATURES LOGIC (POSTS, LIKES, CHAT)
-            // ==========================================
             Features: {
                 renderPosts() {
                     const stream = document.getElementById('feed-stream');
                     if(!stream) return;
-                    
                     const posts = App.Storage.getPosts();
-                    let html = '';
-                    
-                    posts.forEach(p => {
-                        const heartIcon = p.liked ? '<span class="material-symbols-outlined" style="font-variation-settings: \'FILL\' 1;">favorite</span>' : '<span class="material-symbols-outlined">favorite</span>';
-                        const likeClass = p.liked ? 'active' : '';
-                        
-                        html += `
-                            <div class="glass-card post-card">
-                                <div class="post-header">
-                                    <div class="post-author">
-                                        <img src="${p.avatar}" class="post-avatar">
-                                        <div class="post-meta">
-                                            <h4 style="color:var(--text-main);">${p.author}</h4>
-                                            <span>${p.role} &bull; ${p.time}</span>
-                                        </div>
-                                    </div>
-                                    <button class="icon-btn"><span class="material-symbols-outlined">more_horiz</span></button>
+                    stream.innerHTML = posts.map(p => `
+                        <div class="glass-card post-card">
+                            <div class="post-header">
+                                <div class="post-author">
+                                    <img src="${p.avatar}" class="post-avatar">
+                                    <div class="post-meta"><h4 style="color:var(--text-main);">${p.author}</h4><span>${p.role} &bull; ${p.time}</span></div>
                                 </div>
-                                <div class="post-content">${p.content}</div>
-                                ${p.image ? `<img src="${p.image}" class="post-image">` : ''}
-                                <div class="post-actions">
-                                    <div class="action-btn ripple-btn ${likeClass}" onclick="App.Features.toggleLike(${p.id})">
-                                        ${heartIcon} ${p.likes} Suka
-                                    </div>
-                                    <div class="action-btn ripple-btn" onclick="App.Modal.open('Komentar', 'Fitur komentar akan segera hadir.')">
-                                        <span class="material-symbols-outlined">chat_bubble</span> ${p.comments} Komentar
-                                    </div>
-                                    <div class="action-btn ripple-btn" onclick="App.Toast.show('Tautan disalin ke clipboard','info')">
-                                        <span class="material-symbols-outlined">share</span> Bagikan
-                                    </div>
+                                <button class="icon-btn"><span class="material-symbols-outlined">more_horiz</span></button>
+                            </div>
+                            <div class="post-content">${p.content}</div>
+                            ${p.image ? `<img src="${p.image}" class="post-image">` : ''}
+                            <div class="post-actions">
+                                <div class="action-btn ripple-btn ${p.liked?'active':''}" onclick="App.Features.toggleLike(${p.id})">
+                                    <span class="material-symbols-outlined" style="${p.liked?"font-variation-settings:'FILL' 1;":""}">favorite</span> ${p.likes} Suka
+                                </div>
+                                <div class="action-btn ripple-btn" onclick="App.Modal.open('Komentar', 'Fitur komentar akan segera hadir.')">
+                                    <span class="material-symbols-outlined">chat_bubble</span> ${p.comments} Komentar
                                 </div>
                             </div>
-                        `;
-                    });
-                    
-                    stream.innerHTML = html;
+                        </div>
+                    `).join('');
                 },
                 createPost() {
                     const txt = document.getElementById('composer-text');
-                    if(!txt.value.trim()) return App.Toast.show("Kiriman tidak boleh kosong.", "warning");
-                    
+                    if(!txt.value.trim()) return App.Toast.show("Kiriman kosong.", "warning");
                     const posts = App.Storage.getPosts();
-                    const newPost = {
-                        id: Date.now(),
-                        author: 'Reza Rahadian',
-                        role: 'Senior UI/UX Designer',
-                        avatar: 'https://i.pravatar.cc/150?img=68',
-                        time: 'Baru saja',
-                        content: txt.value,
-                        image: null,
-                        likes: 0, comments: 0, liked: false
-                    };
-                    
-                    posts.unshift(newPost);
-                    App.Storage.savePosts(posts);
-                    txt.value = '';
-                    this.renderPosts();
-                    App.Toast.show("Postingan berhasil diterbitkan.", "success");
+                    posts.unshift({
+                        id: Date.now(), author: 'Reza Rahadian', role: 'UI/UX Designer', avatar: 'https://i.pravatar.cc/150?img=68',
+                        time: 'Baru saja', content: txt.value, image: null, likes: 0, comments: 0, liked: false
+                    });
+                    App.Storage.savePosts(posts); txt.value = ''; this.renderPosts(); App.Toast.show("Berhasil diposting.", "success");
                 },
                 toggleLike(id) {
                     const posts = App.Storage.getPosts();
-                    const post = posts.find(p => p.id === id);
-                    if(post) {
-                        if(post.liked) { post.likes--; post.liked = false; }
-                        else { post.likes++; post.liked = true; }
-                        App.Storage.savePosts(posts);
-                        this.renderPosts();
-                    }
+                    const p = posts.find(x => x.id === id);
+                    if(p) { p.liked ? (p.likes--, p.liked = false) : (p.likes++, p.liked = true); App.Storage.savePosts(posts); this.renderPosts(); }
                 },
                 sendChat() {
-                    const input = document.getElementById('chat-input-msg');
-                    const val = input.value.trim();
-                    if(!val) return;
-                    
-                    const container = document.getElementById('chat-messages-container');
-                    const bubble = document.createElement('div');
-                    bubble.className = 'bubble out';
-                    bubble.innerText = val;
-                    container.appendChild(bubble);
-                    
-                    input.value = '';
-                    container.scrollTop = container.scrollHeight;
+                    const i = document.getElementById('chat-input-msg');
+                    if(!i.value.trim()) return;
+                    const c = document.getElementById('chat-messages-container');
+                    const b = document.createElement('div'); b.className = 'bubble out'; b.innerText = i.value;
+                    c.appendChild(b); i.value = ''; c.scrollTop = c.scrollHeight;
                 }
             },
 
-            // ==========================================
-            // 8. GLOBAL UTILITIES (THEME, CLOCK, MODAL, TOAST, RIPPLE)
-            // ==========================================
             Theme: {
-                init() {
-                    const saved = localStorage.getItem('ns_theme') || 'light';
-                    document.documentElement.setAttribute('data-theme', saved);
-                },
+                init() { document.documentElement.setAttribute('data-theme', localStorage.getItem('ns_theme') || 'light'); },
                 toggle() {
-                    const cur = document.documentElement.getAttribute('data-theme');
-                    const nxt = cur === 'light' ? 'dark' : 'light';
-                    document.documentElement.setAttribute('data-theme', nxt);
-                    localStorage.setItem('ns_theme', nxt);
+                    const n = document.documentElement.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
+                    document.documentElement.setAttribute('data-theme', n); localStorage.setItem('ns_theme', n);
                 }
             },
 
             Clock: {
                 start() {
-                    const days = ["Minggu", "Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"];
-                    const months = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
-                    
                     setInterval(() => {
-                        const d = new Date();
-                        const dateStr = `${days[d.getDay()]}, ${d.getDate()} ${months[d.getMonth()]} ${d.getFullYear()}`;
-                        const timeStr = `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}:${String(d.getSeconds()).padStart(2,'0')} WIB`;
-                        
-                        const dateEl = document.getElementById('ui-date');
-                        const timeEl = document.getElementById('ui-time');
-                        const yearEl = document.getElementById('footer-year');
-                        
-                        if(dateEl) dateEl.innerText = dateStr;
-                        if(timeEl) timeEl.innerText = timeStr;
-                        if(yearEl) yearEl.innerText = d.getFullYear();
+                        const d = new Date(), ms = ["Jan","Feb","Mar","Apr","Mei","Jun","Jul","Ags","Sep","Okt","Nov","Des"];
+                        const uiD = document.getElementById('ui-date'), uiT = document.getElementById('ui-time');
+                        if(uiD) uiD.innerText = `${d.getDate()} ${ms[d.getMonth()]} ${d.getFullYear()}`;
+                        if(uiT) uiT.innerText = `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')} WIB`;
                     }, 1000);
                 }
             },
 
-            Network: {
-                listen() {
-                    const update = () => {
-                        const dot = document.getElementById('network-dot');
-                        const txt = document.getElementById('network-text');
-                        if(navigator.onLine) {
-                            dot.className = 'status-dot'; txt.innerText = 'Online';
-                        } else {
-                            dot.className = 'status-dot offline'; txt.innerText = 'Offline';
-                            App.Toast.show("Koneksi internet terputus.", "danger");
-                        }
-                    };
-                    window.addEventListener('online', update);
-                    window.addEventListener('offline', update);
-                }
-            },
-
-            Modal: {
-                open(title, bodyText) {
-                    document.getElementById('modal-title').innerText = title;
-                    document.getElementById('modal-body').innerText = bodyText;
-                    document.getElementById('global-modal').classList.add('active');
-                },
-                close() {
-                    document.getElementById('global-modal').classList.remove('active');
-                }
-            },
-
+            Network: { listen() { window.addEventListener('online', ()=>document.getElementById('network-text').innerText='Online'); window.addEventListener('offline', ()=>App.Toast.show("Offline","danger")); } },
+            Modal: { open(t, b) { document.getElementById('modal-title').innerText=t; document.getElementById('modal-body').innerText=b; document.getElementById('global-modal').classList.add('active'); }, close() { document.getElementById('global-modal').classList.remove('active'); } },
+            
             Toast: {
-                show(msg, type = "info") {
-                    const c = document.getElementById('toast-container');
-                    const t = document.createElement('div');
-                    t.className = 'toast';
-                    
-                    let color = "var(--primary)";
-                    let icon = "info";
-                    if(type === 'success') { color = "var(--secondary)"; icon = "check_circle"; }
-                    if(type === 'danger') { color = "var(--danger)"; icon = "error"; }
-                    if(type === 'warning') { color = "var(--warning)"; icon = "warning"; }
-
-                    t.style.borderLeftColor = color;
-                    t.innerHTML = `<span class="material-symbols-outlined" style="color:${color}">${icon}</span> <span>${msg}</span>`;
-                    
-                    c.appendChild(t);
-                    setTimeout(() => {
-                        t.style.opacity = '0'; t.style.transform = 'translateX(50px)';
-                        t.style.transition = 'all 0.3s ease';
-                        setTimeout(() => t.remove(), 300);
-                    }, 3000);
+                show(m, t="info") {
+                    const c = document.getElementById('toast-container'), b = document.createElement('div');
+                    b.className = 'toast'; b.style.borderLeftColor = t==='success'?'var(--secondary)':t==='danger'?'var(--danger)':'var(--primary)';
+                    b.innerHTML = `<span>${m}</span>`; c.appendChild(b);
+                    setTimeout(() => { b.style.opacity='0'; setTimeout(()=>b.remove(), 300); }, 3000);
                 }
             },
 
             UI: {
                 bindGlobalEvents() {
-                    // Sidebar Toggle Desktop
                     document.getElementById('btn-toggle-sidebar')?.addEventListener('click', () => {
-                        document.getElementById('app-layout').classList.toggle('sidebar-collapsed');
+                        const l = document.getElementById('app-layout'), o = document.getElementById('mobile-overlay');
+                        if(window.innerWidth <= 768) { l.classList.toggle('sidebar-mobile-open'); o.classList.toggle('active'); }
+                        else l.classList.toggle('sidebar-collapsed');
                     });
-                    
-                    // Theme Switch
+                    document.getElementById('mobile-overlay')?.addEventListener('click', this.closeMobileSidebar);
                     document.getElementById('btn-theme')?.addEventListener('click', () => App.Theme.toggle());
-                    
-                    // Fullscreen
-                    document.getElementById('btn-fullscreen')?.addEventListener('click', () => {
-                        if (!document.fullscreenElement) document.documentElement.requestFullscreen();
-                        else if (document.exitFullscreen) document.exitFullscreen();
-                    });
-
-                    // Refresh
-                    document.getElementById('btn-refresh')?.addEventListener('click', () => {
-                        App.Router.handleRoute();
-                        App.Toast.show("Halaman diperbarui", "success");
-                    });
-
-                    // Modal Close on Click Outside
-                    document.getElementById('global-modal').addEventListener('click', (e) => {
-                        if(e.target.id === 'global-modal') App.Modal.close();
-                    });
-
-                    // Ripple Effect Binding via Event Delegation
-                    document.addEventListener('click', function(e) {
-                        const target = e.target.closest('.ripple-btn');
-                        if (target) {
-                            const circle = document.createElement('span');
-                            const diameter = Math.max(target.clientWidth, target.clientHeight);
-                            const radius = diameter / 2;
-                            const rect = target.getBoundingClientRect();
-                            circle.style.width = circle.style.height = `${diameter}px`;
-                            circle.style.left = `${e.clientX - rect.left - radius}px`;
-                            circle.style.top = `${e.clientY - rect.top - radius}px`;
-                            circle.classList.add('ripple');
-                            const existing = target.querySelector('.ripple');
-                            if (existing) existing.remove();
-                            target.appendChild(circle);
-                        }
-                    });
+                    document.getElementById('btn-refresh')?.addEventListener('click', () => { App.Router.handleRoute(); App.Toast.show("Diperbarui","success"); });
+                    document.getElementById('global-modal').addEventListener('click', (e) => { if(e.target.id==='global-modal') App.Modal.close(); });
                 },
-                showLoadingBtn(btn) {
-                    const originalText = btn.innerText;
-                    btn.innerHTML = `<span class="material-symbols-outlined" style="animation: spin 1s linear infinite;">sync</span> Loading...`;
-                    btn.style.pointerEvents = 'none';
-                    btn.style.opacity = '0.8';
-                    setTimeout(() => {
-                        btn.innerHTML = originalText;
-                        btn.style.pointerEvents = 'auto';
-                        btn.style.opacity = '1';
-                    }, 1000);
+                closeMobileSidebar() {
+                    document.getElementById('app-layout')?.classList.remove('sidebar-mobile-open');
+                    document.getElementById('mobile-overlay')?.classList.remove('active');
+                },
+                showLoadingBtn(b) {
+                    const ot = b.innerText; b.innerHTML = 'Loading...'; b.style.pointerEvents='none'; b.style.opacity='0.8';
+                    setTimeout(() => { b.innerHTML = ot; b.style.pointerEvents='auto'; b.style.opacity='1'; }, 1000);
                 }
             }
         };
 
-        // Initialize App on DOM Load
         document.addEventListener('DOMContentLoaded', () => App.init());
-
     </script>
-    
-    <!-- Inline keyframes for JS added animations -->
-    <style>
-        @keyframes spin { 100% { transform: rotate(360deg); } }
-    </style>
 </body>
 </html>
