@@ -2,19 +2,20 @@ const SUPABASE_URL = 'https://waaufoxlimqtesmmjhyw.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_X6icNByv3YFbekorwJ6kSw_SX0XUFM8'; 
 const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY); 
 
+// Variabel Global Aplikasi
 let liveNotifications = [ 
     { id: 1, icon: 'shield_person', user: 'Super Admin', type: 'admin', desc: 'Sistem Workspace Tech Social versi 2.4 berhasil diperbarui ke server cloud.', isUnread: true }, 
     { id: 2, icon: 'handshake', user: 'System', type: 'admin', desc: 'Fitur network teman aktif. Sekarang Anda dapat mencari user lain di halaman Eksplor.', isUnread: false } 
 ]; 
 let activeChatFriendEmail = null; 
 let activeChatFriendName = null; 
-let composerAttachedImageBase64 = null; // Ini menampung File object (bukan Base64 lagi)
+let composerAttachedImageBase64 = null; 
 let composerAttachedFileBase64 = null; 
 let composerAttachedFileName = "Dokumen.bin"; 
 let unreadMessageCounters = {}; 
 let liveHeaderNotificationCount = 1; 
 let headerSearchFilterQueryString = ""; 
-let searchTimeout = null; // Variabel untuk Debounce (agar ringan)
+let searchTimeout = null; 
 const EMOJI_LIST = ['😊', '😂', '🔥', '👍', '🙌', '💯', '❤️', '👏', '🎉', '😮', '😢', '🙏']; 
 
 const App = { 
@@ -355,6 +356,13 @@ const App = {
         } 
     }, 
 
+    ViewControllers: { 
+        feed() { App.Features.renderPosts(); }, 
+        explore() { App.Features.renderExploreUsers(); }, 
+        groups() { App.Features.renderCommunityHubViewportList(); }, 
+        profil() { App.Features.loadFriendsCount(); } 
+    }, 
+
     Features: { 
         async fetchIncomingFriendRequestsSync() {
             const myEmail = localStorage.getItem('ns_user_email') || '';
@@ -396,7 +404,9 @@ const App = {
                 await supabaseClient.from('friends').update({ status: 'approved' }).eq('id', dbRequestId);
                 const { data: checkInverse } = await supabaseClient.from('friends').select('id').eq('user_email', myEmail).eq('friend_email', senderEmail);
                 if(!checkInverse || checkInverse.length === 0) {
-                    await supabaseClient.from('friends').insert([{ user_email: myEmail, friend_email: senderEmail, status: 'approved' }]);
+                    await supabaseClient.from('friends').insert([
+                        { user_email: myEmail, friend_email: senderEmail, status: 'approved' }
+                    ]);
                 }
                 liveNotifications = liveNotifications.filter(n => n.id !== notiId);
                 App.Toast.show("Pertemanan dikonfirmasi!", "success");
@@ -405,7 +415,7 @@ const App = {
                 if(window.location.hash === '#/explore') App.Features.renderExploreUsers();
             } catch(err) {
                 console.error(err);
-                App.Toast.show("Gagal menyetujui.", "danger");
+                App.Toast.show("Gagal menyetujui pertemanan.", "danger");
             }
         },
 
@@ -413,7 +423,7 @@ const App = {
             try {
                 await supabaseClient.from('friends').delete().eq('id', dbRequestId);
                 liveNotifications = liveNotifications.filter(n => n.id !== notiId);
-                App.Toast.show("Permintaan ditolak.", "warning");
+                App.Toast.show("Permintaan pertemanan ditolak.", "warning");
                 App.Features.showNotifications();
                 if(window.location.hash === '#/explore') App.Features.renderExploreUsers();
             } catch(e) { console.error(e); }
