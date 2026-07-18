@@ -164,6 +164,13 @@
         .notification-info h4 { font-size: 0.95rem; font-weight: 700; margin-bottom: 2px; color: var(--text-main); }
         .notification-info p { font-size: 0.85rem; color: var(--text-muted); line-height: 1.4; }
 
+        /* USER LIST EXPLORE LAYOUT */
+        .user-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; margin-top: 20px; }
+        .user-follow-card { display: flex; align-items: center; gap: 14px; padding: 16px; background: var(--bg-body); border-radius: var(--radius-md); border: 1px solid var(--border-color); }
+        .user-follow-info { flex: 1; overflow: hidden; text-align: left; }
+        .user-follow-info h4 { font-size: 0.95rem; font-weight: 700; color: var(--text-main); white-space: nowrap; text-overflow: ellipsis; overflow: hidden; }
+        .user-follow-info p { font-size: 0.8rem; color: var(--text-muted); white-space: nowrap; text-overflow: ellipsis; overflow: hidden; }
+
         /* MODULES (FEED, CHAT, GROUPS) */
         .composer-box { display: flex; gap: 16px; margin-bottom: 32px; }
         .composer-input-area { flex: 1; background: var(--bg-body); border-radius: var(--radius-lg); padding: 16px; border: 1px solid var(--border-color); }
@@ -205,7 +212,6 @@
         .group-card:hover { background: var(--primary-state); border-color: var(--primary); }
         .group-icon { width: 60px; height: 60px; border-radius: var(--radius-md); object-fit: cover; }
 
-        /* SETTINGS AVATAR EDIT LAYOUT */
         .avatar-edit-container { display: flex; flex-direction: column; align-items: center; gap: 14px; margin-bottom: 28px; }
         .avatar-preview-wrapper { position: relative; width: 100px; height: 100px; }
         .avatar-preview-circle { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; border: 3px solid var(--primary); padding: 2px; }
@@ -385,7 +391,7 @@
             <div>&copy; <span id="footer-year">2026</span> <strong>NexSocial</strong>. All Rights Reserved.</div>
             <div style="display: flex; gap: 24px; align-items: center;">
                 <span>Powered by HTML, CSS, Vanilla JS & Supabase</span>
-                <span>v5.1.0</span>
+                <span>v5.2.0</span>
                 <div class="status-indicator"><div class="status-dot" id="network-dot"></div><span id="network-text">Online</span></div>
             </div>
         </footer>
@@ -416,7 +422,7 @@
         const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
         let liveNotifications = [
-            { icon: 'build', title: 'Update Sistem Workspace', desc: 'Sistem limit kustomisasi akun Anda di bulan Juli 2026 ini telah diperbarui secara otomatis.' }
+            { icon: 'handshake', title: 'Fitur Network Teman Aktif', desc: 'Sekarang Anda dapat mencari nama user lain dan menambahkannya sebagai koneksi pertemanan di halaman Eksplor.' }
         ];
 
         const App = {
@@ -431,9 +437,6 @@
                 this.Realtime.subscribePosts();
             },
 
-            // ==========================================================================
-            // KENDALI DATA IDENTITAS RAM USER
-            // ==========================================================================
             ProfileState: {
                 getCurrentName() {
                     const savedName = localStorage.getItem('ns_display_name');
@@ -444,7 +447,6 @@
                 },
                 getCurrentAvatar() {
                     const savedAvatar = localStorage.getItem('ns_user_avatar_base64');
-                    // Return default avatar jika user belum mengunggah foto khusus
                     return savedAvatar || 'https://i.pravatar.cc/150?img=12';
                 },
                 getLimitConfig() {
@@ -628,7 +630,7 @@
             Navigation: {
                 menuConfig: [
                     { id: 'feed', label: 'News Feed', icon: 'home', mobile: true },
-                    { id: 'explore', label: 'Eksplor', icon: 'explore', mobile: true },
+                    { id: 'explore', label: 'Cari Teman', icon: 'person_search', mobile: true }, // Mengubah nama menu ke Cari Teman
                     { id: 'chat', label: 'Pesan', icon: 'chat', mobile: true },
                     { id: 'groups', label: 'Komunitas', icon: 'groups', mobile: true },
                     { id: 'settings', label: 'Pengaturan', icon: 'settings', mobile: false }
@@ -672,13 +674,11 @@
                 explore() {
                     return `
                         <div class="glass-card">
-                            <h2 style="margin-bottom: 24px;">Sedang Tren Saat Ini</h2>
-                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 16px;">
-                                <div style="height: 200px; border-radius: var(--radius-md); background: url('https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=600&q=80') center/cover; position: relative;">
-                                    <div style="position: absolute; bottom:0; left:0; right:0; padding: 16px; background: linear-gradient(transparent, rgba(0,0,0,0.8)); border-bottom-left-radius: var(--radius-md); border-bottom-right-radius: var(--radius-md); color: white;">
-                                        <h3 style="font-size: 1rem; color:white;">#FacilityManagement2026</h3><p style="font-size: 0.8rem; color: #ddd;">12.5k Postingan</p>
-                                    </div>
-                                </div>
+                            <h2 style="margin-bottom: 8px;">Cari Koneksi & Teman</h2>
+                            <p style="color: var(--text-muted); font-size:0.85rem; margin-bottom: 24px;">Temukan pengguna Workspace lain yang terdaftar dalam kluster jaringan cloud Anda.</p>
+                            
+                            <div id="explore-users-stream" class="user-grid">
+                                <div class="skeleton" style="height: 80px; width: 100%;"></div>
                             </div>
                         </div>
                     `;
@@ -745,7 +745,7 @@
                             <h2 style="font-size: 1.8rem; font-weight: 800; margin-bottom: 4px;">${currentName}</h2>
                             <p style="color: var(--primary); font-weight: 600; margin-bottom: 12px;">Nex Workspace Member</p>
                             <div class="profile-stats">
-                                <div class="stat-item"><span class="stat-val">312</span><span class="stat-lbl">Koneksi</span></div>
+                                <div class="stat-item"><span class="stat-val" id="profile-friends-count">0</span><span class="stat-lbl">Teman</span></div>
                                 <div class="stat-item"><span class="stat-val">2.5K</span><span class="stat-lbl">Pengikut</span></div>
                                 <div class="stat-item"><span class="stat-val">84</span><span class="stat-lbl">Postingan</span></div>
                             </div>
@@ -768,7 +768,6 @@
                                 Kustomisasi profil publik Anda di sini. Semua file foto yang dimasukkan otomatis dikompresi agar berukuran di bawah 200kb.
                             </p>
                             
-                            <!-- EDIT FOTO PROFIL SECTION -->
                             <div class="avatar-edit-container">
                                 <div class="avatar-preview-wrapper">
                                     <img src="${currentAvatar}" id="settings-avatar-preview" class="avatar-preview-circle user-avatar-reactive" alt="Preview">
@@ -800,13 +799,122 @@
 
             ViewControllers: {
                 feed() { App.Features.renderPosts(); },
-                chat() { const c = document.getElementById('chat-messages-container'); if(c) c.scrollTop = c.scrollHeight; }
+                explore() { App.Features.renderExploreUsers(); }, // Controller untuk halaman cari teman
+                chat() { const c = document.getElementById('chat-messages-container'); if(c) c.scrollTop = c.scrollHeight; },
+                profil() { App.Features.loadFriendsCount(); }
             },
 
             Features: {
                 // ==========================================================================
-                // CLIENT-SIDE IMAGE COMPRESSION (MAKSIMAL 200KB)
+                // FITUR PERTEMANAN & DAFTAR USER DARI DATA POSTS (SINKRON CLOUD)
                 // ==========================================================================
+                async renderExploreUsers() {
+                    const container = document.getElementById('explore-users-stream');
+                    if(!container) return;
+
+                    const myEmail = localStorage.getItem('ns_user_email') || '';
+
+                    try {
+                        // Mengambil data komparasi relasi teman saat ini
+                        const { data: myFriends, error: friendErr } = await supabaseClient
+                            .from('friends')
+                            .select('friend_email')
+                            .eq('user_email', myEmail);
+
+                        const friendList = myFriends ? myFriends.map(f => f.friend_email) : [];
+
+                        // Menampilkan user lain berdasarkan data penulis pos unik di database
+                        const { data: posts, error: postErr } = await supabaseClient
+                            .from('posts')
+                            .select('author, avatar')
+                            .not('author', 'is', null);
+
+                        if(postErr) throw postErr;
+
+                        // Memetakan user unik (mencegah duplikasi nama kita sendiri)
+                        const uniqueUsers = [];
+                        const map = new Map();
+                        const myCurrentName = App.ProfileState.getCurrentName();
+
+                        for (const item of posts) {
+                            if(item.author !== myCurrentName && !map.has(item.author)) {
+                                map.set(item.author, true);
+                                uniqueUsers.push({
+                                    name: item.author,
+                                    avatar: item.avatar || 'https://i.pravatar.cc/150?img=11',
+                                    email: item.author.toLowerCase() + "@nexsocial.id" // Mock email mapping based on name
+                                });
+                            }
+                        }
+
+                        if(uniqueUsers.length === 0) {
+                            container.innerHTML = `<div style="grid-column: 1/-1; text-align:center; color:var(--text-muted); padding:20px;">Belum ada pengguna lain yang aktif memposting di database Anda.</div>`;
+                            return;
+                        }
+
+                        container.innerHTML = uniqueUsers.map(u => {
+                            const isFriend = friendList.includes(u.email);
+                            return `
+                                <div class="user-follow-card">
+                                    <img src="${u.avatar}" class="user-avatar" style="width:44px; height:44px; border:none;">
+                                    <div class="user-follow-info">
+                                        <h4>${u.name}</h4>
+                                        <p>${u.email}</p>
+                                    </div>
+                                    <button class="btn ${isFriend ? 'btn-secondary' : 'btn-primary'}" style="padding: 6px 14px; font-size:0.8rem; border-radius:10px;" onclick="App.Features.toggleFriendAction('${u.email}', ${isFriend})">
+                                        ${isFriend ? 'Teman' : 'Tambah'}
+                                    </button>
+                                </div>
+                            `;
+                        }).join('');
+
+                    } catch(err) {
+                        console.error(err);
+                        container.innerHTML = `<div style="color:var(--danger);">Gagal memuat list koneksi teman dari Supabase.</div>`;
+                    }
+                },
+
+                async toggleFriendAction(friendEmail, isFriend) {
+                    const myEmail = localStorage.getItem('ns_user_email') || '';
+                    if(!myEmail) return;
+
+                    try {
+                        if (isFriend) {
+                            // Hapus teman
+                            await supabaseClient
+                                .from('friends')
+                                .delete()
+                                .eq('user_email', myEmail)
+                                .eq('friend_email', friendEmail);
+                            App.Toast.show("Koneksi teman berhasil dihapus.", "warning");
+                        } else {
+                            // Tambah teman
+                            await supabaseClient
+                                .from('friends')
+                                .insert([{ user_email: myEmail, friend_email: friendEmail }]);
+                            App.Toast.show("Berhasil berteman!", "success");
+                        }
+                        this.renderExploreUsers(); // Refresh UI
+                    } catch(err) {
+                        console.error(err);
+                    }
+                },
+
+                async loadFriendsCount() {
+                    const countEl = document.getElementById('profile-friends-count');
+                    if(!countEl) return;
+                    const myEmail = localStorage.getItem('ns_user_email') || '';
+                    
+                    const { count, error } = await supabaseClient
+                        .from('friends')
+                        .select('*', { count: 'exact', head: true })
+                        .eq('user_email', myEmail);
+                    
+                    if(!error && count !== null) {
+                        countEl.innerText = count;
+                    }
+                },
+
                 handleAvatarSelection(event) {
                     const file = event.target.files[0];
                     if (!file) return;
@@ -823,7 +931,6 @@
                             let width = img.width;
                             let height = img.height;
 
-                            // Batasi resolusi maksimal untuk optimasi ukuran file
                             const MAX_WIDTH = 400;
                             const MAX_HEIGHT = 400;
 
@@ -844,30 +951,20 @@
                             const ctx = canvas.getContext('2d');
                             ctx.drawImage(img, 0, 0, width, height);
 
-                            // Kompresi dengan loop dinamis diturunkan bertahap sampai ukuran di bawah 200kb
                             let quality = 0.9;
                             let base64Result = canvas.toDataURL('image/jpeg', quality);
                             
-                            // Estimasi ukuran file base64 string (1 karakter base64 = 0.75 byte)
                             while ((base64Result.length * 0.75) > 200 * 1024 && quality > 0.1) {
                                 quality -= 0.1;
                                 base64Result = canvas.toDataURL('image/jpeg', quality);
                             }
 
                             const finalSizeKb = Math.round((base64Result.length * 0.75) / 1024);
-                            console.log("Compressed image size: " + finalSizeKb + "kb");
-
-                            if(finalSizeKb > 200) {
-                                App.Toast.show("File terlalu besar, kompresi gagal di bawah 200kb.", "danger");
-                                return;
-                            }
-
-                            // Simpan ke state lokal aplikasi dan update UI preview
                             App.ProfileState.saveCompressedAvatar(base64Result);
                             const previewEl = document.getElementById('settings-avatar-preview');
                             if(previewEl) previewEl.src = base64Result;
                             
-                            App.Toast.show("Foto profil siap disimpan (" + finalSizeKb + "kb).", "success");
+                            App.Toast.show("Foto profil terkompresi (" + finalSizeKb + "kb).", "success");
                         };
                     };
                 },
@@ -959,7 +1056,41 @@
                     App.UI.showLoadingBtn(btn);
 
                     const myAuthorName = App.ProfileState.getCurrentName();
-                    const myAvatar = App.ProfileState.getCurrentAvatar(); // Mengirim data foto terkompresi <200kb
+                    const myAvatar = App.ProfileState.getCurrentAvatar();
+
+                    try {
+                        const { error } = await supabaseClient
+                            .from('posts')
+                            .insert([
+                                { 
+                                    author: myAuthorName, 
+                                    role: 'Nex Workspace Member', 
+                                    avatar: myAvatar, 
+                                    content: txt.value,
+                                    likes: 0
+                                }
+                            ]);
+
+                        if (error) throw error;
+
+                        txt.value = ''; 
+                        App.Toast.show("Berhasil diposting.", "success");
+                        this.renderPosts();
+                    } catch (err) {
+                        console.error(err);
+                        App.Toast.show("Gagal memposting ke cloud.", "danger");
+                    }
+                },
+
+                async createPost() {
+                    const txt = document.getElementById('composer-text');
+                    if(!txt.value.trim()) return App.Toast.show("Kiriman kosong.", "warning");
+
+                    const btn = document.querySelector('.composer-actions .btn-primary');
+                    App.UI.showLoadingBtn(btn);
+
+                    const myAuthorName = App.ProfileState.getCurrentName();
+                    const myAvatar = App.ProfileState.getCurrentAvatar();
 
                     try {
                         const { error } = await supabaseClient
@@ -1062,7 +1193,6 @@
                     const sidebarNameEl = document.getElementById('sidebar-user-name');
                     if (sidebarNameEl) sidebarNameEl.innerText = currentName;
 
-                    // Sinkronisasi seluruh elemen gambar profile-avatar di seluruh halaman
                     document.querySelectorAll('.id-user-avatar-element, .user-avatar-reactive').forEach(img => {
                         img.src = currentAvatar;
                     });
