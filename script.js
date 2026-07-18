@@ -9,13 +9,13 @@ let liveNotifications = [
 ]; 
 let activeChatFriendEmail = null; 
 let activeChatFriendName = null; 
-let composerAttachedImageBase64 = null; 
+let composerAttachedImageBase64 = null; // Menampung objek File asli untuk diunggah ke Storage
 let composerAttachedFileBase64 = null; 
 let composerAttachedFileName = "Dokumen.bin"; 
 let unreadMessageCounters = {}; 
 let liveHeaderNotificationCount = 1; 
 let headerSearchFilterQueryString = ""; 
-let searchTimeout = null; 
+let searchTimeout = null; // Timer untuk Debounce pencarian
 const EMOJI_LIST = ['😊', '😂', '🔥', '👍', '🙌', '💯', '❤️', '👏', '🎉', '😮', '😢', '🙏']; 
 
 const App = { 
@@ -700,6 +700,7 @@ const App = {
             const container = document.getElementById('explore-users-stream'); 
             if(!container) return; 
             const myEmail = localStorage.getItem('ns_user_email') || ''; 
+            const myCurrentName = App.ProfileState.getCurrentName().toLowerCase();
             try { 
                 const { data: incomingReq } = await supabaseClient.from('friends').select('id, user_email, status').eq('friend_email', myEmail);
                 const { data: outgoingReq } = await supabaseClient.from('friends').select('id, friend_email, status').eq('user_email', myEmail); 
@@ -729,12 +730,11 @@ const App = {
                 const { data: posts } = await supabaseClient.from('posts').select('author, avatar').not('author', 'is', null); 
                 const uniqueUsers = []; 
                 const map = new Map(); 
-                const myCurrentName = App.ProfileState.getCurrentName(); 
                 
                 if(posts) { 
                     for (const item of posts) { 
                         const authorLower = item.author.toLowerCase();
-                        if(authorLower !== myCurrentName.toLowerCase() && !map.has(authorLower) && item.image !== 'private_chat_type') { 
+                        if(authorLower !== myCurrentName && !map.has(authorLower) && item.image !== 'private_chat_type') { 
                             map.set(authorLower, true); 
                             uniqueUsers.push({ name: item.author, avatar: item.avatar || 'https://i.pravatar.cc/150?img=11', email: authorLower + "@nexsocial.id" }); 
                         } 
@@ -761,7 +761,7 @@ const App = {
                         buttonHTML = `<button class="btn btn-primary" style="padding:6px 14px; font-size:0.8rem;" onclick="App.Features.toggleFriendAction('${u.email}', 'none', null)">Tambah</button>`; 
                     } 
                     
-                    return `<div class="user-follow-card"><img src="${u.avatar}" class="user-avatar" style="width:44px; height:44px; border:none;"><div class="user-follow-info"><h4 onclick="App.Features.redirectToTargetFriendProfile('${u.name}')">${u.name}</h4><p>${u.email}</p></div>${buttonHTML}</div>`; 
+                    return `<div class="user-follow-card"><img src="${u.avatar}" class="user-avatar" style="width:44px; height:44px; border:none;"><div class="user-follow-info"><h4 onclick="App.Features.redirectToTargetFriendProfile('${u.name}')">${u.name}</h4><p>${username}@workspace</p></div>${buttonHTML}</div>`; 
                 }).join(''); 
             } catch(err) { console.error(err); } 
         }, 
