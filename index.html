@@ -11,6 +11,9 @@
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0..1,0" rel="stylesheet">
     
+    <!-- Supabase SDK -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
     <style>
         /* ==========================================================================
            1. CSS VARIABLES & PREMIUM THEME CONFIGURATION
@@ -18,7 +21,7 @@
         :root {
             --font-main: 'Plus Jakarta Sans', sans-serif;
             
-            /* Light Theme - Elegant & Glassmorphic */
+            /* Light Theme */
             --bg-body: #f4f7fe;
             --bg-glass: rgba(255, 255, 255, 0.75);
             --bg-glass-hover: rgba(255, 255, 255, 0.95);
@@ -29,7 +32,6 @@
             --text-main: #2b3674;
             --text-muted: #a3aed1;
             
-            /* Social Brand Colors */
             --primary: #4318FF;
             --primary-state: rgba(67, 24, 255, 0.08);
             --secondary: #01B574;
@@ -37,13 +39,11 @@
             --danger: #EE5D50;
             --warning: #FFCE20;
             
-            /* Structural Variables */
             --blur-md: 12px;
             --blur-lg: 20px;
             --shadow-soft: 0 18px 40px rgba(112, 144, 176, 0.12);
             --shadow-float: 0 10px 20px rgba(67, 24, 255, 0.15);
             
-            --radius-sm: 10px;
             --radius-md: 16px;
             --radius-lg: 24px;
             --radius-xl: 30px;
@@ -74,152 +74,52 @@
             --shadow-float: 0 10px 20px rgba(117, 81, 255, 0.25);
         }
 
-        /* ==========================================================================
-           2. GLOBAL RESET & BASE STYLES
-           ========================================================================== */
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: var(--font-main);
-            -webkit-tap-highlight-color: transparent;
-        }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: var(--font-main); -webkit-tap-highlight-color: transparent; }
+        body { background-color: var(--bg-body); color: var(--text-main); overflow-x: hidden; transition: var(--trans-smooth); min-height: 100vh; background-image: radial-gradient(at 0% 0%, rgba(67, 24, 255, 0.05) 0px, transparent 50%), radial-gradient(at 100% 100%, rgba(1, 181, 116, 0.05) 0px, transparent 50%); background-attachment: fixed; }
+        a { text-decoration: none; color: inherit; } ul { list-style: none; } button, input, textarea { font-family: inherit; outline: none; border: none; }
+        ::-webkit-scrollbar { width: 6px; height: 6px; } ::-webkit-scrollbar-track { background: transparent; } ::-webkit-scrollbar-thumb { background: rgba(135, 143, 166, 0.3); border-radius: var(--radius-round); } ::-webkit-scrollbar-thumb:hover { background: var(--primary); }
 
-        body {
-            background-color: var(--bg-body);
-            color: var(--text-main);
-            overflow-x: hidden;
-            transition: var(--trans-smooth);
-            min-height: 100vh;
-            background-image: 
-                radial-gradient(at 0% 0%, rgba(67, 24, 255, 0.05) 0px, transparent 50%),
-                radial-gradient(at 100% 100%, rgba(1, 181, 116, 0.05) 0px, transparent 50%);
-            background-attachment: fixed;
-        }
+        /* AUTH LAYOUT */
+        #auth-layout { display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 24px; position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 2000; background: var(--bg-body); transition: var(--trans-smooth); }
+        .auth-card { background: var(--bg-glass); backdrop-filter: blur(var(--blur-lg)); -webkit-backdrop-filter: blur(var(--blur-lg)); border: 1px solid var(--border-glass); border-radius: var(--radius-xl); padding: 40px; width: 100%; max-width: 450px; box-shadow: var(--shadow-soft); animation: slideUpFade 0.6s cubic-bezier(0.25, 1, 0.5, 1); text-align: center; }
+        .auth-logo { width: 64px; height: 64px; background: linear-gradient(135deg, var(--primary), #a68cff); border-radius: var(--radius-lg); display: flex; align-items: center; justify-content: center; color: white; font-size: 32px; font-weight: 700; margin: 0 auto 24px auto; box-shadow: var(--shadow-float); }
 
-        a { text-decoration: none; color: inherit; }
-        ul { list-style: none; }
-        button, input, textarea { font-family: inherit; outline: none; border: none; }
-
-        ::-webkit-scrollbar { width: 6px; height: 6px; }
-        ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: rgba(135, 143, 166, 0.3); border-radius: var(--radius-round); }
-        ::-webkit-scrollbar-thumb:hover { background: var(--primary); }
-
-        /* ==========================================================================
-           3. AUTHENTICATION LAYOUT
-           ========================================================================== */
-        #auth-layout {
-            display: flex; align-items: center; justify-content: center;
-            min-height: 100vh; padding: 24px; position: fixed;
-            top: 0; left: 0; right: 0; bottom: 0; z-index: 2000;
-            background: var(--bg-body); transition: var(--trans-smooth);
-        }
-
-        .auth-card {
-            background: var(--bg-glass); backdrop-filter: blur(var(--blur-lg));
-            -webkit-backdrop-filter: blur(var(--blur-lg));
-            border: 1px solid var(--border-glass); border-radius: var(--radius-xl);
-            padding: 40px; width: 100%; max-width: 450px;
-            box-shadow: var(--shadow-soft); animation: slideUpFade 0.6s cubic-bezier(0.25, 1, 0.5, 1);
-            text-align: center;
-        }
-
-        .auth-logo {
-            width: 64px; height: 64px; background: linear-gradient(135deg, var(--primary), #a68cff);
-            border-radius: var(--radius-lg); display: flex; align-items: center; justify-content: center;
-            color: white; font-size: 32px; font-weight: 700; margin: 0 auto 24px auto;
-            box-shadow: var(--shadow-float);
-        }
-
-        /* ==========================================================================
-           4. MAIN APP LAYOUT
-           ========================================================================== */
-        #app-layout {
-            display: grid;
-            grid-template-areas: "sidebar header" "sidebar content" "sidebar footer";
-            grid-template-columns: var(--sidebar-width) 1fr;
-            grid-template-rows: var(--header-height) 1fr auto;
-            min-height: 100vh; display: none; opacity: 0;
-            transition: opacity 0.5s ease;
-        }
+        /* APP LAYOUT */
+        #app-layout { display: grid; grid-template-areas: "sidebar header" "sidebar content" "sidebar footer"; grid-template-columns: var(--sidebar-width) 1fr; grid-template-rows: var(--header-height) 1fr auto; min-height: 100vh; display: none; opacity: 0; transition: opacity 0.5s ease; }
         #app-layout.active { display: grid; opacity: 1; }
         #app-layout.sidebar-collapsed { --sidebar-width: 90px; }
 
-        .mobile-overlay {
-            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(11, 20, 55, 0.5); backdrop-filter: blur(4px);
-            -webkit-backdrop-filter: blur(4px); z-index: 1000;
-            opacity: 0; pointer-events: none; transition: var(--trans-smooth);
-        }
+        .mobile-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(11, 20, 55, 0.5); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); z-index: 1000; opacity: 0; pointer-events: none; transition: var(--trans-smooth); }
         .mobile-overlay.active { opacity: 1; pointer-events: auto; }
 
         /* HEADER */
-        .app-header {
-            grid-area: header; background: var(--bg-glass);
-            backdrop-filter: blur(var(--blur-md)); -webkit-backdrop-filter: blur(var(--blur-md));
-            border-bottom: 1px solid var(--border-color); padding: 0 32px;
-            display: flex; align-items: center; justify-content: space-between;
-            position: sticky; top: 0; z-index: 999;
-        }
+        .app-header { grid-area: header; background: var(--bg-glass); backdrop-filter: blur(var(--blur-md)); -webkit-backdrop-filter: blur(var(--blur-md)); border-bottom: 1px solid var(--border-color); padding: 0 32px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 999; }
         .header-left, .header-right { display: flex; align-items: center; gap: 16px; }
-
         .search-box { position: relative; width: 300px; }
-        .search-box input {
-            width: 100%; background: var(--bg-body); border: 1px solid var(--border-color);
-            padding: 12px 20px 12px 48px; border-radius: var(--radius-round);
-            color: var(--text-main); transition: var(--trans-smooth);
-        }
+        .search-box input { width: 100%; background: var(--bg-body); border: 1px solid var(--border-color); padding: 12px 20px 12px 48px; border-radius: var(--radius-round); color: var(--text-main); transition: var(--trans-smooth); }
         .search-box input:focus { border-color: var(--primary); box-shadow: 0 0 0 4px var(--primary-state); }
-        .search-box .material-symbols-outlined {
-            position: absolute; left: 16px; top: 50%; transform: translateY(-50%);
-            color: var(--text-muted); pointer-events: none;
-        }
-
+        .search-box .material-symbols-outlined { position: absolute; left: 16px; top: 50%; transform: translateY(-50%); color: var(--text-muted); pointer-events: none; }
         .clock-widget { display: flex; flex-direction: column; align-items: flex-end; padding-right: 20px; border-right: 1px solid var(--border-color); }
         .clock-date { font-size: 0.85rem; color: var(--text-muted); font-weight: 500; }
         .clock-time { font-size: 1.1rem; font-weight: 700; color: var(--text-main); }
-
-        .icon-btn {
-            width: 44px; height: 44px; border-radius: var(--radius-round);
-            display: flex; align-items: center; justify-content: center;
-            background: transparent; color: var(--text-muted); cursor: pointer;
-            position: relative; transition: var(--trans-smooth);
-        }
+        .icon-btn { width: 44px; height: 44px; border-radius: var(--radius-round); display: flex; align-items: center; justify-content: center; background: transparent; color: var(--text-muted); cursor: pointer; position: relative; transition: var(--trans-smooth); }
         .icon-btn:hover { background: var(--bg-body); color: var(--primary); }
         .badge { position: absolute; top: 8px; right: 8px; width: 8px; height: 8px; background: var(--danger); border-radius: var(--radius-round); }
-
         .user-avatar { width: 44px; height: 44px; border-radius: var(--radius-round); object-fit: cover; cursor: pointer; border: 2px solid var(--primary); padding: 2px; }
 
         /* SIDEBAR */
-        .app-sidebar {
-            grid-area: sidebar; background: var(--bg-glass-solid);
-            border-right: 1px solid var(--border-color); padding: 32px 20px;
-            display: flex; flex-direction: column; position: fixed;
-            top: 0; left: 0; bottom: 0; width: var(--sidebar-width);
-            z-index: 1001; transition: var(--trans-smooth); box-shadow: var(--shadow-soft);
-        }
+        .app-sidebar { grid-area: sidebar; background: var(--bg-glass-solid); border-right: 1px solid var(--border-color); padding: 32px 20px; display: flex; flex-direction: column; position: fixed; top: 0; left: 0; bottom: 0; width: var(--sidebar-width); z-index: 1001; transition: var(--trans-smooth); box-shadow: var(--shadow-soft); }
         .brand { display: flex; align-items: center; gap: 12px; margin-bottom: 40px; padding: 0 12px; cursor: pointer; }
         .brand-logo { width: 36px; height: 36px; background: var(--primary); color: white; border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 18px; }
         .brand-name { font-size: 20px; font-weight: 800; color: var(--text-main); letter-spacing: -0.5px; }
         #app-layout.sidebar-collapsed .brand-name { display: none; }
-
         .sidebar-menu { display: flex; flex-direction: column; gap: 6px; flex: 1; }
-        .menu-item {
-            display: flex; align-items: center; gap: 16px; padding: 14px 16px;
-            border-radius: var(--radius-md); color: var(--text-muted); font-weight: 600;
-            cursor: pointer; transition: var(--trans-smooth); position: relative; overflow: hidden;
-        }
+        .menu-item { display: flex; align-items: center; gap: 16px; padding: 14px 16px; border-radius: var(--radius-md); color: var(--text-muted); font-weight: 600; cursor: pointer; transition: var(--trans-smooth); position: relative; overflow: hidden; }
         .menu-item:hover { background: var(--primary-state); color: var(--primary); }
         .menu-item.active { background: var(--primary); color: white; box-shadow: var(--shadow-float); }
         .menu-item .menu-text { white-space: nowrap; transition: opacity 0.3s; }
         #app-layout.sidebar-collapsed .menu-text { opacity: 0; width: 0; display: none; }
-
-        .sidebar-profile {
-            margin-top: auto; padding: 16px; background: var(--bg-body);
-            border-radius: var(--radius-lg); display: flex; align-items: center; gap: 12px;
-            border: 1px solid var(--border-color); cursor: pointer; transition: var(--trans-smooth);
-        }
+        .sidebar-profile { margin-top: auto; padding: 16px; background: var(--bg-body); border-radius: var(--radius-lg); display: flex; align-items: center; gap: 12px; border: 1px solid var(--border-color); cursor: pointer; transition: var(--trans-smooth); }
         .sidebar-profile:hover { border-color: var(--primary); }
         .sidebar-profile-info { display: flex; flex-direction: column; overflow: hidden; }
         .sp-name { font-weight: 700; font-size: 0.95rem; white-space: nowrap; }
@@ -227,71 +127,43 @@
         #app-layout.sidebar-collapsed .sidebar-profile { padding: 8px; justify-content: center; }
         #app-layout.sidebar-collapsed .sidebar-profile-info { display: none; }
 
-        /* CONTENT */
+        /* CONTENT & FOOTER */
         .app-content { grid-area: content; padding: 32px; min-height: calc(100vh - var(--header-height) - 70px); position: relative; }
         .view-container { animation: fadeScale 0.4s cubic-bezier(0.25, 1, 0.5, 1); }
-
-        /* FOOTER */
-        .app-footer {
-            grid-area: footer; padding: 24px 32px; background: transparent;
-            display: flex; justify-content: space-between; align-items: center;
-            border-top: 1px solid var(--border-color); color: var(--text-muted); font-size: 0.85rem; font-weight: 500;
-        }
+        .app-footer { grid-area: footer; padding: 24px 32px; background: transparent; display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--border-color); color: var(--text-muted); font-size: 0.85rem; font-weight: 500; }
         .status-indicator { display: flex; align-items: center; gap: 8px; }
         .status-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--secondary); box-shadow: 0 0 10px var(--secondary); }
         .status-dot.offline { background: var(--danger); box-shadow: 0 0 10px var(--danger); }
-
         .bottom-nav { display: none; }
 
-        /* ==========================================================================
-           5. PREMIUM UI COMPONENTS (CARDS, BUTTONS, FORMS)
-           ========================================================================== */
-        .glass-card {
-            background: var(--bg-glass-solid); border: 1px solid var(--border-glass);
-            border-radius: var(--radius-xl); padding: 24px; box-shadow: var(--shadow-soft);
-            transition: var(--trans-smooth); margin-bottom: 24px; position: relative;
-        }
+        /* COMPONENTS */
+        .glass-card { background: var(--bg-glass-solid); border: 1px solid var(--border-glass); border-radius: var(--radius-xl); padding: 24px; box-shadow: var(--shadow-soft); transition: var(--trans-smooth); margin-bottom: 24px; position: relative; }
         .glass-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-float); }
-
-        .btn {
-            padding: 12px 24px; border-radius: var(--radius-round); font-weight: 700; font-size: 0.95rem;
-            cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 8px;
-            transition: var(--trans-smooth); position: relative; overflow: hidden; border: none;
-        }
+        .btn { padding: 12px 24px; border-radius: var(--radius-round); font-weight: 700; font-size: 0.95rem; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 8px; transition: var(--trans-smooth); position: relative; overflow: hidden; border: none; }
         .btn-primary { background: var(--primary); color: white; box-shadow: var(--shadow-float); }
         .btn-primary:hover { background: #3208e6; transform: translateY(-2px); }
         .btn-secondary { background: var(--primary-state); color: var(--primary); }
         .btn-secondary:hover { background: rgba(67, 24, 255, 0.15); }
         .btn-full { width: 100%; }
-
         .form-group { position: relative; margin-bottom: 24px; text-align: left; }
-        .form-input {
-            width: 100%; padding: 16px; padding-top: 24px; background: var(--bg-body);
-            border: 1px solid var(--border-color); border-radius: var(--radius-md);
-            color: var(--text-main); font-size: 1rem; transition: var(--trans-smooth);
-        }
+        .form-input { width: 100%; padding: 16px; padding-top: 24px; background: var(--bg-body); border: 1px solid var(--border-color); border-radius: var(--radius-md); color: var(--text-main); font-size: 1rem; transition: var(--trans-smooth); }
         .form-input:focus { border-color: var(--primary); background: var(--bg-glass-solid); box-shadow: 0 0 0 4px var(--primary-state); }
         .form-label { position: absolute; left: 16px; top: 50%; transform: translateY(-50%); color: var(--text-muted); pointer-events: none; transition: var(--trans-smooth); font-weight: 500; }
         .form-input:focus ~ .form-label, .form-input:not(:placeholder-shown) ~ .form-label { top: 12px; font-size: 0.75rem; color: var(--primary); font-weight: 700; }
-
+        
         .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(11, 20, 55, 0.4); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); z-index: 3000; display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: var(--trans-smooth); }
         .modal-overlay.active { opacity: 1; pointer-events: auto; }
         .modal-content { background: var(--bg-glass-solid); width: 90%; max-width: 500px; border-radius: var(--radius-xl); padding: 32px; box-shadow: var(--shadow-soft); transform: scale(0.9) translateY(20px); transition: var(--trans-smooth); }
         .modal-overlay.active .modal-content { transform: scale(1) translateY(0); }
-
         .toast-container { position: fixed; top: 24px; right: 24px; z-index: 4000; display: flex; flex-direction: column; gap: 12px; }
         .toast { background: var(--bg-glass-solid); border-left: 6px solid var(--primary); box-shadow: var(--shadow-soft); padding: 16px 24px; border-radius: var(--radius-md); display: flex; align-items: center; gap: 12px; font-weight: 600; animation: slideInRight 0.4s cubic-bezier(0.25, 1, 0.5, 1); }
-
         .ripple { position: absolute; background: rgba(255,255,255,0.4); border-radius: 50%; transform: scale(0); animation: rippleAnim 0.6s linear; pointer-events: none; }
 
-        /* ==========================================================================
-           6. MODULES (FEED, CHAT, PROFILE, GROUPS)
-           ========================================================================== */
+        /* MODULES */
         .composer-box { display: flex; gap: 16px; margin-bottom: 32px; }
         .composer-input-area { flex: 1; background: var(--bg-body); border-radius: var(--radius-lg); padding: 16px; border: 1px solid var(--border-color); }
         .composer-textarea { width: 100%; min-height: 80px; resize: none; background: transparent; font-size: 1rem; color: var(--text-main); }
         .composer-actions { display: flex; justify-content: space-between; align-items: center; margin-top: 12px; border-top: 1px solid var(--border-color); padding-top: 12px; }
-
         .post-card { padding: 24px; }
         .post-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
         .post-author { display: flex; align-items: center; gap: 12px; }
@@ -299,7 +171,6 @@
         .post-meta h4 { font-weight: 700; font-size: 1.05rem; }
         .post-meta span { font-size: 0.85rem; color: var(--text-muted); }
         .post-content { font-size: 1rem; line-height: 1.6; margin-bottom: 16px; }
-        .post-image { width: 100%; max-height: 400px; object-fit: cover; border-radius: var(--radius-md); margin-bottom: 16px; }
         .post-actions { display: flex; border-top: 1px solid var(--border-color); padding-top: 16px; gap: 8px; }
         .action-btn { flex: 1; display: flex; align-items: center; justify-content: center; gap: 8px; padding: 10px; border-radius: var(--radius-md); color: var(--text-muted); font-weight: 600; cursor: pointer; transition: var(--trans-smooth); }
         .action-btn:hover { background: var(--bg-body); color: var(--primary); }
@@ -331,10 +202,6 @@
 
         .skeleton { background: linear-gradient(90deg, var(--bg-body) 25%, var(--border-color) 50%, var(--bg-body) 75%); background-size: 200% 100%; animation: skeletonLoading 1.5s infinite; border-radius: 8px; }
         @keyframes skeletonLoading { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
-
-        /* ==========================================================================
-           7. ANIMATIONS
-           ========================================================================== */
         @keyframes slideUpFade { from { opacity: 0; transform: translateY(40px); } to { opacity: 1; transform: translateY(0); } }
         @keyframes fadeScale { from { opacity: 0; transform: scale(0.98); } to { opacity: 1; transform: scale(1); } }
         @keyframes slideInRight { from { opacity: 0; transform: translateX(50px); } to { opacity: 1; transform: translateX(0); } }
@@ -344,45 +211,73 @@
            8. RESPONSIVE DESIGN (MOBILE FIXES)
            ========================================================================== */
         @media (max-width: 768px) {
-            #app-layout { grid-template-areas: "header" "content"; grid-template-columns: 1fr; grid-template-rows: 70px 1fr; }
-            
-            /* Sidebar jadi Drawer */
-            .app-sidebar {
-                display: flex; transform: translateX(-100%); width: 280px; z-index: 1002;
+            #app-layout { 
+                grid-template-areas: "header" "content" "footer"; 
+                grid-template-columns: 1fr; 
+                grid-template-rows: 70px 1fr auto; 
             }
+            
+            .app-sidebar { 
+                display: flex; transform: translateX(-100%); 
+                width: 280px; z-index: 2005; 
+            }
+            .mobile-overlay { z-index: 2000; }
+            
             #app-layout.sidebar-mobile-open .app-sidebar { transform: translateX(0); }
-            #app-layout.sidebar-mobile-open .brand-name,
-            #app-layout.sidebar-mobile-open .menu-text,
-            #app-layout.sidebar-mobile-open .sidebar-profile-info { display: block; opacity: 1; width: auto; }
-
-            .app-header { padding: 0 16px; }
+            #app-layout.sidebar-mobile-open .brand-name, 
+            #app-layout.sidebar-mobile-open .menu-text, 
+            #app-layout.sidebar-mobile-open .sidebar-profile-info { 
+                display: block; opacity: 1; width: auto; 
+            }
+            
+            .app-header { padding: 0 16px; z-index: 1000; }
             .search-box, .clock-widget { display: none; }
-            .app-content { padding: 16px; padding-bottom: calc(var(--bottom-nav-height) + 32px); }
-            .app-footer { padding-bottom: calc(var(--bottom-nav-height) + 24px); flex-direction: column; gap: 12px; text-align: center; }
+            
+            .app-content { 
+                padding: 16px; 
+                padding-bottom: calc(var(--bottom-nav-height) + 32px); 
+            }
+            .app-footer { 
+                padding: 24px 16px; 
+                padding-bottom: calc(var(--bottom-nav-height) + 40px); 
+                flex-direction: column; gap: 12px; text-align: center; 
+            }
             
             .glass-card { padding: 16px; }
             .composer-box { flex-direction: column; }
-            .post-image { max-height: 250px; }
+            .composer-actions { flex-direction: column; align-items: stretch; gap: 16px; }
+            .composer-actions > div { justify-content: center; }
             
-            .profile-cover { height: 150px; margin-bottom: -50px; }
-            .profile-avatar-large { width: 100px; height: 100px; }
-            .profile-stats { gap: 16px; flex-wrap: wrap; }
-
-            /* Chat Mobile Layout */
+            .post-actions { flex-wrap: wrap; gap: 4px; }
+            .action-btn { font-size: 0.85rem; padding: 8px 4px; }
+            
+            .profile-cover { height: 120px; margin-bottom: -40px; }
+            .profile-avatar-large { width: 90px; height: 90px; border-width: 3px; }
+            .profile-stats { gap: 12px; flex-wrap: wrap; }
+            
             .chat-layout { display: flex; flex-direction: column; height: calc(100vh - 180px); }
-            .chat-sidebar { display: flex; max-height: 180px; flex-shrink: 0; }
-            .chat-main { flex: 1; min-height: 300px; }
-
-            /* Bottom Nav */
-            .bottom-nav {
-                display: flex; position: fixed; bottom: 0; left: 0; right: 0; height: var(--bottom-nav-height);
-                background: var(--bg-glass); backdrop-filter: blur(var(--blur-lg)); -webkit-backdrop-filter: blur(var(--blur-lg));
-                border-top: 1px solid var(--border-color); z-index: 1000; padding-bottom: env(safe-area-inset-bottom);
-                box-shadow: 0 -10px 30px rgba(0,0,0,0.05); justify-content: space-around; align-items: center;
+            .chat-sidebar { display: flex; flex-direction: column; max-height: 160px; flex-shrink: 0; }
+            .contact-list { overflow-y: auto; }
+            .chat-main { flex: 1; min-height: 350px; }
+            
+            .bottom-nav { 
+                display: flex; position: fixed; bottom: 0; left: 0; right: 0; 
+                height: var(--bottom-nav-height); 
+                background: var(--bg-glass); backdrop-filter: blur(var(--blur-lg)); 
+                -webkit-backdrop-filter: blur(var(--blur-lg)); 
+                border-top: 1px solid var(--border-color); z-index: 1500; 
+                padding-bottom: env(safe-area-inset-bottom); 
+                box-shadow: 0 -10px 30px rgba(0,0,0,0.05); 
+                justify-content: space-around; align-items: center; 
             }
-            .bn-item { display: flex; flex-direction: column; align-items: center; gap: 4px; color: var(--text-muted); padding: 8px 0; flex: 1; position: relative; }
+            .bn-item { 
+                display: flex; flex-direction: column; align-items: center; gap: 4px; 
+                color: var(--text-muted); padding: 8px 0; flex: 1; position: relative; 
+            }
             .bn-item.active { color: var(--primary); font-weight: 700; }
-            .bn-item.active .material-symbols-outlined { background: var(--primary-state); padding: 4px 16px; border-radius: var(--radius-xl); }
+            .bn-item.active .material-symbols-outlined { 
+                background: var(--primary-state); padding: 4px 16px; border-radius: var(--radius-xl); 
+            }
         }
     </style>
 </head>
@@ -396,7 +291,7 @@
             <p style="color: var(--text-muted); margin-bottom: 32px; font-size: 0.95rem;">Masuk untuk terhubung dengan koneksi profesional Anda.</p>
             <form onsubmit="App.Auth.login(event)">
                 <div class="form-group">
-                    <input type="email" class="form-input" id="login-email" placeholder=" " required value="demo@nexsocial.id">
+                    <input type="email" class="form-input" id="login-email" placeholder=" " required value="adnan@nexsocial.id">
                     <label class="form-label">Email / Username</label>
                 </div>
                 <div class="form-group">
@@ -454,7 +349,7 @@
                 <button class="icon-btn ripple-btn" id="btn-theme" title="Ubah Tema"><span class="material-symbols-outlined">dark_mode</span></button>
                 <button class="icon-btn ripple-btn" id="btn-fullscreen" title="Layar Penuh"><span class="material-symbols-outlined">fullscreen</span></button>
                 <button class="icon-btn ripple-btn" title="Notifikasi"><span class="material-symbols-outlined">notifications</span><span class="badge"></span></button>
-                <img src="https://i.pravatar.cc/150?img=68" alt="Profile" class="user-avatar" onclick="App.Router.navigate('profil')">
+                <img src="https://i.pravatar.cc/150?img=12" alt="Profile" class="user-avatar" onclick="App.Router.navigate('profil')">
             </div>
         </header>
 
@@ -465,10 +360,10 @@
             </div>
             <ul class="sidebar-menu" id="sidebar-menu-list"></ul>
             <div class="sidebar-profile" onclick="App.Router.navigate('profil')">
-                <img src="https://i.pravatar.cc/150?img=68" alt="User" class="user-avatar" style="border:none;">
+                <img src="https://i.pravatar.cc/150?img=12" alt="User" class="user-avatar" style="border:none;">
                 <div class="sidebar-profile-info">
-                    <span class="sp-name">Reza Rahadian</span>
-                    <span class="sp-role">Senior UI/UX Designer</span>
+                    <span class="sp-name">Adnan</span>
+                    <span class="sp-role">Technical Operations Manager</span>
                 </div>
             </div>
         </aside>
@@ -478,8 +373,8 @@
         <footer class="app-footer">
             <div>&copy; <span id="footer-year">2026</span> <strong>NexSocial</strong>. All Rights Reserved.</div>
             <div style="display: flex; gap: 24px; align-items: center;">
-                <span>Powered by HTML, CSS & Vanilla JS</span>
-                <span>v2.5.0</span>
+                <span>Powered by HTML, CSS, Vanilla JS & Supabase</span>
+                <span>v3.1.0</span>
                 <div class="status-indicator"><div class="status-dot" id="network-dot"></div><span id="network-text">Online</span></div>
             </div>
         </footer>
@@ -501,9 +396,19 @@
     <div class="toast-container" id="toast-container"></div>
 
     <script>
+        // ==========================================================================
+        // KONFIGURASI SUPABASE (MASUKKAN URL & KEY ANDA DI SINI)
+        // ==========================================================================
+        const SUPABASE_URL = 'URL_SUPABASE_ANDA_DISINI';
+        const SUPABASE_KEY = 'KEY_SUPABASE_ANDA_DISINI';
+        
+        let supabaseClient = null;
+        if(SUPABASE_URL !== 'URL_SUPABASE_ANDA_DISINI') {
+            supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        }
+
         const App = {
             init() {
-                this.Storage.init();
                 this.Theme.init();
                 this.Clock.start();
                 this.Network.listen();
@@ -516,19 +421,6 @@
                 } else {
                     document.getElementById('auth-layout').style.display = 'flex';
                 }
-            },
-
-            Storage: {
-                init() {
-                    if(!localStorage.getItem('ns_posts')) {
-                        localStorage.setItem('ns_posts', JSON.stringify([
-                            { id: 1, author: 'Budi Santoso', role: 'Software Architect', avatar: 'https://i.pravatar.cc/150?img=11', time: '2 jam yang lalu', content: 'Baru saja menyelesaikan refactoring arsitektur microservices untuk project terbaru. Performa naik 40%! 🚀', image: 'https://images.unsplash.com/photo-1555066931-4365d14bab8c?auto=format&fit=crop&w=800&q=80', likes: 124, comments: 18, liked: false },
-                            { id: 2, author: 'Siska Amelia', role: 'Product Manager', avatar: 'https://i.pravatar.cc/150?img=5', time: '5 jam yang lalu', content: 'Fokus kita selanjutnya adalah meningkatkan retensi user dengan desain antarmuka yang lebih responsif.', image: null, likes: 89, comments: 24, liked: true }
-                        ]));
-                    }
-                },
-                getPosts() { return JSON.parse(localStorage.getItem('ns_posts')) || []; },
-                savePosts(posts) { localStorage.setItem('ns_posts', JSON.stringify(posts)); }
             },
 
             Auth: {
@@ -593,7 +485,7 @@
                     { id: 'feed', label: 'News Feed', icon: 'home', mobile: true },
                     { id: 'explore', label: 'Eksplor', icon: 'explore', mobile: true },
                     { id: 'chat', label: 'Pesan', icon: 'chat', mobile: true },
-                    { id: 'groups', label: 'Komunitas', icon: 'groups', mobile: true }, /* Diganti true agar muncul di HP */
+                    { id: 'groups', label: 'Komunitas', icon: 'groups', mobile: true },
                     { id: 'settings', label: 'Pengaturan', icon: 'settings', mobile: false }
                 ],
                 render() {
@@ -615,9 +507,9 @@
                 feed() {
                     return `
                         <div class="glass-card composer-box">
-                            <img src="https://i.pravatar.cc/150?img=68" class="user-avatar" style="width:48px;height:48px;" alt="Me">
+                            <img src="https://i.pravatar.cc/150?img=12" class="user-avatar" style="width:48px;height:48px;" alt="Me">
                             <div class="composer-input-area">
-                                <textarea class="composer-textarea" id="composer-text" placeholder="Apa yang sedang Anda pikirkan?"></textarea>
+                                <textarea class="composer-textarea" id="composer-text" placeholder="Apa yang sedang Anda pikirkan, Adnan?"></textarea>
                                 <div class="composer-actions">
                                     <div style="display:flex; gap:12px;">
                                         <button class="icon-btn" style="color:var(--secondary)"><span class="material-symbols-outlined">image</span></button>
@@ -637,7 +529,7 @@
                             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 16px;">
                                 <div style="height: 200px; border-radius: var(--radius-md); background: url('https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=600&q=80') center/cover; position: relative;">
                                     <div style="position: absolute; bottom:0; left:0; right:0; padding: 16px; background: linear-gradient(transparent, rgba(0,0,0,0.8)); border-bottom-left-radius: var(--radius-md); border-bottom-right-radius: var(--radius-md); color: white;">
-                                        <h3 style="font-size: 1rem; color:white;">#TechConf2026</h3><p style="font-size: 0.8rem; color: #ddd;">12.5k Postingan</p>
+                                        <h3 style="font-size: 1rem; color:white;">#FacilityManagement2026</h3><p style="font-size: 0.8rem; color: #ddd;">12.5k Postingan</p>
                                     </div>
                                 </div>
                             </div>
@@ -652,17 +544,17 @@
                                 <div class="contact-list">
                                     <div class="contact-item active">
                                         <img src="https://i.pravatar.cc/150?img=5" class="user-avatar" style="width:40px;height:40px;border:none;">
-                                        <div style="overflow:hidden;"><div style="font-weight:700; font-size:0.95rem;">Siska Amelia</div><div style="font-size:0.8rem; color:var(--text-muted);">Nanti kabari ya.</div></div>
+                                        <div style="overflow:hidden;"><div style="font-weight:700; font-size:0.95rem;">Tim Maintenance HQ</div><div style="font-size:0.8rem; color:var(--text-muted); text-overflow: ellipsis; white-space: nowrap;">Genset lokasi 4 sudah aman.</div></div>
                                     </div>
                                 </div>
                             </div>
                             <div class="chat-main">
                                 <div class="chat-header" style="display:flex; align-items:center; gap:12px;">
-                                    <img src="https://i.pravatar.cc/150?img=5" class="user-avatar" style="width:36px;height:36px;border:none;"> Siska Amelia
+                                    <img src="https://i.pravatar.cc/150?img=5" class="user-avatar" style="width:36px;height:36px;border:none;"> Tim Maintenance HQ
                                 </div>
                                 <div class="chat-messages" id="chat-messages-container">
-                                    <div class="bubble in">Halo Reza, progres UI sampai mana?</div>
-                                    <div class="bubble out">Halo Siska, sudah 80%. Saya sedang menyesuaikan komponen mobile.</div>
+                                    <div class="bubble in">Halo Pak Adnan, update untuk maintenance genset cabang 4 sudah selesai.</div>
+                                    <div class="bubble out">Terima kasih updatenya. Tolong log di spreadsheet seperti biasa ya.</div>
                                 </div>
                                 <div class="chat-input-area">
                                     <input type="text" class="form-input" style="padding: 12px; border-radius:20px; flex:1;" placeholder="Tulis pesan..." id="chat-input-msg" onkeypress="if(event.key==='Enter') App.Features.sendChat()">
@@ -676,19 +568,19 @@
                     return `
                         <div class="glass-card">
                             <h2 style="margin-bottom: 24px;">Komunitas Anda</h2>
-                            <div class="group-card" onclick="App.Modal.open('Frontend Dev ID', 'Bergabung ke ruang obrolan komunitas ini?')">
-                                <img src="https://images.unsplash.com/photo-1555066931-4365d14bab8c?auto=format&fit=crop&w=200&q=80" class="group-icon">
+                            <div class="group-card" onclick="App.Modal.open('Regional Touring Squad', 'Bergabung ke ruang obrolan komunitas ini?')">
+                                <img src="https://images.unsplash.com/photo-1558981403-c5f9899a28bc?auto=format&fit=crop&w=200&q=80" class="group-icon">
                                 <div>
-                                    <h3 style="font-size:1.1rem;">Frontend Developer Indonesia</h3>
-                                    <p style="color:var(--text-muted); font-size:0.9rem;">12.4K Anggota • 42 online</p>
+                                    <h3 style="font-size:1.1rem;">Regional Touring Squad</h3>
+                                    <p style="color:var(--text-muted); font-size:0.9rem;">2.1K Anggota • 42 online</p>
                                 </div>
                                 <span class="material-symbols-outlined" style="margin-left:auto; color:var(--text-muted);">chevron_right</span>
                             </div>
-                            <div class="group-card" onclick="App.Modal.open('UI/UX Designer', 'Bergabung ke ruang obrolan komunitas ini?')">
-                                <img src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=200&q=80" class="group-icon">
+                            <div class="group-card" onclick="App.Modal.open('AI Video Creators', 'Bergabung ke ruang obrolan komunitas ini?')">
+                                <img src="https://images.unsplash.com/photo-1620712943543-bcc4688e7485?auto=format&fit=crop&w=200&q=80" class="group-icon">
                                 <div>
-                                    <h3 style="font-size:1.1rem;">UI/UX Nusantara</h3>
-                                    <p style="color:var(--text-muted); font-size:0.9rem;">8.2K Anggota • 15 online</p>
+                                    <h3 style="font-size:1.1rem;">AI Video & Content Creators</h3>
+                                    <p style="color:var(--text-muted); font-size:0.9rem;">8.2K Anggota • 150 online</p>
                                 </div>
                                 <span class="material-symbols-outlined" style="margin-left:auto; color:var(--text-muted);">chevron_right</span>
                             </div>
@@ -699,13 +591,13 @@
                     return `
                         <div class="glass-card profile-info-card" style="padding:0; overflow:hidden;">
                             <div class="profile-cover"></div>
-                            <img src="https://i.pravatar.cc/150?img=68" class="profile-avatar-large" alt="Profile">
-                            <h2 style="font-size: 1.8rem; font-weight: 800; margin-bottom: 4px;">Reza Rahadian</h2>
-                            <p style="color: var(--primary); font-weight: 600; margin-bottom: 12px;">Senior UI/UX Designer</p>
+                            <img src="https://i.pravatar.cc/150?img=12" class="profile-avatar-large" alt="Profile">
+                            <h2 style="font-size: 1.8rem; font-weight: 800; margin-bottom: 4px;">Adnan</h2>
+                            <p style="color: var(--primary); font-weight: 600; margin-bottom: 12px;">Technical Operations Manager & Content Creator</p>
                             <div class="profile-stats">
-                                <div class="stat-item"><span class="stat-val">245</span><span class="stat-lbl">Koneksi</span></div>
-                                <div class="stat-item"><span class="stat-val">1.2K</span><span class="stat-lbl">Pengikut</span></div>
-                                <div class="stat-item"><span class="stat-val">48</span><span class="stat-lbl">Postingan</span></div>
+                                <div class="stat-item"><span class="stat-val">312</span><span class="stat-lbl">Koneksi</span></div>
+                                <div class="stat-item"><span class="stat-val">2.5K</span><span class="stat-lbl">Pengikut</span></div>
+                                <div class="stat-item"><span class="stat-val">84</span><span class="stat-lbl">Postingan</span></div>
                             </div>
                             <div style="padding: 24px; display:flex; justify-content:center; gap:16px;">
                                 <button class="btn btn-primary ripple-btn" onclick="App.Router.navigate('settings')">Edit Profil</button>
@@ -718,7 +610,7 @@
                         <div class="glass-card" style="max-width: 600px;">
                             <h2 style="margin-bottom: 24px;">Pengaturan Akun</h2>
                             <div class="form-group">
-                                <input type="text" class="form-input" placeholder=" " value="Reza Rahadian">
+                                <input type="text" class="form-input" placeholder=" " value="Adnan">
                                 <label class="form-label">Nama Tampilan</label>
                             </div>
                             <div class="form-group" style="display:flex; justify-content:space-between; align-items:center; padding: 16px; border:1px solid var(--border-color); border-radius:var(--radius-md);">
@@ -745,47 +637,103 @@
             },
 
             Features: {
-                renderPosts() {
+                async renderPosts() {
                     const stream = document.getElementById('feed-stream');
                     if(!stream) return;
-                    const posts = App.Storage.getPosts();
-                    stream.innerHTML = posts.map(p => `
-                        <div class="glass-card post-card">
-                            <div class="post-header">
-                                <div class="post-author">
-                                    <img src="${p.avatar}" class="post-avatar">
-                                    <div class="post-meta"><h4 style="color:var(--text-main);">${p.author}</h4><span>${p.role} &bull; ${p.time}</span></div>
+
+                    if(!supabaseClient) {
+                        stream.innerHTML = `<div class="glass-card" style="text-align:center; color:var(--danger); font-weight:bold; padding:32px 16px;">Silakan isi URL dan Key Supabase Anda di bagian atas script ganti variabel 'SUPABASE_URL' dan 'SUPABASE_KEY' untuk menampilkan data terintegrasi.</div>`;
+                        return;
+                    }
+
+                    stream.innerHTML = '<div class="glass-card"><div class="skeleton" style="height: 100px;"></div></div>';
+
+                    try {
+                        const { data: posts, error } = await supabaseClient
+                            .from('posts')
+                            .select('*')
+                            .order('created_at', { ascending: false });
+
+                        if (error) throw error;
+
+                        if (posts.length === 0) {
+                            stream.innerHTML = `<div class="glass-card" style="text-align:center; color:var(--text-muted); padding:32px 16px;">Belum ada postingan di database. Mulai buat postingan pertama Anda!</div>`;
+                            return;
+                        }
+
+                        stream.innerHTML = posts.map(p => `
+                            <div class="glass-card post-card">
+                                <div class="post-header">
+                                    <div class="post-author">
+                                        <img src="${p.avatar || 'https://i.pravatar.cc/150?img=12'}" class="post-avatar">
+                                        <div class="post-meta"><h4 style="color:var(--text-main);">${p.author}</h4><span>${p.role || ''}</span></div>
+                                    </div>
                                 </div>
-                                <button class="icon-btn"><span class="material-symbols-outlined">more_horiz</span></button>
+                                <div class="post-content" style="white-space: pre-wrap;">${p.content}</div>
+                                ${p.image ? `<img src="${p.image}" class="post-image">` : ''}
+                                <div class="post-actions">
+                                    <div class="action-btn ripple-btn" onclick="App.Features.toggleLike(${p.id}, ${p.likes})">
+                                        <span class="material-symbols-outlined">favorite</span> ${p.likes || 0} Suka
+                                    </div>
+                                    <div class="action-btn ripple-btn" onclick="App.Modal.open('Komentar', 'Fitur komentar akan segera hadir.')">
+                                        <span class="material-symbols-outlined">chat_bubble</span> Komentar
+                                    </div>
+                                </div>
                             </div>
-                            <div class="post-content">${p.content}</div>
-                            ${p.image ? `<img src="${p.image}" class="post-image">` : ''}
-                            <div class="post-actions">
-                                <div class="action-btn ripple-btn ${p.liked?'active':''}" onclick="App.Features.toggleLike(${p.id})">
-                                    <span class="material-symbols-outlined" style="${p.liked?"font-variation-settings:'FILL' 1;":""}">favorite</span> ${p.likes} Suka
-                                </div>
-                                <div class="action-btn ripple-btn" onclick="App.Modal.open('Komentar', 'Fitur komentar akan segera hadir.')">
-                                    <span class="material-symbols-outlined">chat_bubble</span> ${p.comments} Komentar
-                                </div>
-                            </div>
-                        </div>
-                    `).join('');
+                        `).join('');
+                    } catch (err) {
+                        console.error(err);
+                        stream.innerHTML = `<div class="glass-card" style="color:var(--danger); padding:20px;">Gagal memuat data dari database Supabase. Pastikan setup SQL Editor Anda sudah selesai dijalankan dengan benar tanpa error.</div>`;
+                    }
                 },
-                createPost() {
+
+                async createPost() {
                     const txt = document.getElementById('composer-text');
                     if(!txt.value.trim()) return App.Toast.show("Kiriman kosong.", "warning");
-                    const posts = App.Storage.getPosts();
-                    posts.unshift({
-                        id: Date.now(), author: 'Reza Rahadian', role: 'UI/UX Designer', avatar: 'https://i.pravatar.cc/150?img=68',
-                        time: 'Baru saja', content: txt.value, image: null, likes: 0, comments: 0, liked: false
-                    });
-                    App.Storage.savePosts(posts); txt.value = ''; this.renderPosts(); App.Toast.show("Berhasil diposting.", "success");
+                    if(!supabaseClient) return App.Toast.show("Supabase belum dikonfigurasi.", "danger");
+
+                    const btn = document.querySelector('.composer-actions .btn-primary');
+                    App.UI.showLoadingBtn(btn);
+
+                    try {
+                        const { error } = await supabaseClient
+                            .from('posts')
+                            .insert([
+                                { 
+                                    author: 'Adnan', 
+                                    role: 'Technical Operations Manager', 
+                                    avatar: 'https://i.pravatar.cc/150?img=12', 
+                                    content: txt.value,
+                                    likes: 0
+                                }
+                            ]);
+
+                        if (error) throw error;
+
+                        txt.value = ''; 
+                        App.Toast.show("Berhasil diposting.", "success");
+                        this.renderPosts();
+                    } catch (err) {
+                        console.error(err);
+                        App.Toast.show("Gagal memposting ke cloud.", "danger");
+                    }
                 },
-                toggleLike(id) {
-                    const posts = App.Storage.getPosts();
-                    const p = posts.find(x => x.id === id);
-                    if(p) { p.liked ? (p.likes--, p.liked = false) : (p.likes++, p.liked = true); App.Storage.savePosts(posts); this.renderPosts(); }
+
+                async toggleLike(id, currentLikes) {
+                    if(!supabaseClient) return;
+                    try {
+                        const newLikes = (currentLikes || 0) + 1;
+                        const { error } = await supabaseClient
+                            .from('posts')
+                            .update({ likes: newLikes })
+                            .eq('id', id);
+
+                        if(!error) this.renderPosts();
+                    } catch(err) {
+                        console.error(err);
+                    }
                 },
+
                 sendChat() {
                     const i = document.getElementById('chat-input-msg');
                     if(!i.value.trim()) return;
