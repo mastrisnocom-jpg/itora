@@ -10,9 +10,8 @@ let liveNotifications = [
 let activeChatFriendEmail = null;
 let activeChatFriendName = null;
 
-// Mengubah tipe penampung berkas dari string Base64 ke Object File asli / mentah
-let composerAttachedImageFile = null;
-let composerAttachedCustomFile = null;
+let composerAttachedImageBase64 = null;
+let composerAttachedFileBase64 = null;
 let composerAttachedFileName = "Dokumen.bin";
 
 let unreadMessageCounters = {}; 
@@ -21,32 +20,6 @@ let headerSearchFilterQueryString = "";
 
 const EMOJI_LIST = ['😊', '😂', '🔥', '👍', '🙌', '💯', '❤️', '👏', '🎉', '😮', '😢', '🙏'];
 
-// Helper Global untuk proses unggah data biner ke Supabase Storage (posts-bucket)
-async function uploadFileToSupabaseStorage(folderPath, fileObject) {
-    if (!fileObject) return null;
-    
-    const fileExtension = fileObject.name.split('.').pop();
-    const uniqueFileName = `${folderPath}/${Date.now()}-${Math.random().toString(36).substring(2, 7)}.${fileExtension}`;
-    
-    const { data, error } = await supabaseClient.storage
-        .from('posts-bucket')
-        .upload(uniqueFileName, fileObject, {
-            cacheControl: '3600',
-            upsert: false
-        });
-        
-    if (error) {
-        console.error("Gagal mengunggah berkas ke Storage:", error.message);
-        throw error;
-    }
-    
-    const { data: publicUrlData } = supabaseClient.storage
-        .from('posts-bucket')
-        .getPublicUrl(uniqueFileName);
-        
-    return publicUrlData.publicUrl;
-}
-
 const App = {
     init() {
         this.Theme.init();
@@ -54,9 +27,11 @@ const App = {
         this.Network.listen();
         this.UI.bindGlobalEvents();
         this.Navigation.render();
-        
-        // Memeriksa session terlebih dahulu sebelum mengaktifkan realtime streaming/UI dashboard
         this.Auth.checkCurrentSession();
+        this.Realtime.subscribePosts();
+        
+        App.UI.refreshHeaderNotificationBadgeDOM();
+        App.UI.renderGlobalBannerAdIfExists();
     },
 
     ProfileState: {
@@ -71,7 +46,7 @@ const App = {
             return localStorage.getItem('ns_user_bio_status') || 'Tech Workspace Member';
         },
         getCurrentAvatar() {
-            return localStorage.getItem('ns_user_avatar_url') || 'https://i.pravatar.cc/150?img=12';
+            return localStorage.getItem('ns_user_avatar_base64') || 'https://i.pravatar.cc/150?img=12';
         },
         getLimitConfig() {
             const defaultLimit = { count: 0, month: new Date().getMonth() };
@@ -92,17 +67,14 @@ const App = {
             App.UI.syncGlobalAvatarAndName();
             return { success: true };
         },
-        saveCompressedAvatar(avatarPublicUrl) {
-            localStorage.setItem('ns_user_avatar_url', avatarPublicUrl);
+        saveCompressedAvatar(base64Image) {
+            localStorage.setItem('ns_user_avatar_base64', base64Image);
             App.UI.syncGlobalAvatarAndName();
         }
     },
 
     Realtime: {
         subscribePosts() {
-            // Mencegah error jika supabase belum siap atau crash sewaktu anonim
-            if (!localStorage.getItem('ns_logged_in')) return;
-
             supabaseClient
                 .channel('schema-db-changes')
                 .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'posts' }, async (payload) => {
@@ -201,19 +173,15 @@ const App = {
                     App.UI.syncGlobalAvatarAndName();
                     App.Auth.showApp();
                     App.Router.init();
-                    App.Realtime.subscribePosts();
-                    App.UI.refreshHeaderNotificationBadgeDOM();
-                    App.UI.renderGlobalBannerAdIfExists();
                 } else {
                     localStorage.removeItem('ns_logged_in');
                     localStorage.removeItem('ns_user_email');
                     const authLayout = document.getElementById('auth-layout');
                     if (authLayout) authLayout.style.display = 'flex';
-                    const appLayout = document.getElementById('app-layout');
-                    if (appLayout) appLayout.style.display = 'none';
                 }
             } catch (err) {
                 console.error("Session check error:", err.message);
+                localStorage.clear();
                 const authLayout = document.getElementById('auth-layout');
                 if (authLayout) authLayout.style.display = 'flex';
             }
@@ -256,9 +224,6 @@ const App = {
                 App.UI.syncGlobalAvatarAndName();
                 this.showApp();
                 App.Router.init();
-                App.Realtime.subscribePosts();
-                App.UI.refreshHeaderNotificationBadgeDOM();
-                App.UI.renderGlobalBannerAdIfExists();
                 App.Toast.show("Selamat datang kembali!", "success");
             } catch (error) {
                 console.error("Login error:", error.message);
@@ -309,7 +274,6 @@ const App = {
             setTimeout(() => { 
                 if(auth) auth.style.display = 'none'; 
                 if(app) app.classList.add('active'); 
-                if(app) app.style.display = 'grid'; // Menyinkronkan css grid layout utama
             }, 400);
         }
     },
@@ -350,8 +314,7 @@ const App = {
             { id: 'explore', label: 'Cari Teman', icon: 'person_search', mobile: true, isChatTrigger: false },
             { id: 'chat_trigger', label: 'Pesan', icon: 'chat', mobile: true, isChatTrigger: true }, 
             { id: 'groups', label: 'Komunitas', icon: 'groups', mobile: true, isChatTrigger: false },
-            { id: 'profil', label: 'Profil Saya', icon: 'account_circle', mobile: true, isChatTrigger: false },
-            { id: 'settings', label: 'Pengaturan', icon: 'settings', mobile: true, isChatTrigger: false }
+            { id: 'settings', label: 'Pengaturan', icon: 'settings', mobile: false, isChatTrigger: false }
         ],
         render() {
             const side = document.getElementById('sidebar-menu-list');
@@ -447,7 +410,8 @@ const App = {
                         <div class="stat-item"><span class="stat-val">84</span><span class="stat-lbl">Postingan</span></div>
                     </div>
                     <div style="padding: 24px; display:flex; flex-direction:column; gap:12px; max-width:320px; margin:0 auto;">
-                        <button class="btn btn-primary ripple-btn" onclick="App.Router.navigate('settings')">Buka Pengaturan Akun</button>
+                        <button class="btn btn-primary ripple-btn" onclick="App.Router.navigate('settings')">Edit Profil & Nama</button>
+                        <button class="btn btn-secondary ripple-btn" style="color:var(--danger); background:rgba(238,93,80,0.08)" onclick="App.Features.triggerChangePasswordAction()">Ganti Password Akun</button>
                     </div>
                 </div>
                 ${adFormHTML}
@@ -460,10 +424,8 @@ const App = {
             const limitConfig = App.ProfileState.getLimitConfig();
             const remainingEdit = 3 - limitConfig.count;
             return `
-                <div class="glass-card" style="max-width: 600px; margin: 0 auto;">
-                    <h2>Pengaturan Profil & Keamanan</h2>
-                    <p style="color: var(--text-muted); font-size:0.85rem; margin-bottom: 24px;">Modifikasi data identitas digital Anda dalam ekosistem workspace.</p>
-                    
+                <div class="glass-card" style="max-width: 600px;">
+                    <h2>Pengaturan Akun</h2>
                     <div class="avatar-edit-container">
                         <div class="avatar-preview-wrapper">
                             <img src="${currentAvatar}" id="settings-avatar-preview" class="avatar-preview-circle user-avatar-reactive" alt="Preview">
@@ -483,10 +445,7 @@ const App = {
                         <span>Sisa Kuota Perubahan Data:</span>
                         <span class="badge" style="display:inline-block; position:relative; padding: 6px 12px; font-weight: 800; border-radius: 8px; background: ${remainingEdit > 0 ? 'var(--primary)' : 'var(--danger)'}; color: white; border:none;">${remainingEdit} Kali</span>
                     </div>
-                    <div style="display: flex; flex-direction: column; gap: 12px;">
-                        <button class="btn btn-primary ripple-btn" onclick="App.Features.saveNameSettings()">Simpan Perubahan Profil</button>
-                        <button class="btn btn-secondary ripple-btn" style="color:var(--danger); background:rgba(238,93,80,0.08)" onclick="App.Features.triggerChangePasswordAction()">Ganti Password Akun</button>
-                    </div>
+                    <button class="btn btn-primary ripple-btn" onclick="App.Features.saveNameSettings()">Simpan Perubahan Profil</button>
                 </div>
             `;
         }
@@ -496,8 +455,7 @@ const App = {
         feed() { App.Features.renderPosts(); },
         explore() { App.Features.renderExploreUsers(); },
         groups() { App.Features.renderCommunityHubViewportList(); },
-        profil() { App.Features.loadFriendsCount(); },
-        settings() { /* Memuat komponen input statis lokal */ }
+        profil() { App.Features.loadFriendsCount(); }
     },
 
     Features: {
@@ -514,8 +472,8 @@ const App = {
         openComposerModalPopupForm() {
             const currentName = App.ProfileState.getCurrentName();
             
-            composerAttachedImageFile = null;
-            composerAttachedCustomFile = null;
+            composerAttachedImageBase64 = null;
+            composerAttachedFileBase64 = null;
 
             const popupFormHTML = `
                 <div style="text-align:left;">
@@ -565,40 +523,21 @@ const App = {
                     if (width > 1000) { height *= 1000 / width; width = 1000; }
                     canvas.width = width; canvas.height = height;
                     const ctx = canvas.getContext('2d'); ctx.drawImage(img, 0, 0, width, height);
-                    
-                    canvas.toBlob((blob) => {
-                        composerAttachedImageFile = new File([blob], file.name, { type: "image/jpeg" });
-                        const previewArea = document.getElementById('composer-upload-preview-area');
-                        if (previewArea) {
-                            const objectUrl = URL.createObjectURL(composerAttachedImageFile);
-                            previewArea.innerHTML = `<img src="${objectUrl}" style="max-height:120px; border-radius:8px; display:block; border:2px solid var(--primary);">`;
-                            previewArea.querySelector('img').onload = () => URL.revokeObjectURL(objectUrl);
-                        }
-                    }, 'image/jpeg', 0.65);
+                    composerAttachedImageBase64 = canvas.toDataURL('image/jpeg', 0.65);
+                    const previewArea = document.getElementById('composer-upload-preview-area');
+                    if (previewArea) previewArea.innerHTML = `<img src="${composerAttachedImageBase64}" style="max-height:120px; border-radius:8px; display:block; border:2px solid var(--primary);">`;
                 };
             };
         },
         handleComposerFileSelection(event) {
             const file = event.target.files[0]; if (!file) return;
             composerAttachedFileName = file.name;
-            composerAttachedCustomFile = file;
-            
-            const previewArea = document.getElementById('composer-upload-preview-area');
-            if (previewArea) {
-                previewArea.innerHTML = `<div style="background:var(--primary-state); padding:8px 12px; border-radius:8px; display:inline-flex; align-items:center; gap:8px; font-size:0.85rem; font-weight:700;"><span class="material-symbols-outlined">description</span> ${file.name}</div>`;
-            }
-        },
-
-        zoomPostImageModal(imageUrl) {
-            const zoomHTML = `
-                <div style="text-align: center; padding: 10px 0; overflow: hidden;">
-                    <img src="${imageUrl}" style="max-width: 100%; max-height: 70vh; object-fit: contain; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
-                </div>
-            `;
-            App.Modal.open("Pratinjau Gambar", zoomHTML);
-            
-            const okBtn = document.getElementById('modal-ok-btn');
-            if (okBtn) okBtn.style.display = 'none';
+            const reader = new FileReader(); reader.readAsDataURL(file);
+            reader.onload = function (e) {
+                composerAttachedFileBase64 = e.target.result;
+                const previewArea = document.getElementById('composer-upload-preview-area');
+                if (previewArea) previewArea.innerHTML = `<div style="background:var(--primary-state); padding:8px 12px; border-radius:8px; display:inline-flex; align-items:center; gap:8px; font-size:0.85rem; font-weight:700;"><span class="material-symbols-outlined">description</span> ${file.name}</div>`;
+            };
         },
 
         async triggerChangePasswordAction() {
@@ -943,14 +882,12 @@ const App = {
                     const isDislikedActive = dislikedLogs.includes(pId) ? 'disliked' : '';
                     
                     let attachedMediaHTML = ''; let hasImage = false;
-                    // Membaca berkas lampiran berdasarkan URL Supabase Storage
                     if (p.image) {
-                        const isImageFile = p.image.match(/\.(jpeg|jpg|gif|png|webp)/i) || p.image.includes('posts/images');
-                        if (isImageFile) {
-                            attachedMediaHTML = `<img src="${p.image}" class="post-attached-image" alt="Media" style="cursor: zoom-in;" onclick="App.Features.zoomPostImageModal('${p.image}')">`;
+                        if (p.image.startsWith('data:image')) {
+                            attachedMediaHTML = `<img src="${p.image}" class="post-attached-image" alt="Media">`;
                             hasImage = true;
-                        } else {
-                            attachedMediaHTML = `<div class="post-attached-file-box"><span class="material-symbols-outlined" style="color:var(--primary)">download_for_offline</span><a href="${p.image}" target="_blank" download style="color:var(--primary); text-decoration:underline;">Unduh Lampiran Berkas</a></div>`;
+                        } else if (p.image.startsWith('data:application') || p.image.includes('base64')) {
+                            attachedMediaHTML = `<div class="post-attached-file-box"><span class="material-symbols-outlined" style="color:var(--primary)">download_for_offline</span><a href="${p.image}" download="Lampiran.bin" style="color:var(--primary); text-decoration:underline;">Unduh Lampiran</a></div>`;
                         }
                     }
 
@@ -1035,21 +972,15 @@ const App = {
             const txt = document.getElementById('composer-text'); 
             const textValue = txt ? txt.value.trim() : "";
 
-            if(!textValue && !composerAttachedImageFile && !composerAttachedCustomFile) {
+            if(!textValue && !composerAttachedImageBase64 && !composerAttachedFileBase64) {
                 return App.Toast.show("Konten kiriman Anda masih kosong.", "warning");
             }
 
-            App.Toast.show("Memproses berkas ke cloud storage...", "info");
-            let payloadAssetUrl = null;
+            let payloadAsset = null;
+            if(composerAttachedImageBase64) payloadAsset = composerAttachedImageBase64;
+            else if(composerAttachedFileBase64) payloadAsset = composerAttachedFileBase64;
 
             try {
-                // Proses pengunggahan biner asli ke folder spesifik di posts-bucket
-                if (composerAttachedImageFile) {
-                    payloadAssetUrl = await uploadFileToSupabaseStorage('posts/images', composerAttachedImageFile);
-                } else if (composerAttachedCustomFile) {
-                    payloadAssetUrl = await uploadFileToSupabaseStorage('posts/files', composerAttachedCustomFile);
-                }
-
                 const myCurrentName = App.ProfileState.getCurrentName();
                 const myAvatar = App.ProfileState.getCurrentAvatar();
 
@@ -1057,7 +988,7 @@ const App = {
                     author: myCurrentName, 
                     avatar: myAvatar, 
                     content: textValue, 
-                    image: payloadAssetUrl, 
+                    image: payloadAsset, 
                     likes: 0
                 };
 
@@ -1067,8 +998,8 @@ const App = {
 
                 if (error) throw error;
                 
-                composerAttachedImageFile = null; 
-                composerAttachedCustomFile = null;
+                composerAttachedImageBase64 = null; 
+                composerAttachedFileBase64 = null;
                 
                 App.Modal.close();
                 const modalOverlay = document.getElementById('global-modal');
@@ -1205,23 +1136,8 @@ const App = {
                 img.onload = function () {
                     const canvas = document.createElement('canvas'); canvas.width = 150; canvas.height = 150;
                     const ctx = canvas.getContext('2d'); ctx.drawImage(img, 0, 0, 150, 150);
-                    
-                    canvas.toBlob(async (blob) => {
-                        const avatarFile = new File([blob], `avatar-${Date.now()}.jpg`, { type: "image/jpeg" });
-                        App.Toast.show("Memperbarui avatar ke server...", "info");
-                        
-                        try {
-                            const avatarPublicUrl = await uploadFileToSupabaseStorage('avatars', avatarFile);
-                            if(avatarPublicUrl) {
-                                App.ProfileState.saveCompressedAvatar(avatarPublicUrl);
-                                const p = document.getElementById('settings-avatar-preview'); 
-                                if(p) p.src = avatarPublicUrl;
-                                App.Toast.show("Avatar berhasil diperbarui!", "success");
-                            }
-                        } catch(err) {
-                            App.Toast.show("Gagal mengunggah avatar.", "danger");
-                        }
-                    }, 'image/jpeg', 0.8);
+                    App.ProfileState.saveCompressedAvatar(canvas.toDataURL('image/jpeg', 0.8));
+                    const p = document.getElementById('settings-avatar-preview'); if(p) p.src = localStorage.getItem('ns_user_avatar_base64');
                 };
             };
         },
@@ -1258,7 +1174,7 @@ const App = {
     },
 
     Clock: { start() { /* JAM DAN TANGGAL HEADER DIHILANGKAN SESUAI REQUEST */ } },
-    Network: { listen() { /* Listener status murni internal */ } },
+    Network: { listen() { window.addEventListener('online', ()=>document.getElementById('network-text').innerText='Online'); window.addEventListener('offline', ()=>App.Toast.show("Offline","danger")); } },
     Modal: { open(t, b) { document.getElementById('modal-title').innerText=t; document.getElementById('modal-body').innerHTML=b; document.getElementById('modal-ok-btn').style.display = 'inline-flex'; document.getElementById('global-modal').classList.add('active'); }, close() { document.getElementById('global-modal').classList.remove('active'); } },
     Toast: {
         show(m, t="info") {
@@ -1301,7 +1217,8 @@ const App = {
             document.getElementById('mobile-overlay')?.classList.remove('active');
         },
         toggleProfileRouteViewportState() {
-            App.Router.navigate('profil');
+            if(window.location.hash === '#/profil') App.Router.navigate('feed');
+            else App.Router.navigate('profil');
         },
         toggleChatPopup(shouldOpen) {
             const chatBox = document.getElementById('floating-chat-popup-box'); if(!chatBox) return;
