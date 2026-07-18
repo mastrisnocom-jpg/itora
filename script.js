@@ -2,20 +2,19 @@ const SUPABASE_URL = 'https://waaufoxlimqtesmmjhyw.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_X6icNByv3YFbekorwJ6kSw_SX0XUFM8'; 
 const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY); 
 
-// Variabel Global Aplikasi
 let liveNotifications = [ 
     { id: 1, icon: 'shield_person', user: 'Super Admin', type: 'admin', desc: 'Sistem Workspace Tech Social versi 2.4 berhasil diperbarui ke server cloud.', isUnread: true }, 
     { id: 2, icon: 'handshake', user: 'System', type: 'admin', desc: 'Fitur network teman aktif. Sekarang Anda dapat mencari user lain di halaman Eksplor.', isUnread: false } 
 ]; 
 let activeChatFriendEmail = null; 
 let activeChatFriendName = null; 
-let composerAttachedImageBase64 = null; // Dioptimasi untuk menampung Objek File Gambar Asli
+let composerAttachedImageBase64 = null; // Ini menampung File object (bukan Base64 lagi)
 let composerAttachedFileBase64 = null; 
 let composerAttachedFileName = "Dokumen.bin"; 
 let unreadMessageCounters = {}; 
 let liveHeaderNotificationCount = 1; 
 let headerSearchFilterQueryString = ""; 
-let searchTimeout = null; // Timer untuk optimasi Debounce pencarian agar ringan
+let searchTimeout = null; // Variabel untuk Debounce (agar ringan)
 const EMOJI_LIST = ['😊', '😂', '🔥', '👍', '🙌', '💯', '❤️', '👏', '🎉', '😮', '😢', '🙏']; 
 
 const App = { 
@@ -356,13 +355,6 @@ const App = {
         } 
     }, 
 
-    ViewControllers: { 
-        feed() { App.Features.renderPosts(); }, 
-        explore() { App.Features.renderExploreUsers(); }, 
-        groups() { App.Features.renderCommunityHubViewportList(); }, 
-        profil() { App.Features.loadFriendsCount(); } 
-    }, 
-
     Features: { 
         async fetchIncomingFriendRequestsSync() {
             const myEmail = localStorage.getItem('ns_user_email') || '';
@@ -404,9 +396,7 @@ const App = {
                 await supabaseClient.from('friends').update({ status: 'approved' }).eq('id', dbRequestId);
                 const { data: checkInverse } = await supabaseClient.from('friends').select('id').eq('user_email', myEmail).eq('friend_email', senderEmail);
                 if(!checkInverse || checkInverse.length === 0) {
-                    await supabaseClient.from('friends').insert([
-                        { user_email: myEmail, friend_email: senderEmail, status: 'approved' }
-                    ]);
+                    await supabaseClient.from('friends').insert([{ user_email: myEmail, friend_email: senderEmail, status: 'approved' }]);
                 }
                 liveNotifications = liveNotifications.filter(n => n.id !== notiId);
                 App.Toast.show("Pertemanan dikonfirmasi!", "success");
@@ -415,7 +405,7 @@ const App = {
                 if(window.location.hash === '#/explore') App.Features.renderExploreUsers();
             } catch(err) {
                 console.error(err);
-                App.Toast.show("Gagal menyetujui pertemanan.", "danger");
+                App.Toast.show("Gagal menyetujui.", "danger");
             }
         },
 
@@ -423,7 +413,7 @@ const App = {
             try {
                 await supabaseClient.from('friends').delete().eq('id', dbRequestId);
                 liveNotifications = liveNotifications.filter(n => n.id !== notiId);
-                App.Toast.show("Permintaan pertemanan ditolak.", "warning");
+                App.Toast.show("Permintaan ditolak.", "warning");
                 App.Features.showNotifications();
                 if(window.location.hash === '#/explore') App.Features.renderExploreUsers();
             } catch(e) { console.error(e); }
@@ -469,7 +459,7 @@ const App = {
             const file = event.target.files[0]; 
             if (!file) return; 
 
-            composerAttachedImageBase64 = file; // Menyimpan File objek asli
+            composerAttachedImageBase64 = file; 
 
             const previewArea = document.getElementById('composer-upload-preview-area'); 
             if (previewArea) { 
@@ -709,17 +699,18 @@ const App = {
                 
                 if(outgoingReq) { 
                     outgoingReq.forEach(f => { 
-                        relationMap[f.friend_email.toLowerCase()] = f.status; 
-                        dbIdMap[f.friend_email.toLowerCase()] = f.id;
+                        const username = f.friend_email.split('@')[0].toLowerCase();
+                        relationMap[username] = f.status; 
+                        dbIdMap[username] = f.id;
                     }); 
                 } 
                 if(incomingReq) {
                     incomingReq.forEach(f => {
-                        const senderEmail = f.user_email.toLowerCase();
-                        if(relationMap[senderEmail] !== 'approved') {
+                        const senderUsername = f.user_email.split('@')[0].toLowerCase();
+                        if(relationMap[senderUsername] !== 'approved') {
                             if(f.status === 'pending') {
-                                relationMap[senderEmail] = 'incoming_pending';
-                                dbIdMap[senderEmail] = f.id;
+                                relationMap[senderUsername] = 'incoming_pending';
+                                dbIdMap[senderUsername] = f.id;
                             }
                         }
                     });
@@ -732,16 +723,18 @@ const App = {
                 
                 if(posts) { 
                     for (const item of posts) { 
-                        if(item.author !== myCurrentName && !map.has(item.author) && item.image !== 'private_chat_type') { 
-                            map.set(item.author, true); 
-                            uniqueUsers.push({ name: item.author, avatar: item.avatar || 'https://i.pravatar.cc/150?img=11', email: item.author.toLowerCase() + "@nexsocial.id" }); 
+                        const authorLower = item.author.toLowerCase();
+                        if(authorLower !== myCurrentName.toLowerCase() && !map.has(authorLower) && item.image !== 'private_chat_type') { 
+                            map.set(authorLower, true); 
+                            uniqueUsers.push({ name: item.author, avatar: item.avatar || 'https://i.pravatar.cc/150?img=11', email: authorLower + "@nexsocial.id" }); 
                         } 
                     } 
                 } 
                 
                 container.innerHTML = uniqueUsers.map(u => { 
-                    const statusPertemanan = relationMap[u.email.toLowerCase()]; 
-                    const targetDbId = dbIdMap[u.email.toLowerCase()];
+                    const username = u.name.toLowerCase();
+                    const statusPertemanan = relationMap[username]; 
+                    const targetDbId = dbIdMap[username];
                     let buttonHTML = ''; 
                     
                     if (statusPertemanan === 'approved') { 
@@ -848,7 +841,6 @@ const App = {
                 const myCurrentName = App.ProfileState.getCurrentName(); 
                 const myAvatar = App.ProfileState.getCurrentAvatar(); 
 
-                // PROSES UNGGAH FILE ASLI KE SUPABASE STORAGE BUCKET
                 if (composerAttachedImageBase64 && composerAttachedImageBase64 instanceof File) {
                     const file = composerAttachedImageBase64;
                     const fileExtension = file.name.split('.').pop();
