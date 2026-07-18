@@ -192,13 +192,20 @@ const App = {
                 const { data, error } = await supabaseClient.auth.getSession();
                 if (error) throw error;
                 if(data?.session) {
+                    // PERBAIKAN FIXED: Mengunci kembali status sesi lokal agar saat di-refresh tidak me-lempar ke form login
+                    localStorage.setItem('ns_logged_in', 'true');
+                    localStorage.setItem('ns_user_email', data.session.user.email);
+                    
                     await App.ProfileState.fetchAndSyncProfileFromServer(data.session.user.id, data.session.user.email);
                     App.Auth.showApp();
                     App.Router.init();
                 } else {
+                    localStorage.removeItem('ns_logged_in');
+                    localStorage.removeItem('ns_user_email');
                     document.getElementById('auth-layout').style.display = 'flex';
                 }
             } catch (err) {
+                localStorage.clear();
                 document.getElementById('auth-layout').style.display = 'flex';
             }
         },
@@ -215,6 +222,10 @@ const App = {
             try {
                 const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
                 if (error) throw error;
+                
+                localStorage.setItem('ns_logged_in', 'true');
+                localStorage.setItem('ns_user_email', data.user.email);
+                
                 await App.ProfileState.fetchAndSyncProfileFromServer(data.user.id, data.user.email);
                 this.showApp();
                 App.Router.init();
@@ -240,6 +251,7 @@ const App = {
         },
         async logout() {
             try { await supabaseClient.auth.signOut(); } catch(e){}
+            localStorage.clear();
             window.location.hash = '';
             window.location.reload();
         },
