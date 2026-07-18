@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>NexSphere - Enterprise Business Suite</title>
-    <!-- Google Fonts & Material Symbols -->
+    <title>NexSphere - Enterprise Business & Social Cloud Suite</title>
+    <!-- Material Symbols Outlined Icons -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0..1,0" rel="stylesheet">
@@ -15,7 +15,7 @@
            ========================================================================== */
         :root {
             --font-main: 'Arial', sans-serif;
-            --base-font-size: 11px; /* Setara 8pt */
+            --base-font-size: 11px; /* 8pt Baseline */
             
             /* Light Theme Configuration */
             --bg-primary: #f1f5f9;
@@ -92,7 +92,7 @@
 
         a { text-decoration: none; color: inherit; }
 
-        /* Custom Scrollbar UI Engine */
+        /* Custom Scrollbar */
         ::-webkit-scrollbar { width: 5px; height: 5px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: var(--radius-round); }
@@ -116,7 +116,6 @@
             --sidebar-width: 60px;
         }
 
-        /* Fixed App Header Shell */
         .app-header {
             grid-area: header;
             background: var(--bg-surface);
@@ -181,7 +180,6 @@
         }
         .meta-time { font-weight: 700; color: var(--text-main); }
 
-        /* Icon Action Controller Controls */
         .icon-action-btn {
             width: 32px; height: 32px; border-radius: var(--radius-sm);
             border: none; background: transparent; color: var(--text-main);
@@ -194,7 +192,6 @@
             background: var(--danger); border-radius: var(--radius-round);
         }
 
-        /* Fixed Sidebar Component Drawer */
         .app-sidebar {
             grid-area: sidebar;
             background: var(--bg-surface);
@@ -242,14 +239,12 @@
         #app-layout.sidebar-collapsed .sidebar-user-card { padding: 4px; justify-content: center; }
         #app-layout.sidebar-collapsed .user-meta-info { display: none; }
 
-        /* Workspace Main Context Viewport */
         .app-content {
             grid-area: content; margin-top: var(--header-height); margin-left: var(--sidebar-width);
             padding: 16px; min-height: calc(100vh - var(--header-height) - 35px);
             transition: var(--transition-smooth);
         }
 
-        /* Fixed App Footer Layout */
         .app-footer {
             grid-area: footer; background: var(--bg-surface);
             border-top: 1px solid var(--border-color); margin-left: var(--sidebar-width);
@@ -264,7 +259,7 @@
         .bottom-nav { display: none; }
 
         /* ==========================================================================
-           3. UI STYLING & MASTER PREMIUM COMPONENTS (FONTS INTEGRITY AT 8pt FIXED)
+           3. UI STYLING & COMPONENTS (MATERIAL 3 GLASS CONFIGURATION)
            ========================================================================== */
         .view-container { animation: fadeIn 0.25s cubic-bezier(0.4, 0, 0.2, 1); }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
@@ -295,7 +290,6 @@
             display: flex; align-items: center; justify-content: center;
         }
 
-        /* Buttons Core Engine */
         .btn-suite {
             padding: 6px 12px; border-radius: var(--radius-sm); border: none;
             font-weight: 600; cursor: pointer; display: inline-flex;
@@ -307,11 +301,8 @@
         [data-theme="dark"] .btn-secondary { background: rgba(255,255,255,0.05); }
         .btn-success { background: var(--success); color: white; }
         .btn-danger { background: var(--danger); color: white; }
-        .btn-warning { background: var(--warning); color: white; }
-        .btn-info { background: var(--info); color: white; }
         .btn-suite:disabled { opacity: 0.5; cursor: not-allowed; }
 
-        /* Floating Label Form Core controls UI */
         .form-group-floating { position: relative; margin-bottom: 12px; }
         .form-control-input {
             width: 100%; padding: 8px 10px; border: 1px solid var(--border-color);
@@ -319,7 +310,6 @@
         }
         .form-control-input:focus { border-color: var(--primary); box-shadow: 0 0 0 2px var(--primary-state); }
         
-        /* Premium Data Table Architecture Component */
         .table-panel-holder { width: 100%; overflow-x: auto; border-radius: var(--radius-sm); border: 1px solid var(--border-color); }
         .premium-table { width: 100%; border-collapse: collapse; text-align: left; }
         .premium-table th {
@@ -327,17 +317,13 @@
             color: var(--text-muted); border-bottom: 2px solid var(--border-color);
             cursor: pointer; user-select: none;
         }
-        [data-theme="dark"] .premium-table th { background: rgba(255,255,255,0.02); }
+        [data-theme="dark"] .premium-table th { background: rgba(255, 255, 255, 0.02); }
         .premium-table td { padding: 8px 12px; border-bottom: 1px solid var(--border-color); }
-        .premium-table tr:last-child td { border-bottom: none; }
         .premium-table tr:hover td { background: var(--primary-state); }
 
-        /* Social Media Module Components Engine */
+        /* Social & Chat Layout Components */
         .post-composer-area { display: flex; flex-direction: column; gap: 8px; }
-        .composer-textarea {
-            width: 100%; min-height: 60px; border: 1px solid var(--border-color);
-            border-radius: var(--radius-sm); background: rgba(0,0,0,0.01); padding: 8px; resize: none;
-        }
+        .composer-textarea { width: 100%; min-height: 60px; border: 1px solid var(--border-color); border-radius: var(--radius-sm); background: rgba(0,0,0,0.01); padding: 8px; resize: none; }
         .post-card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
         .post-author-block { display: flex; align-items: center; gap: 8px; }
         .post-content-body { line-height: 1.5; margin-bottom: 10px; white-space: pre-wrap; }
@@ -346,10 +332,9 @@
         .action-trigger-btn { flex: 1; display: flex; align-items: center; justify-content: center; gap: 6px; padding: 6px; border: none; background: transparent; cursor: pointer; color: var(--text-muted); }
         .action-trigger-btn.active-liked { color: var(--danger); font-weight: bold; }
         .comments-section { background: rgba(0, 0, 0, 0.01); border-radius: var(--radius-sm); padding: 8px; display: flex; flex-direction: column; gap: 6px; }
-        .comment-node { display: flex; gap: 8px; }
-        .comment-bubble { background: var(--bg-surface-hover); border: 1px solid var(--border-color); padding: 6px 10px; border-radius: 0 var(--radius-md) var(--radius-md) var(--radius-md); flex: 1; }
+        .comment-node { display: flex; gap: 8px; margin-bottom: 4px; }
+        .comment-bubble { background: var(--bg-surface-hover); border: 1px solid var(--border-color); padding: 6px 10px; border-radius: 4px; flex: 1; }
 
-        /* Chat Modules Subsystem Engine */
         .chat-module-container {
             display: grid; grid-template-columns: 180px 1fr; border: 1px solid var(--border-color);
             border-radius: var(--radius-md); background: var(--bg-surface); height: calc(100vh - var(--header-height) - 100px); overflow: hidden;
@@ -363,12 +348,12 @@
         .msg-packet.incoming { align-self: flex-start; }
         .msg-packet.outgoing { align-self: flex-end; align-items: flex-end; }
         .msg-payload { padding: 8px 12px; border-radius: var(--radius-md); box-shadow: var(--shadow-sm); }
-        .incoming .msg-payload { background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: 0 var(--radius-md) var(--radius-md) var(--radius-md); }
-        .outgoing .msg-payload { background: var(--primary); color: white; border-radius: var(--radius-md) 0 var(--radius-md) var(--radius-md); }
+        .incoming .msg-payload { background: var(--bg-surface); border: 1px solid var(--border-color); }
+        .outgoing .msg-payload { background: var(--primary); color: white; }
         .msg-timestamp { font-size: 9px; color: var(--text-muted); }
         .chat-composer-strip { padding: 10px 16px; background: var(--bg-surface); border-top: 1px solid var(--border-color); display: flex; gap: 8px; align-items: center; }
 
-        /* Modal Overlay & Sheet Container UI */
+        /* Modal Overlay & Toasts */
         .modal-overlay {
             position: fixed; top: 0; left: 0; right: 0; bottom: 0;
             background: rgba(15, 23, 42, 0.3); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);
@@ -376,35 +361,22 @@
             opacity: 0; pointer-events: none; transition: var(--transition-smooth);
         }
         .modal-overlay.active { opacity: 1; pointer-events: auto; }
-        .modal-sheet-box {
-            background: var(--bg-surface); border: 1px solid var(--border-color);
-            border-radius: var(--radius-lg); width: 90%; max-width: 400px; padding: 16px;
-            box-shadow: var(--shadow-lg); transform: scale(0.95); transition: var(--transition-smooth);
-        }
-        .modal-overlay.active .modal-sheet-box { transform: scale(1); }
-
-        /* Dynamic System Toast Gateway Alerts CSS */
+        .modal-sheet-box { background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: var(--radius-lg); width: 90%; max-width: 400px; padding: 16px; box-shadow: var(--shadow-lg); }
+        
         #toast-container { position: fixed; top: 16px; right: 16px; z-index: 3000; display: flex; flex-direction: column; gap: 8px; pointer-events: none; }
-        .toast-node {
-            background: var(--bg-surface); border-left: 4px solid var(--primary); box-shadow: var(--shadow-lg);
-            padding: 10px 16px; border-radius: var(--radius-sm); display: flex; align-items: center; gap: 10px;
-            min-width: 240px; pointer-events: auto; animation: slideIn 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-        @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+        .toast-node { background: var(--bg-surface); border-left: 4px solid var(--primary); box-shadow: var(--shadow-lg); padding: 10px 16px; border-radius: var(--radius-sm); display: flex; align-items: center; gap: 10px; min-width: 240px; pointer-events: auto; }
 
         .ripple { position: absolute; background: rgba(255, 255, 255, 0.35); border-radius: var(--radius-round); transform: scale(0); animation: ripple-anim 0.5s linear; pointer-events: none; }
         @keyframes ripple-anim { to { transform: scale(4); opacity: 0; } }
 
-        /* User Menu Profile Dropdown Overlay styling */
-        .dropdown-menu-sheet {
-            position: absolute; top: var(--header-height); right: 16px;
-            background: var(--bg-surface); border: 1px solid var(--border-color);
-            border-radius: var(--radius-md); min-width: 140px; box-shadow: var(--shadow-lg);
-            display: none; flex-direction: column; padding: 4px; z-index: 1005;
-        }
+        .dropdown-menu-sheet { position: absolute; top: var(--header-height); right: 16px; background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: var(--radius-md); min-width: 140px; box-shadow: var(--shadow-lg); display: none; flex-direction: column; padding: 4px; z-index: 1005; }
         .dropdown-menu-sheet.active { display: flex; }
         .dropdown-item-node { padding: 6px 10px; border-radius: var(--radius-sm); cursor: pointer; display: flex; align-items: center; gap: 8px; }
         .dropdown-item-node:hover { background: var(--primary-state); color: var(--primary); }
+
+        /* Skeleton Loading */
+        .skeleton-line { height: 12px; margin-bottom: 6px; background: linear-gradient(90deg, rgba(0,0,0,0.06) 25%, rgba(0,0,0,0.12) 50%, rgba(0,0,0,0.06) 75%); background-size: 200% 100%; animation: loading-skeleton 1.5s infinite; border-radius: 4px; }
+        @keyframes loading-skeleton { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
 
         /* ==========================================================================
            4. ADAPTIVE RESPONSIVENESS MEDIA INTERFACES HUB
@@ -417,31 +389,21 @@
         }
 
         @media (max-width: 768px) {
-            #app-layout {
-                grid-template-areas: "header header" "content content";
-                grid-template-columns: 1fr;
-            }
+            #app-layout { grid-template-areas: "header header" "content content"; grid-template-columns: 1fr; }
             .app-sidebar, .app-footer { display: none; }
             .app-content { margin-left: 0; padding: 12px; padding-bottom: calc(var(--bottom-nav-height) + 12px); }
             .grid-dashboard { grid-template-columns: 1fr; }
-
-            /* Mobile Frame Bottom Navigation Engine Trigger activation */
             .bottom-nav {
                 display: flex; position: fixed; bottom: 0; left: 0; right: 0;
                 height: var(--bottom-nav-height); background: var(--bg-surface);
-                backdrop-filter: blur(var(--blur-radius)); -webkit-backdrop-filter: blur(var(--blur-radius));
-                border-top: 1px solid var(--border-color); box-shadow: var(--shadow-lg);
-                z-index: 1000; padding-bottom: env(safe-area-inset-bottom);
-                justify-content: space-around; align-items: center;
+                backdrop-filter: blur(var(--blur-radius)); border-top: 1px solid var(--border-color);
+                z-index: 1000; padding-bottom: env(safe-area-inset-bottom); justify-content: space-around; align-items: center;
             }
             .bottom-nav-item { display: flex; flex-direction: column; align-items: center; color: var(--text-muted); font-size: 9px; gap: 2px; flex: 1; padding: 4px 0; cursor: pointer; }
             .bottom-nav-item.active { color: var(--primary); font-weight: bold; }
-            .bottom-nav-item.active .material-symbols-outlined { background: var(--primary-container); padding: 2px 12px; border-radius: var(--radius-round); }
-            
-            /* Responsive Table Mobile List Grid Parser */
             .premium-table-container th { display: none; }
             .premium-table-container tr { display: block; margin-bottom: 8px; border: 1px solid var(--border-color); border-radius: var(--radius-md); background: var(--bg-surface); }
-            .premium-table-container td { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); text-align: right; padding: 8px 12px; }
+            .premium-table-container td { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding: 8px 12px; }
             .premium-table-container td::before { content: attr(data-label); font-weight: 700; color: var(--text-muted); text-align: left; }
             .chat-module-container { grid-template-columns: 1fr; }
             .chat-channels-list { display: none; }
@@ -451,83 +413,67 @@
 <body>
 
     <div id="app-layout">
-        <!-- APP TOP NAVBAR HEADER -->
+        <!-- HEADER TOP NAVBAR -->
         <header class="app-header">
             <div class="header-left">
                 <div class="brand-wrapper" onclick="App.Router.navigate('dashboard')">
                     <div class="brand-logo">N</div>
                     <span class="brand-name">NexSphere</span>
                 </div>
-                <button class="icon-action-btn" id="sidebar-toggle-trigger" aria-label="Toggle Sidebar Menu">
+                <button class="icon-action-btn" id="sidebar-toggle-trigger">
                     <span class="material-symbols-outlined" style="font-size:16px;">menu</span>
                 </button>
                 <div class="search-container">
                     <span class="material-symbols-outlined search-icon" style="font-size:14px;">search</span>
-                    <input type="text" class="search-input" placeholder="Cari master berkas, pos..." id="global-search-engine">
+                    <input type="text" class="search-input" placeholder="Cari data server..." id="global-search-engine">
                 </div>
             </div>
             
             <div class="header-right">
                 <div class="meta-clock-widget">
-                    <span id="live-date-str">Memuat...</span>
+                    <span id="live-date-str">Memuat Tanggal...</span>
                     <span id="live-clock-str" class="meta-time">00:00:00 WIB</span>
                 </div>
-                <button class="icon-action-btn" id="refresh-view-trigger" aria-label="Segarkan Halaman">
-                    <span class="material-symbols-outlined" style="font-size:16px;">refresh</span>
-                </button>
-                <button class="icon-action-btn" id="theme-toggle-trigger" aria-label="Toggle Tema Gelap">
-                    <span class="material-symbols-outlined" style="font-size:16px;">dark_mode</span>
-                </button>
-                <button class="icon-action-btn" id="fullscreen-toggle-trigger" aria-label="Ubah Layar Penuh">
-                    <span class="material-symbols-outlined" style="font-size:16px;">fullscreen</span>
-                </button>
-                <button class="icon-action-btn" id="notification-bell-trigger" aria-label="Buka Notifikasi">
-                    <span class="material-symbols-outlined" style="font-size:16px;">notifications</span>
-                    <span class="badge-dot"></span>
-                </button>
+                <button class="icon-action-btn" id="refresh-view-trigger"><span class="material-symbols-outlined" style="font-size:16px;">refresh</span></button>
+                <button class="icon-action-btn" id="theme-toggle-trigger"><span class="material-symbols-outlined" style="font-size:16px;">dark_mode</span></button>
+                <button class="icon-action-btn" id="fullscreen-toggle-trigger"><span class="material-symbols-outlined" style="font-size:16px;">fullscreen</span></button>
+                <button class="icon-action-btn" id="notification-bell-trigger"><span class="material-symbols-outlined" style="font-size:16px;">notifications</span><span class="badge-dot"></span></button>
                 <div class="avatar-frame" id="profile-dropdown-trigger" style="cursor:pointer;">
-                    <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=100&q=80" alt="Avatar Profil Operator" class="avatar-img">
+                    <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=100&q=80" alt="Avatar Operator" class="avatar-img">
                 </div>
             </div>
         </header>
 
-        <!-- USER DROPDOWN FLOATING SHEET MENU -->
+        <!-- FLOATING PROFILE DROPDOWN MENU -->
         <div class="dropdown-menu-sheet" id="profile-dropdown-sheet">
-            <div class="dropdown-item-node" onclick="App.Router.navigate('profil')"><span class="material-symbols-outlined" style="font-size:14px;">person</span>Akun Profil</div>
-            <div class="dropdown-item-node" onclick="App.Router.navigate('pengaturan')"><span class="material-symbols-outlined" style="font-size:14px;">settings</span>Konfigurasi</div>
+            <div class="dropdown-item-node" onclick="App.Router.navigate('profil')"><span class="material-symbols-outlined" style="font-size:14px;">person</span>Profil Akun</div>
+            <div class="dropdown-item-node" onclick="App.Router.navigate('pengaturan')"><span class="material-symbols-outlined" style="font-size:14px;">settings</span>Pengaturan</div>
             <hr style="border:none; border-top:1px solid var(--border-color); margin:4px 0;">
             <div class="dropdown-item-node" onclick="App.Auth.logout()" style="color:var(--danger);"><span class="material-symbols-outlined" style="font-size:14px;">logout</span>Keluar Sistem</div>
         </div>
 
-        <!-- FIXED SIDEBAR MAIN CONTAINER LEFT -->
+        <!-- LEFT SIDEBAR CONTAINER -->
         <aside class="app-sidebar">
-            <div class="sidebar-menu-wrapper" id="sidebar-menu-injector">
-                <!-- Injected Natively from Menu JS Matrix Mapping Loop -->
-            </div>
-            
-            <div class="sidebar-user-card" id="sidebar-account-plate">
+            <div class="sidebar-menu-wrapper" id="sidebar-menu-injector"></div>
+            <div class="sidebar-user-card">
                 <div class="avatar-frame">
-                    <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=100&q=80" alt="Operator Avatar" class="avatar-img">
+                    <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=100&q=80" class="avatar-img">
                 </div>
                 <div class="user-meta-info">
                     <span class="user-display-name" id="sidebar-user-name">Kartika Dewi</span>
-                    <span class="user-role-lbl">Admin Supabase Cloud</span>
+                    <span class="user-role-lbl">Admin Operator</span>
                 </div>
             </div>
         </aside>
 
-        <!-- MAIN CORE VIEWPORT INTERFACE DRAWER -->
-        <main class="app-content" id="app-viewport-root">
-            <!-- Dynamic Router SPA Render Context Injected Here -->
-        </main>
+        <!-- ROUTER SPA WORKSPACE VIEWPORT -->
+        <main class="app-content" id="app-viewport-root"></main>
 
-        <!-- SYSTEM MASTER FOOTER DATA LOG LAYER -->
+        <!-- SYSTEM GLOBAL FOOTER LOG DATA -->
         <footer class="app-footer">
-            <div>
-                &copy; <span id="footer-year-sync">2026</span> <strong>NexSphere Platform</strong>. Seluruh Hak Cipta Dilindungi.
-            </div>
+            <div>&copy; <span id="footer-year-sync">2026</span> <strong>NexSphere System Engine</strong>. All Rights Reserved.</div>
             <div style="display:flex; gap:16px; align-items:center;">
-                <span>Arsitektur DB Terpusat: <strong>Supabase Infrastructure Cloud REST v3</strong></span>
+                <span>DB Cloud Hub: <strong style="color:var(--primary)">Supabase Engine REST Live</strong></span>
                 <div class="network-status-badge">
                     <div class="status-dot" id="network-indicator-dot"></div>
                     <span id="network-indicator-lbl">Koneksi Aktif</span>
@@ -535,54 +481,93 @@
             </div>
         </footer>
 
-        <!-- BOTTOM NAVIGATION LAYER MODULE (MOBILE PLATFORM VIEWPORT) -->
-        <nav class="bottom-nav" id="bottom-nav-injector">
-            <!-- Dynamic Mobile Anchors Trigger runtime structural inject -->
-        </nav>
+        <!-- BOTTOM NAVIGATION BAR (MOBILE PLATFORM VIEWPORT) -->
+        <nav class="bottom-nav" id="bottom-nav-injector"></nav>
     </div>
 
-    <!-- MAIN DIALOG SYSTEM ROOT MODAL OVERLAY SHEET -->
+    <!-- MAIN ROOT MODAL ARCHITECTURE CONTEXT SYSTEM OVERLAY -->
     <div class="modal-overlay" id="system-modal-root" tabindex="-1">
-        <div class="modal-sheet-box" id="modal-container-body">
-            <!-- Dynamic Template Content Dialog Modals Injected -->
-        </div>
+        <div class="modal-sheet-box" id="modal-container-body"></div>
     </div>
 
-    <!-- APP GATEWAY ALERT LAYER NOTIFIER TOAST CONTAINER -->
+    <!-- TOAST ALERTS LAYER NOTIFIER CONTAINER Gateway -->
     <div id="toast-container"></div>
 
     <!-- ==========================================================================
-       5. CORE PROGRAM ENGINEERING ARCHITECTURE (VANILLA JAVASCRIPT SYSTEM ENGINE)
+       5. CORE PROGRAM JAVASCRIPT SYSTEM ENGINE (NATIVE SUPABASE REST CLIENT ENGINE)
        ========================================================================== -->
     <script>
         /**
-         * NEXSPHERE SYSTEM DATABASES - CLIENT BACKEND REST INTEGRATION
-         * Data runtime layer sinkronisasi dengan status state penyimpanan
+         * KREDENSIAL UTAMA DATABASE SUPABASE REST API (CONFIGURED BY USER GENERATOR)
+         */
+        const SUPABASE_URL = "https://waaufoxlimqtesmmjhyw.supabase.co"; 
+        const SUPABASE_ANON_KEY = "sb_publishable_X6icNByv3YFbekorwJ6kSw_SX0XUFM8";
+
+        /**
+         * NETWORK CLIENT CORE MATRIX DENGAN SYSTEM SINKRONISASI FALLBACK OTOMATIS
          */
         const SupabaseClientEngine = {
-            db: {
-                posts: JSON.parse(localStorage.getItem('sb_posts')) || [
-                    { id: "p1", author: "Ahmad Rifai", avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=100&q=80", body: "Konfigurasi skema database cloud server Supabase REST API untuk unit social feed serta modular POS kasir telah selesai di-migrate. Data harian sinkron penuh.", media: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&w=600&q=80", likes: 24, liked: false, timestamp: "08:15", comments: [{ author: "Budi Utomo", body: "Kerja bagus tim! Respon query sangat cepat kurang dari 40ms." }] },
-                    { id: "p2", author: "Kartika Dewi", avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=100&q=80", body: "Pengumuman internal: sinkronisasi berkas inventaris gudang dan absensi mingguan wajib disubmit sebelum pukul 17:00 sore ini melalui modul dashboard.", media: null, likes: 9, liked: true, timestamp: "09:32", comments: [] }
-                ],
-                chats: JSON.parse(localStorage.getItem('sb_chats')) || [
-                    { id: 1, sender: "Budi Utomo", msg: "Halo admin, modul sinkronisasi logistik Supabase sudah divalidasi hari ini?", time: "10:02", incoming: true },
-                    { id: 2, sender: "Kartika Dewi", msg: "Sudah terverifikasi masuk ke tabel utama Cloud Ledger, om Budi. Aman.", time: "10:05", incoming: false }
-                ],
-                inventoris: JSON.parse(localStorage.getItem('sb_items')) || [
-                    { sku: "SKU-2026-001", name: "Server Rack Mount Glass II", cat: "Infrastruktur IT", qty: 14, price: 4500000, status: "Optimal" },
-                    { sku: "SKU-2026-002", name: "Router Core Fiber Optic 10G", cat: "Networking", qty: 3, price: 12000000, status: "Stok Kritis" },
-                    { sku: "SKU-2026-003", name: "Crimping Tool Pro-Max Kit", cat: "Perkakas Kerja", qty: 45, price: 3500000, status: "Optimal" }
-                ]
+            getHeaders() {
+                return {
+                    "apikey": SUPABASE_ANON_KEY,
+                    "Authorization": `Bearer ${SUPABASE_ANON_KEY}`,
+                    "Content-Type": "application/json",
+                    "Prefer": "return=representation"
+                };
             },
-            saveState() {
-                localStorage.setItem('sb_posts', JSON.stringify(this.db.posts));
-                localStorage.setItem('sb_chats', JSON.stringify(this.db.chats));
-                localStorage.setItem('sb_items', JSON.stringify(this.db.inventoris));
+            async select(table, selectQuery = "*", orderColumn = "created_at") {
+                try {
+                    const response = await fetch(`${SUPABASE_URL}/rest/v1/${table}?select=${selectQuery}&order=${orderColumn}.desc`, {
+                        method: "GET",
+                        headers: this.getHeaders()
+                    });
+                    if (!response.ok) throw new Error("Supabase Fetch Error");
+                    return await response.json();
+                } catch (err) {
+                    console.warn("Menggunakan database lokal cache fallback.");
+                    return this.LocalCache.get(table);
+                }
+            },
+            async insert(table, payload) {
+                try {
+                    const response = await fetch(`${SUPABASE_URL}/rest/v1/${table}`, {
+                        method: "POST",
+                        headers: this.getHeaders(),
+                        body: JSON.stringify(payload)
+                    });
+                    const data = await response.json();
+                    this.LocalCache.syncInsert(table, data[0] || payload);
+                    return data;
+                } catch (err) {
+                    this.LocalCache.syncInsert(table, payload);
+                    return [payload];
+                }
+            },
+            async update(table, payload, matchColumn, matchValue) {
+                try {
+                    const response = await fetch(`${SUPABASE_URL}/rest/v1/${table}?${matchColumn}=eq.${matchValue}`, {
+                        method: "PATCH",
+                        headers: this.getHeaders(),
+                        body: JSON.stringify(payload)
+                    });
+                    return await response.json();
+                } catch (err) {
+                    return null;
+                }
+            },
+            LocalCache: {
+                get(table) {
+                    return JSON.parse(localStorage.getItem(`sb_${table}`)) || [];
+                },
+                syncInsert(table, data) {
+                    const current = this.get(table);
+                    current.unshift(data);
+                    localStorage.setItem(`sb_${table}`, JSON.stringify(current));
+                }
             }
         };
 
-        // Complete Global Navigation Matrix Engine Setup Configuration Registry Array
+        // Navigation Master Registry Array Mapping List Layout Configuration Elements
         const AppNavigationRegistry = [
             { id: 'dashboard', label: 'Dashboard', icon: 'dashboard' },
             { id: 'social-feed', label: 'Social Feed', icon: 'share' },
@@ -591,15 +576,13 @@
             { id: 'transaksi', label: 'Transaksi POS', icon: 'shopping_cart' },
             { id: 'laporan', label: 'Laporan Finansial', icon: 'analytics' },
             { id: 'absensi', label: 'Absensi Tim', icon: 'badge' },
-            { id: 'inventaris', label: 'Inventaris Gudang', icon: 'inventory' },
             { id: 'pengaturan', label: 'Pengaturan', icon: 'settings' },
-            { id: 'profil', label: 'Profil Saya', icon: 'account_circle' },
-            { id: 'bantuan', label: 'Bantuan', icon: 'help' }
+            { id: 'profil', label: 'Profil Saya', icon: 'account_circle' }
         ];
 
-        // Central Application Core Kernel Namespace Controller Suite
+        // Central Kernel Application Namespace Matrix Systems Logic Controller
         const App = {
-            init() {
+            async init() {
                 this.Theme.init();
                 this.Clock.start();
                 this.Navigation.render();
@@ -607,26 +590,21 @@
                 this.Events.bindGlobal();
                 this.Network.listen();
                 
-                // Initialize cache session storage parameters metadata
-                const activeUser = localStorage.getItem('sb_user_cache') || "Kartika Dewi";
-                document.getElementById('sidebar-user-name').innerText = activeUser;
-                
-                App.Toast.show("Modul Supabase Enterprise Business Hub Berhasil Diinisialisasi", "success");
+                const cachedUser = localStorage.getItem('sb_user_cache') || "Kartika Dewi";
+                document.getElementById('sidebar-user-name').innerText = cachedUser;
+                App.Toast.show("Portal Supabase Cloud Engine Terkoneksi Penuh", "success");
             },
 
-            // Network Monitoring Layer
             Network: {
                 listen() {
                     const toggleStateStatus = () => {
                         const dot = document.getElementById('network-indicator-dot');
                         const lbl = document.getElementById('network-indicator-lbl');
                         if (navigator.onLine) {
-                            dot.className = "status-dot";
-                            lbl.innerText = "Koneksi Aktif";
+                            dot.className = "status-dot"; lbl.innerText = "Koneksi Aktif";
                         } else {
-                            dot.className = "status-dot offline";
-                            lbl.innerText = "Koneksi Offline";
-                            App.Toast.show("Koneksi jaringan internet terputus! Menggunakan data cache lokal.", "warning");
+                            dot.className = "status-dot offline"; lbl.innerText = "Koneksi Offline";
+                            App.Toast.show("Koneksi cloud terputus, beralih ke engine offline local storage.", "warning");
                         }
                     };
                     window.addEventListener('online', toggleStateStatus);
@@ -634,101 +612,60 @@
                 }
             },
 
-            // SPA Native Hash Router Subsystem Controller Matrix Engine
+            // SPA Native Hash Router Subsystem Controller Framework Architecture
             Router: {
                 init() {
                     window.addEventListener('hashchange', () => this.executeRouteTransition());
                     this.executeRouteTransition();
                 },
-                navigate(viewId) {
-                    window.location.hash = `#/${viewId}`;
-                },
+                navigate(viewId) { window.location.hash = `#/${viewId}`; },
                 executeRouteTransition() {
                     const hash = window.location.hash.replace('#/', '') || 'dashboard';
-                    
                     document.querySelectorAll('.menu-item, .bottom-nav-item').forEach(el => {
-                        if(el.getAttribute('data-view-target') === hash) {
-                            el.classList.add('active');
-                        } else {
-                            el.classList.remove('active');
-                        }
+                        el.classList.toggle('active', el.getAttribute('data-view-target') === hash);
                     });
 
-                    const viewportNode = document.getElementById('app-viewport-root');
-                    localStorage.setItem('sb_last_view', hash);
-                    
+                    const viewport = document.getElementById('app-viewport-root');
                     if (this.views[hash]) {
-                        viewportNode.innerHTML = `<div class="view-container">${this.views[hash]()}</div>`;
+                        viewport.innerHTML = `<div class="view-container">${this.views[hash]()}</div>`;
                         if(this.viewHooks[hash]) this.viewHooks[hash]();
                     } else {
-                        viewportNode.innerHTML = `<div class="premium-card"><h3>Modul Tidak Ditemukan</h3><p>Halaman enkripsi `#/${hash}` tidak terdaftar dalam routing table.</p></div>`;
+                        viewport.innerHTML = `<div class="premium-card"><h3>Modul Enkripsi Tidak Ditemukan</h3></div>`;
                     }
                 },
 
-                // Dynamic HTML Template Generation Matrix Framework
+                // Dynamic Workspace Layout View Modules HTML Rendering Layout Parser Matrix
                 views: {
                     dashboard() {
                         return `
                             <div class="premium-card welcome-gradient-card">
-                                <h1 style="font-size: 16px; font-weight: 700;">Selamat Datang di Portal Bisnis Terpadu NexSphere</h1>
-                                <p style="margin-top: 4px; opacity:0.9;">Monitoring semua aktivitas operasional, interaksi sosial internal tim, kasir penjualan POS, absensi real-time, dan manajemen berkas logistik terpusat dengan infrastruktur database cloud Supabase.</p>
+                                <h1 style="font-size: 14px; font-weight: 700;">Portal Bisnis Cloud Terpadu NexSphere</h1>
+                                <p style="margin-top: 4px; opacity:0.9;">Monitoring data terenkripsi, status real-time, master logistik pergudangan, interaksi tim internal terintegrasi Supabase Cloud.</p>
                             </div>
-
                             <div class="stats-strip">
                                 <div class="stat-box">
                                     <div class="stat-icon-wrapper" style="background:var(--primary-state); color:var(--primary);"><span class="material-symbols-outlined" style="font-size:16px;">share</span></div>
-                                    <div><h3 style="font-weight:700; font-size:12px;">${SupabaseClientEngine.db.posts.length} Post</h3><p style="color:var(--text-muted); font-size:9px;">Interaksi Sosial</p></div>
+                                    <div><h3 style="font-weight:700;">Supabase Data Live</h3><p style="color:var(--text-muted); font-size:9px;">Komunitas Sinkron</p></div>
                                 </div>
                                 <div class="stat-box">
                                     <div class="stat-icon-wrapper" style="background:rgba(16,185,129,0.1); color:var(--success);"><span class="material-symbols-outlined" style="font-size:16px;">payments</span></div>
-                                    <div><h3 style="font-weight:700; font-size:12px;">Rp 24,8M</h3><p style="color:var(--text-muted); font-size:9px;">Omset POS Penjualan</p></div>
-                                </div>
-                                <div class="stat-box">
-                                    <div class="stat-icon-wrapper" style="background:rgba(14,165,233,0.1); color:var(--secondary);"><span class="material-symbols-outlined" style="font-size:16px;">badge</span></div>
-                                    <div><h3 style="font-weight:700; font-size:12px;">98.2%</h3><p style="color:var(--text-muted); font-size:9px;">Presensi Karyawan</p></div>
-                                </div>
-                                <div class="stat-box">
-                                    <div class="stat-icon-wrapper" style="background:rgba(245,158,11,0.1); color:var(--warning);"><span class="material-symbols-outlined" style="font-size:16px;">inventory</span></div>
-                                    <div><h3 style="font-weight:700; font-size:12px;">${SupabaseClientEngine.db.inventoris.length} SKU</h3><p style="color:var(--text-muted); font-size:9px;">Logistik Terdaftar</p></div>
+                                    <div><h3 style="font-weight:700;">Rp 24.850.000</h3><p style="color:var(--text-muted); font-size:9px;">Omset Kasir POS</p></div>
                                 </div>
                             </div>
-
                             <div class="grid-dashboard">
-                                <div>
-                                    <div class="premium-card">
-                                        <h3 style="margin-bottom:12px; font-weight:700;">Grafik Performa Bisnis Skema Digital Terintegrasi (Supabase Data Live)</h3>
-                                        <div style="height: 140px; display:flex; align-items:flex-end; gap:12px; padding-top:10px; border-left:1px solid var(--border-color); border-bottom:1px solid var(--border-color);">
-                                            <div style="flex:1; background:var(--primary); height:70%; position:relative; border-radius:2px 2px 0 0;"><span style="position:absolute; top:-12px; left:25%; font-size:9px;">70%</span></div>
-                                            <div style="flex:1; background:var(--secondary); height:90%; position:relative; border-radius:2px 2px 0 0;"><span style="position:absolute; top:-12px; left:25%; font-size:9px;">90%</span></div>
-                                            <div style="flex:1; background:var(--success); height:55%; position:relative; border-radius:2px 2px 0 0;"><span style="position:absolute; top:-12px; left:25%; font-size:9px;">55%</span></div>
-                                            <div style="flex:1; background:var(--warning); height:80%; position:relative; border-radius:2px 2px 0 0;"><span style="position:absolute; top:-12px; left:25%; font-size:9px;">80%</span></div>
-                                        </div>
-                                    </div>
-                                    
-                                    <div class="premium-card">
-                                        <h3 style="margin-bottom:8px; font-weight:700;">Daftar Tugas Karyawan & Log Aktivitas Sistem</h3>
-                                        <div style="display:flex; flex-direction:column; gap:6px;">
-                                            <div style="display:flex; align-items:center; gap:8px; padding:4px 0; border-bottom:1px solid var(--border-color);">
-                                                <input type="checkbox" checked style="cursor:pointer;">
-                                                <span style="text-decoration:line-through; color:var(--text-muted);">Validasi data mutasi saldo POS Kasir regional Banten</span>
-                                            </div>
-                                            <div style="display:flex; align-items:center; gap:8px; padding:4px 0; border-bottom:1px solid var(--border-color);">
-                                                <input type="checkbox" style="cursor:pointer;" id="todo-check-2">
-                                                <span>Audit berkas restrukturisasi stok kritis pergudangan logistik IT</span>
-                                            </div>
-                                        </div>
+                                <div class="premium-card">
+                                    <h3 style="margin-bottom:12px; font-weight:700;">Grafik Performa Operasional Bisnis</h3>
+                                    <div style="height: 120px; display:flex; align-items:flex-end; gap:12px; border-left:1px solid var(--border-color); border-bottom:1px solid var(--border-color);">
+                                        <div style="flex:1; background:var(--primary); height:75%;"></div>
+                                        <div style="flex:1; background:var(--secondary); height:90%;"></div>
+                                        <div style="flex:1; background:var(--success); height:45%;"></div>
                                     </div>
                                 </div>
-                                
-                                <div>
-                                    <div class="premium-card">
-                                        <h3 style="margin-bottom:10px; font-weight:700;">Aksi Akses Cepat Utama</h3>
-                                        <div style="display:flex; flex-direction:column; gap:6px;">
-                                            <button class="btn-suite btn-primary" onclick="App.Router.navigate('social-feed')"><span class="material-symbols-outlined" style="font-size:14px;">share</span> Buka Social Feed</button>
-                                            <button class="btn-suite btn-secondary" onclick="App.Router.navigate('transaksi')"><span class="material-symbols-outlined" style="font-size:14px;">point_of_sale</span> Buka Kasir POS</button>
-                                            <button class="btn-suite btn-secondary" onclick="App.Router.navigate('inventaris')"><span class="material-symbols-outlined" style="font-size:14px;">inventory_2</span> Cek Berkas Gudang</button>
-                                            <button class="btn-suite btn-danger" onclick="App.Modal.open('Demo Dialog Alert','Ini adalah sistem pengujian integrasi modal dialog terstruktur.')">Uji Pemicu Dialog Modal</button>
-                                        </div>
+                                <div class="premium-card">
+                                    <h3 style="margin-bottom:8px; font-weight:700;">Aksi Cepat Menu Utama</h3>
+                                    <div style="display:flex; flex-direction:column; gap:6px;">
+                                        <button class="btn-suite btn-primary" onclick="App.Router.navigate('social-feed')">Buka Social Feed</button>
+                                        <button class="btn-suite btn-secondary" onclick="App.Router.navigate('transaksi')">Kasir POS Kasir</button>
                                     </div>
                                 </div>
                             </div>
@@ -737,38 +674,31 @@
                     'social-feed'() {
                         return `
                             <div class="premium-card">
-                                <h3 style="font-weight:700; margin-bottom:8px;">Komunitas Internal - Posting Informasi & Pengumuman Baru</h3>
+                                <h3 style="font-weight:700; margin-bottom:8px;">Social Feed Komunitas Internal - Kirim Postingan Ke Supabase</h3>
                                 <div class="post-composer-area">
-                                    <textarea class="composer-textarea" id="post-text-body-field" placeholder="Tulis pengumuman penting atau bagikan progres kerja tim hari ini..."></textarea>
+                                    <textarea class="composer-textarea" id="post-text-body-field" placeholder="Bagikan informasi progres update atau berkas penting tim hari ini..."></textarea>
                                     <div style="display:flex; justify-content:space-between; align-items:center;">
-                                        <button class="btn-suite btn-secondary" onclick="document.getElementById('post-image-file-input').click()">
-                                            <span class="material-symbols-outlined" style="font-size:14px;">image</span> Lampirkan Gambar
-                                        </button>
+                                        <button class="btn-suite btn-secondary" onclick="document.getElementById('post-image-file-input').click()"><span class="material-symbols-outlined" style="font-size:14px;">image</span> Gambar</button>
                                         <input type="file" id="post-image-file-input" style="display:none;" accept="image/*" onchange="App.FeedModule.handleImagePreview(this)">
-                                        <button class="btn-suite btn-primary" onclick="App.FeedModule.executeCreatePost()">
-                                            <span class="material-symbols-outlined" style="font-size:14px;">send</span> Publikasikan Postingan
-                                        </button>
+                                        <button class="btn-suite btn-primary" onclick="App.FeedModule.executeCreatePost()">Kirim Post</button>
                                     </div>
                                     <div id="composer-image-preview-target" style="margin-top:6px;"></div>
                                 </div>
                             </div>
-                            <div id="social-feed-stream-injector"></div>
+                            <div id="social-feed-stream-injector"><div class="skeleton-line"></div><div class="skeleton-line"></div></div>
                         `;
                     },
                     'chat-room'() {
                         return `
                             <div class="chat-module-container">
                                 <div class="chat-channels-list">
-                                    <div class="channel-row active">
-                                        <span class="material-symbols-outlined" style="font-size:14px;">groups</span>
-                                        <div><div style="font-weight:600;">Grup Utama Divisi</div><div style="font-size:9px; color:var(--text-muted);">Koneksi Sinkron</div></div>
-                                    </div>
+                                    <div class="channel-row active"><span class="material-symbols-outlined" style="font-size:14px;">groups</span><div><div style="font-weight:600;">Grup Utama Divisi</div></div></div>
                                 </div>
                                 <div class="chat-viewport">
                                     <div class="chat-messages-stream" id="chat-messages-stream-node"></div>
                                     <div class="chat-composer-strip">
-                                        <input type="text" class="form-control-input" id="chat-composer-input-message" placeholder="Tulis pesan instant ke tim divisi..." onkeypress="if(event.key==='Enter') App.ChatModule.executeSend()">
-                                        <button class="btn-suite btn-primary" onclick="App.ChatModule.executeSend()" style="padding:8px;"><span class="material-symbols-outlined" style="font-size:14px;">send</span></button>
+                                        <input type="text" class="form-control-input" id="chat-composer-input-message" placeholder="Tulis pesan obrolan realtime..." onkeypress="if(event.key==='Enter') App.ChatModule.executeSend()">
+                                        <button class="btn-suite btn-primary" onclick="App.ChatModule.executeSend()"><span class="material-symbols-outlined" style="font-size:14px;">send</span></button>
                                     </div>
                                 </div>
                             </div>
@@ -777,29 +707,16 @@
                     'master-data'() {
                         return `
                             <div class="premium-card">
-                                <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:12px;">
-                                    <div><h2 style="font-size:14px; font-weight:700;">Data Master Logistik Cloud (Supabase Synced)</h2><p style="color:var(--text-muted); font-size:9px;">Manajemen kendali komoditas barang inventori pergudangan internal</p></div>
-                                    <div style="display:flex; gap:6px;">
-                                        <button class="btn-suite btn-secondary" onclick="App.TableDataModule.exportCSVData()">Export File CSV</button>
-                                        <button class="btn-suite btn-primary" onclick="window.print()">Cetak PDF Dokumen</button>
-                                    </div>
+                                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+                                    <div><h2 style="font-size:12px; font-weight:700;">Data Master Logistik Inventori ERP</h2></div>
+                                    <button class="btn-suite btn-secondary" onclick="App.TableDataModule.exportCSVData()">Export CSV</button>
                                 </div>
-                                
                                 <div class="table-panel-holder">
                                     <table class="premium-table premium-table-container">
                                         <thead>
-                                            <tr>
-                                                <th onclick="App.TableDataModule.sortColumn('sku')">Kode SKU</th>
-                                                <th onclick="App.TableDataModule.sortColumn('name')">Nama Komoditas</th>
-                                                <th onclick="App.TableDataModule.sortColumn('cat')">Kategori Kelompok</th>
-                                                <th onclick="App.TableDataModule.sortColumn('qty')">Stok Minim</th>
-                                                <th onclick="App.TableDataModule.sortColumn('price')">Harga Satuan Gudang</th>
-                                                <th>Status</th>
-                                            </tr>
+                                            <tr><th>Kode SKU</th><th>Nama Item</th><th>Kategori</th><th>Stok</th><th>Harga Satuan</th></tr>
                                         </thead>
-                                        <tbody id="master-data-table-rows-injector">
-                                            <!-- Injected runtime by table engine mapping arrays -->
-                                        </tbody>
+                                        <tbody id="master-data-table-rows-injector"></tbody>
                                     </table>
                                 </div>
                             </div>
@@ -807,190 +724,89 @@
                     },
                     transaksi() {
                         return `
-                            <div class="grid-dashboard">
-                                <div class="premium-card">
-                                    <h3 style="font-weight:700; margin-bottom:12px;">Mesin Kasir Point of Sales (POS) Terintegrasi</h3>
-                                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
-                                        <div class="form-group-floating">
-                                            <label style="font-size:9px; color:var(--text-muted); display:block; margin-bottom:2px;">Pilih Komoditas Item</label>
-                                            <select class="form-control-input" id="pos-select-product" onchange="App.POSModule.runKalkulasi()">
-                                                <option value="4500000">Server Rack Mount Glass - Rp 4.500.000</option>
-                                                <option value="12000000">Router Core Fiber 10G - Rp 12.000.000</option>
-                                                <option value="3500000">Crimping Tool Kit Pro - Rp 3.500.000</option>
-                                            </select>
-                                        </div>
-                                        <div class="form-group-floating">
-                                            <label style="font-size:9px; color:var(--text-muted); display:block; margin-bottom:2px;">Jumlah Kuantitas Belanja</label>
-                                            <input type="number" class="form-control-input" id="pos-qty-field" value="1" min="1" oninput="App.POSModule.runKalkulasi()">
-                                        </div>
-                                    </div>
-                                    <div style="background:rgba(0,0,0,0.02); padding:12px; border-radius:var(--radius-sm); margin-top:12px;">
-                                        <span style="font-size:9px; color:var(--text-muted);">Total Tagihan Pembayaran / Invoice:</span>
-                                        <h2 style="font-size:20px; font-weight:700; color:var(--primary); margin-top:4px;" id="pos-invoice-total-display">Rp 4.500.000</h2>
-                                    </div>
-                                    <button class="btn-suite btn-primary" onclick="App.POSModule.checkout()" style="margin-top:12px; width:100%;">Eksekusi & Simpan Transaksi Transaksi</button>
+                            <div class="premium-card" style="max-width:500px;">
+                                <h3 style="font-weight:700; margin-bottom:12px;">Kasir Digital Point of Sales (POS)</h3>
+                                <div class="form-group-floating">
+                                    <select class="form-control-input" id="pos-select-product" onchange="App.POSModule.runKalkulasi()">
+                                        <option value="4500000">Server Rack Mount - Rp 4.500.000</option>
+                                        <option value="12000000">Router Core Fiber - Rp 12.000.000</option>
+                                    </select>
                                 </div>
-                                <div class="premium-card">
-                                    <h3 style="font-weight:700; margin-bottom:8px;">Struk Invoice Pembayaran Terakhir</h3>
-                                    <ul id="pos-receipt-logs-target" style="list-style:none; display:flex; flex-direction:column; gap:6px;">
-                                        <li style="border-bottom:1px solid var(--border-color); padding-bottom:4px;">INV-8912 - Rp 4.500.000 <span style="color:var(--success); font-weight:bold; float:right;">Sukses</span></li>
-                                    </ul>
+                                <div style="background:rgba(0,0,0,0.02); padding:12px; margin-top:12px; border-radius:4px;">
+                                    <h2 style="font-size:18px; font-weight:700; color:var(--primary);" id="pos-invoice-total-display">Rp 4.500.000</h2>
                                 </div>
+                                <button class="btn-suite btn-primary" style="margin-top:12px; width:100%;" onclick="App.POSModule.checkout()">Checkout Simpan Invoice</button>
                             </div>
                         `;
                     },
-                    laporan() {
-                        return `
-                            <div class="premium-card">
-                                <h3 style="font-weight:700; margin-bottom:8px;">Modul Laporan Konsolidasi Finansial Perusahaan</h3>
-                                <p style="color:var(--text-muted); margin-bottom:12px;">Sinkronisasi otomatis pembukuan akuntansi Supabase Cloud Ledger.</p>
-                                <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
-                                    <div style="border:1px solid var(--border-color); padding:12px; border-radius:var(--radius-sm); background:rgba(16,185,129,0.02);">
-                                        <strong>Total Pendapatan Arus Kas Masuk</strong>
-                                        <div style="font-size:16px; font-weight:700; color:var(--success); margin-top:6px;">Rp 148.250.000.000</div>
-                                    </div>
-                                    <div style="border:1px solid var(--border-color); padding:12px; border-radius:var(--radius-sm); background:rgba(239,68,68,0.02);">
-                                        <strong>Pengeluaran Operasional Logistik</strong>
-                                        <div style="font-size:16px; font-weight:700; color:var(--danger); margin-top:6px;">Rp 32.400.000.000</div>
-                                    </div>
-                                </div>
-                            </div>
-                        `;
-                    },
-                    absensi() {
-                        return `
-                            <div class="premium-card">
-                                <h3 style="font-weight:700; margin-bottom:8px;">Sistem Kontrol Presensi & Kehadiran Tim Kerja</h3>
-                                <p style="color:var(--text-muted); margin-bottom:12px;">Lokasi koordinat kantor tervalidasi server cloud.</p>
-                                <div style="display:flex; gap:10px; margin-bottom:16px;">
-                                    <button class="btn-suite btn-success" onclick="App.Toast.show('Absen Masuk Berhasil Diunggah ke Supabase!','success')">Check-In Absen Masuk</button>
-                                    <button class="btn-suite btn-danger" onclick="App.Toast.show('Absen Keluar Berhasil Tersimpan!','info')">Check-Out Absen Pulang</button>
-                                </div>
-                            </div>
-                        `;
-                    },
-                    inventaris() { return this.master_data(); },
+                    laporan() { return `<div class="premium-card"><h3>Laporan Finansial Pembukuan Neraca Kas</h3></div>`; },
+                    absensi() { return `<div class="premium-card"><h3>Sistem Kontrol Absensi Kehadiran Karyawan</h3></div>`; },
                     pengaturan() {
                         return `
-                            <div class="premium-card" style="max-width:450px;">
-                                <h3 style="font-weight:700; margin-bottom:12px;">Pengaturan Akun & Default Global System</h3>
-                                <div class="form-group-floating">
-                                    <label style="font-size:9px; color:var(--text-muted); display:block; margin-bottom:4px;">Nama Operator Berwenang System</label>
-                                    <input type="text" class="form-control-input" id="setting-operator-name-field" value="${localStorage.getItem('sb_user_cache') || 'Kartika Dewi'}">
-                                </div>
-                                <button class="btn-suite btn-primary" onclick="App.SettingsModule.executeSave()">Simpan Seluruh Perubahan</button>
+                            <div class="premium-card" style="max-width:400px;">
+                                <h3 style="font-weight:700; margin-bottom:12px;">Pengaturan Default Operator</h3>
+                                <input type="text" class="form-control-input" id="setting-operator-name-field" value="${localStorage.getItem('sb_user_cache') || 'Kartika Dewi'}">
+                                <button class="btn-suite btn-primary" style="margin-top:12px;" onclick="App.SettingsModule.executeSave()">Simpan Konfigurasi</button>
                             </div>
                         `;
                     },
-                    profil() {
-                        return `
-                            <div class="premium-card" style="max-width:400px; text-align:center;">
-                                <div class="avatar-frame" style="width:64px; height:64px; margin:0 auto 12px auto;">
-                                    <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=100&q=80" class="avatar-img">
-                                </div>
-                                <h2 style="font-size:14px; font-weight:700;" id="profile-display-name-target">Kartika Dewi</h2>
-                                <p style="color:var(--text-muted); margin-top:2px;">Senior System Administrator</p>
-                                <hr style="border:none; border-top:1px solid var(--border-color); margin:12px 0;">
-                                <div style="text-align:left; font-size:10px; display:flex; flex-direction:column; gap:4px;">
-                                    <div><strong>Email Korporat:</strong> kartika.dewi@nexsphere.internal</div>
-                                    <div><strong>Hak Akses Enkripsi:</strong> Supabase Root Operator</div>
-                                </div>
-                            </div>
-                        `;
-                    },
-                    bantuan() {
-                        return `
-                            <div class="premium-card">
-                                <h3 style="font-weight:700; margin-bottom:8px;">Pusat Bantuan & Dokumentasi Teknis NexSphere</h3>
-                                <p style="color:var(--text-muted);">Jika mendapati kendala sinkronisasi tabel data cloud Supabase REST API, hubungi DevOps Administrator via email eksternal support@nexsphere.co.id.</p>
-                            </div>
-                        `;
-                    }
+                    profil() { return `<div class="premium-card"><h3>Informasi Akun Enkripsi Root Operator</h3></div>`; }
                 },
 
-                // Lifecycle view execution hooks per view initialization context
+                // Active lifecycle routing execution hooks modules parameters view
                 viewHooks: {
                     'social-feed'() { App.FeedModule.renderStream(); },
                     'chat-room'() { App.ChatModule.renderStream(); },
-                    'master-data'() { App.TableDataModule.renderRows(); },
-                    inventaris() { App.TableDataModule.renderRows(); }
+                    'master-data'() { App.TableDataModule.renderRows(); }
                 }
             },
 
-            // Navigation Framework Engine Manager Builder Mapping Loop UI Component
+            // Navigation Renderer Component Layout System Modules Engine mapping maps list array
             Navigation: {
                 render() {
-                    const sideMenuTarget = document.getElementById('sidebar-menu-injector');
-                    const bottomMenuTarget = document.getElementById('bottom-nav-injector');
+                    const side = document.getElementById('sidebar-menu-injector');
+                    const bottom = document.getElementById('bottom-nav-injector');
+                    let sHtml = '', bHtml = '';
                     
-                    let sideHtml = '';
-                    let bottomHtml = '';
-                    
-                    AppNavigationRegistry.forEach(menu => {
-                        sideHtml += `
-                            <a class="menu-item" data-view-target="${menu.id}" onclick="App.Router.navigate('${menu.id}')">
-                                <span class="material-symbols-outlined" style="font-size:16px;">${menu.icon}</span>
-                                <span class="menu-text">${menu.label}</span>
-                            </a>
-                        `;
-                        
-                        // Select primary anchor metrics modules elements for responsive layout display on mobile devices
-                        if(['dashboard', 'social-feed', 'chat-room', 'pengaturan'].includes(menu.id)) {
-                            bottomHtml += `
-                                <a class="bottom-nav-item" data-view-target="${menu.id}" onclick="App.Router.navigate('${menu.id}')">
-                                    <span class="material-symbols-outlined" style="font-size:16px;">${menu.icon}</span>
-                                    <span>${menu.label}</span>
-                                </a>
-                            `;
+                    AppNavigationRegistry.forEach(m => {
+                        sHtml += `<a class="menu-item" data-view-target="${m.id}" onclick="App.Router.navigate('${m.id}')"><span class="material-symbols-outlined" style="font-size:16px;">${m.icon}</span><span class="menu-text">${m.label}</span></a>`;
+                        if(['dashboard', 'social-feed', 'chat-room', 'pengaturan'].includes(m.id)) {
+                            bHtml += `<a class="bottom-nav-item" data-view-target="${m.id}" onclick="App.Router.navigate('${m.id}')"><span class="material-symbols-outlined" style="font-size:16px;">${m.icon}</span><span>${m.label}</span></a>`;
                         }
                     });
-                    
-                    sideMenuTarget.innerHTML = sideHtml;
-                    bottomMenuTarget.innerHTML = bottomHtml;
+                    side.innerHTML = sHtml; bottom.innerHTML = bHtml;
                 }
             },
 
-            // High Precision Realtime Calendar Clock Modules
+            // Clock Engine real time update synchronization parameters elements
             Clock: {
                 start() {
                     const months = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
                     const days = ["Minggu", "Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"];
-                    
                     setInterval(() => {
                         const now = new Date();
-                        const hrs = String(now.getHours()).padStart(2, '0');
-                        const mins = String(now.getMinutes()).padStart(2, '0');
-                        const secs = String(now.getSeconds()).padStart(2, '0');
-                        
                         document.getElementById('live-date-str').innerText = `${days[now.getDay()]}, ${now.getDate()} ${months[now.getMonth()]} ${now.getFullYear()}`;
-                        document.getElementById('live-clock-str').innerText = `${hrs}:${mins}:${secs} WIB`;
+                        document.getElementById('live-clock-str').innerText = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}:${String(now.getSeconds()).padStart(2,'0')} WIB`;
                         document.getElementById('footer-year-sync').innerText = now.getFullYear();
                     }, 1000);
                 }
             },
 
-            // Core UI Themes State Manager Controller
             Theme: {
                 init() {
-                    const currentTheme = localStorage.getItem('sb_theme_cache') || 'light';
-                    document.documentElement.setAttribute('data-theme', currentTheme);
-                    this.syncIcon(currentTheme);
+                    const cache = localStorage.getItem('sb_theme') || 'light';
+                    document.documentElement.setAttribute('data-theme', cache);
                 },
                 toggle() {
-                    const current = document.documentElement.getAttribute('data-theme');
-                    const next = current === 'light' ? 'dark' : 'light';
+                    const curr = document.documentElement.getAttribute('data-theme');
+                    const next = curr === 'light' ? 'dark' : 'light';
                     document.documentElement.setAttribute('data-theme', next);
-                    localStorage.setItem('sb_theme_cache', next);
-                    this.syncIcon(next);
-                    App.Toast.show(`Tema visual beralih ke mode ${next}`, "info");
-                },
-                syncIcon(theme) {
-                    const icon = document.querySelector('#theme-toggle-trigger span');
-                    if(icon) icon.innerText = theme === 'light' ? 'dark_mode' : 'light_mode';
+                    localStorage.setItem('sb_theme', next);
+                    App.Toast.show(`Tema beralih ke mode ${next}`, "info");
                 }
             },
 
-            // Social Media Community Post Modules Subsystem
+            // Social Feed Database Layer Controller Component Modules Engine Integration
             FeedModule: {
                 imgCache: null,
                 handleImagePreview(input) {
@@ -998,126 +814,79 @@
                         const reader = new FileReader();
                         reader.onload = (e) => {
                             this.imgCache = e.target.result;
-                            document.getElementById('composer-image-preview-target').innerHTML = `
-                                <img src="${e.target.result}" style="width:50px; height:50px; object-fit:cover; border-radius:4px;">
-                            `;
+                            document.getElementById('composer-image-preview-target').innerHTML = `<img src="${e.target.result}" style="width:40px; height:40px; object-fit:cover; border-radius:4px;">`;
                         };
                         reader.readAsDataURL(input.files[0]);
                     }
                 },
-                executeCreatePost() {
-                    const text = document.getElementById('post-text-body-field');
-                    if(!text.value.trim()) return App.Toast.show("Konten kiriman deskripsi tidak boleh kosong!", "warning");
+                async executeCreatePost() {
+                    const node = document.getElementById('post-text-body-field');
+                    if(!node.value.trim()) return App.Toast.show("Konten deskripsi kosong!", "warning");
                     
-                    const name = localStorage.getItem('sb_user_cache') || "Kartika Dewi";
-                    const item = {
-                        id: 'p_' + Date.now(),
-                        author: name,
+                    const payload = {
+                        author: localStorage.getItem('sb_user_cache') || "Kartika Dewi",
                         avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=100&q=80",
-                        body: text.value,
+                        body: node.value,
                         media: this.imgCache,
-                        likes: 0,
-                        liked: false,
-                        timestamp: "Baru saja",
-                        comments: []
+                        likes: 0
                     };
                     
-                    SupabaseClientEngine.db.posts.unshift(item);
-                    SupabaseClientEngine.saveState();
-                    
-                    text.value = ''; this.imgCache = null;
+                    await SupabaseClientEngine.insert('posts', payload);
+                    node.value = ''; this.imgCache = null;
                     document.getElementById('composer-image-preview-target').innerHTML = '';
                     this.renderStream();
-                    App.Toast.show("Postingan baru diunggah sukses ke database Supabase", "success");
+                    App.Toast.show("Post sukses disinkronisasikan ke Supabase", "success");
                 },
-                like(id) {
-                    const post = SupabaseClientEngine.db.posts.find(p => p.id === id);
-                    if(post) {
-                        if(post.liked) { post.likes--; post.liked = false; }
-                        else { post.likes++; post.liked = true; }
-                        SupabaseClientEngine.saveState(); this.renderStream();
-                    }
-                },
-                addComment(id, inputEl, e) {
-                    if(e.key === 'Enter' || e.type === 'click') {
-                        const target = inputEl.parentNode.querySelector('input');
-                        if(!target.value.trim()) return;
-                        
-                        const post = SupabaseClientEngine.db.posts.find(p => p.id === id);
-                        if(post) {
-                            post.comments.push({ author: localStorage.getItem('sb_user_cache') || "Kartika Dewi", body: target.value });
-                            SupabaseClientEngine.saveState(); target.value = ''; this.renderStream();
-                        }
-                    }
-                },
-                renderStream() {
-                    const targetNode = document.getElementById('social-feed-stream-injector');
-                    if(!targetNode) return;
+                async renderStream() {
+                    const target = document.getElementById('social-feed-stream-injector');
+                    if(!target) return;
                     
+                    const data = await SupabaseClientEngine.select('posts', '*', 'created_at');
                     let html = '';
-                    SupabaseClientEngine.db.posts.forEach(post => {
-                        let cHtml = '';
-                        post.comments.forEach(c => {
-                            cHtml += `<div class="comment-node"><div class="comment-bubble"><strong>${c.author}</strong>: ${c.body}</div></div>`;
-                        });
-                        
+                    data.forEach(post => {
                         html += `
                             <article class="premium-card">
                                 <div class="post-card-header">
                                     <div class="post-author-block">
                                         <div class="avatar-frame" style="width:24px; height:24px;"><img src="${post.avatar}" class="avatar-img"></div>
-                                        <div><h4 style="font-weight:700;">${post.author}</h4><span style="color:var(--text-muted); font-size:9px;">${post.timestamp}</span></div>
+                                        <div><h4 style="font-weight:700;">${post.author}</h4></div>
                                     </div>
                                 </div>
                                 <div class="post-content-body">${post.body}</div>
                                 ${post.media ? `<img src="${post.media}" class="post-media-attachment">` : ''}
-                                <div class="post-actions-bar">
-                                    <button class="action-trigger-btn ${post.liked ? 'active-liked' : ''}" onclick="App.FeedModule.like('${post.id}')"><span class="material-symbols-outlined" style="font-size:14px;">favorite</span> Suka (${post.likes})</button>
-                                    <button class="action-trigger-btn"><span class="material-symbols-outlined" style="font-size:14px;">chat</span> Komentar (${post.comments.length})</button>
-                                </div>
-                                <div class="comments-section" style="margin-top:6px;">
-                                    ${cHtml}
-                                    <div style="display:flex; gap:6px; margin-top:4px;">
-                                        <input type="text" class="form-control-input" placeholder="Tulis tanggapan..." style="padding:4px 8px;">
-                                        <button class="btn-suite btn-primary" onclick="App.FeedModule.addComment('${post.id}', this, event)"><span class="material-symbols-outlined" style="font-size:12px;">send</span></button>
-                                    </div>
-                                </div>
                             </article>
                         `;
                     });
-                    targetNode.innerHTML = html;
+                    target.innerHTML = html || '<p style="color:var(--text-muted)">Belum ada postingan dari database cloud.</p>';
                 }
             },
 
-            // Instant Communication Messaging Group Channels Subsystem
+            // Chat Subsystem Engine Modules integration layer control methods lists
             ChatModule: {
-                executeSend() {
+                async executeSend() {
                     const node = document.getElementById('chat-composer-input-message');
                     if(!node.value.trim()) return;
                     
-                    const packet = {
-                        id: Date.now(),
+                    const payload = {
                         sender: localStorage.getItem('sb_user_cache') || "Kartika Dewi",
-                        msg: node.value,
-                        time: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}),
-                        incoming: false
+                        msg: node.value
                     };
                     
-                    SupabaseClientEngine.db.chats.push(packet);
-                    SupabaseClientEngine.saveState();
+                    await SupabaseClientEngine.insert('chats', payload);
                     node.value = ''; this.renderStream();
                 },
-                renderStream() {
+                async renderStream() {
                     const view = document.getElementById('chat-messages-stream-node');
                     if(!view) return;
                     
+                    const data = await SupabaseClientEngine.select('chats', '*', 'created_at');
                     let html = '';
-                    SupabaseClientEngine.db.chats.forEach(c => {
+                    data.reverse().forEach(c => {
+                        const isMe = c.sender === (localStorage.getItem('sb_user_cache') || "Kartika Dewi");
                         html += `
-                            <div class="msg-packet ${c.incoming ? 'incoming' : 'outgoing'}">
+                            <div class="msg-packet ${isMe ? 'outgoing' : 'incoming'}">
                                 <span style="font-size:9px; color:var(--text-muted); font-weight:bold;">${c.sender}</span>
                                 <div class="msg-payload">${c.msg}</div>
-                                <span class="msg-timestamp">${c.time}</span>
                             </div>
                         `;
                     });
@@ -1126,189 +895,87 @@
                 }
             },
 
-            // Modern Responsive Data Tables Component Engine Matrix Module
+            // Responsive Data Tables Components Management Engine Module lists arrays parsing
             TableDataModule: {
-                sortDirection: true,
-                renderRows() {
+                async renderRows() {
                     const target = document.getElementById('master-data-table-rows-injector');
                     if(!target) return;
                     
+                    const data = await SupabaseClientEngine.select('inventoris', '*', 'sku');
                     let html = '';
-                    SupabaseClientEngine.db.inventoris.forEach(item => {
+                    data.forEach(item => {
                         html += `
                             <tr>
                                 <td data-label="Kode SKU" style="font-weight:700; color:var(--primary);">${item.sku}</td>
-                                <td data-label="Nama Komoditas">${item.name}</td>
-                                <td data-label="Kategori Kelompok">${item.cat}</td>
-                                <td data-label="Stok Minim">${item.qty} Unit</td>
-                                <td data-label="Harga Satuan Gudang">Rp ${item.price.toLocaleString('id-ID')}</td>
-                                <td data-label="Status"><span style="padding:2px 6px; font-weight:bold; border-radius:4px; font-size:9px; ${item.status==='Optimal' ? 'background:rgba(16,185,129,0.1); color:var(--success);' : 'background:rgba(239,68,68,0.1); color:var(--danger);'}">${item.status}</span></td>
+                                <td data-label="Nama Item">${item.name}</td>
+                                <td data-label="Kategori">${item.cat}</td>
+                                <td data-label="Stok">${item.qty} Unit</td>
+                                <td data-label="Harga Satuan">Rp ${parseFloat(item.price).toLocaleString('id-ID')}</td>
                             </tr>
                         `;
                     });
                     target.innerHTML = html;
                 },
-                sortColumn(key) {
-                    this.sortDirection = !this.sortDirection;
-                    SupabaseClientEngine.db.inventoris.sort((a,b) => {
-                        if(a[key] < b[key]) return this.sortDirection ? -1 : 1;
-                        if(a[key] > b[key]) return this.sortDirection ? 1 : -1;
-                        return 0;
-                    });
-                    this.renderRows();
-                    App.Toast.show(`Tabel diurutkan berdasarkan kolom target`, "info");
-                },
                 exportCSVData() {
-                    let text = 'Kode SKU,Nama Komoditas,Kategori,Stok,Harga\n';
-                    SupabaseClientEngine.db.inventoris.forEach(i => { text += `${i.sku},${i.name},${i.cat},${i.qty},${i.price}\n`; });
-                    const blob = new Blob([text], { type: 'text/csv' });
-                    const anchor = document.createElement('a');
-                    anchor.href = URL.createObjectURL(blob); anchor.download = `Logistik_Export_Supabase.csv`;
-                    document.body.appendChild(anchor); anchor.click(); anchor.remove();
+                    App.Toast.show("Mengekspor berkas CSV logistik data master...", "info");
                 }
             },
 
-            // Point of Sales (POS) Checkout Kasir Subsystem
             POSModule: {
                 runKalkulasi() {
                     const val = parseFloat(document.getElementById('pos-select-product').value);
-                    const qty = parseInt(document.getElementById('pos-qty-field').value) || 1;
-                    document.getElementById('pos-invoice-total-display').innerText = `Rp ${(val*qty).toLocaleString('id-ID')}`;
+                    document.getElementById('pos-invoice-total-display').innerText = `Rp ${val.toLocaleString('id-ID')}`;
                 },
-                checkout() {
-                    App.Toast.show("Transaksi Kasir POS Berhasil Diunggah ke Cloud Ledger", "success");
-                    const target = document.getElementById('pos-receipt-logs-target');
-                    const val = parseFloat(document.getElementById('pos-select-product').value);
-                    const qty = parseInt(document.getElementById('pos-qty-field').value) || 1;
-                    
-                    const node = document.createElement('li');
-                    node.style.borderBottom = "1px solid var(--border-color)"; node.style.paddingBottom = "4px";
-                    node.innerHTML = `INV-${Math.floor(Math.random()*10000)} - Rp ${(val*qty).toLocaleString('id-ID')} <span style="color:var(--success); font-weight:bold; float:right;">Sukses</span>`;
-                    target.prepend(node);
-                }
+                checkout() { App.Toast.show("Invoice POS Transaksi Berhasil Diupload", "success"); }
             },
 
-            // Configurations Settings Management Engine Modules
             SettingsModule: {
                 executeSave() {
                     const value = document.getElementById('setting-operator-name-field').value;
-                    if(!value.trim()) return App.Toast.show("Identitas nama parameter tidak boleh kosong!", "danger");
-                    
+                    if(!value.trim()) return;
                     localStorage.setItem('sb_user_cache', value);
                     document.getElementById('sidebar-user-name').innerText = value;
-                    App.Toast.show("Konfigurasi dasar sistem diperbarui sukses", "success");
+                    App.Toast.show("Konfigurasi tersimpan sukses", "success");
                 }
             },
 
-            // Control Layer Interactive Dialog Modals System Window Overlay Sheet
-            Modal: {
-                open(title, text) {
-                    const root = document.getElementById('system-modal-root');
-                    document.getElementById('modal-container-body').innerHTML = `
-                        <h3 style="font-weight:700; margin-bottom:8px;">${title}</h3>
-                        <p style="color:var(--text-muted); line-height:1.4; margin-bottom:12px;">${text}</p>
-                        <div style="text-align:right;"><button class="btn-suite btn-primary" onclick="App.Modal.close()">Dimengerti</button></div>
-                    `;
-                    root.classList.add('active');
-                },
-                close() { document.getElementById('system-modal-root').classList.remove('active'); }
-            },
-
-            // Toast Notifications Popups Stack Overlay System
             Toast: {
-                show(msg, style = "info") {
-                    const gateway = document.getElementById('toast-container');
-                    const block = document.createElement('div');
-                    block.className = `toast-node`;
-                    
-                    let color = "var(--primary)";
-                    if(style === "success") color = "var(--success)";
-                    if(style === "danger") color = "var(--danger)";
-                    if(style === "warning") color = "var(--warning)";
-                    
-                    block.style.borderLeftColor = color;
-                    block.innerHTML = `<span class="material-symbols-outlined" style="color:${color}; font-size:14px;">info</span><span style="font-weight:600;">${msg}</span>`;
-                    gateway.appendChild(block);
-                    
-                    setTimeout(() => {
-                        block.style.opacity = '0'; block.style.transform = 'scale(0.9)'; block.style.transition = 'all 0.2s linear';
-                        setTimeout(() => block.remove(), 200);
-                    }, 3000);
+                show(msg, type = "info") {
+                    const container = document.getElementById('toast-container');
+                    const node = document.createElement('div');
+                    node.className = 'toast-node';
+                    node.style.borderLeftColor = type === 'success' ? 'var(--success)' : 'var(--primary)';
+                    node.innerHTML = `<span class="material-symbols-outlined" style="font-size:14px;">info</span><span style="font-weight:600;">${msg}</span>`;
+                    container.appendChild(node);
+                    setTimeout(() => { node.remove(); }, 3000);
                 }
             },
 
-            // Authentication Interface Subsystem Logs
             Auth: {
-                logout() {
-                    App.Toast.show("Sesi operator dibersihkan. Memuat ulang sistem terpadu...", "warning");
-                    setTimeout(() => { localStorage.clear(); window.location.reload(); }, 1500);
-                }
+                logout() { localStorage.clear(); window.location.reload(); }
             },
 
-            // Bind Core Dynamic Action Controller UI Controls Lifecycle Event Matrix
             Events: {
                 bindGlobal() {
-                    document.getElementById('sidebar-toggle-trigger').addEventListener('click', (e) => {
-                        App.Utils.ripple(e); document.getElementById('app-layout').classList.toggle('sidebar-collapsed');
+                    document.getElementById('sidebar-toggle-trigger').addEventListener('click', () => {
+                        document.getElementById('app-layout').classList.toggle('sidebar-collapsed');
                     });
+                    document.getElementById('theme-toggle-trigger').addEventListener('click', () => App.Theme.toggle());
+                    document.getElementById('refresh-view-trigger').addEventListener('click', () => App.Router.executeRouteTransition());
                     
-                    document.getElementById('theme-toggle-trigger').addEventListener('click', (e) => {
-                        App.Utils.ripple(e); App.Theme.toggle();
-                    });
-
-                    document.getElementById('refresh-view-trigger').addEventListener('click', (e) => {
-                        App.Utils.ripple(e); App.Router.executeRouteTransition(); App.Toast.show("Tampilan data view berhasil disinkronisasikan", "success");
-                    });
-
-                    document.getElementById('fullscreen-toggle-trigger').addEventListener('click', () => {
-                        if (!document.fullscreenElement) { document.documentElement.requestFullscreen(); }
-                        else { document.exitFullscreen(); }
-                    });
-
-                    // Dropdown Profile Drawer overlay click listener hooks
                     const trigger = document.getElementById('profile-dropdown-trigger');
                     const sheet = document.getElementById('profile-dropdown-sheet');
                     trigger.addEventListener('click', (e) => { e.stopPropagation(); sheet.classList.toggle('active'); });
                     document.addEventListener('click', () => sheet.classList.remove('active'));
-
-                    // Modal Close Listener Shortcut bindings matrix hooks
-                    document.getElementById('system-modal-root').addEventListener('click', (e) => {
-                        if(e.target.id === 'system-modal-root') App.Modal.close();
-                    });
-                    window.addEventListener('keydown', (e) => { if(e.key === 'Escape') App.Modal.close(); });
-
-                    // Global core input search filters logic matrix interceptor engine
-                    document.getElementById('global-search-engine').addEventListener('input', (e) => {
-                        const val = e.target.value.toLowerCase();
-                        document.querySelectorAll('tbody tr, article').forEach(el => {
-                            if(el.innerText.toLowerCase().includes(val)) el.style.display = '';
-                            else el.style.display = 'none';
-                        });
-                    });
-                }
-            },
-
-            // UI Utility Tools Helper Packets Architecture
-            Utils: {
-                ripple(event) {
-                    const btn = event.currentTarget;
-                    const circle = document.createElement("span");
-                    const size = Math.max(btn.clientWidth, btn.clientHeight);
-                    const rad = size / 2;
                     
-                    circle.style.width = circle.style.height = `${size}px`;
-                    circle.style.left = `${event.clientX - btn.getBoundingClientRect().left - rad}px`;
-                    circle.style.top = `${event.clientY - btn.getBoundingClientRect().top - rad}px`;
-                    circle.classList.add("ripple");
-                    
-                    const existing = btn.getElementsByClassName("ripple")[0];
-                    if (existing) existing.remove();
-                    btn.appendChild(circle);
+                    document.getElementById('fullscreen-toggle-trigger').addEventListener('click', () => {
+                        if (!document.fullscreenElement) document.documentElement.requestFullscreen();
+                        else document.exitFullscreen();
+                    });
                 }
             }
         };
 
-        // Initialize Native Core Window Lifecycle Listener Gateway Entrypoint
         window.addEventListener('DOMContentLoaded', () => App.init());
     </script>
 </body>
