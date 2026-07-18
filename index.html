@@ -3,980 +3,1235 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>NexSphere - Enterprise Business & Social Cloud Suite</title>
-    <!-- Material Symbols Outlined Icons -->
+    <title>NexSocial - Premium Social Workspace</title>
+    
+    <!-- Google Fonts & Material Symbols -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0..1,0" rel="stylesheet">
     
     <style>
         /* ==========================================================================
-           1. CSS VARIABLES, CORE THEMES & RESET (FONT ARIAL 8pt/11px BASELINE)
+           1. CSS VARIABLES & PREMIUM THEME CONFIGURATION
            ========================================================================== */
         :root {
-            --font-main: 'Arial', sans-serif;
-            --base-font-size: 11px; /* 8pt Baseline */
+            --font-main: 'Plus Jakarta Sans', sans-serif;
             
-            /* Light Theme Configuration */
-            --bg-primary: #f1f5f9;
-            --bg-surface: rgba(255, 255, 255, 0.8);
-            --bg-surface-hover: rgba(255, 255, 255, 0.95);
-            --border-color: rgba(226, 232, 240, 0.8);
-            --text-main: #0f172a;
-            --text-muted: #64748b;
+            /* Light Theme - Elegant & Glassmorphic */
+            --bg-body: #f4f7fe;
+            --bg-glass: rgba(255, 255, 255, 0.75);
+            --bg-glass-hover: rgba(255, 255, 255, 0.95);
+            --bg-glass-solid: #ffffff;
+            --border-glass: rgba(255, 255, 255, 0.4);
+            --border-color: rgba(135, 143, 166, 0.2);
             
-            /* UI Color System Palette */
-            --primary: #4f46e5;
-            --primary-state: rgba(79, 70, 229, 0.08);
-            --primary-container: #e0e7ff;
-            --secondary: #0ea5e9;
-            --success: #10b981;
-            --danger: #ef4444;
-            --warning: #f59e0b;
-            --info: #6366f1;
+            --text-main: #2b3674;
+            --text-muted: #a3aed1;
             
-            /* Structural Foundations */
-            --blur-radius: 12px;
-            --shadow-sm: 0 1px 3px rgba(0,0,0,0.05);
-            --shadow-md: 0 4px 12px -2px rgba(0,0,0,0.08);
-            --shadow-lg: 0 16px 24px -6px rgba(0,0,0,0.12);
-            --radius-sm: 4px;
-            --radius-md: 8px;
-            --radius-lg: 12px;
+            /* Social Brand Colors */
+            --primary: #4318FF;
+            --primary-state: rgba(67, 24, 255, 0.08);
+            --secondary: #01B574;
+            --accent: #FF7E67;
+            --danger: #EE5D50;
+            --warning: #FFCE20;
+            
+            /* Structural Variables */
+            --blur-md: 12px;
+            --blur-lg: 20px;
+            --shadow-soft: 0 18px 40px rgba(112, 144, 176, 0.12);
+            --shadow-float: 0 10px 20px rgba(67, 24, 255, 0.15);
+            
+            --radius-sm: 10px;
+            --radius-md: 16px;
+            --radius-lg: 24px;
+            --radius-xl: 30px;
             --radius-round: 9999px;
             
-            /* Screen Layout Constants */
-            --header-height: 50px;
-            --sidebar-width: 220px;
-            --bottom-nav-height: 60px;
-            --transition-smooth: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            --header-height: 80px;
+            --sidebar-width: 280px;
+            --bottom-nav-height: 70px;
+            
+            --trans-smooth: all 0.4s cubic-bezier(0.25, 1, 0.5, 1);
         }
 
         [data-theme="dark"] {
-            --bg-primary: #090d16;
-            --bg-surface: rgba(20, 27, 41, 0.75);
-            --bg-surface-hover: rgba(28, 37, 56, 0.9);
-            --border-color: rgba(51, 65, 85, 0.5);
-            --text-main: #f8fafc;
-            --text-muted: #94a3b8;
-            --primary: #818cf8;
-            --primary-state: rgba(129, 140, 248, 0.15);
-            --primary-container: #1e1b4b;
-            --shadow-sm: 0 1px 3px rgba(0,0,0,0.3);
-            --shadow-md: 0 4px 12px -2px rgba(0,0,0,0.5);
-            --shadow-lg: 0 16px 24px -6px rgba(0,0,0,0.6);
+            --bg-body: #0b1437;
+            --bg-glass: rgba(17, 28, 68, 0.75);
+            --bg-glass-hover: rgba(17, 28, 68, 0.95);
+            --bg-glass-solid: #111c44;
+            --border-glass: rgba(255, 255, 255, 0.05);
+            --border-color: rgba(255, 255, 255, 0.1);
+            
+            --text-main: #ffffff;
+            --text-muted: #8f9bba;
+            
+            --primary: #7551FF;
+            --primary-state: rgba(117, 81, 255, 0.15);
+            
+            --shadow-soft: 0 18px 40px rgba(0, 0, 0, 0.25);
+            --shadow-float: 0 10px 20px rgba(117, 81, 255, 0.25);
         }
 
+        /* ==========================================================================
+           2. GLOBAL RESET & BASE STYLES
+           ========================================================================== */
         * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
             font-family: var(--font-main);
-            font-size: var(--base-font-size);
             -webkit-tap-highlight-color: transparent;
         }
 
         body {
-            background-color: var(--bg-primary);
+            background-color: var(--bg-body);
             color: var(--text-main);
             overflow-x: hidden;
-            transition: background-color 0.3s ease, color 0.3s ease;
+            transition: var(--trans-smooth);
             min-height: 100vh;
-        }
-
-        input, textarea, select, button {
-            font-family: inherit;
-            color: inherit;
-            outline: none;
+            /* Animated background gradient for elegance */
+            background-image: 
+                radial-gradient(at 0% 0%, rgba(67, 24, 255, 0.05) 0px, transparent 50%),
+                radial-gradient(at 100% 100%, rgba(1, 181, 116, 0.05) 0px, transparent 50%);
+            background-attachment: fixed;
         }
 
         a { text-decoration: none; color: inherit; }
+        ul { list-style: none; }
+        button, input, textarea { font-family: inherit; outline: none; border: none; }
 
         /* Custom Scrollbar */
-        ::-webkit-scrollbar { width: 5px; height: 5px; }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
         ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: var(--radius-round); }
-        ::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+        ::-webkit-scrollbar-thumb { background: rgba(135, 143, 166, 0.3); border-radius: var(--radius-round); }
+        ::-webkit-scrollbar-thumb:hover { background: var(--primary); }
 
         /* ==========================================================================
-           2. MASTER LAYOUT ARCHITECTURE
+           3. AUTHENTICATION LAYOUT (LOGIN/SIGNUP)
+           ========================================================================== */
+        #auth-layout {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 24px;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            z-index: 2000;
+            background: var(--bg-body);
+            transition: var(--trans-smooth);
+        }
+
+        .auth-card {
+            background: var(--bg-glass);
+            backdrop-filter: blur(var(--blur-lg));
+            -webkit-backdrop-filter: blur(var(--blur-lg));
+            border: 1px solid var(--border-glass);
+            border-radius: var(--radius-xl);
+            padding: 40px;
+            width: 100%;
+            max-width: 450px;
+            box-shadow: var(--shadow-soft);
+            animation: slideUpFade 0.6s cubic-bezier(0.25, 1, 0.5, 1);
+            text-align: center;
+        }
+
+        .auth-logo {
+            width: 64px;
+            height: 64px;
+            background: linear-gradient(135deg, var(--primary), #a68cff);
+            border-radius: var(--radius-lg);
+            display: flex; align-items: center; justify-content: center;
+            color: white; font-size: 32px; font-weight: 700;
+            margin: 0 auto 24px auto;
+            box-shadow: var(--shadow-float);
+        }
+
+        /* ==========================================================================
+           4. MAIN APP LAYOUT (HEADER, SIDEBAR, CONTENT, FOOTER)
            ========================================================================== */
         #app-layout {
             display: grid;
             grid-template-areas: 
-                "header header"
+                "sidebar header"
                 "sidebar content"
-                "footer footer";
+                "sidebar footer";
             grid-template-columns: var(--sidebar-width) 1fr;
             grid-template-rows: var(--header-height) 1fr auto;
             min-height: 100vh;
+            display: none; /* Hidden by default until logged in */
+            opacity: 0;
+            transition: opacity 0.5s ease;
         }
 
-        #app-layout.sidebar-collapsed {
-            --sidebar-width: 60px;
-        }
+        #app-layout.active { display: grid; opacity: 1; }
+        #app-layout.sidebar-collapsed { --sidebar-width: 90px; }
 
+        /* HEADER */
         .app-header {
             grid-area: header;
-            background: var(--bg-surface);
-            backdrop-filter: blur(var(--blur-radius));
-            -webkit-backdrop-filter: blur(var(--blur-radius));
+            background: var(--bg-glass);
+            backdrop-filter: blur(var(--blur-md));
+            -webkit-backdrop-filter: blur(var(--blur-md));
             border-bottom: 1px solid var(--border-color);
+            padding: 0 32px;
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 0 16px;
-            position: fixed;
-            top: 0; left: 0; right: 0;
-            height: var(--header-height);
+            position: sticky;
+            top: 0;
             z-index: 1000;
-            box-shadow: var(--shadow-sm);
         }
 
-        .header-left, .header-right {
-            display: flex;
-            align-items: center;
-            gap: 12px;
+        .header-left, .header-right { display: flex; align-items: center; gap: 16px; }
+
+        .search-box {
+            position: relative;
+            width: 300px;
         }
-
-        .brand-wrapper {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            cursor: pointer;
-        }
-
-        .brand-logo {
-            width: 28px; height: 28px;
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-            border-radius: var(--radius-md);
-            display: flex; align-items: center; justify-content: center;
-            color: white; font-weight: bold; font-size: 13px;
-        }
-
-        .brand-name {
-            font-size: 14px; font-weight: 700;
-            background: linear-gradient(135deg, var(--text-main), var(--text-muted));
-            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-        }
-
-        #app-layout.sidebar-collapsed .brand-name { display: none; }
-
-        .search-container { position: relative; width: 220px; }
-        .search-input {
-            width: 100%; padding: 6px 10px 6px 28px;
-            border-radius: var(--radius-sm);
+        .search-box input {
+            width: 100%;
+            background: var(--bg-body);
             border: 1px solid var(--border-color);
-            background: rgba(0, 0, 0, 0.02);
-            transition: var(--transition-smooth);
+            padding: 12px 20px 12px 48px;
+            border-radius: var(--radius-round);
+            color: var(--text-main);
+            transition: var(--trans-smooth);
         }
-        [data-theme="dark"] .search-input { background: rgba(255, 255, 255, 0.02); }
-        .search-input:focus { border-color: var(--primary); background: var(--bg-surface-hover); }
-        .search-icon { position: absolute; left: 8px; top: 50%; transform: translateY(-50%); color: var(--text-muted); }
+        .search-box input:focus { border-color: var(--primary); box-shadow: 0 0 0 4px var(--primary-state); }
+        .search-box .material-symbols-outlined {
+            position: absolute; left: 16px; top: 50%; transform: translateY(-50%);
+            color: var(--text-muted); pointer-events: none;
+        }
 
-        .meta-clock-widget {
+        .clock-widget {
             display: flex; flex-direction: column; align-items: flex-end;
-            border-right: 1px solid var(--border-color); padding-right: 12px;
+            padding-right: 20px; border-right: 1px solid var(--border-color);
         }
-        .meta-time { font-weight: 700; color: var(--text-main); }
+        .clock-date { font-size: 0.85rem; color: var(--text-muted); font-weight: 500; }
+        .clock-time { font-size: 1.1rem; font-weight: 700; color: var(--text-main); }
 
-        .icon-action-btn {
-            width: 32px; height: 32px; border-radius: var(--radius-sm);
-            border: none; background: transparent; color: var(--text-main);
+        .icon-btn {
+            width: 44px; height: 44px; border-radius: var(--radius-round);
             display: flex; align-items: center; justify-content: center;
-            cursor: pointer; position: relative; transition: var(--transition-smooth);
+            background: transparent; color: var(--text-muted);
+            cursor: pointer; position: relative; transition: var(--trans-smooth);
         }
-        .icon-action-btn:hover { background: var(--primary-state); color: var(--primary); }
-        .icon-action-btn .badge-dot {
-            position: absolute; top: 6px; right: 6px; width: 6px; height: 6px;
+        .icon-btn:hover { background: var(--bg-body); color: var(--primary); }
+        .badge {
+            position: absolute; top: 8px; right: 8px; width: 8px; height: 8px;
             background: var(--danger); border-radius: var(--radius-round);
         }
 
-        .app-sidebar {
-            grid-area: sidebar;
-            background: var(--bg-surface);
-            backdrop-filter: blur(var(--blur-radius));
-            -webkit-backdrop-filter: blur(var(--blur-radius));
-            border-right: 1px solid var(--border-color);
-            position: fixed; top: var(--header-height); left: 0; bottom: 0;
-            width: var(--sidebar-width); z-index: 999;
-            transition: var(--transition-smooth);
-            display: flex; flex-direction: column; justify-content: space-between;
-            padding: 12px 0; box-shadow: var(--shadow-sm);
+        .user-avatar {
+            width: 44px; height: 44px; border-radius: var(--radius-round);
+            object-fit: cover; cursor: pointer; border: 2px solid var(--primary);
+            padding: 2px;
         }
 
-        .sidebar-menu-wrapper { display: flex; flex-direction: column; gap: 2px; padding: 0 6px; }
-        
+        /* SIDEBAR */
+        .app-sidebar {
+            grid-area: sidebar;
+            background: var(--bg-glass-solid);
+            border-right: 1px solid var(--border-color);
+            padding: 32px 20px;
+            display: flex;
+            flex-direction: column;
+            position: fixed;
+            top: 0; left: 0; bottom: 0;
+            width: var(--sidebar-width);
+            z-index: 1001;
+            transition: var(--trans-smooth);
+            box-shadow: var(--shadow-soft);
+        }
+
+        .brand {
+            display: flex; align-items: center; gap: 12px; margin-bottom: 40px;
+            padding: 0 12px; cursor: pointer;
+        }
+        .brand-logo {
+            width: 36px; height: 36px; background: var(--primary); color: white;
+            border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center;
+            font-weight: 800; font-size: 18px;
+        }
+        .brand-name { font-size: 20px; font-weight: 800; color: var(--text-main); letter-spacing: -0.5px; }
+        #app-layout.sidebar-collapsed .brand-name { display: none; }
+
+        .sidebar-menu { display: flex; flex-direction: column; gap: 6px; flex: 1; }
         .menu-item {
-            display: flex; align-items: center; gap: 10px; padding: 8px 12px;
-            border-radius: var(--radius-sm); color: var(--text-muted);
-            cursor: pointer; transition: var(--transition-smooth);
+            display: flex; align-items: center; gap: 16px; padding: 14px 16px;
+            border-radius: var(--radius-md); color: var(--text-muted);
+            font-weight: 600; cursor: pointer; transition: var(--trans-smooth);
             position: relative; overflow: hidden;
         }
         .menu-item:hover { background: var(--primary-state); color: var(--primary); }
-        .menu-item.active {
-            background: var(--primary); color: white; font-weight: bold;
-            box-shadow: 0 2px 6px rgba(79, 70, 229, 0.2);
-        }
+        .menu-item.active { background: var(--primary); color: white; box-shadow: var(--shadow-float); }
+        .menu-item .menu-text { white-space: nowrap; transition: opacity 0.3s; }
+        #app-layout.sidebar-collapsed .menu-text { opacity: 0; width: 0; display: none; }
 
-        #app-layout.sidebar-collapsed .menu-text { display: none; }
-
-        .sidebar-user-card {
-            margin: 0 6px; padding: 8px; background: rgba(0, 0, 0, 0.02);
-            border-radius: var(--radius-sm); display: flex; align-items: center; gap: 8px;
+        .sidebar-profile {
+            margin-top: auto; padding: 16px; background: var(--bg-body);
+            border-radius: var(--radius-lg); display: flex; align-items: center; gap: 12px;
             border: 1px solid var(--border-color);
         }
-        [data-theme="dark"] .sidebar-user-card { background: rgba(255, 255, 255, 0.02); }
-        .avatar-frame {
-            position: relative; width: 28px; height: 28px;
-            border-radius: var(--radius-round); padding: 1px;
-            background: linear-gradient(135deg, var(--secondary), var(--primary));
-        }
-        .avatar-img { width: 100%; height: 100%; border-radius: var(--radius-round); object-fit: cover; }
-        .user-meta-info { display: flex; flex-direction: column; overflow: hidden; }
-        .user-display-name { font-weight: 600; white-space: nowrap; text-overflow: ellipsis; overflow: hidden; }
-        .user-role-lbl { font-size: 9px; color: var(--text-muted); }
-        #app-layout.sidebar-collapsed .sidebar-user-card { padding: 4px; justify-content: center; }
-        #app-layout.sidebar-collapsed .user-meta-info { display: none; }
+        .sidebar-profile-info { display: flex; flex-direction: column; overflow: hidden; }
+        .sp-name { font-weight: 700; font-size: 0.95rem; white-space: nowrap; }
+        .sp-role { font-size: 0.8rem; color: var(--text-muted); }
+        #app-layout.sidebar-collapsed .sidebar-profile { padding: 8px; justify-content: center; }
+        #app-layout.sidebar-collapsed .sidebar-profile-info { display: none; }
 
+        /* CONTENT AREA */
         .app-content {
-            grid-area: content; margin-top: var(--header-height); margin-left: var(--sidebar-width);
-            padding: 16px; min-height: calc(100vh - var(--header-height) - 35px);
-            transition: var(--transition-smooth);
+            grid-area: content;
+            padding: 32px;
+            min-height: calc(100vh - var(--header-height) - 70px);
+            position: relative;
         }
+        .view-container { animation: fadeScale 0.4s cubic-bezier(0.25, 1, 0.5, 1); }
 
+        /* FOOTER */
         .app-footer {
-            grid-area: footer; background: var(--bg-surface);
-            border-top: 1px solid var(--border-color); margin-left: var(--sidebar-width);
-            padding: 8px 16px; display: flex; justify-content: space-between;
-            align-items: center; color: var(--text-muted); transition: var(--transition-smooth);
+            grid-area: footer;
+            padding: 24px 32px;
+            background: transparent;
+            display: flex; justify-content: space-between; align-items: center;
+            border-top: 1px solid var(--border-color);
+            color: var(--text-muted); font-size: 0.85rem; font-weight: 500;
         }
+        .status-indicator { display: flex; align-items: center; gap: 8px; }
+        .status-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--secondary); box-shadow: 0 0 10px var(--secondary); }
+        .status-dot.offline { background: var(--danger); box-shadow: 0 0 10px var(--danger); }
 
-        .network-status-badge { display: flex; align-items: center; gap: 4px; font-weight: bold; }
-        .status-dot { width: 6px; height: 6px; border-radius: var(--radius-round); background: var(--success); }
-        .status-dot.offline { background: var(--danger); }
-
-        .bottom-nav { display: none; }
+        /* BOTTOM NAVIGATION (MOBILE) */
+        .bottom-nav {
+            display: none;
+            position: fixed; bottom: 0; left: 0; right: 0;
+            height: var(--bottom-nav-height);
+            background: var(--bg-glass);
+            backdrop-filter: blur(var(--blur-lg));
+            -webkit-backdrop-filter: blur(var(--blur-lg));
+            border-top: 1px solid var(--border-color);
+            z-index: 1000;
+            padding-bottom: env(safe-area-inset-bottom);
+            box-shadow: 0 -10px 30px rgba(0,0,0,0.05);
+        }
 
         /* ==========================================================================
-           3. UI STYLING & COMPONENTS (MATERIAL 3 GLASS CONFIGURATION)
+           5. PREMIUM UI COMPONENTS (CARDS, BUTTONS, FORMS)
            ========================================================================== */
-        .view-container { animation: fadeIn 0.25s cubic-bezier(0.4, 0, 0.2, 1); }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
-
-        .grid-dashboard { display: grid; grid-template-columns: 2fr 1fr; gap: 16px; }
         
-        .premium-card {
-            background: var(--bg-surface); backdrop-filter: blur(var(--blur-radius));
-            -webkit-backdrop-filter: blur(var(--blur-radius));
-            border: 1px solid var(--border-color); border-radius: var(--radius-md);
-            padding: 16px; box-shadow: var(--shadow-sm); transition: var(--transition-smooth);
-            margin-bottom: 16px; position: relative;
+        /* Cards */
+        .glass-card {
+            background: var(--bg-glass-solid);
+            border: 1px solid var(--border-glass);
+            border-radius: var(--radius-xl);
+            padding: 24px;
+            box-shadow: var(--shadow-soft);
+            transition: var(--trans-smooth);
+            margin-bottom: 24px;
+            position: relative;
         }
-        .premium-card:hover { transform: translateY(-1px); box-shadow: var(--shadow-md); }
+        .glass-card:hover { transform: translateY(-5px); box-shadow: var(--shadow-float); }
 
-        .welcome-gradient-card {
-            background: linear-gradient(135deg, var(--primary), var(--secondary)); color: white; border: none;
+        /* Buttons */
+        .btn {
+            padding: 12px 24px; border-radius: var(--radius-round);
+            font-weight: 700; font-size: 0.95rem; cursor: pointer;
+            display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+            transition: var(--trans-smooth); position: relative; overflow: hidden;
+            border: none;
         }
-        .welcome-gradient-card * { color: white !important; }
-
-        .stats-strip { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin-bottom: 16px; }
-        .stat-box {
-            background: var(--bg-surface); border: 1px solid var(--border-color);
-            border-radius: var(--radius-md); padding: 12px; display: flex; align-items: center; gap: 12px;
-        }
-        .stat-icon-wrapper {
-            width: 32px; height: 32px; border-radius: var(--radius-sm);
-            display: flex; align-items: center; justify-content: center;
-        }
-
-        .btn-suite {
-            padding: 6px 12px; border-radius: var(--radius-sm); border: none;
-            font-weight: 600; cursor: pointer; display: inline-flex;
-            align-items: center; gap: 6px; justify-content: center;
-            transition: var(--transition-smooth); position: relative; overflow: hidden;
-        }
-        .btn-primary { background: var(--primary); color: white; }
-        .btn-secondary { background: rgba(0,0,0,0.05); color: var(--text-main); }
-        [data-theme="dark"] .btn-secondary { background: rgba(255,255,255,0.05); }
-        .btn-success { background: var(--success); color: white; }
+        .btn-primary { background: var(--primary); color: white; box-shadow: var(--shadow-float); }
+        .btn-primary:hover { background: #3208e6; transform: translateY(-2px); }
+        .btn-secondary { background: var(--primary-state); color: var(--primary); }
+        .btn-secondary:hover { background: rgba(67, 24, 255, 0.15); }
         .btn-danger { background: var(--danger); color: white; }
-        .btn-suite:disabled { opacity: 0.5; cursor: not-allowed; }
+        .btn-full { width: 100%; }
 
-        .form-group-floating { position: relative; margin-bottom: 12px; }
-        .form-control-input {
-            width: 100%; padding: 8px 10px; border: 1px solid var(--border-color);
-            border-radius: var(--radius-sm); background: transparent; transition: var(--transition-smooth);
+        /* Floating Label Inputs */
+        .form-group { position: relative; margin-bottom: 24px; text-align: left; }
+        .form-input {
+            width: 100%; padding: 16px; padding-top: 24px;
+            background: var(--bg-body); border: 1px solid var(--border-color);
+            border-radius: var(--radius-md); color: var(--text-main);
+            font-size: 1rem; transition: var(--trans-smooth);
         }
-        .form-control-input:focus { border-color: var(--primary); box-shadow: 0 0 0 2px var(--primary-state); }
-        
-        .table-panel-holder { width: 100%; overflow-x: auto; border-radius: var(--radius-sm); border: 1px solid var(--border-color); }
-        .premium-table { width: 100%; border-collapse: collapse; text-align: left; }
-        .premium-table th {
-            background: rgba(0,0,0,0.02); padding: 8px 12px; font-weight: 700;
-            color: var(--text-muted); border-bottom: 2px solid var(--border-color);
-            cursor: pointer; user-select: none;
+        .form-input:focus { border-color: var(--primary); background: var(--bg-glass-solid); box-shadow: 0 0 0 4px var(--primary-state); }
+        .form-label {
+            position: absolute; left: 16px; top: 50%; transform: translateY(-50%);
+            color: var(--text-muted); pointer-events: none; transition: var(--trans-smooth);
+            font-weight: 500;
         }
-        [data-theme="dark"] .premium-table th { background: rgba(255, 255, 255, 0.02); }
-        .premium-table td { padding: 8px 12px; border-bottom: 1px solid var(--border-color); }
-        .premium-table tr:hover td { background: var(--primary-state); }
-
-        /* Social & Chat Layout Components */
-        .post-composer-area { display: flex; flex-direction: column; gap: 8px; }
-        .composer-textarea { width: 100%; min-height: 60px; border: 1px solid var(--border-color); border-radius: var(--radius-sm); background: rgba(0,0,0,0.01); padding: 8px; resize: none; }
-        .post-card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
-        .post-author-block { display: flex; align-items: center; gap: 8px; }
-        .post-content-body { line-height: 1.5; margin-bottom: 10px; white-space: pre-wrap; }
-        .post-media-attachment { width: 100%; max-height: 220px; border-radius: var(--radius-sm); object-fit: cover; margin-bottom: 10px; border: 1px solid var(--border-color); }
-        .post-actions-bar { display: flex; border-top: 1px solid var(--border-color); border-bottom: 1px solid var(--border-color); padding: 4px 0; gap: 4px; }
-        .action-trigger-btn { flex: 1; display: flex; align-items: center; justify-content: center; gap: 6px; padding: 6px; border: none; background: transparent; cursor: pointer; color: var(--text-muted); }
-        .action-trigger-btn.active-liked { color: var(--danger); font-weight: bold; }
-        .comments-section { background: rgba(0, 0, 0, 0.01); border-radius: var(--radius-sm); padding: 8px; display: flex; flex-direction: column; gap: 6px; }
-        .comment-node { display: flex; gap: 8px; margin-bottom: 4px; }
-        .comment-bubble { background: var(--bg-surface-hover); border: 1px solid var(--border-color); padding: 6px 10px; border-radius: 4px; flex: 1; }
-
-        .chat-module-container {
-            display: grid; grid-template-columns: 180px 1fr; border: 1px solid var(--border-color);
-            border-radius: var(--radius-md); background: var(--bg-surface); height: calc(100vh - var(--header-height) - 100px); overflow: hidden;
+        .form-input:focus ~ .form-label, .form-input:not(:placeholder-shown) ~ .form-label {
+            top: 12px; font-size: 0.75rem; color: var(--primary); font-weight: 700;
         }
-        .chat-channels-list { border-right: 1px solid var(--border-color); overflow-y: auto; display: flex; flex-direction: column; }
-        .channel-row { display: flex; align-items: center; gap: 8px; padding: 10px; cursor: pointer; border-bottom: 1px solid var(--border-color); }
-        .channel-row.active { background: var(--primary-state); font-weight: bold; }
-        .chat-viewport { display: flex; flex-direction: column; justify-content: space-between; background: rgba(0,0,0,0.01); }
-        .chat-messages-stream { flex: 1; padding: 16px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; }
-        .msg-packet { display: flex; flex-direction: column; max-width: 70%; gap: 2px; }
-        .msg-packet.incoming { align-self: flex-start; }
-        .msg-packet.outgoing { align-self: flex-end; align-items: flex-end; }
-        .msg-payload { padding: 8px 12px; border-radius: var(--radius-md); box-shadow: var(--shadow-sm); }
-        .incoming .msg-payload { background: var(--bg-surface); border: 1px solid var(--border-color); }
-        .outgoing .msg-payload { background: var(--primary); color: white; }
-        .msg-timestamp { font-size: 9px; color: var(--text-muted); }
-        .chat-composer-strip { padding: 10px 16px; background: var(--bg-surface); border-top: 1px solid var(--border-color); display: flex; gap: 8px; align-items: center; }
 
-        /* Modal Overlay & Toasts */
+        /* Modals */
         .modal-overlay {
             position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(15, 23, 42, 0.3); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);
-            z-index: 2000; display: flex; align-items: center; justify-content: center;
-            opacity: 0; pointer-events: none; transition: var(--transition-smooth);
+            background: rgba(11, 20, 55, 0.4); backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            z-index: 3000; display: flex; align-items: center; justify-content: center;
+            opacity: 0; pointer-events: none; transition: var(--trans-smooth);
         }
         .modal-overlay.active { opacity: 1; pointer-events: auto; }
-        .modal-sheet-box { background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: var(--radius-lg); width: 90%; max-width: 400px; padding: 16px; box-shadow: var(--shadow-lg); }
-        
-        #toast-container { position: fixed; top: 16px; right: 16px; z-index: 3000; display: flex; flex-direction: column; gap: 8px; pointer-events: none; }
-        .toast-node { background: var(--bg-surface); border-left: 4px solid var(--primary); box-shadow: var(--shadow-lg); padding: 10px 16px; border-radius: var(--radius-sm); display: flex; align-items: center; gap: 10px; min-width: 240px; pointer-events: auto; }
+        .modal-content {
+            background: var(--bg-glass-solid); width: 90%; max-width: 500px;
+            border-radius: var(--radius-xl); padding: 32px; box-shadow: var(--shadow-soft);
+            transform: scale(0.9) translateY(20px); transition: var(--trans-smooth);
+        }
+        .modal-overlay.active .modal-content { transform: scale(1) translateY(0); }
 
-        .ripple { position: absolute; background: rgba(255, 255, 255, 0.35); border-radius: var(--radius-round); transform: scale(0); animation: ripple-anim 0.5s linear; pointer-events: none; }
-        @keyframes ripple-anim { to { transform: scale(4); opacity: 0; } }
+        /* Toasts */
+        .toast-container { position: fixed; top: 24px; right: 24px; z-index: 4000; display: flex; flex-direction: column; gap: 12px; }
+        .toast {
+            background: var(--bg-glass-solid); border-left: 6px solid var(--primary);
+            box-shadow: var(--shadow-soft); padding: 16px 24px; border-radius: var(--radius-md);
+            display: flex; align-items: center; gap: 12px; font-weight: 600;
+            animation: slideInRight 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+        }
 
-        .dropdown-menu-sheet { position: absolute; top: var(--header-height); right: 16px; background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: var(--radius-md); min-width: 140px; box-shadow: var(--shadow-lg); display: none; flex-direction: column; padding: 4px; z-index: 1005; }
-        .dropdown-menu-sheet.active { display: flex; }
-        .dropdown-item-node { padding: 6px 10px; border-radius: var(--radius-sm); cursor: pointer; display: flex; align-items: center; gap: 8px; }
-        .dropdown-item-node:hover { background: var(--primary-state); color: var(--primary); }
-
-        /* Skeleton Loading */
-        .skeleton-line { height: 12px; margin-bottom: 6px; background: linear-gradient(90deg, rgba(0,0,0,0.06) 25%, rgba(0,0,0,0.12) 50%, rgba(0,0,0,0.06) 75%); background-size: 200% 100%; animation: loading-skeleton 1.5s infinite; border-radius: 4px; }
-        @keyframes loading-skeleton { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+        /* Ripple Effect */
+        .ripple {
+            position: absolute; background: rgba(255,255,255,0.4); border-radius: 50%;
+            transform: scale(0); animation: rippleAnim 0.6s linear; pointer-events: none;
+        }
 
         /* ==========================================================================
-           4. ADAPTIVE RESPONSIVENESS MEDIA INTERFACES HUB
+           6. SPECIFIC SOCIAL MEDIA VIEWS (FEED, CHAT, PROFILE)
            ========================================================================== */
-        @media (max-width: 992px) {
-            #app-layout { grid-template-columns: 60px 1fr; }
-            .app-sidebar { width: 60px; }
-            .brand-name, .menu-text, .user-meta-info { display: none; }
-            .app-content, .app-footer { margin-left: 60px; }
+        
+        /* Post Composer */
+        .composer-box { display: flex; gap: 16px; margin-bottom: 32px; }
+        .composer-input-area { flex: 1; background: var(--bg-body); border-radius: var(--radius-lg); padding: 16px; border: 1px solid var(--border-color); }
+        .composer-textarea { width: 100%; min-height: 80px; resize: none; background: transparent; font-size: 1rem; color: var(--text-main); }
+        .composer-actions { display: flex; justify-content: space-between; align-items: center; margin-top: 12px; border-top: 1px solid var(--border-color); padding-top: 12px; }
+
+        /* Feed Post */
+        .post-card { padding: 24px; }
+        .post-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+        .post-author { display: flex; align-items: center; gap: 12px; }
+        .post-avatar { width: 48px; height: 48px; border-radius: var(--radius-round); object-fit: cover; }
+        .post-meta h4 { font-weight: 700; font-size: 1.05rem; }
+        .post-meta span { font-size: 0.85rem; color: var(--text-muted); }
+        .post-content { font-size: 1rem; line-height: 1.6; margin-bottom: 16px; }
+        .post-image { width: 100%; max-height: 400px; object-fit: cover; border-radius: var(--radius-md); margin-bottom: 16px; }
+        .post-actions { display: flex; border-top: 1px solid var(--border-color); padding-top: 16px; gap: 8px; }
+        .action-btn { flex: 1; display: flex; align-items: center; justify-content: center; gap: 8px; padding: 10px; border-radius: var(--radius-md); color: var(--text-muted); font-weight: 600; cursor: pointer; transition: var(--trans-smooth); }
+        .action-btn:hover { background: var(--bg-body); color: var(--primary); }
+        .action-btn.active { color: var(--accent); }
+
+        /* Chat System */
+        .chat-layout { display: grid; grid-template-columns: 300px 1fr; gap: 24px; height: calc(100vh - 200px); }
+        .chat-sidebar, .chat-main { background: var(--bg-glass-solid); border-radius: var(--radius-xl); border: 1px solid var(--border-color); display: flex; flex-direction: column; overflow: hidden; box-shadow: var(--shadow-soft); }
+        .chat-header { padding: 20px; border-bottom: 1px solid var(--border-color); font-weight: 700; font-size: 1.1rem; }
+        .contact-list { overflow-y: auto; flex: 1; }
+        .contact-item { display: flex; align-items: center; gap: 12px; padding: 16px 20px; cursor: pointer; transition: var(--trans-smooth); border-bottom: 1px solid var(--border-color); }
+        .contact-item:hover, .contact-item.active { background: var(--primary-state); }
+        .chat-messages { flex: 1; padding: 24px; overflow-y: auto; display: flex; flex-direction: column; gap: 16px; background: var(--bg-body); }
+        .bubble { max-width: 70%; padding: 12px 16px; border-radius: 20px; font-size: 0.95rem; line-height: 1.5; position: relative; }
+        .bubble.in { align-self: flex-start; background: var(--bg-glass-solid); border-bottom-left-radius: 4px; box-shadow: var(--shadow-soft); }
+        .bubble.out { align-self: flex-end; background: var(--primary); color: white; border-bottom-right-radius: 4px; box-shadow: var(--shadow-float); }
+        .chat-input-area { padding: 16px; background: var(--bg-glass-solid); border-top: 1px solid var(--border-color); display: flex; gap: 12px; }
+
+        /* Profile Layout */
+        .profile-cover { height: 200px; border-radius: var(--radius-xl); background: linear-gradient(135deg, #a68cff, var(--primary)); margin-bottom: -60px; position: relative; }
+        .profile-info-card { text-align: center; padding-top: 0; }
+        .profile-avatar-large { width: 120px; height: 120px; border-radius: var(--radius-round); border: 4px solid var(--bg-glass-solid); margin: 0 auto 16px auto; object-fit: cover; box-shadow: var(--shadow-float); position: relative; z-index: 2; }
+        .profile-stats { display: flex; justify-content: center; gap: 32px; margin-top: 24px; padding-top: 24px; border-top: 1px solid var(--border-color); }
+        .stat-item { display: flex; flex-direction: column; align-items: center; }
+        .stat-val { font-weight: 800; font-size: 1.5rem; color: var(--text-main); }
+        .stat-lbl { font-size: 0.85rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 1px; }
+
+        /* Skeleton Loading */
+        .skeleton { background: linear-gradient(90deg, var(--bg-body) 25%, var(--border-color) 50%, var(--bg-body) 75%); background-size: 200% 100%; animation: skeletonLoading 1.5s infinite; border-radius: 8px; }
+        @keyframes skeletonLoading { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+
+        /* ==========================================================================
+           7. ANIMATIONS
+           ========================================================================== */
+        @keyframes slideUpFade { from { opacity: 0; transform: translateY(40px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fadeScale { from { opacity: 0; transform: scale(0.98); } to { opacity: 1; transform: scale(1); } }
+        @keyframes slideInRight { from { opacity: 0; transform: translateX(50px); } to { opacity: 1; transform: translateX(0); } }
+        @keyframes rippleAnim { to { transform: scale(4); opacity: 0; } }
+
+        /* ==========================================================================
+           8. RESPONSIVE DESIGN (MEDIA QUERIES)
+           ========================================================================== */
+        @media (max-width: 1024px) {
+            #app-layout { grid-template-columns: 90px 1fr; }
+            .app-sidebar { width: 90px; }
+            .brand-name, .menu-text, .sidebar-profile-info { display: none; }
+            .sidebar-profile { padding: 8px; justify-content: center; }
+            .brand { justify-content: center; padding: 0; }
         }
 
         @media (max-width: 768px) {
-            #app-layout { grid-template-areas: "header header" "content content"; grid-template-columns: 1fr; }
-            .app-sidebar, .app-footer { display: none; }
-            .app-content { margin-left: 0; padding: 12px; padding-bottom: calc(var(--bottom-nav-height) + 12px); }
-            .grid-dashboard { grid-template-columns: 1fr; }
+            #app-layout { grid-template-areas: "header header" "content content"; grid-template-columns: 1fr; grid-template-rows: 70px 1fr; }
+            .app-sidebar { display: none; }
+            .app-footer { padding-bottom: calc(var(--bottom-nav-height) + 24px); flex-direction: column; gap: 12px; text-align: center; }
+            .app-content { padding: 16px; padding-bottom: calc(var(--bottom-nav-height) + 16px); }
+            
+            .app-header { padding: 0 16px; }
+            .search-box { display: none; }
+            .clock-widget { display: none; }
+            
             .bottom-nav {
-                display: flex; position: fixed; bottom: 0; left: 0; right: 0;
-                height: var(--bottom-nav-height); background: var(--bg-surface);
-                backdrop-filter: blur(var(--blur-radius)); border-top: 1px solid var(--border-color);
-                z-index: 1000; padding-bottom: env(safe-area-inset-bottom); justify-content: space-around; align-items: center;
+                display: flex; justify-content: space-around; align-items: center;
             }
-            .bottom-nav-item { display: flex; flex-direction: column; align-items: center; color: var(--text-muted); font-size: 9px; gap: 2px; flex: 1; padding: 4px 0; cursor: pointer; }
-            .bottom-nav-item.active { color: var(--primary); font-weight: bold; }
-            .premium-table-container th { display: none; }
-            .premium-table-container tr { display: block; margin-bottom: 8px; border: 1px solid var(--border-color); border-radius: var(--radius-md); background: var(--bg-surface); }
-            .premium-table-container td { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding: 8px 12px; }
-            .premium-table-container td::before { content: attr(data-label); font-weight: 700; color: var(--text-muted); text-align: left; }
-            .chat-module-container { grid-template-columns: 1fr; }
-            .chat-channels-list { display: none; }
+            .bn-item {
+                display: flex; flex-direction: column; align-items: center; gap: 4px;
+                color: var(--text-muted); padding: 8px 0; flex: 1; position: relative;
+            }
+            .bn-item.active { color: var(--primary); font-weight: 700; }
+            .bn-item.active .material-symbols-outlined { background: var(--primary-state); padding: 4px 16px; border-radius: var(--radius-xl); }
+            
+            .chat-layout { grid-template-columns: 1fr; }
+            .chat-sidebar { display: none; } /* On mobile, clicking a contact would show chat main */
         }
     </style>
 </head>
 <body>
 
+    <!-- ==========================================================================
+         AUTHENTICATION WRAPPER (LOGIN / SIGN UP)
+         ========================================================================== -->
+    <div id="auth-layout">
+        <div class="auth-card" id="login-view">
+            <div class="auth-logo">N</div>
+            <h1 style="margin-bottom: 8px; font-weight: 800; font-size: 24px;">Selamat Datang Kembali</h1>
+            <p style="color: var(--text-muted); margin-bottom: 32px; font-size: 0.95rem;">Masuk untuk terhubung dengan koneksi profesional Anda.</p>
+            
+            <form onsubmit="App.Auth.login(event)">
+                <div class="form-group">
+                    <input type="email" class="form-input" id="login-email" placeholder=" " required value="demo@nexsocial.id">
+                    <label class="form-label">Email / Username</label>
+                </div>
+                <div class="form-group">
+                    <input type="password" class="form-input" id="login-pwd" placeholder=" " required value="password123">
+                    <label class="form-label">Password</label>
+                </div>
+                <button type="submit" class="btn btn-primary btn-full ripple-btn" style="margin-bottom: 24px;">Masuk ke Aplikasi</button>
+            </form>
+            
+            <p style="font-size: 0.9rem; color: var(--text-muted);">
+                Belum punya akun? <a href="#" style="color: var(--primary); font-weight: 700;" onclick="App.Auth.toggleView('signup')">Daftar Sekarang</a>
+            </p>
+        </div>
+
+        <div class="auth-card" id="signup-view" style="display: none;">
+            <div class="auth-logo">N</div>
+            <h1 style="margin-bottom: 8px; font-weight: 800; font-size: 24px;">Bergabung dengan NexSocial</h1>
+            <p style="color: var(--text-muted); margin-bottom: 32px; font-size: 0.95rem;">Buat profil profesional Anda hari ini.</p>
+            
+            <form onsubmit="App.Auth.login(event)"> <!-- using login logic for demo -->
+                <div class="form-group">
+                    <input type="text" class="form-input" placeholder=" " required>
+                    <label class="form-label">Nama Lengkap</label>
+                </div>
+                <div class="form-group">
+                    <input type="email" class="form-input" placeholder=" " required>
+                    <label class="form-label">Email</label>
+                </div>
+                <div class="form-group">
+                    <input type="password" class="form-input" placeholder=" " required>
+                    <label class="form-label">Password</label>
+                </div>
+                <button type="submit" class="btn btn-primary btn-full ripple-btn" style="margin-bottom: 24px;">Daftar Akun Baru</button>
+            </form>
+            
+            <p style="font-size: 0.9rem; color: var(--text-muted);">
+                Sudah punya akun? <a href="#" style="color: var(--primary); font-weight: 700;" onclick="App.Auth.toggleView('login')">Masuk di sini</a>
+            </p>
+        </div>
+    </div>
+
+    <!-- ==========================================================================
+         MAIN APP LAYOUT (DASHBOARD SOCIAL MEDIA)
+         ========================================================================== -->
     <div id="app-layout">
-        <!-- HEADER TOP NAVBAR -->
+        
+        <!-- HEADER -->
         <header class="app-header">
             <div class="header-left">
-                <div class="brand-wrapper" onclick="App.Router.navigate('dashboard')">
-                    <div class="brand-logo">N</div>
-                    <span class="brand-name">NexSphere</span>
-                </div>
-                <button class="icon-action-btn" id="sidebar-toggle-trigger">
-                    <span class="material-symbols-outlined" style="font-size:16px;">menu</span>
+                <button class="icon-btn ripple-btn" id="btn-toggle-sidebar" aria-label="Toggle Menu">
+                    <span class="material-symbols-outlined">menu_open</span>
                 </button>
-                <div class="search-container">
-                    <span class="material-symbols-outlined search-icon" style="font-size:14px;">search</span>
-                    <input type="text" class="search-input" placeholder="Cari data server..." id="global-search-engine">
+                <div class="search-box">
+                    <span class="material-symbols-outlined">search</span>
+                    <input type="text" placeholder="Cari orang, grup, atau postingan...">
                 </div>
             </div>
             
             <div class="header-right">
-                <div class="meta-clock-widget">
-                    <span id="live-date-str">Memuat Tanggal...</span>
-                    <span id="live-clock-str" class="meta-time">00:00:00 WIB</span>
+                <div class="clock-widget">
+                    <span class="clock-date" id="ui-date">Memuat Tanggal...</span>
+                    <span class="clock-time" id="ui-time">00:00:00 WIB</span>
                 </div>
-                <button class="icon-action-btn" id="refresh-view-trigger"><span class="material-symbols-outlined" style="font-size:16px;">refresh</span></button>
-                <button class="icon-action-btn" id="theme-toggle-trigger"><span class="material-symbols-outlined" style="font-size:16px;">dark_mode</span></button>
-                <button class="icon-action-btn" id="fullscreen-toggle-trigger"><span class="material-symbols-outlined" style="font-size:16px;">fullscreen</span></button>
-                <button class="icon-action-btn" id="notification-bell-trigger"><span class="material-symbols-outlined" style="font-size:16px;">notifications</span><span class="badge-dot"></span></button>
-                <div class="avatar-frame" id="profile-dropdown-trigger" style="cursor:pointer;">
-                    <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=100&q=80" alt="Avatar Operator" class="avatar-img">
-                </div>
+                
+                <button class="icon-btn ripple-btn" id="btn-refresh" title="Refresh">
+                    <span class="material-symbols-outlined">refresh</span>
+                </button>
+                <button class="icon-btn ripple-btn" id="btn-theme" title="Ubah Tema">
+                    <span class="material-symbols-outlined">dark_mode</span>
+                </button>
+                <button class="icon-btn ripple-btn" id="btn-fullscreen" title="Layar Penuh">
+                    <span class="material-symbols-outlined">fullscreen</span>
+                </button>
+                <button class="icon-btn ripple-btn" title="Notifikasi">
+                    <span class="material-symbols-outlined">notifications</span>
+                    <span class="badge"></span>
+                </button>
+                
+                <img src="https://i.pravatar.cc/150?img=68" alt="Profile" class="user-avatar" id="header-avatar" onclick="App.Router.navigate('profil')">
             </div>
         </header>
 
-        <!-- FLOATING PROFILE DROPDOWN MENU -->
-        <div class="dropdown-menu-sheet" id="profile-dropdown-sheet">
-            <div class="dropdown-item-node" onclick="App.Router.navigate('profil')"><span class="material-symbols-outlined" style="font-size:14px;">person</span>Profil Akun</div>
-            <div class="dropdown-item-node" onclick="App.Router.navigate('pengaturan')"><span class="material-symbols-outlined" style="font-size:14px;">settings</span>Pengaturan</div>
-            <hr style="border:none; border-top:1px solid var(--border-color); margin:4px 0;">
-            <div class="dropdown-item-node" onclick="App.Auth.logout()" style="color:var(--danger);"><span class="material-symbols-outlined" style="font-size:14px;">logout</span>Keluar Sistem</div>
-        </div>
-
-        <!-- LEFT SIDEBAR CONTAINER -->
-        <aside class="app-sidebar">
-            <div class="sidebar-menu-wrapper" id="sidebar-menu-injector"></div>
-            <div class="sidebar-user-card">
-                <div class="avatar-frame">
-                    <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=100&q=80" class="avatar-img">
-                </div>
-                <div class="user-meta-info">
-                    <span class="user-display-name" id="sidebar-user-name">Kartika Dewi</span>
-                    <span class="user-role-lbl">Admin Operator</span>
+        <!-- SIDEBAR (DESKTOP) -->
+        <aside class="app-sidebar" id="sidebar">
+            <div class="brand" onclick="App.Router.navigate('feed')">
+                <div class="brand-logo">N</div>
+                <span class="brand-name">NexSocial</span>
+            </div>
+            
+            <ul class="sidebar-menu" id="sidebar-menu-list">
+                <!-- Injected via JS -->
+            </ul>
+            
+            <div class="sidebar-profile" onclick="App.Router.navigate('profil')" style="cursor:pointer;">
+                <img src="https://i.pravatar.cc/150?img=68" alt="User" class="user-avatar" style="border:none;">
+                <div class="sidebar-profile-info">
+                    <span class="sp-name">Reza Rahadian</span>
+                    <span class="sp-role">Senior UI/UX Designer</span>
                 </div>
             </div>
         </aside>
 
-        <!-- ROUTER SPA WORKSPACE VIEWPORT -->
-        <main class="app-content" id="app-viewport-root"></main>
+        <!-- CONTENT VIEWPORT -->
+        <main class="app-content" id="app-viewport">
+            <!-- Dynamic Content Injected Here -->
+        </main>
 
-        <!-- SYSTEM GLOBAL FOOTER LOG DATA -->
+        <!-- FOOTER -->
         <footer class="app-footer">
-            <div>&copy; <span id="footer-year-sync">2026</span> <strong>NexSphere System Engine</strong>. All Rights Reserved.</div>
-            <div style="display:flex; gap:16px; align-items:center;">
-                <span>DB Cloud Hub: <strong style="color:var(--primary)">Supabase Engine REST Live</strong></span>
-                <div class="network-status-badge">
-                    <div class="status-dot" id="network-indicator-dot"></div>
-                    <span id="network-indicator-lbl">Koneksi Aktif</span>
+            <div>
+                &copy; <span id="footer-year">2026</span> <strong>NexSocial</strong>. All Rights Reserved.
+            </div>
+            <div style="display: flex; gap: 24px; align-items: center;">
+                <span>Powered by HTML, CSS & Vanilla JS ES6+</span>
+                <span>v2.4.0</span>
+                <div class="status-indicator">
+                    <div class="status-dot" id="network-dot"></div>
+                    <span id="network-text">Online</span>
                 </div>
             </div>
         </footer>
 
-        <!-- BOTTOM NAVIGATION BAR (MOBILE PLATFORM VIEWPORT) -->
-        <nav class="bottom-nav" id="bottom-nav-injector"></nav>
-    </div>
+        <!-- BOTTOM NAVIGATION (MOBILE) -->
+        <nav class="bottom-nav" id="bottom-nav-list">
+            <!-- Injected via JS (Matches Sidebar Core Menus) -->
+        </nav>
 
-    <!-- MAIN ROOT MODAL ARCHITECTURE CONTEXT SYSTEM OVERLAY -->
-    <div class="modal-overlay" id="system-modal-root" tabindex="-1">
-        <div class="modal-sheet-box" id="modal-container-body"></div>
     </div>
-
-    <!-- TOAST ALERTS LAYER NOTIFIER CONTAINER Gateway -->
-    <div id="toast-container"></div>
 
     <!-- ==========================================================================
-       5. CORE PROGRAM JAVASCRIPT SYSTEM ENGINE (NATIVE SUPABASE REST CLIENT ENGINE)
-       ========================================================================== -->
+         GLOBAL UI COMPONENTS (MODAL, TOAST)
+         ========================================================================== -->
+    <div class="modal-overlay" id="global-modal">
+        <div class="modal-content" id="modal-content-area">
+            <h2 style="margin-bottom: 16px;" id="modal-title">Judul Modal</h2>
+            <div id="modal-body" style="color: var(--text-muted); line-height: 1.6; margin-bottom: 24px;">
+                Isi konten modal.
+            </div>
+            <div style="text-align: right; display: flex; justify-content: flex-end; gap: 12px;">
+                <button class="btn btn-secondary ripple-btn" onclick="App.Modal.close()">Batal</button>
+                <button class="btn btn-primary ripple-btn" onclick="App.Modal.close()">Mengerti</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="toast-container" id="toast-container"></div>
+
+    <!-- ==========================================================================
+         JAVASCRIPT LOGIC (VANILLA ES6+)
+         ========================================================================== -->
     <script>
         /**
-         * KREDENSIAL UTAMA DATABASE SUPABASE REST API (CONFIGURED BY USER GENERATOR)
+         * NEXSOCIAL SYSTEM ARCHITECTURE
+         * Modular Vanilla JS without any external libraries.
          */
-        const SUPABASE_URL = "https://waaufoxlimqtesmmjhyw.supabase.co"; 
-        const SUPABASE_ANON_KEY = "sb_publishable_X6icNByv3YFbekorwJ6kSw_SX0XUFM8";
-
-        /**
-         * NETWORK CLIENT CORE MATRIX DENGAN SYSTEM SINKRONISASI FALLBACK OTOMATIS
-         */
-        const SupabaseClientEngine = {
-            getHeaders() {
-                return {
-                    "apikey": SUPABASE_ANON_KEY,
-                    "Authorization": `Bearer ${SUPABASE_ANON_KEY}`,
-                    "Content-Type": "application/json",
-                    "Prefer": "return=representation"
-                };
-            },
-            async select(table, selectQuery = "*", orderColumn = "created_at") {
-                try {
-                    const response = await fetch(`${SUPABASE_URL}/rest/v1/${table}?select=${selectQuery}&order=${orderColumn}.desc`, {
-                        method: "GET",
-                        headers: this.getHeaders()
-                    });
-                    if (!response.ok) throw new Error("Supabase Fetch Error");
-                    return await response.json();
-                } catch (err) {
-                    console.warn("Menggunakan database lokal cache fallback.");
-                    return this.LocalCache.get(table);
-                }
-            },
-            async insert(table, payload) {
-                try {
-                    const response = await fetch(`${SUPABASE_URL}/rest/v1/${table}`, {
-                        method: "POST",
-                        headers: this.getHeaders(),
-                        body: JSON.stringify(payload)
-                    });
-                    const data = await response.json();
-                    this.LocalCache.syncInsert(table, data[0] || payload);
-                    return data;
-                } catch (err) {
-                    this.LocalCache.syncInsert(table, payload);
-                    return [payload];
-                }
-            },
-            async update(table, payload, matchColumn, matchValue) {
-                try {
-                    const response = await fetch(`${SUPABASE_URL}/rest/v1/${table}?${matchColumn}=eq.${matchValue}`, {
-                        method: "PATCH",
-                        headers: this.getHeaders(),
-                        body: JSON.stringify(payload)
-                    });
-                    return await response.json();
-                } catch (err) {
-                    return null;
-                }
-            },
-            LocalCache: {
-                get(table) {
-                    return JSON.parse(localStorage.getItem(`sb_${table}`)) || [];
-                },
-                syncInsert(table, data) {
-                    const current = this.get(table);
-                    current.unshift(data);
-                    localStorage.setItem(`sb_${table}`, JSON.stringify(current));
-                }
-            }
-        };
-
-        // Navigation Master Registry Array Mapping List Layout Configuration Elements
-        const AppNavigationRegistry = [
-            { id: 'dashboard', label: 'Dashboard', icon: 'dashboard' },
-            { id: 'social-feed', label: 'Social Feed', icon: 'share' },
-            { id: 'chat-room', label: 'Ruang Chat', icon: 'forum' },
-            { id: 'master-data', label: 'Master Data', icon: 'database' },
-            { id: 'transaksi', label: 'Transaksi POS', icon: 'shopping_cart' },
-            { id: 'laporan', label: 'Laporan Finansial', icon: 'analytics' },
-            { id: 'absensi', label: 'Absensi Tim', icon: 'badge' },
-            { id: 'pengaturan', label: 'Pengaturan', icon: 'settings' },
-            { id: 'profil', label: 'Profil Saya', icon: 'account_circle' }
-        ];
-
-        // Central Kernel Application Namespace Matrix Systems Logic Controller
         const App = {
-            async init() {
+            init() {
+                // Initialize modules
+                this.Storage.init();
                 this.Theme.init();
                 this.Clock.start();
-                this.Navigation.render();
-                this.Router.init();
-                this.Events.bindGlobal();
                 this.Network.listen();
+                this.UI.bindGlobalEvents();
+                this.Navigation.render();
                 
-                const cachedUser = localStorage.getItem('sb_user_cache') || "Kartika Dewi";
-                document.getElementById('sidebar-user-name').innerText = cachedUser;
-                App.Toast.show("Portal Supabase Cloud Engine Terkoneksi Penuh", "success");
-            },
-
-            Network: {
-                listen() {
-                    const toggleStateStatus = () => {
-                        const dot = document.getElementById('network-indicator-dot');
-                        const lbl = document.getElementById('network-indicator-lbl');
-                        if (navigator.onLine) {
-                            dot.className = "status-dot"; lbl.innerText = "Koneksi Aktif";
-                        } else {
-                            dot.className = "status-dot offline"; lbl.innerText = "Koneksi Offline";
-                            App.Toast.show("Koneksi cloud terputus, beralih ke engine offline local storage.", "warning");
-                        }
-                    };
-                    window.addEventListener('online', toggleStateStatus);
-                    window.addEventListener('offline', toggleStateStatus);
+                // Check Auth State
+                const isLoggedIn = localStorage.getItem('ns_logged_in') === 'true';
+                if(isLoggedIn) {
+                    this.Auth.showApp();
+                    this.Router.init();
+                } else {
+                    document.getElementById('auth-layout').style.display = 'flex';
                 }
             },
 
-            // SPA Native Hash Router Subsystem Controller Framework Architecture
-            Router: {
+            // ==========================================
+            // 1. DATA STORAGE & MOCKS
+            // ==========================================
+            Storage: {
                 init() {
-                    window.addEventListener('hashchange', () => this.executeRouteTransition());
-                    this.executeRouteTransition();
-                },
-                navigate(viewId) { window.location.hash = `#/${viewId}`; },
-                executeRouteTransition() {
-                    const hash = window.location.hash.replace('#/', '') || 'dashboard';
-                    document.querySelectorAll('.menu-item, .bottom-nav-item').forEach(el => {
-                        el.classList.toggle('active', el.getAttribute('data-view-target') === hash);
-                    });
-
-                    const viewport = document.getElementById('app-viewport-root');
-                    if (this.views[hash]) {
-                        viewport.innerHTML = `<div class="view-container">${this.views[hash]()}</div>`;
-                        if(this.viewHooks[hash]) this.viewHooks[hash]();
-                    } else {
-                        viewport.innerHTML = `<div class="premium-card"><h3>Modul Enkripsi Tidak Ditemukan</h3></div>`;
+                    // Seed mock data if not exists
+                    if(!localStorage.getItem('ns_posts')) {
+                        const initialPosts = [
+                            { id: 1, author: 'Budi Santoso', role: 'Software Architect', avatar: 'https://i.pravatar.cc/150?img=11', time: '2 jam yang lalu', content: 'Baru saja menyelesaikan refactoring arsitektur microservices untuk project terbaru. Performa naik 40% tanpa framework eksternal! 🚀 #VanillaJS #Architecture', image: 'https://images.unsplash.com/photo-1555066931-4365d14bab8c?auto=format&fit=crop&w=800&q=80', likes: 124, comments: 18, liked: false },
+                            { id: 2, author: 'Siska Amelia', role: 'Product Manager', avatar: 'https://i.pravatar.cc/150?img=5', time: '5 jam yang lalu', content: 'Rapat kuartal Q3 sangat produktif. Fokus kita selanjutnya adalah meningkatkan retensi user dengan desain antarmuka yang lebih clean dan responsif. Bagaimana pendapat teman-teman desain?', image: null, likes: 89, comments: 24, liked: true }
+                        ];
+                        localStorage.setItem('ns_posts', JSON.stringify(initialPosts));
                     }
                 },
+                getPosts() { return JSON.parse(localStorage.getItem('ns_posts')) || []; },
+                savePosts(posts) { localStorage.setItem('ns_posts', JSON.stringify(posts)); }
+            },
 
-                // Dynamic Workspace Layout View Modules HTML Rendering Layout Parser Matrix
-                views: {
-                    dashboard() {
-                        return `
-                            <div class="premium-card welcome-gradient-card">
-                                <h1 style="font-size: 14px; font-weight: 700;">Portal Bisnis Cloud Terpadu NexSphere</h1>
-                                <p style="margin-top: 4px; opacity:0.9;">Monitoring data terenkripsi, status real-time, master logistik pergudangan, interaksi tim internal terintegrasi Supabase Cloud.</p>
-                            </div>
-                            <div class="stats-strip">
-                                <div class="stat-box">
-                                    <div class="stat-icon-wrapper" style="background:var(--primary-state); color:var(--primary);"><span class="material-symbols-outlined" style="font-size:16px;">share</span></div>
-                                    <div><h3 style="font-weight:700;">Supabase Data Live</h3><p style="color:var(--text-muted); font-size:9px;">Komunitas Sinkron</p></div>
-                                </div>
-                                <div class="stat-box">
-                                    <div class="stat-icon-wrapper" style="background:rgba(16,185,129,0.1); color:var(--success);"><span class="material-symbols-outlined" style="font-size:16px;">payments</span></div>
-                                    <div><h3 style="font-weight:700;">Rp 24.850.000</h3><p style="color:var(--text-muted); font-size:9px;">Omset Kasir POS</p></div>
-                                </div>
-                            </div>
-                            <div class="grid-dashboard">
-                                <div class="premium-card">
-                                    <h3 style="margin-bottom:12px; font-weight:700;">Grafik Performa Operasional Bisnis</h3>
-                                    <div style="height: 120px; display:flex; align-items:flex-end; gap:12px; border-left:1px solid var(--border-color); border-bottom:1px solid var(--border-color);">
-                                        <div style="flex:1; background:var(--primary); height:75%;"></div>
-                                        <div style="flex:1; background:var(--secondary); height:90%;"></div>
-                                        <div style="flex:1; background:var(--success); height:45%;"></div>
-                                    </div>
-                                </div>
-                                <div class="premium-card">
-                                    <h3 style="margin-bottom:8px; font-weight:700;">Aksi Cepat Menu Utama</h3>
-                                    <div style="display:flex; flex-direction:column; gap:6px;">
-                                        <button class="btn-suite btn-primary" onclick="App.Router.navigate('social-feed')">Buka Social Feed</button>
-                                        <button class="btn-suite btn-secondary" onclick="App.Router.navigate('transaksi')">Kasir POS Kasir</button>
-                                    </div>
-                                </div>
-                            </div>
-                        `;
-                    },
-                    'social-feed'() {
-                        return `
-                            <div class="premium-card">
-                                <h3 style="font-weight:700; margin-bottom:8px;">Social Feed Komunitas Internal - Kirim Postingan Ke Supabase</h3>
-                                <div class="post-composer-area">
-                                    <textarea class="composer-textarea" id="post-text-body-field" placeholder="Bagikan informasi progres update atau berkas penting tim hari ini..."></textarea>
-                                    <div style="display:flex; justify-content:space-between; align-items:center;">
-                                        <button class="btn-suite btn-secondary" onclick="document.getElementById('post-image-file-input').click()"><span class="material-symbols-outlined" style="font-size:14px;">image</span> Gambar</button>
-                                        <input type="file" id="post-image-file-input" style="display:none;" accept="image/*" onchange="App.FeedModule.handleImagePreview(this)">
-                                        <button class="btn-suite btn-primary" onclick="App.FeedModule.executeCreatePost()">Kirim Post</button>
-                                    </div>
-                                    <div id="composer-image-preview-target" style="margin-top:6px;"></div>
-                                </div>
-                            </div>
-                            <div id="social-feed-stream-injector"><div class="skeleton-line"></div><div class="skeleton-line"></div></div>
-                        `;
-                    },
-                    'chat-room'() {
-                        return `
-                            <div class="chat-module-container">
-                                <div class="chat-channels-list">
-                                    <div class="channel-row active"><span class="material-symbols-outlined" style="font-size:14px;">groups</span><div><div style="font-weight:600;">Grup Utama Divisi</div></div></div>
-                                </div>
-                                <div class="chat-viewport">
-                                    <div class="chat-messages-stream" id="chat-messages-stream-node"></div>
-                                    <div class="chat-composer-strip">
-                                        <input type="text" class="form-control-input" id="chat-composer-input-message" placeholder="Tulis pesan obrolan realtime..." onkeypress="if(event.key==='Enter') App.ChatModule.executeSend()">
-                                        <button class="btn-suite btn-primary" onclick="App.ChatModule.executeSend()"><span class="material-symbols-outlined" style="font-size:14px;">send</span></button>
-                                    </div>
-                                </div>
-                            </div>
-                        `;
-                    },
-                    'master-data'() {
-                        return `
-                            <div class="premium-card">
-                                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
-                                    <div><h2 style="font-size:12px; font-weight:700;">Data Master Logistik Inventori ERP</h2></div>
-                                    <button class="btn-suite btn-secondary" onclick="App.TableDataModule.exportCSVData()">Export CSV</button>
-                                </div>
-                                <div class="table-panel-holder">
-                                    <table class="premium-table premium-table-container">
-                                        <thead>
-                                            <tr><th>Kode SKU</th><th>Nama Item</th><th>Kategori</th><th>Stok</th><th>Harga Satuan</th></tr>
-                                        </thead>
-                                        <tbody id="master-data-table-rows-injector"></tbody>
-                                    </table>
-                                </div>
-                            </div>
-                        `;
-                    },
-                    transaksi() {
-                        return `
-                            <div class="premium-card" style="max-width:500px;">
-                                <h3 style="font-weight:700; margin-bottom:12px;">Kasir Digital Point of Sales (POS)</h3>
-                                <div class="form-group-floating">
-                                    <select class="form-control-input" id="pos-select-product" onchange="App.POSModule.runKalkulasi()">
-                                        <option value="4500000">Server Rack Mount - Rp 4.500.000</option>
-                                        <option value="12000000">Router Core Fiber - Rp 12.000.000</option>
-                                    </select>
-                                </div>
-                                <div style="background:rgba(0,0,0,0.02); padding:12px; margin-top:12px; border-radius:4px;">
-                                    <h2 style="font-size:18px; font-weight:700; color:var(--primary);" id="pos-invoice-total-display">Rp 4.500.000</h2>
-                                </div>
-                                <button class="btn-suite btn-primary" style="margin-top:12px; width:100%;" onclick="App.POSModule.checkout()">Checkout Simpan Invoice</button>
-                            </div>
-                        `;
-                    },
-                    laporan() { return `<div class="premium-card"><h3>Laporan Finansial Pembukuan Neraca Kas</h3></div>`; },
-                    absensi() { return `<div class="premium-card"><h3>Sistem Kontrol Absensi Kehadiran Karyawan</h3></div>`; },
-                    pengaturan() {
-                        return `
-                            <div class="premium-card" style="max-width:400px;">
-                                <h3 style="font-weight:700; margin-bottom:12px;">Pengaturan Default Operator</h3>
-                                <input type="text" class="form-control-input" id="setting-operator-name-field" value="${localStorage.getItem('sb_user_cache') || 'Kartika Dewi'}">
-                                <button class="btn-suite btn-primary" style="margin-top:12px;" onclick="App.SettingsModule.executeSave()">Simpan Konfigurasi</button>
-                            </div>
-                        `;
-                    },
-                    profil() { return `<div class="premium-card"><h3>Informasi Akun Enkripsi Root Operator</h3></div>`; }
+            // ==========================================
+            // 2. AUTHENTICATION MODULE
+            // ==========================================
+            Auth: {
+                toggleView(view) {
+                    document.getElementById('login-view').style.display = view === 'login' ? 'block' : 'none';
+                    document.getElementById('signup-view').style.display = view === 'signup' ? 'block' : 'none';
                 },
-
-                // Active lifecycle routing execution hooks modules parameters view
-                viewHooks: {
-                    'social-feed'() { App.FeedModule.renderStream(); },
-                    'chat-room'() { App.ChatModule.renderStream(); },
-                    'master-data'() { App.TableDataModule.renderRows(); }
+                login(e) {
+                    e.preventDefault();
+                    App.UI.showLoadingBtn(e.target.querySelector('button[type="submit"]'));
+                    setTimeout(() => {
+                        localStorage.setItem('ns_logged_in', 'true');
+                        this.showApp();
+                        App.Toast.show("Berhasil masuk ke sistem.", "success");
+                        App.Router.init(); // Initialize routing after login
+                    }, 1000);
+                },
+                logout() {
+                    localStorage.removeItem('ns_logged_in');
+                    window.location.hash = '';
+                    window.location.reload();
+                },
+                showApp() {
+                    const auth = document.getElementById('auth-layout');
+                    const app = document.getElementById('app-layout');
+                    auth.style.opacity = '0';
+                    setTimeout(() => {
+                        auth.style.display = 'none';
+                        app.classList.add('active');
+                    }, 400);
                 }
             },
 
-            // Navigation Renderer Component Layout System Modules Engine mapping maps list array
-            Navigation: {
-                render() {
-                    const side = document.getElementById('sidebar-menu-injector');
-                    const bottom = document.getElementById('bottom-nav-injector');
-                    let sHtml = '', bHtml = '';
+            // ==========================================
+            // 3. ROUTER (SPA HASH ROUTING)
+            // ==========================================
+            Router: {
+                init() {
+                    window.addEventListener('hashchange', () => this.handleRoute());
+                    if(!window.location.hash) window.location.hash = '#/feed';
+                    this.handleRoute();
+                },
+                navigate(path) {
+                    window.location.hash = `#/${path}`;
+                },
+                handleRoute() {
+                    const hash = window.location.hash.replace('#/', '') || 'feed';
+                    const viewport = document.getElementById('app-viewport');
                     
-                    AppNavigationRegistry.forEach(m => {
-                        sHtml += `<a class="menu-item" data-view-target="${m.id}" onclick="App.Router.navigate('${m.id}')"><span class="material-symbols-outlined" style="font-size:16px;">${m.icon}</span><span class="menu-text">${m.label}</span></a>`;
-                        if(['dashboard', 'social-feed', 'chat-room', 'pengaturan'].includes(m.id)) {
-                            bHtml += `<a class="bottom-nav-item" data-view-target="${m.id}" onclick="App.Router.navigate('${m.id}')"><span class="material-symbols-outlined" style="font-size:16px;">${m.icon}</span><span>${m.label}</span></a>`;
+                    // Update Active Menu
+                    document.querySelectorAll('.menu-item, .bn-item').forEach(el => {
+                        if(el.getAttribute('data-route') === hash) el.classList.add('active');
+                        else el.classList.remove('active');
+                    });
+
+                    // Render View
+                    if(App.Views[hash]) {
+                        viewport.innerHTML = `<div class="view-container">${App.Views[hash]()}</div>`;
+                        if(App.ViewControllers[hash]) App.ViewControllers[hash]();
+                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                    } else {
+                        viewport.innerHTML = `<div class="glass-card"><h2 style="color:var(--danger)">404 Not Found</h2><p>Halaman tidak tersedia.</p></div>`;
+                    }
+                }
+            },
+
+            // ==========================================
+            // 4. NAVIGATION RENDERER
+            // ==========================================
+            Navigation: {
+                menuConfig: [
+                    { id: 'feed', label: 'News Feed', icon: 'home', mobile: true },
+                    { id: 'explore', label: 'Eksplor', icon: 'explore', mobile: true },
+                    { id: 'chat', label: 'Pesan', icon: 'chat', mobile: true },
+                    { id: 'groups', label: 'Komunitas', icon: 'groups', mobile: false },
+                    { id: 'profil', label: 'Profil Saya', icon: 'person', mobile: true },
+                    { id: 'settings', label: 'Pengaturan', icon: 'settings', mobile: false }
+                ],
+                render() {
+                    const side = document.getElementById('sidebar-menu-list');
+                    const bottom = document.getElementById('bottom-nav-list');
+                    let sHTML = '', bHTML = '';
+
+                    this.menuConfig.forEach(m => {
+                        // Sidebar Item
+                        sHTML += `
+                            <li>
+                                <a class="menu-item ripple-btn" data-route="${m.id}" onclick="App.Router.navigate('${m.id}')">
+                                    <span class="material-symbols-outlined">${m.icon}</span>
+                                    <span class="menu-text">${m.label}</span>
+                                </a>
+                            </li>
+                        `;
+                        // Bottom Nav Item
+                        if(m.mobile) {
+                            bHTML += `
+                                <a class="bn-item ripple-btn" data-route="${m.id}" onclick="App.Router.navigate('${m.id}')">
+                                    <span class="material-symbols-outlined">${m.icon}</span>
+                                    <span style="font-size: 0.7rem;">${m.label}</span>
+                                </a>
+                            `;
                         }
                     });
-                    side.innerHTML = sHtml; bottom.innerHTML = bHtml;
+
+                    sHTML += `
+                        <li style="margin-top: auto;">
+                            <a class="menu-item ripple-btn" style="color: var(--danger);" onclick="App.Auth.logout()">
+                                <span class="material-symbols-outlined">logout</span>
+                                <span class="menu-text">Keluar</span>
+                            </a>
+                        </li>
+                    `;
+
+                    side.innerHTML = sHTML;
+                    bottom.innerHTML = bHTML;
                 }
             },
 
-            // Clock Engine real time update synchronization parameters elements
+            // ==========================================
+            // 5. VIEWS (HTML TEMPLATES)
+            // ==========================================
+            Views: {
+                feed() {
+                    return `
+                        <div class="glass-card composer-box">
+                            <img src="https://i.pravatar.cc/150?img=68" class="user-avatar" style="width:48px;height:48px;" alt="Me">
+                            <div class="composer-input-area">
+                                <textarea class="composer-textarea" id="composer-text" placeholder="Apa yang sedang Anda pikirkan, Reza?"></textarea>
+                                <div class="composer-actions">
+                                    <div style="display:flex; gap:12px;">
+                                        <button class="icon-btn" title="Foto/Video" style="color:var(--secondary)"><span class="material-symbols-outlined">image</span></button>
+                                        <button class="icon-btn" title="Lampiran" style="color:var(--warning)"><span class="material-symbols-outlined">attachment</span></button>
+                                        <button class="icon-btn" title="Emoji" style="color:var(--accent)"><span class="material-symbols-outlined">mood</span></button>
+                                    </div>
+                                    <button class="btn btn-primary ripple-btn" onclick="App.Features.createPost()">Posting</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="feed-stream">
+                            <!-- Skeleton loader while rendering -->
+                            <div class="glass-card"><div class="skeleton" style="height: 60px; margin-bottom:16px;"></div><div class="skeleton" style="height: 200px;"></div></div>
+                        </div>
+                    `;
+                },
+                explore() {
+                    return `
+                        <div class="glass-card">
+                            <h2 style="margin-bottom: 24px;">Sedang Tren Saat Ini</h2>
+                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 16px;">
+                                <div style="height: 200px; border-radius: var(--radius-md); background: url('https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=600&q=80') center/cover; position: relative;">
+                                    <div style="position: absolute; bottom:0; left:0; right:0; padding: 16px; background: linear-gradient(transparent, rgba(0,0,0,0.8)); border-bottom-left-radius: var(--radius-md); border-bottom-right-radius: var(--radius-md); color: white;">
+                                        <h3 style="font-size: 1rem; color:white;">#TechConf2026</h3>
+                                        <p style="font-size: 0.8rem; color: #ddd;">12.5k Postingan</p>
+                                    </div>
+                                </div>
+                                <div style="height: 200px; border-radius: var(--radius-md); background: url('https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=600&q=80') center/cover; position: relative;">
+                                    <div style="position: absolute; bottom:0; left:0; right:0; padding: 16px; background: linear-gradient(transparent, rgba(0,0,0,0.8)); border-bottom-left-radius: var(--radius-md); border-bottom-right-radius: var(--radius-md); color: white;">
+                                        <h3 style="font-size: 1rem; color:white;">#DesignSystem</h3>
+                                        <p style="font-size: 0.8rem; color: #ddd;">8.2k Postingan</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                },
+                chat() {
+                    return `
+                        <div class="chat-layout">
+                            <div class="chat-sidebar">
+                                <div class="chat-header">Pesan Langsung</div>
+                                <div class="contact-list">
+                                    <div class="contact-item active">
+                                        <img src="https://i.pravatar.cc/150?img=5" class="user-avatar" style="width:40px;height:40px;border:none;">
+                                        <div style="overflow:hidden;">
+                                            <div style="font-weight:700; font-size:0.95rem;">Siska Amelia</div>
+                                            <div style="font-size:0.8rem; color:var(--text-muted); white-space:nowrap; text-overflow:ellipsis; overflow:hidden;">Baik, nanti saya cek desainnya.</div>
+                                        </div>
+                                    </div>
+                                    <div class="contact-item">
+                                        <img src="https://i.pravatar.cc/150?img=11" class="user-avatar" style="width:40px;height:40px;border:none;">
+                                        <div style="overflow:hidden;">
+                                            <div style="font-weight:700; font-size:0.95rem;">Budi Santoso</div>
+                                            <div style="font-size:0.8rem; color:var(--text-muted);">Siap, deploy jam 8 malam ya.</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="chat-main">
+                                <div class="chat-header" style="display:flex; align-items:center; gap:12px;">
+                                    <img src="https://i.pravatar.cc/150?img=5" class="user-avatar" style="width:36px;height:36px;border:none;">
+                                    Siska Amelia
+                                </div>
+                                <div class="chat-messages" id="chat-messages-container">
+                                    <div class="bubble in">Halo Reza, progres UI untuk dashboard klien sudah sampai mana?</div>
+                                    <div class="bubble out">Halo Siska, sudah 80%. Saya sedang menyesuaikan glassmorphism effect agar lebih smooth.</div>
+                                    <div class="bubble in">Mantap! Nanti kalau sudah selesai kabari ya, mau saya presentasikan besok.</div>
+                                </div>
+                                <div class="chat-input-area">
+                                    <button class="icon-btn"><span class="material-symbols-outlined">add_circle</span></button>
+                                    <input type="text" class="form-input" style="padding: 12px; border-radius:20px; flex:1;" placeholder="Tulis pesan..." id="chat-input-msg" onkeypress="if(event.key==='Enter') App.Features.sendChat()">
+                                    <button class="icon-btn" style="background:var(--primary); color:white;" onclick="App.Features.sendChat()"><span class="material-symbols-outlined">send</span></button>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                },
+                groups() {
+                    return `<div class="glass-card"><h2>Komunitas & Grup</h2><p style="color:var(--text-muted); margin-top:12px;">Modul dalam tahap pengembangan UI lanjutan.</p></div>`;
+                },
+                profil() {
+                    return `
+                        <div class="glass-card profile-info-card" style="padding:0; overflow:hidden;">
+                            <div class="profile-cover"></div>
+                            <img src="https://i.pravatar.cc/150?img=68" class="profile-avatar-large" alt="Profile">
+                            <h2 style="font-size: 1.8rem; font-weight: 800; margin-bottom: 4px;">Reza Rahadian</h2>
+                            <p style="color: var(--primary); font-weight: 600; margin-bottom: 12px;">Senior UI/UX Designer & Frontend Engineer</p>
+                            <p style="max-width: 600px; margin: 0 auto; color: var(--text-muted); line-height: 1.6;">
+                                Mendesain pengalaman pengguna yang elegan dengan fokus pada arsitektur modern. Passionate about Clean UI, Glassmorphism, dan Vanilla JavaScript.
+                            </p>
+                            
+                            <div class="profile-stats">
+                                <div class="stat-item">
+                                    <span class="stat-val">245</span>
+                                    <span class="stat-lbl">Koneksi</span>
+                                </div>
+                                <div class="stat-item">
+                                    <span class="stat-val">1.2K</span>
+                                    <span class="stat-lbl">Pengikut</span>
+                                </div>
+                                <div class="stat-item">
+                                    <span class="stat-val">48</span>
+                                    <span class="stat-lbl">Postingan</span>
+                                </div>
+                            </div>
+                            <div style="padding: 24px; display:flex; justify-content:center; gap:16px;">
+                                <button class="btn btn-primary ripple-btn" style="padding-left:32px; padding-right:32px;">Edit Profil</button>
+                                <button class="btn btn-secondary ripple-btn"><span class="material-symbols-outlined">share</span></button>
+                            </div>
+                        </div>
+                    `;
+                },
+                settings() {
+                    return `
+                        <div class="glass-card" style="max-width: 600px;">
+                            <h2 style="margin-bottom: 24px;">Pengaturan Akun</h2>
+                            <div class="form-group">
+                                <input type="text" class="form-input" placeholder=" " value="Reza Rahadian">
+                                <label class="form-label">Nama Tampilan</label>
+                            </div>
+                            <div class="form-group" style="display:flex; justify-content:space-between; align-items:center; padding: 16px; border:1px solid var(--border-color); border-radius:var(--radius-md);">
+                                <div>
+                                    <h4 style="margin-bottom:4px;">Notifikasi Email</h4>
+                                    <p style="font-size:0.8rem; color:var(--text-muted);">Terima update aktivitas via email</p>
+                                </div>
+                                <!-- Custom Toggle Switch -->
+                                <label style="position:relative; display:inline-block; width:50px; height:24px;">
+                                    <input type="checkbox" checked style="opacity:0; width:0; height:0;" onchange="App.Toast.show('Preferensi disimpan','success')">
+                                    <span style="position:absolute; cursor:pointer; top:0; left:0; right:0; bottom:0; background-color:var(--primary); border-radius:24px; transition:0.4s;">
+                                        <span style="position:absolute; content:''; height:16px; width:16px; left:30px; bottom:4px; background-color:white; border-radius:50%; transition:0.4s;"></span>
+                                    </span>
+                                </label>
+                            </div>
+                            <button class="btn btn-primary ripple-btn" onclick="App.Toast.show('Pengaturan berhasil diperbarui.','success')">Simpan Perubahan</button>
+                        </div>
+                    `;
+                }
+            },
+
+            // ==========================================
+            // 6. VIEW CONTROLLERS (LOGIC FOR VIEWS)
+            // ==========================================
+            ViewControllers: {
+                feed() {
+                    App.Features.renderPosts();
+                },
+                chat() {
+                    const c = document.getElementById('chat-messages-container');
+                    c.scrollTop = c.scrollHeight;
+                }
+            },
+
+            // ==========================================
+            // 7. FEATURES LOGIC (POSTS, LIKES, CHAT)
+            // ==========================================
+            Features: {
+                renderPosts() {
+                    const stream = document.getElementById('feed-stream');
+                    if(!stream) return;
+                    
+                    const posts = App.Storage.getPosts();
+                    let html = '';
+                    
+                    posts.forEach(p => {
+                        const heartIcon = p.liked ? '<span class="material-symbols-outlined" style="font-variation-settings: \'FILL\' 1;">favorite</span>' : '<span class="material-symbols-outlined">favorite</span>';
+                        const likeClass = p.liked ? 'active' : '';
+                        
+                        html += `
+                            <div class="glass-card post-card">
+                                <div class="post-header">
+                                    <div class="post-author">
+                                        <img src="${p.avatar}" class="post-avatar">
+                                        <div class="post-meta">
+                                            <h4 style="color:var(--text-main);">${p.author}</h4>
+                                            <span>${p.role} &bull; ${p.time}</span>
+                                        </div>
+                                    </div>
+                                    <button class="icon-btn"><span class="material-symbols-outlined">more_horiz</span></button>
+                                </div>
+                                <div class="post-content">${p.content}</div>
+                                ${p.image ? `<img src="${p.image}" class="post-image">` : ''}
+                                <div class="post-actions">
+                                    <div class="action-btn ripple-btn ${likeClass}" onclick="App.Features.toggleLike(${p.id})">
+                                        ${heartIcon} ${p.likes} Suka
+                                    </div>
+                                    <div class="action-btn ripple-btn" onclick="App.Modal.open('Komentar', 'Fitur komentar akan segera hadir.')">
+                                        <span class="material-symbols-outlined">chat_bubble</span> ${p.comments} Komentar
+                                    </div>
+                                    <div class="action-btn ripple-btn" onclick="App.Toast.show('Tautan disalin ke clipboard','info')">
+                                        <span class="material-symbols-outlined">share</span> Bagikan
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                    });
+                    
+                    stream.innerHTML = html;
+                },
+                createPost() {
+                    const txt = document.getElementById('composer-text');
+                    if(!txt.value.trim()) return App.Toast.show("Kiriman tidak boleh kosong.", "warning");
+                    
+                    const posts = App.Storage.getPosts();
+                    const newPost = {
+                        id: Date.now(),
+                        author: 'Reza Rahadian',
+                        role: 'Senior UI/UX Designer',
+                        avatar: 'https://i.pravatar.cc/150?img=68',
+                        time: 'Baru saja',
+                        content: txt.value,
+                        image: null,
+                        likes: 0, comments: 0, liked: false
+                    };
+                    
+                    posts.unshift(newPost);
+                    App.Storage.savePosts(posts);
+                    txt.value = '';
+                    this.renderPosts();
+                    App.Toast.show("Postingan berhasil diterbitkan.", "success");
+                },
+                toggleLike(id) {
+                    const posts = App.Storage.getPosts();
+                    const post = posts.find(p => p.id === id);
+                    if(post) {
+                        if(post.liked) { post.likes--; post.liked = false; }
+                        else { post.likes++; post.liked = true; }
+                        App.Storage.savePosts(posts);
+                        this.renderPosts();
+                    }
+                },
+                sendChat() {
+                    const input = document.getElementById('chat-input-msg');
+                    const val = input.value.trim();
+                    if(!val) return;
+                    
+                    const container = document.getElementById('chat-messages-container');
+                    const bubble = document.createElement('div');
+                    bubble.className = 'bubble out';
+                    bubble.innerText = val;
+                    container.appendChild(bubble);
+                    
+                    input.value = '';
+                    container.scrollTop = container.scrollHeight;
+                }
+            },
+
+            // ==========================================
+            // 8. GLOBAL UTILITIES (THEME, CLOCK, MODAL, TOAST, RIPPLE)
+            // ==========================================
+            Theme: {
+                init() {
+                    const saved = localStorage.getItem('ns_theme') || 'light';
+                    document.documentElement.setAttribute('data-theme', saved);
+                },
+                toggle() {
+                    const cur = document.documentElement.getAttribute('data-theme');
+                    const nxt = cur === 'light' ? 'dark' : 'light';
+                    document.documentElement.setAttribute('data-theme', nxt);
+                    localStorage.setItem('ns_theme', nxt);
+                }
+            },
+
             Clock: {
                 start() {
-                    const months = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
                     const days = ["Minggu", "Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"];
+                    const months = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
+                    
                     setInterval(() => {
-                        const now = new Date();
-                        document.getElementById('live-date-str').innerText = `${days[now.getDay()]}, ${now.getDate()} ${months[now.getMonth()]} ${now.getFullYear()}`;
-                        document.getElementById('live-clock-str').innerText = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}:${String(now.getSeconds()).padStart(2,'0')} WIB`;
-                        document.getElementById('footer-year-sync').innerText = now.getFullYear();
+                        const d = new Date();
+                        const dateStr = `${days[d.getDay()]}, ${d.getDate()} ${months[d.getMonth()]} ${d.getFullYear()}`;
+                        const timeStr = `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}:${String(d.getSeconds()).padStart(2,'0')} WIB`;
+                        
+                        const dateEl = document.getElementById('ui-date');
+                        const timeEl = document.getElementById('ui-time');
+                        const yearEl = document.getElementById('footer-year');
+                        
+                        if(dateEl) dateEl.innerText = dateStr;
+                        if(timeEl) timeEl.innerText = timeStr;
+                        if(yearEl) yearEl.innerText = d.getFullYear();
                     }, 1000);
                 }
             },
 
-            Theme: {
-                init() {
-                    const cache = localStorage.getItem('sb_theme') || 'light';
-                    document.documentElement.setAttribute('data-theme', cache);
-                },
-                toggle() {
-                    const curr = document.documentElement.getAttribute('data-theme');
-                    const next = curr === 'light' ? 'dark' : 'light';
-                    document.documentElement.setAttribute('data-theme', next);
-                    localStorage.setItem('sb_theme', next);
-                    App.Toast.show(`Tema beralih ke mode ${next}`, "info");
-                }
-            },
-
-            // Social Feed Database Layer Controller Component Modules Engine Integration
-            FeedModule: {
-                imgCache: null,
-                handleImagePreview(input) {
-                    if (input.files && input.files[0]) {
-                        const reader = new FileReader();
-                        reader.onload = (e) => {
-                            this.imgCache = e.target.result;
-                            document.getElementById('composer-image-preview-target').innerHTML = `<img src="${e.target.result}" style="width:40px; height:40px; object-fit:cover; border-radius:4px;">`;
-                        };
-                        reader.readAsDataURL(input.files[0]);
-                    }
-                },
-                async executeCreatePost() {
-                    const node = document.getElementById('post-text-body-field');
-                    if(!node.value.trim()) return App.Toast.show("Konten deskripsi kosong!", "warning");
-                    
-                    const payload = {
-                        author: localStorage.getItem('sb_user_cache') || "Kartika Dewi",
-                        avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=100&q=80",
-                        body: node.value,
-                        media: this.imgCache,
-                        likes: 0
+            Network: {
+                listen() {
+                    const update = () => {
+                        const dot = document.getElementById('network-dot');
+                        const txt = document.getElementById('network-text');
+                        if(navigator.onLine) {
+                            dot.className = 'status-dot'; txt.innerText = 'Online';
+                        } else {
+                            dot.className = 'status-dot offline'; txt.innerText = 'Offline';
+                            App.Toast.show("Koneksi internet terputus.", "danger");
+                        }
                     };
-                    
-                    await SupabaseClientEngine.insert('posts', payload);
-                    node.value = ''; this.imgCache = null;
-                    document.getElementById('composer-image-preview-target').innerHTML = '';
-                    this.renderStream();
-                    App.Toast.show("Post sukses disinkronisasikan ke Supabase", "success");
-                },
-                async renderStream() {
-                    const target = document.getElementById('social-feed-stream-injector');
-                    if(!target) return;
-                    
-                    const data = await SupabaseClientEngine.select('posts', '*', 'created_at');
-                    let html = '';
-                    data.forEach(post => {
-                        html += `
-                            <article class="premium-card">
-                                <div class="post-card-header">
-                                    <div class="post-author-block">
-                                        <div class="avatar-frame" style="width:24px; height:24px;"><img src="${post.avatar}" class="avatar-img"></div>
-                                        <div><h4 style="font-weight:700;">${post.author}</h4></div>
-                                    </div>
-                                </div>
-                                <div class="post-content-body">${post.body}</div>
-                                ${post.media ? `<img src="${post.media}" class="post-media-attachment">` : ''}
-                            </article>
-                        `;
-                    });
-                    target.innerHTML = html || '<p style="color:var(--text-muted)">Belum ada postingan dari database cloud.</p>';
+                    window.addEventListener('online', update);
+                    window.addEventListener('offline', update);
                 }
             },
 
-            // Chat Subsystem Engine Modules integration layer control methods lists
-            ChatModule: {
-                async executeSend() {
-                    const node = document.getElementById('chat-composer-input-message');
-                    if(!node.value.trim()) return;
-                    
-                    const payload = {
-                        sender: localStorage.getItem('sb_user_cache') || "Kartika Dewi",
-                        msg: node.value
-                    };
-                    
-                    await SupabaseClientEngine.insert('chats', payload);
-                    node.value = ''; this.renderStream();
+            Modal: {
+                open(title, bodyText) {
+                    document.getElementById('modal-title').innerText = title;
+                    document.getElementById('modal-body').innerText = bodyText;
+                    document.getElementById('global-modal').classList.add('active');
                 },
-                async renderStream() {
-                    const view = document.getElementById('chat-messages-stream-node');
-                    if(!view) return;
-                    
-                    const data = await SupabaseClientEngine.select('chats', '*', 'created_at');
-                    let html = '';
-                    data.reverse().forEach(c => {
-                        const isMe = c.sender === (localStorage.getItem('sb_user_cache') || "Kartika Dewi");
-                        html += `
-                            <div class="msg-packet ${isMe ? 'outgoing' : 'incoming'}">
-                                <span style="font-size:9px; color:var(--text-muted); font-weight:bold;">${c.sender}</span>
-                                <div class="msg-payload">${c.msg}</div>
-                            </div>
-                        `;
-                    });
-                    view.innerHTML = html;
-                    view.scrollTop = view.scrollHeight;
-                }
-            },
-
-            // Responsive Data Tables Components Management Engine Module lists arrays parsing
-            TableDataModule: {
-                async renderRows() {
-                    const target = document.getElementById('master-data-table-rows-injector');
-                    if(!target) return;
-                    
-                    const data = await SupabaseClientEngine.select('inventoris', '*', 'sku');
-                    let html = '';
-                    data.forEach(item => {
-                        html += `
-                            <tr>
-                                <td data-label="Kode SKU" style="font-weight:700; color:var(--primary);">${item.sku}</td>
-                                <td data-label="Nama Item">${item.name}</td>
-                                <td data-label="Kategori">${item.cat}</td>
-                                <td data-label="Stok">${item.qty} Unit</td>
-                                <td data-label="Harga Satuan">Rp ${parseFloat(item.price).toLocaleString('id-ID')}</td>
-                            </tr>
-                        `;
-                    });
-                    target.innerHTML = html;
-                },
-                exportCSVData() {
-                    App.Toast.show("Mengekspor berkas CSV logistik data master...", "info");
-                }
-            },
-
-            POSModule: {
-                runKalkulasi() {
-                    const val = parseFloat(document.getElementById('pos-select-product').value);
-                    document.getElementById('pos-invoice-total-display').innerText = `Rp ${val.toLocaleString('id-ID')}`;
-                },
-                checkout() { App.Toast.show("Invoice POS Transaksi Berhasil Diupload", "success"); }
-            },
-
-            SettingsModule: {
-                executeSave() {
-                    const value = document.getElementById('setting-operator-name-field').value;
-                    if(!value.trim()) return;
-                    localStorage.setItem('sb_user_cache', value);
-                    document.getElementById('sidebar-user-name').innerText = value;
-                    App.Toast.show("Konfigurasi tersimpan sukses", "success");
+                close() {
+                    document.getElementById('global-modal').classList.remove('active');
                 }
             },
 
             Toast: {
                 show(msg, type = "info") {
-                    const container = document.getElementById('toast-container');
-                    const node = document.createElement('div');
-                    node.className = 'toast-node';
-                    node.style.borderLeftColor = type === 'success' ? 'var(--success)' : 'var(--primary)';
-                    node.innerHTML = `<span class="material-symbols-outlined" style="font-size:14px;">info</span><span style="font-weight:600;">${msg}</span>`;
-                    container.appendChild(node);
-                    setTimeout(() => { node.remove(); }, 3000);
+                    const c = document.getElementById('toast-container');
+                    const t = document.createElement('div');
+                    t.className = 'toast';
+                    
+                    let color = "var(--primary)";
+                    let icon = "info";
+                    if(type === 'success') { color = "var(--secondary)"; icon = "check_circle"; }
+                    if(type === 'danger') { color = "var(--danger)"; icon = "error"; }
+                    if(type === 'warning') { color = "var(--warning)"; icon = "warning"; }
+
+                    t.style.borderLeftColor = color;
+                    t.innerHTML = `<span class="material-symbols-outlined" style="color:${color}">${icon}</span> <span>${msg}</span>`;
+                    
+                    c.appendChild(t);
+                    setTimeout(() => {
+                        t.style.opacity = '0'; t.style.transform = 'translateX(50px)';
+                        t.style.transition = 'all 0.3s ease';
+                        setTimeout(() => t.remove(), 300);
+                    }, 3000);
                 }
             },
 
-            Auth: {
-                logout() { localStorage.clear(); window.location.reload(); }
-            },
-
-            Events: {
-                bindGlobal() {
-                    document.getElementById('sidebar-toggle-trigger').addEventListener('click', () => {
+            UI: {
+                bindGlobalEvents() {
+                    // Sidebar Toggle Desktop
+                    document.getElementById('btn-toggle-sidebar')?.addEventListener('click', () => {
                         document.getElementById('app-layout').classList.toggle('sidebar-collapsed');
                     });
-                    document.getElementById('theme-toggle-trigger').addEventListener('click', () => App.Theme.toggle());
-                    document.getElementById('refresh-view-trigger').addEventListener('click', () => App.Router.executeRouteTransition());
                     
-                    const trigger = document.getElementById('profile-dropdown-trigger');
-                    const sheet = document.getElementById('profile-dropdown-sheet');
-                    trigger.addEventListener('click', (e) => { e.stopPropagation(); sheet.classList.toggle('active'); });
-                    document.addEventListener('click', () => sheet.classList.remove('active'));
+                    // Theme Switch
+                    document.getElementById('btn-theme')?.addEventListener('click', () => App.Theme.toggle());
                     
-                    document.getElementById('fullscreen-toggle-trigger').addEventListener('click', () => {
+                    // Fullscreen
+                    document.getElementById('btn-fullscreen')?.addEventListener('click', () => {
                         if (!document.fullscreenElement) document.documentElement.requestFullscreen();
-                        else document.exitFullscreen();
+                        else if (document.exitFullscreen) document.exitFullscreen();
                     });
+
+                    // Refresh
+                    document.getElementById('btn-refresh')?.addEventListener('click', () => {
+                        App.Router.handleRoute();
+                        App.Toast.show("Halaman diperbarui", "success");
+                    });
+
+                    // Modal Close on Click Outside
+                    document.getElementById('global-modal').addEventListener('click', (e) => {
+                        if(e.target.id === 'global-modal') App.Modal.close();
+                    });
+
+                    // Ripple Effect Binding via Event Delegation
+                    document.addEventListener('click', function(e) {
+                        const target = e.target.closest('.ripple-btn');
+                        if (target) {
+                            const circle = document.createElement('span');
+                            const diameter = Math.max(target.clientWidth, target.clientHeight);
+                            const radius = diameter / 2;
+                            const rect = target.getBoundingClientRect();
+                            circle.style.width = circle.style.height = `${diameter}px`;
+                            circle.style.left = `${e.clientX - rect.left - radius}px`;
+                            circle.style.top = `${e.clientY - rect.top - radius}px`;
+                            circle.classList.add('ripple');
+                            const existing = target.querySelector('.ripple');
+                            if (existing) existing.remove();
+                            target.appendChild(circle);
+                        }
+                    });
+                },
+                showLoadingBtn(btn) {
+                    const originalText = btn.innerText;
+                    btn.innerHTML = `<span class="material-symbols-outlined" style="animation: spin 1s linear infinite;">sync</span> Loading...`;
+                    btn.style.pointerEvents = 'none';
+                    btn.style.opacity = '0.8';
+                    setTimeout(() => {
+                        btn.innerHTML = originalText;
+                        btn.style.pointerEvents = 'auto';
+                        btn.style.opacity = '1';
+                    }, 1000);
                 }
             }
         };
 
-        window.addEventListener('DOMContentLoaded', () => App.init());
+        // Initialize App on DOM Load
+        document.addEventListener('DOMContentLoaded', () => App.init());
+
     </script>
+    
+    <!-- Inline keyframes for JS added animations -->
+    <style>
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+    </style>
 </body>
 </html>
