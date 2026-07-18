@@ -4,18 +4,17 @@ const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 // Variabel Global Aplikasi
 let liveNotifications = [ 
-    { id: 1, icon: 'shield_person', user: 'Super Admin', type: 'admin', desc: 'Sistem Workspace Tech Social versi 2.4 berhasil diperbarui ke server cloud.', isUnread: true }, 
-    { id: 2, icon: 'handshake', user: 'System', type: 'admin', desc: 'Fitur network teman aktif. Sekarang Anda dapat mencari user lain di halaman Eksplor.', isUnread: false } 
+    { id: 1, icon: 'shield_person', user: 'Super Admin', type: 'admin', desc: 'Sistem Workspace Tech Social versi 2.4 berhasil diperbarui ke server cloud.', isUnread: true }
 ]; 
 let activeChatFriendEmail = null; 
 let activeChatFriendName = null; 
-let composerAttachedImageBase64 = null; 
+let composerAttachedImageBase64 = null; // Menampung objek File asli untuk diunggah ke Storage
 let composerAttachedFileBase64 = null; 
 let composerAttachedFileName = "Dokumen.bin"; 
 let unreadMessageCounters = {}; 
 let liveHeaderNotificationCount = 1; 
 let headerSearchFilterQueryString = ""; 
-let searchTimeout = null; 
+let searchTimeout = null; // Timer untuk Debounce pencarian
 const EMOJI_LIST = ['😊', '😂', '🔥', '👍', '🙌', '💯', '❤️', '👏', '🎉', '😮', '😢', '🙏']; 
 
 const App = { 
@@ -77,16 +76,17 @@ const App = {
                 .channel('schema-friends-changes')
                 .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'friends' }, async (payload) => {
                     const newRequest = payload.new;
-                    const myEmail = localStorage.getItem('ns_user_email') || '';
-                    if (newRequest.friend_email.toLowerCase() === myEmail.toLowerCase() && newRequest.status === 'pending') {
-                        const senderName = newRequest.user_email.split('@')[0];
+                    const myUsername = App.ProfileState.getCurrentName().toLowerCase();
+                    
+                    if (newRequest.friend_email.split('@')[0].toLowerCase() === myUsername && newRequest.status === 'pending') {
+                        const senderUsername = newRequest.user_email.split('@')[0];
                         const exists = liveNotifications.some(n => n.friendRequestId === newRequest.id);
                         if (!exists) {
                             liveNotifications.unshift({
                                 id: newRequest.id,
                                 friendRequestId: newRequest.id,
                                 icon: 'person_add',
-                                user: senderName,
+                                user: senderUsername,
                                 senderEmail: newRequest.user_email,
                                 type: 'friend_request',
                                 desc: `Mengajak Anda berteman.`,
@@ -94,7 +94,7 @@ const App = {
                             });
                             liveHeaderNotificationCount++;
                             App.UI.refreshHeaderNotificationBadgeDOM();
-                            App.Toast.show(`Permintaan pertemanan baru dari ${senderName}!`, "info");
+                            App.Toast.show(`Permintaan pertemanan baru dari ${senderUsername}!`, "info");
                         }
                     }
                 })
@@ -106,15 +106,15 @@ const App = {
                 if(window.location.hash === '#/explore') App.Features.renderExploreUsers();
             }) .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'posts' }, async (payload) => { 
                 const newPost = payload.new; 
-                const myCurrentName = App.ProfileState.getCurrentName(); 
+                const myUsername = App.ProfileState.getCurrentName().toLowerCase(); 
                 
                 if (newPost.image === 'private_chat_type') { 
-                    if (newPost.role === myCurrentName) { 
+                    if (newPost.role.toLowerCase() === myUsername) { 
                         const searchFriendName = newPost.author.toLowerCase(); 
                         liveNotifications.unshift({ id: Date.now(), icon: 'chat', user: newPost.author, type: 'chat', desc: `Mengirimkan sebuah pesan pribadi baru: "${newPost.content.substring(0, 30)}..."`, isUnread: true }); 
                         liveHeaderNotificationCount++; 
                         App.UI.refreshHeaderNotificationBadgeDOM(); 
-                        if (activeChatFriendName === newPost.author && document.getElementById('floating-chat-popup-box').classList.contains('active')) { 
+                        if (activeChatFriendName && activeChatFriendName.toLowerCase() === searchFriendName && document.getElementById('floating-chat-popup-box').classList.contains('active')) { 
                             App.Features.appendIncomingBubbleDOM(newPost.author, newPost.content); 
                         } else { 
                             unreadMessageCounters[searchFriendName] = (unreadMessageCounters[searchFriendName] || 0) + 1; 
@@ -126,11 +126,11 @@ const App = {
                     return; 
                 } 
                 
-                if (newPost.author !== myCurrentName) { 
+                if (newPost.author.toLowerCase() !== myUsername) { 
                     const myEmail = localStorage.getItem('ns_user_email') || ''; 
                     const { data: friends } = await supabaseClient.from('friends').select('friend_email').eq('user_email', myEmail).eq('status', 'approved'); 
-                    const friendListNames = friends ? friends.map(f => f.friend_email.split('@')[0]) : []; 
-                    if (friendListNames.includes(newPost.author)) { 
+                    const friendListNames = friends ? friends.map(f => f.friend_email.split('@')[0].toLowerCase()) : []; 
+                    if (friendListNames.includes(newPost.author.toLowerCase())) { 
                         liveNotifications.unshift({ id: Date.now(), icon: 'campaign', user: newPost.author, type: 'feed', desc: `Menerbitkan kiriman timeline baru: "${newPost.content.substring(0, 30)}..."`, isUnread: true }); 
                         liveHeaderNotificationCount++; 
                         App.UI.refreshHeaderNotificationBadgeDOM(); 
@@ -142,7 +142,7 @@ const App = {
                 const updatedPost = payload.new; 
                 const myCurrentName = App.ProfileState.getCurrentName(); 
                 
-                if (updatedPost.author === myCurrentName && updatedPost.image !== 'private_chat_type') { 
+                if (updatedPost.author.toLowerCase() === myCurrentName.toLowerCase() && updatedPost.image !== 'private_chat_type') { 
                     let parsedComments = []; 
                     try { 
                         if(updatedPost.role && updatedPost.role.startsWith('[')) parsedComments = JSON.parse(updatedPost.role); 
@@ -150,7 +150,7 @@ const App = {
                     
                     if (parsedComments.length > 0) { 
                         const latestComment = parsedComments[parsedComments.length - 1]; 
-                        if (latestComment.user !== myCurrentName) { 
+                        if (latestComment.user.toLowerCase() !== myCurrentName.toLowerCase()) { 
                             liveNotifications.unshift({ id: Date.now(), icon: 'maps_ugc', user: latestComment.user, type: 'comment', desc: `Mengomentari postingan Anda: "${latestComment.text.substring(0, 25)}"`, isUnread: true }); 
                             liveHeaderNotificationCount++; 
                             App.UI.refreshHeaderNotificationBadgeDOM(); 
@@ -195,18 +195,8 @@ const App = {
         }, 
         async login(e) { 
             if (e && e.preventDefault) e.preventDefault(); 
-            const emailInput = document.getElementById('login-email'); 
-            const pwdInput = document.getElementById('login-pwd'); 
-            if (!emailInput || !pwdInput) { 
-                alert("Elemen form login tidak ditemukan di DOM!"); 
-                return; 
-            } 
-            const email = emailInput.value.trim(); 
-            const password = pwdInput.value; 
-            if (!email || !password) { 
-                alert("Email dan password wajib diisi!"); 
-                return; 
-            } 
+            const email = document.getElementById('login-email').value.trim(); 
+            const password = document.getElementById('login-pwd').value; 
             const btn = e && e.target ? e.target.querySelector('button[type="submit"]') : null; 
             if (btn) App.UI.showLoadingBtn(btn); 
             try { 
@@ -217,42 +207,29 @@ const App = {
                 App.UI.syncGlobalAvatarAndName(); 
                 this.showApp(); 
                 App.Router.init(); 
-                App.Features.fetchIncomingFriendRequestsSync();
+                App.Features.fetchIncomingFriendRequestsSync(); 
                 App.Toast.show("Selamat datang kembali!", "success"); 
             } catch (error) { 
-                console.error("Login error:", error.message); 
                 alert("Gagal Masuk!\nAlasan: " + error.message); 
-                App.Toast.show(error.message, "danger"); 
             } 
         }, 
         async signup(e) { 
             if (e && e.preventDefault) e.preventDefault(); 
-            const emailInput = document.getElementById('signup-email'); 
-            const pwdInput = document.getElementById('signup-pwd'); 
-            if (!emailInput || !pwdInput) return; 
-            const email = emailInput.value.trim(); 
-            const password = pwdInput.value; 
+            const email = document.getElementById('signup-email').value.trim(); 
+            const password = document.getElementById('signup-pwd').value; 
             const btn = e && e.target ? e.target.querySelector('button[type="submit"]') : null; 
             if (btn) App.UI.showLoadingBtn(btn); 
             try { 
-                const { data, error } = await supabaseClient.auth.signUp({ email, password }); 
+                const { error } = await supabaseClient.auth.signUp({ email, password }); 
                 if (error) throw error; 
-                if (data?.user && data.user.identities && data.user.identities.length === 0) { 
-                    App.Modal.open("Email Sudah Terdaftar", "Email ini sudah terikat dengan akun lain. Silakan langsung masuk."); 
-                } else { 
-                    App.Modal.open("Pendaftaran Berhasil", "Akun Anda telah terdaftar. Silakan cek inbox/spam email Anda."); 
-                } 
+                App.Modal.open("Pendaftaran Berhasil", "Akun Anda telah terdaftar. Silakan cek email Anda."); 
                 this.toggleView('login'); 
             } catch (error) { 
-                console.error("Signup error:", error.message); 
                 alert("Gagal Mendaftar!\nAlasan: " + error.message); 
-                App.Toast.show(error.message, "danger"); 
             } 
         }, 
         async logout() { 
-            try { 
-                await supabaseClient.auth.signOut(); 
-            } catch(e){} 
+            try { await supabaseClient.auth.signOut(); } catch(e){} 
             localStorage.clear(); 
             window.location.hash = ''; 
             window.location.reload(); 
@@ -260,11 +237,8 @@ const App = {
         showApp() { 
             const auth = document.getElementById('auth-layout'); 
             const app = document.getElementById('app-layout'); 
-            if(auth) auth.style.opacity = '0'; 
-            setTimeout(() => { 
-                if(auth) auth.style.display = 'none'; 
-                if(app) app.classList.add('active'); 
-            }, 400); 
+            if(auth) auth.style.display = 'none'; 
+            if(app) app.classList.add('active'); 
         } 
     }, 
 
@@ -290,36 +264,36 @@ const App = {
                 viewport.innerHTML = `<div class="view-container">${App.Views[hash]()}</div>`; 
                 if(App.ViewControllers[hash]) App.ViewControllers[hash](); 
                 window.scrollTo({ top: 0, behavior: 'smooth' }); 
-            } else { 
-                viewport.innerHTML = `<div class="glass-card"><h2>404 Not Found</h2></div>`; 
             } 
         } 
     }, 
 
     Navigation: { 
         menuConfig: [ 
-            { id: 'feed', label: 'News Feed', icon: 'home', mobile: true, isChatTrigger: false }, 
-            { id: 'explore', label: 'Cari Teman', icon: 'person_search', mobile: true, isChatTrigger: false }, 
-            { id: 'chat_trigger', label: 'Pesan', icon: 'chat', mobile: true, isChatTrigger: true }, 
-            { id: 'groups', label: 'Komunitas', icon: 'groups', mobile: true, isChatTrigger: false }, 
-            { id: 'settings', label: 'Pengaturan', icon: 'settings', mobile: false, isChatTrigger: false } 
+            { id: 'feed', label: 'News Feed', icon: 'home', mobile: true }, 
+            { id: 'explore', label: 'Cari Teman', icon: 'person_search', mobile: true }, 
+            { id: 'chat_trigger', label: 'Pesan', icon: 'chat', mobile: true }, 
+            { id: 'groups', label: 'Komunitas', icon: 'groups', mobile: true }, 
+            { id: 'settings', label: 'Pengaturan', icon: 'settings', mobile: false } 
         ], 
         render() { 
             const side = document.getElementById('sidebar-menu-list'); 
             const bottom = document.getElementById('bottom-nav-list'); 
-            let sideHTML = '', bottomHTML = ''; 
-            this.menuConfig.forEach(m => { 
-                if(m.isChatTrigger) { 
-                    sideHTML += `<li class="menu-item-wrapper"><a class="menu-item ripple-btn" onclick="App.UI.toggleChatPopup(true)"><span class="material-symbols-outlined">${m.icon}</span><span class="menu-text">${m.label}</span></a><div class="num-counter-badge" id="main-sidebar-chat-counter" style="display:none;">0</div></li>`; 
-                    if(m.mobile) bottomHTML += `<div class="bn-item-wrapper"><a class="bn-item ripple-btn" onclick="App.UI.toggleChatPopup(true)"><span class="material-symbols-outlined">${m.icon}</span><span style="font-size: 0.7rem;">${m.label}</span></a><div class="bn-counter-badge" id="mobile-bn-chat-counter" style="display:none;">0</div></div>`; 
-                } else { 
-                    sideHTML += `<li><a class="menu-item ripple-btn" data-route="${m.id}" onclick="App.Router.navigate('${m.id}')"><span class="material-symbols-outlined">${m.icon}</span><span class="menu-text">${m.label}</span></a></li>`; 
-                    if(m.mobile) bottomHTML += `<a class="bn-item ripple-btn" data-route="${m.id}" onclick="App.Router.navigate('${m.id}')"><span class="material-symbols-outlined">${m.icon}</span><span style="font-size: 0.7rem;">${m.label}</span></a>`; 
-                } 
-            }); 
-            sideHTML += `<li style="margin-top: auto;"><a class="menu-item ripple-btn" style="color: var(--danger);" onclick="App.Auth.logout()"><span class="material-symbols-outlined">logout</span><span class="menu-text">Keluar</span></a></li>`; 
-            side.innerHTML = sideHTML; 
-            bottom.innerHTML = bottomHTML; 
+            if(!side || !bottom) return;
+            
+            side.innerHTML = this.menuConfig.map(m => {
+                if(m.id === 'chat_trigger') {
+                    return `<li class="menu-item-wrapper"><a class="menu-item ripple-btn" onclick="App.UI.toggleChatPopup(true)"><span class="material-symbols-outlined">${m.icon}</span><span class="menu-text">${m.label}</span></a><div class="num-counter-badge" id="main-sidebar-chat-counter" style="display:none;">0</div></li>`;
+                }
+                return `<li><a class="menu-item ripple-btn" data-route="${m.id}" onclick="App.Router.navigate('${m.id}')"><span class="material-symbols-outlined">${m.icon}</span><span class="menu-text">${m.label}</span></a></li>`;
+            }).join('') + `<li style="margin-top: auto;"><a class="menu-item ripple-btn" style="color: var(--danger);" onclick="App.Auth.logout()"><span class="material-symbols-outlined">logout</span><span class="menu-text">Keluar</span></a></li>`; 
+            
+            bottom.innerHTML = this.menuConfig.filter(m => m.mobile).map(m => {
+                if(m.id === 'chat_trigger') {
+                    return `<div class="bn-item-wrapper"><a class="bn-item ripple-btn" onclick="App.UI.toggleChatPopup(true)"><span class="material-symbols-outlined">${m.icon}</span></a><div class="bn-counter-badge" id="mobile-bn-chat-counter" style="display:none;">0</div></div>`;
+                }
+                return `<a class="bn-item ripple-btn" data-route="${m.id}" onclick="App.Router.navigate('${m.id}')"><span class="material-symbols-outlined">${m.icon}</span></a>`;
+            }).join(''); 
         } 
     }, 
 
@@ -377,14 +351,13 @@ const App = {
                 if(error) throw error;
                 if(data) {
                     data.forEach(req => {
-                        const senderName = req.user_email.split('@')[0];
-                        const exists = liveNotifications.some(n => n.friendRequestId === req.id);
-                        if (!exists) {
+                        const senderUsername = req.user_email.split('@')[0];
+                        if (!liveNotifications.some(n => n.friendRequestId === req.id)) {
                             liveNotifications.unshift({
                                 id: req.id,
                                 friendRequestId: req.id,
                                 icon: 'person_add',
-                                user: senderName,
+                                user: senderUsername,
                                 senderEmail: req.user_email,
                                 type: 'friend_request',
                                 desc: `Mengajak Anda berteman.`,
@@ -700,6 +673,7 @@ const App = {
             const container = document.getElementById('explore-users-stream'); 
             if(!container) return; 
             const myEmail = localStorage.getItem('ns_user_email') || ''; 
+            const myUsername = App.ProfileState.getCurrentName().toLowerCase();
             try { 
                 const { data: incomingReq } = await supabaseClient.from('friends').select('id, user_email, status').eq('friend_email', myEmail);
                 const { data: outgoingReq } = await supabaseClient.from('friends').select('id, friend_email, status').eq('user_email', myEmail); 
@@ -729,12 +703,11 @@ const App = {
                 const { data: posts } = await supabaseClient.from('posts').select('author, avatar').not('author', 'is', null); 
                 const uniqueUsers = []; 
                 const map = new Map(); 
-                const myCurrentName = App.ProfileState.getCurrentName(); 
                 
                 if(posts) { 
                     for (const item of posts) { 
                         const authorLower = item.author.toLowerCase();
-                        if(authorLower !== myCurrentName.toLowerCase() && !map.has(authorLower) && item.image !== 'private_chat_type') { 
+                        if(authorLower !== myUsername && !map.has(authorLower) && item.image !== 'private_chat_type') { 
                             map.set(authorLower, true); 
                             uniqueUsers.push({ name: item.author, avatar: item.avatar || 'https://i.pravatar.cc/150?img=11' }); 
                         } 
@@ -754,7 +727,7 @@ const App = {
                     } else if (statusPertemanan === 'incoming_pending') {
                         buttonHTML = `
                             <div style="display:flex; gap:4px;">
-                                <button class="btn btn-primary" style="padding:6px 10px; font-size:0.8rem;" onclick="App.Features.acceptFriendRequestAction(${targetDbId}, ${targetDbId}, '${username}')">Setujui</button>
+                                <button class="btn btn-primary" style="padding:6px 10px; font-size:0.8rem;" onclick="App.Features.acceptFriendRequestAction(${targetDbId}, ${targetDbId}, '${username}@gmail.com')">Setujui</button>
                                 <button class="btn btn-secondary" style="padding:6px 10px; font-size:0.8rem; color:var(--danger);" onclick="App.Features.rejectFriendRequestAction(${targetDbId}, ${targetDbId})">Tolak</button>
                             </div>`;
                     } else { 
@@ -770,10 +743,10 @@ const App = {
             if(!myEmail) return; 
             try { 
                 if (currentStatus === 'approved') { 
-                    await supabaseClient.from('friends').delete().eq('user_email', myEmail).eq('friend_email', friendUsername + "@workspace"); 
-                    await supabaseClient.from('friends').delete().eq('user_email', friendUsername + "@workspace").eq('friend_email', myEmail); 
+                    await supabaseClient.from('friends').delete().eq('user_email', myEmail).eq('friend_email', friendUsername + "@gmail.com"); 
+                    await supabaseClient.from('friends').delete().eq('user_email', friendUsername + "@gmail.com").eq('friend_email', myEmail); 
                 } else { 
-                    await supabaseClient.from('friends').insert([{ user_email: myEmail, friend_email: friendUsername + "@workspace", status: 'pending' }]); 
+                    await supabaseClient.from('friends').insert([{ user_email: myEmail, friend_email: friendUsername + "@gmail.com", status: 'pending' }]); 
                 } 
                 this.renderExploreUsers(); 
                 this.loadPopupFriendsListSidebar(); 
@@ -793,11 +766,11 @@ const App = {
             const myCurrentName = App.ProfileState.getCurrentName(); 
             try { 
                 const { data: myFriends } = await supabaseClient.from('friends').select('friend_email').eq('user_email', myEmail).eq('status', 'approved'); 
-                const allowedNames = myFriends ? myFriends.map(f => f.friend_email.split('@')[0]) : []; 
-                allowedNames.push(myCurrentName); 
+                const allowedNames = myFriends ? myFriends.map(f => f.friend_email.split('@')[0].toLowerCase()) : []; 
+                allowedNames.push(myCurrentName.toLowerCase()); 
                 const { data: posts, error } = await supabaseClient .from('posts') .select('*') .order('created_at', { ascending: false }); 
                 if (error) throw error; 
-                let filteredPosts = posts ? posts.filter(p => p.image !== 'private_chat_type' && allowedNames.includes(p.author)) : []; 
+                let filteredPosts = posts ? posts.filter(p => p.image !== 'private_chat_type' && allowedNames.includes(p.author.toLowerCase())) : []; 
                 if(headerSearchFilterQueryString !== "") { 
                     filteredPosts = filteredPosts.filter(p => p.author.toLowerCase().includes(headerSearchFilterQueryString)); 
                 } 
@@ -822,7 +795,7 @@ const App = {
                         } 
                     } 
                     let postMenuConfigHTML = ''; 
-                    if(p.author === myCurrentName) { 
+                    if(p.author.toLowerCase() === myCurrentName.toLowerCase()) { 
                         postMenuConfigHTML = `<span class="material-symbols-outlined post-menu-trigger" onclick="App.Features.openPostActionMenuDOM(${pId}, ${hasImage})">more_vert</span>`; 
                     } 
                     let parsedComments = []; 
@@ -831,7 +804,7 @@ const App = {
                     } catch(e) { parsedComments = []; } 
                     const commentCountValue = parsedComments.length; 
                     let commentsListHTML = parsedComments.map(c => { 
-                        const alignmentClass = c.user === myCurrentName ? 'my-comment' : 'other-comment'; 
+                        const alignmentClass = c.user.toLowerCase() === myCurrentName.toLowerCase() ? 'my-comment' : 'other-comment'; 
                         return ` <div class="comment-item-wrapper ${alignmentClass}"> <div class="comment-bubble"> <strong onclick="App.Features.redirectToTargetFriendProfile('${c.user}')">${c.user}</strong> <span>${c.text}</span> </div> </div> `; 
                     }).join(''); 
                     let commentEmojiHTML = EMOJI_LIST.map(em => `<button class="emoji-item-btn" onclick="App.Features.appendEmojiToInputField('comment-input-field-${pId}','comment-panel-${pId}','${em}')">${em}</button>`).join(''); 
@@ -907,7 +880,7 @@ const App = {
                 await supabaseClient.from('posts').update(updatePayload).eq('id', id); 
                 
                 const { data: targetPost } = await supabaseClient.from('posts').select('author').eq('id', id).single();
-                if(targetPost && targetPost.author !== myCurrentName) {
+                if(targetPost && targetPost.author.toLowerCase() !== myCurrentName.toLowerCase()) {
                     liveNotifications.unshift({ id: Date.now(), icon: 'thumb_up', user: myCurrentName, type: 'like', desc: `Menyukai postingan ID #${id} Anda.`, isUnread: true }); 
                     liveHeaderNotificationCount++; 
                     App.UI.refreshHeaderNotificationBadgeDOM(); 
@@ -936,7 +909,7 @@ const App = {
                 await supabaseClient.from('posts').update(updatePayload).eq('id', id); 
                 
                 const { data: targetPost } = await supabaseClient.from('posts').select('author').eq('id', id).single();
-                if(targetPost && targetPost.author !== myCurrentName) {
+                if(targetPost && targetPost.author.toLowerCase() !== myCurrentName.toLowerCase()) {
                     liveNotifications.unshift({ id: Date.now(), icon: 'thumb_down', user: myCurrentName, type: 'like', desc: `Memberikan dislike pada postingan ID #${id} Anda.`, isUnread: true }); 
                     liveHeaderNotificationCount++; 
                     App.UI.refreshHeaderNotificationBadgeDOM(); 
@@ -1089,7 +1062,8 @@ const App = {
         open(t, b) { 
             document.getElementById('modal-title').innerText=t; 
             document.getElementById('modal-body').innerHTML=b; 
-            document.getElementById('modal-ok-btn').style.display = 'inline-flex'; 
+            const okBtn = document.getElementById('modal-ok-btn');
+            if(okBtn) okBtn.style.display = 'inline-flex'; 
             document.getElementById('global-modal').classList.add('active'); 
         }, 
         close() { document.getElementById('global-modal').classList.remove('active'); } 
@@ -1097,7 +1071,9 @@ const App = {
 
     Toast: { 
         show(m, t="info") { 
-            const c = document.getElementById('toast-container'), b = document.createElement('div'); 
+            const c = document.getElementById('toast-container');
+            if(!c) return;
+            const b = document.createElement('div'); 
             b.className = 'toast'; 
             b.style.borderLeftColor = t==='success'?'var(--secondary)':t==='danger'?'var(--danger)':'var(--primary)'; 
             b.innerHTML = `<span>${m}</span>`; 
