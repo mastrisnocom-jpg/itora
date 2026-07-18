@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Tech Social - Premium Social Workspace</title>
+    
+    <!-- Google Fonts & Material Symbols -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0..1,0" rel="stylesheet">
+    
+    <!-- Supabase SDK -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
+    <!-- External CSS Styling -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- AUTHENTICATION -->
+    <div id="auth-layout">
+        <div class="auth-card" id="login-view">
+            <div class="auth-logo">T</div>
+            <h1 style="margin-bottom: 8px; font-weight: 800; font-size: 24px;">Selamat Datang Kembali</h1>
+            <p style="color: var(--text-muted); margin-bottom: 32px; font-size: 0.95rem;">Masuk ke akun ekosistem Tech Social Anda.</p>
+            <form onsubmit="App.Auth.login(event)">
+                <div class="form-group">
+                    <input type="email" class="form-input" id="login-email" placeholder=" " required>
+                    <label class="form-label">Email / Username</label>
+                </div>
+                <div class="form-group">
+                    <input type="password" class="form-input" id="login-pwd" placeholder=" " required>
+                    <label class="form-label">Password</label>
+                </div>
+                <button type="submit" class="btn btn-primary btn-full ripple-btn" style="margin-bottom: 24px;">Masuk ke Aplikasi</button>
+            </form>
+            <p style="font-size: 0.9rem; color: var(--text-muted);">Belum punya akun? <a href="#" style="color: var(--primary); font-weight: 700;" onclick="App.Auth.toggleView('signup')">Daftar Sekarang</a></p>
+        </div>
+
+        <div class="auth-card" id="signup-view" style="display: none;">
+            <div class="auth-logo">T</div>
+            <h1 style="margin-bottom: 8px; font-weight: 800; font-size: 24px;">Bergabung dengan Tech Social</h1>
+            <p style="color: var(--text-muted); margin-bottom: 32px; font-size: 0.95rem;">Buat profil profesional Anda hari ini.</p>
+            <form onsubmit="App.Auth.signup(event)">
+                <div class="form-group">
+                    <input type="email" class="form-input" id="signup-email" placeholder=" " required>
+                    <label class="form-label">Email Aktif Anda</label>
+                </div>
+                <div class="form-group">
+                    <input type="password" class="form-input" id="signup-pwd" placeholder=" " required>
+                    <label class="form-label">Password Akun</label>
+                </div>
+                <button type="submit" class="btn btn-primary btn-full ripple-btn" style="margin-bottom: 24px;">Daftar Akun Baru</button>
+            </form>
+            <p style="font-size: 0.9rem; color: var(--text-muted);">Sudah punya akun? <a href="#" style="color: var(--primary); font-weight: 700;" onclick="App.Auth.toggleView('login')">Masuk di sini</a></p>
+        </div>
+    </div>
+
+    <!-- MAIN APP LAYOUT -->
+    <div id="app-layout">
+        <div class="mobile-overlay" id="mobile-overlay"></div>
+        
+        <header class="app-header">
+            <div class="header-left">
+                <button class="icon-btn ripple-btn" id="btn-toggle-sidebar" aria-label="Toggle Menu">
+                    <span class="material-symbols-outlined">menu_open</span>
+                </button>
+                <div class="search-box">
+                    <span class="material-symbols-outlined">search</span>
+                    <input type="text" id="header-global-search" placeholder="Cari teman di linimasa..." oninput="App.Features.handleHeaderLiveSearchInput(event)">
+                </div>
+            </div>
+            <div class="header-right">
+                <button class="icon-btn ripple-btn" id="btn-refresh" title="Refresh"><span class="material-symbols-outlined">refresh</span></button>
+                <button class="icon-btn ripple-btn" id="btn-theme" title="Ubah Tema"><span class="material-symbols-outlined">dark_mode</span></button>
+                <button class="icon-btn ripple-btn" id="btn-fullscreen" title="Layar Penuh"><span class="material-symbols-outlined">fullscreen</span></button>
+                <button class="icon-btn ripple-btn" id="btn-notifications" title="Notifikasi" onclick="App.Features.showNotifications()">
+                    <span class="material-symbols-outlined">notifications</span>
+                    <span class="badge" id="noti-badge">0</span>
+                </button>
+                <img src="https://i.pravatar.cc/150?img=12" id="header-avatar-toggle-node" alt="Profile" class="user-avatar id-user-avatar-element" onclick="App.UI.toggleProfileRouteViewportState()">
+            </div>
+        </header>
+
+        <aside class="app-sidebar" id="sidebar">
+            <div class="brand" onclick="App.Router.navigate('feed')">
+                <div class="brand-logo">T</div>
+                <span class="brand-name">Tech Social</span>
+            </div>
+            <ul class="sidebar-menu" id="sidebar-menu-list"></ul>
+            <div class="sidebar-profile" onclick="App.Router.navigate('profil')">
+                <img src="https://i.pravatar.cc/150?img=12" alt="User" class="user-avatar id-user-avatar-element" style="border:none;">
+                <div class="sidebar-profile-info">
+                    <span class="sp-name" id="sidebar-user-name">User</span>
+                    <span class="sp-role" id="sidebar-user-role-label">Tech Workspace Member</span>
+                </div>
+            </div>
+        </aside>
+
+        <!-- MAIN VIEWPORT -->
+        <main class="app-content">
+            <!-- SLOT RENDER IKLAN GLOBAL SUPER ADMIN (TEPAT DI BAWAH HEADER) -->
+            <div id="global-superadmin-ad-slot-container"></div>
+            <div id="app-viewport"></div>
+        </main>
+        <nav class="bottom-nav" id="bottom-nav-list"></nav>
+    </div>
+
+    <!-- PREMIUM FLOATING CHAT POP-UP LAYOUT -->
+    <div class="floating-chat-widget" id="floating-chat-popup-box">
+        <div class="popup-chat-header">
+            <div style="display:flex; align-items:center; gap:8px;">
+                <span class="material-symbols-outlined">chat_bubble</span>
+                <strong style="font-size:0.95rem; font-weight:800; cursor:pointer;" id="popup-chat-header-title" onclick="App.Features.viewFriendProfileFromChat()">Pesan Pribadi (Cloud)</strong>
+            </div>
+            <button class="icon-btn" style="color:white; width:28px; height:28px;" onclick="App.UI.toggleChatPopup(false)">
+                <span class="material-symbols-outlined" style="font-size:20px;">close</span>
+            </button>
+        </div>
+        <div class="popup-chat-body-container">
+            <div class="popup-friends-list" id="popup-friends-sidebar-items"></div>
+            <div class="popup-chat-main-area" id="popup-chat-main-area-pane">
+                <div style="flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; color:var(--text-muted); font-size:0.8rem; padding:12px; text-align:center;">
+                    <span class="material-symbols-outlined" style="font-size:32px; color:var(--primary); margin-bottom:6px;">arrow_back</span>
+                    Pilih kontak teman untuk memuat obrolan.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- GLOBALS (MODALS, TOAST) -->
+    <div class="modal-overlay" id="global-modal">
+        <div class="modal-content" id="modal-content-area">
+            <h2 style="margin-bottom: 16px;" id="modal-title">Judul</h2>
+            <div id="modal-body" style="color: var(--text-muted); line-height: 1.6; margin-bottom: 24px; max-height: 400px; overflow-y: auto;">Konten</div>
+            <div style="text-align: right; display: flex; justify-content: flex-end; gap: 12px;">
+                <button class="btn btn-secondary ripple-btn" onclick="App.Modal.close()">Tutup</button>
+                <button class="btn btn-primary ripple-btn" id="modal-ok-btn" onclick="App.Modal.close()">Oke</button>
+            </div>
+        </div>
+    </div>
+    <div class="toast-container" id="toast-container"></div>
+
+    <!-- External Logic Script Execution -->
+    <script src="script.js"></script>
+</body>
+</html>
+
