@@ -1,5 +1,3 @@
-Berikut adalah berkas script.js Anda secara penuh, utuh, dan tidak terpotong.
-Di dalam kode ini, halaman Profil Saya dan Pengaturan sudah dipisahkan secara total dengan menu navigasi, rute (router), dan kontroler masing-masing. Seluruh fitur sebelumnya seperti unggah berkas asli ke posts-bucket Supabase Storage, live search, interaksi linimasa, model tulisan .post-content reguler renggang, serta fitur klik gambar untuk zoom layar penuh tetap terjaga dengan aman.
 const SUPABASE_URL = 'https://waaufoxlimqtesmmjhyw.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_X6icNByv3YFbekorwJ6kSw_SX0XUFM8';
 const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -56,11 +54,9 @@ const App = {
         this.Network.listen();
         this.UI.bindGlobalEvents();
         this.Navigation.render();
-        this.Auth.checkCurrentSession();
-        this.Realtime.subscribePosts();
         
-        App.UI.refreshHeaderNotificationBadgeDOM();
-        App.UI.renderGlobalBannerAdIfExists();
+        // Memeriksa session terlebih dahulu sebelum mengaktifkan realtime streaming/UI dashboard
+        this.Auth.checkCurrentSession();
     },
 
     ProfileState: {
@@ -104,6 +100,9 @@ const App = {
 
     Realtime: {
         subscribePosts() {
+            // Mencegah error jika supabase belum siap atau crash sewaktu anonim
+            if (!localStorage.getItem('ns_logged_in')) return;
+
             supabaseClient
                 .channel('schema-db-changes')
                 .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'posts' }, async (payload) => {
@@ -202,15 +201,19 @@ const App = {
                     App.UI.syncGlobalAvatarAndName();
                     App.Auth.showApp();
                     App.Router.init();
+                    App.Realtime.subscribePosts();
+                    App.UI.refreshHeaderNotificationBadgeDOM();
+                    App.UI.renderGlobalBannerAdIfExists();
                 } else {
                     localStorage.removeItem('ns_logged_in');
                     localStorage.removeItem('ns_user_email');
                     const authLayout = document.getElementById('auth-layout');
                     if (authLayout) authLayout.style.display = 'flex';
+                    const appLayout = document.getElementById('app-layout');
+                    if (appLayout) appLayout.style.display = 'none';
                 }
             } catch (err) {
                 console.error("Session check error:", err.message);
-                localStorage.clear();
                 const authLayout = document.getElementById('auth-layout');
                 if (authLayout) authLayout.style.display = 'flex';
             }
@@ -253,6 +256,9 @@ const App = {
                 App.UI.syncGlobalAvatarAndName();
                 this.showApp();
                 App.Router.init();
+                App.Realtime.subscribePosts();
+                App.UI.refreshHeaderNotificationBadgeDOM();
+                App.UI.renderGlobalBannerAdIfExists();
                 App.Toast.show("Selamat datang kembali!", "success");
             } catch (error) {
                 console.error("Login error:", error.message);
@@ -303,6 +309,7 @@ const App = {
             setTimeout(() => { 
                 if(auth) auth.style.display = 'none'; 
                 if(app) app.classList.add('active'); 
+                if(app) app.style.display = 'grid'; // Menyinkronkan css grid layout utama
             }, 400);
         }
     },
@@ -876,7 +883,7 @@ const App = {
                 }
                 container.innerHTML = uniqueUsers.map(u => {
                     const isFriend = friendList.includes(u.email);
-                    return `<div class="user-follow-card"><img src="${u.avatar}" class="user-avatar" style="width:44px; height:44px; border:none;"><div class="user-follow-info"><h4 onclick="App.Features.redirectToTargetFriendProfile('${u.name}')">${u.name}</h4><p>${u.email}</p></div><button class="btn ${isFriend ? 'btn-secondary' : 'btn-primary'}" style="padding:6px 14px; font-size:0.8rem;" onclick="App.Features.toggleFriendAction('${u.follow_email || u.email}', ${isFriend})">${isFriend ? 'Teman' : 'Tambah'}</button></div>`;
+                    return `<div class="user-follow-card"><img src="${u.avatar}" class="user-avatar" style="width:44px; height:44px; border:none;"><div class="user-follow-info"><h4 onclick="App.Features.redirectToTargetFriendProfile('${u.name}')">${u.name}</h4><p>${u.email}</p></div><button class="btn ${isFriend ? 'btn-secondary' : 'btn-primary'}" style="padding:6px 14px; font-size:0.8rem;" onclick="App.Features.toggleFriendAction('${u.email}', ${isFriend})">${isFriend ? 'Teman' : 'Tambah'}</button></div>`;
                 }).join('');
             } catch(err) { console.error(err); }
         },
@@ -1251,7 +1258,7 @@ const App = {
     },
 
     Clock: { start() { /* JAM DAN TANGGAL HEADER DIHILANGKAN SESUAI REQUEST */ } },
-    Network: { listen() { window.addEventListener('online', ()=>document.getElementById('network-text').innerText='Online'); window.addEventListener('offline', ()=>App.Toast.show("Offline","danger")); } },
+    Network: { listen() { /* Listener status murni internal */ } },
     Modal: { open(t, b) { document.getElementById('modal-title').innerText=t; document.getElementById('modal-body').innerHTML=b; document.getElementById('modal-ok-btn').style.display = 'inline-flex'; document.getElementById('global-modal').classList.add('active'); }, close() { document.getElementById('global-modal').classList.remove('active'); } },
     Toast: {
         show(m, t="info") {
@@ -1337,4 +1344,3 @@ const App = {
 };
 
 document.addEventListener('DOMContentLoaded', () => App.init());
-
