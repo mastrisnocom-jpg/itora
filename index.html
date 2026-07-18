@@ -205,6 +205,13 @@
         .group-card:hover { background: var(--primary-state); border-color: var(--primary); }
         .group-icon { width: 60px; height: 60px; border-radius: var(--radius-md); object-fit: cover; }
 
+        /* SETTINGS AVATAR EDIT LAYOUT */
+        .avatar-edit-container { display: flex; flex-direction: column; align-items: center; gap: 14px; margin-bottom: 28px; }
+        .avatar-preview-wrapper { position: relative; width: 100px; height: 100px; }
+        .avatar-preview-circle { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; border: 3px solid var(--primary); padding: 2px; }
+        .avatar-upload-label { position: absolute; bottom: 0; right: 0; width: 32px; height: 32px; border-radius: 50%; background: var(--primary); color: white; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: var(--shadow-float); transition: var(--trans-smooth); }
+        .avatar-upload-label:hover { background: #3208e6; transform: scale(1.05); }
+
         .skeleton { background: linear-gradient(90deg, var(--bg-body) 25%, var(--border-color) 50%, var(--bg-body) 75%); background-size: 200% 100%; animation: skeletonLoading 1.5s infinite; border-radius: 8px; }
         @keyframes skeletonLoading { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
         @keyframes slideUpFade { from { opacity: 0; transform: translateY(40px); } to { opacity: 1; transform: translateY(0); } }
@@ -353,7 +360,7 @@
                     <span class="material-symbols-outlined">notifications</span>
                     <span class="badge" id="noti-badge"></span>
                 </button>
-                <img src="https://i.pravatar.cc/150?img=12" alt="Profile" class="user-avatar" onclick="App.Router.navigate('profil')">
+                <img src="https://i.pravatar.cc/150?img=12" alt="Profile" class="user-avatar id-user-avatar-element" onclick="App.Router.navigate('profil')">
             </div>
         </header>
 
@@ -364,7 +371,7 @@
             </div>
             <ul class="sidebar-menu" id="sidebar-menu-list"></ul>
             <div class="sidebar-profile" onclick="App.Router.navigate('profil')">
-                <img src="https://i.pravatar.cc/150?img=12" alt="User" class="user-avatar" style="border:none;">
+                <img src="https://i.pravatar.cc/150?img=12" alt="User" class="user-avatar id-user-avatar-element" style="border:none;">
                 <div class="sidebar-profile-info">
                     <span class="sp-name" id="sidebar-user-name">User</span>
                     <span class="sp-role">Nex Workspace Member</span>
@@ -378,7 +385,7 @@
             <div>&copy; <span id="footer-year">2026</span> <strong>NexSocial</strong>. All Rights Reserved.</div>
             <div style="display: flex; gap: 24px; align-items: center;">
                 <span>Powered by HTML, CSS, Vanilla JS & Supabase</span>
-                <span>v5.0.0</span>
+                <span>v5.1.0</span>
                 <div class="status-indicator"><div class="status-dot" id="network-dot"></div><span id="network-text">Online</span></div>
             </div>
         </footer>
@@ -432,9 +439,13 @@
                     const savedName = localStorage.getItem('ns_display_name');
                     if (savedName) return savedName;
                     
-                    // Default fallback jika belum disinkronisasi dengan email supabase
                     const currentEmail = localStorage.getItem('ns_user_email') || 'User';
                     return currentEmail.split('@')[0];
+                },
+                getCurrentAvatar() {
+                    const savedAvatar = localStorage.getItem('ns_user_avatar_base64');
+                    // Return default avatar jika user belum mengunggah foto khusus
+                    return savedAvatar || 'https://i.pravatar.cc/150?img=12';
                 },
                 getLimitConfig() {
                     const defaultLimit = { count: 0, month: new Date().getMonth() };
@@ -442,7 +453,6 @@
                     if (!saved) return defaultLimit;
                     
                     const parsed = JSON.parse(saved);
-                    // Reset otomatis jika bulan saat ini sudah berganti
                     if (parsed.month !== new Date().getMonth()) {
                         return defaultLimit;
                     }
@@ -461,8 +471,12 @@
                     localStorage.setItem('ns_display_name', newName);
                     localStorage.setItem('ns_edit_limit_log', JSON.stringify(config));
                     
-                    App.UI.syncHeaderProfileText();
+                    App.UI.syncGlobalAvatarAndName();
                     return { success: true, remaining: 3 - config.count };
+                },
+                saveCompressedAvatar(base64Image) {
+                    localStorage.setItem('ns_user_avatar_base64', base64Image);
+                    App.UI.syncGlobalAvatarAndName();
                 }
             },
 
@@ -505,7 +519,7 @@
                         localStorage.setItem('ns_logged_in', 'true');
                         localStorage.setItem('ns_user_email', data.session.user.email);
                         
-                        App.UI.syncHeaderProfileText();
+                        App.UI.syncGlobalAvatarAndName();
                         App.Auth.showApp();
                         App.Router.init();
                     } else {
@@ -540,7 +554,7 @@
                     localStorage.setItem('ns_logged_in', 'true');
                     localStorage.setItem('ns_user_email', data.user.email);
                     
-                    App.UI.syncHeaderProfileText();
+                    App.UI.syncGlobalAvatarAndName();
                     this.showApp();
                     App.Router.init();
                 },
@@ -637,9 +651,10 @@
             Views: {
                 feed() {
                     const currentName = App.ProfileState.getCurrentName();
+                    const currentAvatar = App.ProfileState.getCurrentAvatar();
                     return `
                         <div class="glass-card composer-box">
-                            <img src="https://i.pravatar.cc/150?img=12" class="user-avatar" style="width:48px;height:48px;" alt="Me">
+                            <img src="${currentAvatar}" class="user-avatar user-avatar-reactive" style="width:48px;height:48px;" alt="Me">
                             <div class="composer-input-area">
                                 <textarea class="composer-textarea" id="composer-text" placeholder="Apa yang sedang Anda pikirkan, ${currentName}?"></textarea>
                                 <div class="composer-actions">
@@ -722,10 +737,11 @@
                 },
                 profil() {
                     const currentName = App.ProfileState.getCurrentName();
+                    const currentAvatar = App.ProfileState.getCurrentAvatar();
                     return `
                         <div class="glass-card profile-info-card" style="padding:0; overflow:hidden;">
                             <div class="profile-cover"></div>
-                            <img src="https://i.pravatar.cc/150?img=12" class="profile-avatar-large" alt="Profile">
+                            <img src="${currentAvatar}" class="profile-avatar-large user-avatar-reactive" alt="Profile">
                             <h2 style="font-size: 1.8rem; font-weight: 800; margin-bottom: 4px;">${currentName}</h2>
                             <p style="color: var(--primary); font-weight: 600; margin-bottom: 12px;">Nex Workspace Member</p>
                             <div class="profile-stats">
@@ -741,6 +757,7 @@
                 },
                 settings() {
                     const currentName = App.ProfileState.getCurrentName();
+                    const currentAvatar = App.ProfileState.getCurrentAvatar();
                     const limitConfig = App.ProfileState.getLimitConfig();
                     const remainingEdit = 3 - limitConfig.count;
 
@@ -748,9 +765,21 @@
                         <div class="glass-card" style="max-width: 600px;">
                             <h2 style="margin-bottom: 12px;">Pengaturan Akun</h2>
                             <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 24px;">
-                                Sesuai kebijakan keamanan, Anda hanya dapat mengubah nama tampilan maksimal 3 kali dalam satu bulan berjalan.
+                                Kustomisasi profil publik Anda di sini. Semua file foto yang dimasukkan otomatis dikompresi agar berukuran di bawah 200kb.
                             </p>
                             
+                            <!-- EDIT FOTO PROFIL SECTION -->
+                            <div class="avatar-edit-container">
+                                <div class="avatar-preview-wrapper">
+                                    <img src="${currentAvatar}" id="settings-avatar-preview" class="avatar-preview-circle user-avatar-reactive" alt="Preview">
+                                    <label for="avatar-file-input" class="avatar-upload-label">
+                                        <span class="material-symbols-outlined" style="font-size:18px;">photo_camera</span>
+                                    </label>
+                                    <input type="file" id="avatar-file-input" style="display:none;" accept="image/*" onchange="App.Features.handleAvatarSelection(event)">
+                                </div>
+                                <span style="font-size:0.8rem; color:var(--text-muted); font-weight:500;">Klik kamera untuk ganti foto profil (Max 200kb Auto)</span>
+                            </div>
+
                             <div class="form-group">
                                 <input type="text" class="form-input" id="settings-display-name" placeholder=" " value="${currentName}">
                                 <label class="form-label">Nama Tampilan</label>
@@ -763,7 +792,7 @@
                                 </span>
                             </div>
 
-                            <button class="btn btn-primary ripple-btn" onclick="App.Features.saveNameSettings()">Simpan Perubahan Nama</button>
+                            <button class="btn btn-primary ripple-btn" onclick="App.Features.saveNameSettings()">Simpan Perubahan Profil</button>
                         </div>
                     `;
                 }
@@ -775,6 +804,74 @@
             },
 
             Features: {
+                // ==========================================================================
+                // CLIENT-SIDE IMAGE COMPRESSION (MAKSIMAL 200KB)
+                // ==========================================================================
+                handleAvatarSelection(event) {
+                    const file = event.target.files[0];
+                    if (!file) return;
+
+                    App.Toast.show("Memproses & mengompresi gambar...", "info");
+
+                    const reader = new FileReader();
+                    reader.readAsDataURL(file);
+                    reader.onload = function (e) {
+                        const img = new Image();
+                        img.src = e.target.result;
+                        img.onload = function () {
+                            const canvas = document.createElement('canvas');
+                            let width = img.width;
+                            let height = img.height;
+
+                            // Batasi resolusi maksimal untuk optimasi ukuran file
+                            const MAX_WIDTH = 400;
+                            const MAX_HEIGHT = 400;
+
+                            if (width > height) {
+                                if (width > MAX_WIDTH) {
+                                    height *= MAX_WIDTH / width;
+                                    width = MAX_WIDTH;
+                                }
+                            } else {
+                                if (height > MAX_HEIGHT) {
+                                    width *= MAX_HEIGHT / height;
+                                    height = MAX_HEIGHT;
+                                }
+                            }
+
+                            canvas.width = width;
+                            canvas.height = height;
+                            const ctx = canvas.getContext('2d');
+                            ctx.drawImage(img, 0, 0, width, height);
+
+                            // Kompresi dengan loop dinamis diturunkan bertahap sampai ukuran di bawah 200kb
+                            let quality = 0.9;
+                            let base64Result = canvas.toDataURL('image/jpeg', quality);
+                            
+                            // Estimasi ukuran file base64 string (1 karakter base64 = 0.75 byte)
+                            while ((base64Result.length * 0.75) > 200 * 1024 && quality > 0.1) {
+                                quality -= 0.1;
+                                base64Result = canvas.toDataURL('image/jpeg', quality);
+                            }
+
+                            const finalSizeKb = Math.round((base64Result.length * 0.75) / 1024);
+                            console.log("Compressed image size: " + finalSizeKb + "kb");
+
+                            if(finalSizeKb > 200) {
+                                App.Toast.show("File terlalu besar, kompresi gagal di bawah 200kb.", "danger");
+                                return;
+                            }
+
+                            // Simpan ke state lokal aplikasi dan update UI preview
+                            App.ProfileState.saveCompressedAvatar(base64Result);
+                            const previewEl = document.getElementById('settings-avatar-preview');
+                            if(previewEl) previewEl.src = base64Result;
+                            
+                            App.Toast.show("Foto profil siap disimpan (" + finalSizeKb + "kb).", "success");
+                        };
+                    };
+                },
+
                 saveNameSettings() {
                     const nameInput = document.getElementById('settings-display-name');
                     if(!nameInput || !nameInput.value.trim()) return App.Toast.show("Nama tidak boleh kosong.", "warning");
@@ -782,7 +879,7 @@
                     const result = App.ProfileState.updateProfileName(nameInput.value.trim());
                     
                     if(result.success) {
-                        App.Toast.show("Nama berhasil diperbarui! Sisa limit bulan ini: " + result.remaining + " kali.", "success");
+                        App.Toast.show("Profil berhasil diperbarui!", "success");
                         App.Router.navigate('profil');
                     } else {
                         App.Modal.open("Batas Limit Tercapai", result.message);
@@ -862,6 +959,7 @@
                     App.UI.showLoadingBtn(btn);
 
                     const myAuthorName = App.ProfileState.getCurrentName();
+                    const myAvatar = App.ProfileState.getCurrentAvatar(); // Mengirim data foto terkompresi <200kb
 
                     try {
                         const { error } = await supabaseClient
@@ -870,7 +968,7 @@
                                 { 
                                     author: myAuthorName, 
                                     role: 'Nex Workspace Member', 
-                                    avatar: 'https://i.pravatar.cc/150?img=12', 
+                                    avatar: myAvatar, 
                                     content: txt.value,
                                     likes: 0
                                 }
@@ -957,10 +1055,17 @@
                     document.getElementById('app-layout')?.classList.remove('sidebar-mobile-open');
                     document.getElementById('mobile-overlay')?.classList.remove('active');
                 },
-                syncHeaderProfileText() {
+                syncGlobalAvatarAndName() {
                     const currentName = App.ProfileState.getCurrentName();
+                    const currentAvatar = App.ProfileState.getCurrentAvatar();
+                    
                     const sidebarNameEl = document.getElementById('sidebar-user-name');
                     if (sidebarNameEl) sidebarNameEl.innerText = currentName;
+
+                    // Sinkronisasi seluruh elemen gambar profile-avatar di seluruh halaman
+                    document.querySelectorAll('.id-user-avatar-element, .user-avatar-reactive').forEach(img => {
+                        img.src = currentAvatar;
+                    });
                 },
                 showLoadingBtn(b) {
                     const ot = b.innerText; b.innerHTML = 'Loading...'; b.style.pointerEvents='none'; b.style.opacity='0.8';
