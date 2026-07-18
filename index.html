@@ -82,7 +82,7 @@
 
         /* AUTH LAYOUT */
         #auth-layout { display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 24px; position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 2000; background: var(--bg-body); transition: var(--trans-smooth); }
-        .auth-card { background: var(--bg-glass); backdrop-filter: blur(var(--blur-lg)); -webkit-backdrop-filter: blur(var(--blur-lg)); border: 1px solid var(--border-glass); border-radius: var(--radius-xl); padding: 40px; width: 100%; max-width: 450px; box-shadow: var(--shadow-soft); animation: slideUpFade 0.6s cubic-bezier(0.25, 1, 0.5, 1); text-align: center; }
+        .auth-card { background: var(--bg-glass); backdrop-filter: blur(var(--blur(var(--blur-lg)))); border: 1px solid var(--border-glass); border-radius: var(--radius-xl); padding: 40px; width: 100%; max-width: 450px; box-shadow: var(--shadow-soft); animation: slideUpFade 0.6s cubic-bezier(0.25, 1, 0.5, 1); text-align: center; }
         .auth-logo { width: 64px; height: 64px; background: linear-gradient(135deg, var(--primary), #52e0a5); border-radius: var(--radius-lg); display: flex; align-items: center; justify-content: center; color: white; font-size: 32px; font-weight: 700; margin: 0 auto 24px auto; box-shadow: var(--shadow-float); }
 
         /* APP LAYOUT */
@@ -98,7 +98,7 @@
         .header-left, .header-right { display: flex; align-items: center; gap: 16px; }
 
         /* BAR PENCARIAN */
-        .search-box { position: relative; width: 300px; display: flex; align-items: center; }
+        .search-box { position: relative; width: 320px; display: flex; align-items: center; }
         .search-box input { width: 100%; background: var(--bg-body); border: 1px solid var(--border-color); padding: 12px 20px 12px 46px; border-radius: var(--radius-round); color: var(--text-main); transition: var(--trans-smooth); font-size: 0.9rem; }
         .search-box input:focus { border-color: var(--primary); box-shadow: 0 0 0 4px var(--primary-state); }
         .search-box .material-symbols-outlined { position: absolute; left: 16px; color: var(--text-muted); pointer-events: none; font-size: 22px; z-index: 2; }
@@ -172,14 +172,13 @@
         .post-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
         .post-author { display: flex; align-items: center; gap: 12px; }
         .post-avatar { width: 48px; height: 48px; border-radius: var(--radius-round); object-fit: cover; }
-        .post-meta h4 { font-weight: 700; font-size: 1.05rem; cursor: pointer; }
+        .post-meta h4 { font-weight: 700; font-size: 1.05rem; cursor: pointer; color: var(--text-main); transition: var(--trans-smooth); }
         .post-meta h4:hover { text-decoration: underline; color: var(--primary); }
         .post-meta span { font-size: 0.85rem; color: var(--text-muted); }
 
         .post-menu-trigger { cursor: pointer; color: var(--text-muted); padding: 4px; border-radius: 50%; }
         .post-menu-trigger:hover { background: var(--primary-state); color: var(--primary); }
 
-        /* BAGIAN TULISAN POSTINGAN */
         .post-content { 
             font-family: var(--font-main);
             font-size: 1.05rem; 
@@ -192,12 +191,13 @@
             white-space: pre-wrap;      
         }
 
-        .post-actions-bar { display: flex; align-items: center; gap: 28px; padding: 12px 4px; border-top: 1px solid var(--border-color); border-bottom: 1px solid var(--border-color); margin-top: 16px; }
-        .post-action-item { display: inline-flex; align-items: center; gap: 8px; color: var(--text-muted); font-weight: 600; font-size: 0.9rem; cursor: pointer; transition: var(--trans-smooth); user-select: none; }
+        /* MODIFIKASI ICON ACTIONS: DIBUAT LEBIH DEKAT DAN RAPAT */
+        .post-actions-bar { display: flex; align-items: center; gap: 12px; padding: 12px 4px; border-top: 1px solid var(--border-color); border-bottom: 1px solid var(--border-color); margin-top: 16px; }
+        .post-action-item { display: inline-flex; align-items: center; gap: 6px; color: var(--text-muted); font-weight: 600; font-size: 0.9rem; cursor: pointer; transition: var(--trans-smooth); user-select: none; }
         .post-action-item:hover { color: var(--primary); }
         .post-action-item.liked { color: var(--primary) !important; }
         .post-action-item.disliked { color: var(--danger) !important; }
-        .post-action-item .material-symbols-outlined { font-size: 22px; }
+        .post-action-item .material-symbols-outlined { font-size: 20px; }
 
         .post-attached-image { max-width: 100%; border-radius: var(--radius-md); margin: 12px 0; box-shadow: var(--shadow-soft); display: block; max-height: 340px; object-fit: cover; cursor: zoom-in; transition: transform 0.2s ease; }
         .post-attached-image:active { transform: scale(0.99); }
@@ -212,6 +212,7 @@
         .comment-item-wrapper.my-comment .comment-bubble { background: var(--primary-state); border-bottom-right-radius: 4px; border: 1px solid rgba(1, 181, 116, 0.2); }
         .comment-item-wrapper.other-comment .comment-bubble { background: var(--bg-body); border-bottom-left-radius: 4px; border: 1px solid var(--border-color); }
         .comment-bubble strong { color: var(--primary); display: block; font-size: 0.75rem; margin-bottom: 3px; cursor: pointer; }
+        .comment-bubble strong:hover { text-decoration: underline; }
         .comment-row { display: flex; gap: 8px; align-items: center; margin-top: 12px; position: relative; }
 
         /* FLOATING CLOUD CHAT WIDGET */
@@ -290,7 +291,7 @@
             .mobile-overlay { z-index: 2000; }
             #app-layout.sidebar-mobile-open .app-sidebar { transform: translateX(0); }
             .app-header { padding: 0 12px; z-index: 1000; height: 70px; gap: 8px; }
-            .search-box { width: 130px; display: flex !important; }
+            .search-box { width: 140px; display: flex !important; }
             .search-box input { padding: 6px 10px 6px 32px; font-size: 0.75rem; height: 34px; border-radius: 12px; }
             .search-box .material-symbols-outlined { left: 8px; font-size: 16px; }
             .header-right { gap: 4px; }
@@ -303,8 +304,8 @@
             .minimal-composer-input-mock { font-size: 0.85rem; padding: 8px 16px; }
             .post-card { padding: 16px; }
             .post-avatar { width: 40px; height: 40px; }
-            .post-actions-bar { gap: 0; justify-content: space-between; padding: 10px 0; }
-            .post-action-item { gap: 6px; font-size: 0.8rem; flex: 1; justify-content: center; }
+            .post-actions-bar { gap: 8px; justify-content: flex-start; padding: 10px 0; }
+            .post-action-item { gap: 4px; font-size: 0.8rem; }
             .post-attached-image { max-height: 220px; border-radius: 8px; }
             .modal-content { width: 95%; padding: 20px; border-radius: var(--radius-lg); }
             
@@ -374,18 +375,17 @@
                 </button>
                 <div class="search-box">
                     <span class="material-symbols-outlined">search</span>
-                    <input type="text" id="header-global-search" placeholder="Cari teman di linimasa..." oninput="App.Features.handleHeaderLiveSearchInput(event)">
+                    <input type="text" id="header-global-search" placeholder="Cari nama / postingan..." oninput="App.Features.handleHeaderLiveSearchInput(event)">
                 </div>
             </div>
             <div class="header-right">
                 <button class="icon-btn ripple-btn" id="btn-refresh" title="Refresh"><span class="material-symbols-outlined">refresh</span></button>
                 <button class="icon-btn ripple-btn" id="btn-theme" title="Ubah Tema"><span class="material-symbols-outlined">dark_mode</span></button>
-                <button class="icon-btn ripple-btn" id="btn-fullscreen" title="Layar Penuh"><span class="material-symbols-outlined">fullscreen</span></button>
-                <button class="icon-btn ripple-btn" id="btn-notifications" title="Notifikasi" onclick="App.Features.showNotifications()">
+                <button class="icon-btn ripple-btn" id="btn-notifications" title="Notifikasi Interaksi" onclick="App.Features.showNotifications()">
                     <span class="material-symbols-outlined">notifications</span>
                     <span class="badge" id="noti-badge">0</span>
                 </button>
-                <img src="https://i.pravatar.cc/150?img=12" id="header-avatar-toggle-node" alt="Profile" class="user-avatar id-user-avatar-element" onclick="App.UI.toggleProfileRouteViewportState()">
+                <img src="https://i.pravatar.cc/150?img=12" id="header-avatar-toggle-node" alt="Profile" class="user-avatar id-user-avatar-element" onclick="App.Router.navigate('profil')">
             </div>
         </header>
 
@@ -406,7 +406,6 @@
 
         <!-- MAIN VIEWPORT -->
         <main class="app-content">
-            <!-- SLOT RENDER IKLAN GLOBAL SUPER ADMIN (TEPAT DI BAWAH HEADER) -->
             <div id="global-superadmin-ad-slot-container"></div>
             <div id="app-viewport"></div>
         </main>
@@ -454,9 +453,9 @@
         const SUPABASE_KEY = 'sb_publishable_X6icNByv3YFbekorwJ6kSw_SX0XUFM8';
         const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
+        // Notifikasi Lonjeng yang sekarang melacak Like, Dislike, dan Komentar secara interaktif
         let liveNotifications = [
-            { id: 1, icon: 'shield_person', user: 'Super Admin', type: 'admin', desc: 'Sistem Workspace Tech Social versi 2.4 berhasil diperbarui ke server cloud.', isUnread: true },
-            { id: 2, icon: 'handshake', user: 'System', type: 'admin', desc: 'Fitur network teman aktif. Sekarang Anda dapat mencari user lain di halaman Eksplor.', isUnread: false }
+            { id: 1, icon: 'shield_person', user: 'Super Admin', type: 'admin', desc: 'Sistem Workspace Tech Social versi 2.4 berhasil diperbarui ke server cloud.', isUnread: true }
         ];
 
         let activeChatFriendEmail = null;
@@ -475,7 +474,6 @@
         const App = {
             init() {
                 this.Theme.init();
-                this.Clock.start();
                 this.Network.listen();
                 this.UI.bindGlobalEvents();
                 this.Navigation.render();
@@ -497,6 +495,9 @@
                     if(email === 'mastrisnocom@gmail.com') return 'Super Administrator';
                     return localStorage.getItem('ns_user_bio_status') || 'Tech Workspace Member';
                 },
+                getCurrentDomisili() {
+                    return localStorage.getItem('ns_user_domisili') || 'Indonesia';
+                },
                 getCurrentAvatar() {
                     return localStorage.getItem('ns_user_avatar_base64') || 'https://i.pravatar.cc/150?img=12';
                 },
@@ -508,13 +509,14 @@
                     if (parsed.month !== new Date().getMonth()) return defaultLimit;
                     return parsed;
                 },
-                updateProfileDataConfiguration(newName, newBio) {
+                updateProfileDataConfiguration(newName, newBio, newDomisili) {
                     const config = this.getLimitConfig();
-                    if(config.count >= 3) return { success: false, message: "Kuota modifikasi bulanan Anda habis." };
+                    if(config.count >= 5) return { success: false, message: "Kuota modifikasi bulanan Anda habis (Maks 5 kali)." };
                     config.count += 1;
                     config.month = new Date().getMonth();
                     localStorage.setItem('ns_display_name', newName);
                     localStorage.setItem('ns_user_bio_status', newBio);
+                    localStorage.setItem('ns_user_domisili', newDomisili);
                     localStorage.setItem('ns_edit_limit_log', JSON.stringify(config));
                     App.UI.syncGlobalAvatarAndName();
                     return { success: true };
@@ -572,7 +574,7 @@
                                         icon: 'campaign',
                                         user: newPost.author,
                                         type: 'feed',
-                                        desc: `Menerbitkan kiriman timeline baru: "${newPost.content.substring(0, 30)}..."`,
+                                        desc: `Menerbitkan kiriman linimasa baru: "${newPost.content.substring(0, 30)}..."`,
                                         isUnread: true
                                     });
 
@@ -646,23 +648,13 @@
                 },
                 async login(e) {
                     if (e && e.preventDefault) e.preventDefault();
-                    
                     const emailInput = document.getElementById('login-email');
                     const pwdInput = document.getElementById('login-pwd');
                     
-                    if (!emailInput || !pwdInput) {
-                        alert("Elemen form login tidak ditemukan di DOM!");
-                        return;
-                    }
-
+                    if (!emailInput || !pwdInput) return;
                     const email = emailInput.value.trim();
                     const password = pwdInput.value;
                     
-                    if (!email || !password) {
-                        alert("Email dan password wajib diisi!");
-                        return;
-                    }
-
                     const btn = e && e.target ? e.target.querySelector('button[type="submit"]') : null;
                     if (btn) App.UI.showLoadingBtn(btn);
                     
@@ -678,19 +670,16 @@
                         App.Router.init();
                         App.Toast.show("Selamat datang kembali!", "success");
                     } catch (error) {
-                        console.error("Login error:", error.message);
-                        alert("Gagal Masuk!\nAlasan: " + error.message);
+                        alert("Gagal Masuk: " + error.message);
                         App.Toast.show(error.message, "danger");
                     }
                 },
                 async signup(e) {
                     if (e && e.preventDefault) e.preventDefault();
-                    
                     const emailInput = document.getElementById('signup-email');
                     const pwdInput = document.getElementById('signup-pwd');
                     
                     if (!emailInput || !pwdInput) return;
-
                     const email = emailInput.value.trim();
                     const password = pwdInput.value;
                     
@@ -702,14 +691,13 @@
                         if (error) throw error;
                         
                         if (data?.user && data.user.identities && data.user.identities.length === 0) {
-                            App.Modal.open("Email Sudah Terdaftar", "Email ini sudah terikat dengan akun lain. Silakan langsung masuk.");
+                            App.Modal.open("Email Sudah Terdaftar", "Email ini sudah terikat dengan akun lain.");
                         } else {
-                            App.Modal.open("Pendaftaran Berhasil", "Akun Anda telah terdaftar. Silakan cek inbox/spam email Anda.");
+                            App.Modal.open("Pendaftaran Berhasil", "Akun Anda telah terdaftar. Silakan verifikasi email Anda.");
                         }
                         this.toggleView('login');
                     } catch (error) {
-                        console.error("Signup error:", error.message);
-                        alert("Gagal Mendaftar!\nAlasan: " + error.message);
+                        alert("Gagal Mendaftar: " + error.message);
                         App.Toast.show(error.message, "danger");
                     }
                 },
@@ -766,7 +754,8 @@
                     { id: 'explore', label: 'Cari Teman', icon: 'person_search', mobile: true, isChatTrigger: false },
                     { id: 'chat_trigger', label: 'Pesan', icon: 'chat', mobile: true, isChatTrigger: true }, 
                     { id: 'groups', label: 'Komunitas', icon: 'groups', mobile: true, isChatTrigger: false },
-                    { id: 'settings', label: 'Pengaturan', icon: 'settings', mobile: false, isChatTrigger: false }
+                    { id: 'profil', label: 'Profil Saya', icon: 'account_circle', mobile: false, isChatTrigger: false },
+                    { id: 'settings', label: 'Pengaturan', icon: 'settings', mobile: true, isChatTrigger: false }
                 ],
                 render() {
                     const side = document.getElementById('sidebar-menu-list');
@@ -823,61 +812,73 @@
                     `;
                 },
                 profil() {
+                    // PROFIL BERTINDAK SEBAGAI HASIL DARI PENGATURAN
                     const currentName = App.ProfileState.getCurrentName();
                     const currentAvatar = App.ProfileState.getCurrentAvatar();
                     const currentBioRole = App.ProfileState.getCurrentRoleBioStatus();
+                    const currentDomisili = App.ProfileState.getCurrentDomisili();
                     
                     const myEmail = (localStorage.getItem('ns_user_email') || '').toLowerCase();
                     const isSuperAdmin = (myEmail === 'mastrisnocom@gmail.com');
-                    
-                    let adFormHTML = '';
-                    if (isSuperAdmin) {
-                        adFormHTML = `
-                            <div class="glass-card" style="margin-top: 24px; text-align: left; border: 1px solid var(--primary);">
-                                <h3 style="margin-bottom: 8px; color: var(--primary); display: flex; align-items: center; gap: 8px;">
-                                    <span class="material-symbols-outlined">ads_click</span> Panel Pasang Iklan Super Admin
-                                </h3>
-                                <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 16px;">Teks iklan ini akan dipasang secara global tepat di bawah header aplikasi.</p>
-                                
-                                <form id="global-admin-ad-form" onsubmit="App.Features.saveAdminGlobalAdBannerAction(event)">
-                                    <div class="form-group" style="margin-bottom: 14px;">
-                                        <input type="text" class="form-input" id="admin-ad-text-input" placeholder=" " value="${localStorage.getItem('ns_ad_text_global') || ''}" required>
-                                        <label class="form-label">Teks Pengumuman / Iklan Berjalan</label>
-                                    </div>
-                                    <button type="submit" class="btn btn-primary btn-full">Pasang & Publikasikan Iklan</button>
-                                </form>
-                            </div>
-                        `;
-                    }
 
                     return `
                         <div class="glass-card profile-info-card" style="padding:0; overflow:hidden;">
                             <div class="profile-cover"></div>
                             <img src="${currentAvatar}" class="profile-avatar-large user-avatar-reactive" alt="Profile">
                             <h2>${currentName} ${isSuperAdmin ? '<span style="font-size:0.75rem; background:var(--primary); color:white; padding:2px 8px; border-radius:10px; margin-left:6px; vertical-align:middle;">SUPER ADMIN</span>' : ''}</h2>
-                            <p style="color: var(--primary); font-weight: 600; margin-bottom: 12px;">${currentBioRole}</p>
+                            <p style="color: var(--primary); font-weight: 600; margin-bottom: 4px;">${currentBioRole}</p>
+                            <p style="color: var(--text-muted); font-size: 0.85rem; font-weight: 500; margin-bottom: 16px; display:flex; align-items:center; justify-content:center; gap:4px;">
+                                <span class="material-symbols-outlined" style="font-size:16px;">location_on</span> ${currentDomisili}
+                            </p>
+                            
                             <div class="profile-stats">
                                 <div class="stat-item"><span class="stat-val" id="profile-friends-count">0</span><span class="stat-lbl">Teman</span></div>
                                 <div class="stat-item"><span class="stat-val">2.5K</span><span class="stat-lbl">Pengikut</span></div>
                                 <div class="stat-item"><span class="stat-val">84</span><span class="stat-lbl">Postingan</span></div>
                             </div>
-                            <div style="padding: 24px; display:flex; flex-direction:column; gap:12px; max-width:320px; margin:0 auto;">
-                                <button class="btn btn-primary ripple-btn" onclick="App.Router.navigate('settings')">Edit Profil & Nama</button>
-                                <button class="btn btn-secondary ripple-btn" style="color:var(--danger); background:rgba(238,93,80,0.08)" onclick="App.Features.triggerChangePasswordAction()">Ganti Password Akun</button>
+                            
+                            <div style="padding: 24px; display:flex; justify-content:center; gap:12px; max-width:400px; margin:0 auto;">
+                                <button class="btn btn-primary ripple-btn" onclick="App.Router.navigate('settings')">Buka Pengaturan Akun</button>
                             </div>
                         </div>
-                        ${adFormHTML}
                     `;
                 },
                 settings() {
+                    // PENGATURAN TEMPAT INPUT DATA (NAMA, PEKERJAAN, DOMISILI, IKLAN DLL)
                     const currentName = App.ProfileState.getCurrentName();
                     const currentAvatar = App.ProfileState.getCurrentAvatar();
                     const currentBioRole = App.ProfileState.getCurrentRoleBioStatus();
+                    const currentDomisili = App.ProfileState.getCurrentDomisili();
                     const limitConfig = App.ProfileState.getLimitConfig();
-                    const remainingEdit = 3 - limitConfig.count;
+                    const remainingEdit = 5 - limitConfig.count;
+
+                    const myEmail = (localStorage.getItem('ns_user_email') || '').toLowerCase();
+                    const isSuperAdmin = (myEmail === 'mastrisnocom@gmail.com');
+                    
+                    let adFormHTML = '';
+                    if (isSuperAdmin) {
+                        adFormHTML = `
+                            <div class="glass-card" style="margin-top: 24px; text-align: left; border: 1px solid var(--primary); background: var(--bg-glass-solid);">
+                                <h3 style="margin-bottom: 8px; color: var(--primary); display: flex; align-items: center; gap: 8px;">
+                                    <span class="material-symbols-outlined">ads_click</span> Panel Pasang Iklan Super Admin
+                                </h3>
+                                <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 16px;">Teks pengumuman/iklan berjalan global di bawah header aplikasi.</p>
+                                <form id="global-admin-ad-form" onsubmit="App.Features.saveAdminGlobalAdBannerAction(event)">
+                                    <div class="form-group" style="margin-bottom: 14px;">
+                                        <input type="text" class="form-input" id="admin-ad-text-input" placeholder=" " value="${localStorage.getItem('ns_ad_text_global') || ''}" required>
+                                        <label class="form-label">Teks Iklan Berjalan Global</label>
+                                    </div>
+                                    <button type="submit" class="btn btn-primary btn-full">Publikasikan Banner Iklan</button>
+                                </form>
+                            </div>
+                        `;
+                    }
+
                     return `
-                        <div class="glass-card" style="max-width: 600px;">
-                            <h2>Pengaturan Akun</h2>
+                        <div class="glass-card" style="max-width: 650px; margin: 0 auto;">
+                            <h2>Pengaturan Kontrol Akun</h2>
+                            <p style="color:var(--text-muted); font-size:0.85rem; margin-bottom:24px;">Perbarui data profil ekosistem Anda di bawah ini.</p>
+                            
                             <div class="avatar-edit-container">
                                 <div class="avatar-preview-wrapper">
                                     <img src="${currentAvatar}" id="settings-avatar-preview" class="avatar-preview-circle user-avatar-reactive" alt="Preview">
@@ -885,20 +886,33 @@
                                     <input type="file" id="avatar-file-input" style="display:none;" accept="image/*" onchange="App.Features.handleAvatarSelection(event)">
                                 </div>
                             </div>
+                            
                             <div class="form-group">
                                 <input type="text" class="form-input" id="settings-display-name" placeholder=" " value="${currentName}">
                                 <label class="form-label">Nama Tampilan</label>
                             </div>
+                            
                             <div class="form-group">
                                 <input type="text" class="form-input" id="settings-bio-status" placeholder=" " value="${currentBioRole}">
-                                <label class="form-label">Status Peran / Bio Profil</label>
+                                <label class="form-label">Pekerjaan / Jabatan Profesional</label>
                             </div>
+                            
+                            <div class="form-group">
+                                <input type="text" class="form-input" id="settings-domisili" placeholder=" " value="${currentDomisili}">
+                                <label class="form-label">Domisili / Lokasi Tempat Tinggal</label>
+                            </div>
+                            
                             <div style="margin-bottom: 24px; padding: 14px; border-radius: var(--radius-md); background: var(--primary-state); display: flex; align-items: center; justify-content: space-between;">
-                                <span>Sisa Kuota Perubahan Data:</span>
+                                <span style="font-size:0.9rem; font-weight:600;">Sisa Kuota Perubahan Data Bulanan:</span>
                                 <span class="badge" style="display:inline-block; position:relative; padding: 6px 12px; font-weight: 800; border-radius: 8px; background: ${remainingEdit > 0 ? 'var(--primary)' : 'var(--danger)'}; color: white; border:none;">${remainingEdit} Kali</span>
                             </div>
-                            <button class="btn btn-primary ripple-btn" onclick="App.Features.saveNameSettings()">Simpan Perubahan Profil</button>
+                            
+                            <div style="display:flex; flex-direction:column; gap:12px;">
+                                <button class="btn btn-primary ripple-btn btn-full" onclick="App.Features.saveNameSettings()">Simpan & Terapkan Profil</button>
+                                <button class="btn btn-secondary ripple-btn btn-full" style="color:var(--danger); background:rgba(238,93,80,0.08)" onclick="App.Features.triggerChangePasswordAction()">Ganti Password Akun Keamanan</button>
+                            </div>
                         </div>
+                        ${adFormHTML}
                     `;
                 }
             },
@@ -907,7 +921,8 @@
                 feed() { App.Features.renderPosts(); },
                 explore() { App.Features.renderExploreUsers(); },
                 groups() { App.Features.renderCommunityHubViewportList(); },
-                profil() { App.Features.loadFriendsCount(); }
+                profil() { App.Features.loadFriendsCount(); },
+                settings() {}
             },
 
             Features: {
@@ -917,13 +932,12 @@
                     if(!txtNode) return;
                     
                     localStorage.setItem('ns_ad_text_global', txtNode.value.trim());
-                    App.Toast.show("Iklan global berhasil diperbarui oleh Super Admin!", "success");
+                    App.Toast.show("Iklan global berhasil diperbarui!", "success");
                     App.UI.renderGlobalBannerAdIfExists();
                 },
 
                 openComposerModalPopupForm() {
                     const currentName = App.ProfileState.getCurrentName();
-                    
                     composerAttachedImageBase64 = null;
                     composerAttachedFileBase64 = null;
 
@@ -944,12 +958,12 @@
                     `;
                     
                     App.Modal.open("Buat Postingan Baru", popupFormHTML);
-                    
                     const okBtn = document.getElementById('modal-ok-btn');
                     if (okBtn) okBtn.style.display = 'none'; 
                 },
 
                 handleHeaderLiveSearchInput(event) {
+                    // MENCARI NAMA USER MAUPUN ISI TEXT POSTINGAN SEKALIGUS
                     headerSearchFilterQueryString = event.target.value.trim().toLowerCase();
                     if(window.location.hash === '#/feed') this.renderPosts();
                 },
@@ -1146,8 +1160,6 @@
                             const normalizedKey = displayName.toLowerCase() + "@nexsocial.id";
                             const unreadCount = unreadMessageCounters[normalizedKey] || 0;
                             const counterBadgeHTML = unreadCount > 0 ? `<div class="popup-item-counter-dot">${unreadCount}</div>` : '';
-                            
-                            // Mendapatkan URL avatar teman dari localStorage jika ada, sebagai fallback gunakan pravatar default
                             const friendAvatar = 'https://i.pravatar.cc/150?img=11';
                             
                             return `
@@ -1178,7 +1190,7 @@
                         <div class="popup-msg-stream" id="popup-msg-stream-viewport"></div>
                         <div class="popup-chat-input-row">
                             <div class="emoji-panel-trigger" onclick="App.Features.toggleEmojiPanelDOM('chat-emoji-panel')"><span class="material-symbols-outlined">mood</span></div>
-                            <div class="emoji-popup-box" id="chat-emoji-panel" style="display:none; bottom:45px; left:0;">${chatEmojiHTML}</div>
+                            <div class="emoji-popup-box" id="chat-emoji-panel" style="display:none;">${chatEmojiHTML}</div>
                             <input type="text" class="form-input" placeholder="Tulis pesan..." id="popup-chat-input-field" onkeypress="if(event.key==='Enter') App.Features.sendPopupChatCloudAction()">
                             <button class="icon-btn" style="background:var(--primary); color:white; width:34px; height:34px;" onclick="App.Features.sendPopupChatCloudAction()"><span class="material-symbols-outlined" style="font-size:16px;">send</span></button>
                         </div>
@@ -1198,22 +1210,14 @@
                         if(streamViewport && messages) {
                             streamViewport.innerHTML = messages.map(msg => {
                                 const bubbleStyle = msg.author === myCurrentName ? 'out' : 'in';
-                                return `<div class="bubble ${bubbleStyle}"><span class="bubble-sender-name" onclick="App.Features.redirectToTargetFriendProfile('${msg.author}')">${msg.author}</span><span>${msg.content}</span></div>`;
+                                return `<div class="bubble ${bubbleStyle}"><span class="bubble-sender-name" onclick="App.Router.navigate('profil')">${msg.author}</span><span>${msg.content}</span></div>`;
                             }).join('');
                             streamViewport.scrollTop = streamViewport.scrollHeight;
                         }
                     } catch(err) { console.error(err); }
                 },
 
-                redirectToTargetFriendProfile(targetName) {
-                    App.UI.toggleChatPopup(false); App.Router.navigate('explore');
-                    setTimeout(() => {
-                        const globalSearchInput = document.getElementById('header-global-search');
-                        if (globalSearchInput) { globalSearchInput.value = targetName; App.Features.handleHeaderLiveSearchInput({ target: globalSearchInput }); }
-                    }, 400);
-                },
-
-                viewFriendProfileFromChat() { if (activeChatFriendName) this.redirectToTargetFriendProfile(activeChatFriendName); },
+                viewFriendProfileFromChat() { App.Router.navigate('profil'); },
 
                 async sendPopupChatCloudAction() {
                     const input = document.getElementById('popup-chat-input-field');
@@ -1226,7 +1230,7 @@
                         const streamViewport = document.getElementById('popup-msg-stream-viewport');
                         if(streamViewport) {
                             const b = document.createElement('div'); b.className = 'bubble out';
-                            b.innerHTML = `<span class="bubble-sender-name" onclick="App.Features.redirectToTargetFriendProfile('${myCurrentName}')">${myCurrentName}</span><span>${textVal}</span>`;
+                            b.innerHTML = `<span class="bubble-sender-name" onclick="App.Router.navigate('profil')">${myCurrentName}</span><span>${textVal}</span>`;
                             streamViewport.appendChild(b); streamViewport.scrollTop = streamViewport.scrollHeight;
                         }
                         input.value = '';
@@ -1237,7 +1241,7 @@
                     const streamViewport = document.getElementById('popup-msg-stream-viewport');
                     if(streamViewport) {
                         const bIn = document.createElement('div'); bIn.className = 'bubble in'; 
-                        bIn.innerHTML = `<span class="bubble-sender-name" onclick="App.Features.redirectToTargetFriendProfile('${senderName}')">${senderName}</span><span>${messageText}</span>`;
+                        bIn.innerHTML = `<span class="bubble-sender-name" onclick="App.Router.navigate('profil')">${senderName}</span><span>${messageText}</span>`;
                         streamViewport.appendChild(bIn); streamViewport.scrollTop = streamViewport.scrollHeight;
                     }
                 },
@@ -1284,7 +1288,7 @@
                         }
                         container.innerHTML = uniqueUsers.map(u => {
                             const isFriend = friendList.includes(u.email);
-                            return `<div class="user-follow-card"><img src="${u.avatar}" class="user-avatar" style="width:44px; height:44px; border:none;"><div class="user-follow-info"><h4 onclick="App.Features.redirectToTargetFriendProfile('${u.name}')">${u.name}</h4><p>${u.email}</p></div><button class="btn ${isFriend ? 'btn-secondary' : 'btn-primary'}" style="padding:6px 14px; font-size:0.8rem;" onclick="App.Features.toggleFriendAction('${u.email}', ${isFriend})">${isFriend ? 'Teman' : 'Tambah'}</button></div>`;
+                            return `<div class="user-follow-card"><img src="${u.avatar}" class="user-avatar" style="width:44px; height:44px; border:none;"><div class="user-follow-info"><h4 onclick="App.Router.navigate('profil')">${u.name}</h4><p>${u.email}</p></div><button class="btn ${isFriend ? 'btn-secondary' : 'btn-primary'}" style="padding:6px 14px; font-size:0.8rem;" onclick="App.Features.toggleFriendAction('${u.email}', ${isFriend})">${isFriend ? 'Teman' : 'Tambah'}</button></div>`;
                         }).join('');
                     } catch(err) { console.error(err); }
                 },
@@ -1326,12 +1330,16 @@
                         
                         let filteredPosts = posts ? posts.filter(p => p.image !== 'private_chat_type' && allowedNames.includes(p.author)) : [];
 
+                        // PENCARIAN GLOBAL MENYARING NAMA MAUPUN ISI POSTINGAN
                         if(headerSearchFilterQueryString !== "") {
-                            filteredPosts = filteredPosts.filter(p => p.author.toLowerCase().includes(headerSearchFilterQueryString));
+                            filteredPosts = filteredPosts.filter(p => 
+                                p.author.toLowerCase().includes(headerSearchFilterQueryString) || 
+                                (p.content && p.content.toLowerCase().includes(headerSearchFilterQueryString))
+                            );
                         }
 
                         if (filteredPosts.length === 0) {
-                            stream.innerHTML = `<div class="glass-card" style="text-align:center; color:var(--text-muted); padding:32px 16px;">Tidak ada postingan di linimasa.</div>`;
+                            stream.innerHTML = `<div class="glass-card" style="text-align:center; color:var(--text-muted); padding:32px 16px;">Tidak ada postingan yang cocok di linimasa.</div>`;
                             return;
                         }
 
@@ -1362,17 +1370,17 @@
                             try { if(p.role && p.role.startsWith('[')) parsedComments = JSON.parse(p.role); } catch(e) { parsedComments = []; }
                             const commentCountValue = parsedComments.length;
 
-                    let commentsListHTML = parsedComments.map(c => {
-                        const alignmentClass = c.user === myCurrentName ? 'my-comment' : 'other-comment';
-                        return `
-                            <div class="comment-item-wrapper ${alignmentClass}">
-                                <div class="comment-bubble">
-                                    <strong onclick="App.Features.redirectToTargetFriendProfile('${c.user}')">${c.user}</strong>
-                                    <span>${c.text}</span>
-                                </div>
-                            </div>
-                        `;
-                    }).join('');
+                            let commentsListHTML = parsedComments.map(c => {
+                                const alignmentClass = c.user === myCurrentName ? 'my-comment' : 'other-comment';
+                                return `
+                                    <div class="comment-item-wrapper ${alignmentClass}">
+                                        <div class="comment-bubble">
+                                            <strong onclick="App.Router.navigate('profil')">${c.user}</strong>
+                                            <span>${c.text}</span>
+                                        </div>
+                                    </div>
+                                `;
+                            }).join('');
 
                             let commentEmojiHTML = EMOJI_LIST.map(em => `<button class="emoji-item-btn" onclick="App.Features.appendEmojiToInputField('comment-input-field-${pId}','comment-panel-${pId}','${em}')">${em}</button>`).join('');
 
@@ -1385,7 +1393,7 @@
                                         <div class="post-author">
                                             <img src="${p.avatar || 'https://i.pravatar.cc/150?img=12'}" class="post-avatar">
                                             <div class="post-meta">
-                                                <h4 onclick="App.Features.redirectToTargetFriendProfile('${p.author}')">${p.author}</h4>
+                                                <h4 onclick="App.Router.navigate('profil')">${p.author}</h4>
                                                 <span style="font-size: 0.75rem; color: var(--text-muted); font-weight: 500;">${formattedFullTimestamp}</span>
                                             </div>
                                         </div>
@@ -1430,6 +1438,184 @@
                     } catch (err) { console.error(err); }
                 },
 
+                async toggleLike(id, currentLikes, currentDislikes) {
+                    let likedLogs = JSON.parse(localStorage.getItem('ns_liked_posts_ids') || '[]');
+                    let dislikedLogs = JSON.parse(localStorage.getItem('ns_disliked_posts_ids') || '[]');
+                    const myCurrentName = App.ProfileState.getCurrentName();
+
+                    if (likedLogs.includes(id)) {
+                        likedLogs = likedLogs.filter(x => x !== id);
+                        await supabaseClient.from('posts').update({ likes: Math.max(0, currentLikes - 1) }).eq('id', id);
+                    } else {
+                        likedLogs.push(id);
+                        let updatePayload = { likes: currentLikes + 1 };
+                        if (dislikedLogs.includes(id)) {
+                            dislikedLogs = dislikedLogs.filter(x => x !== id);
+                            try { updatePayload.dislikes = Math.max(0, currentDislikes - 1); } catch(e){}
+                        }
+                        await supabaseClient.from('posts').update(updatePayload).eq('id', id);
+
+                        // MENAMBAHKAN PEMBERITAHUAN INTERAKSI LIKE
+                        liveNotifications.unshift({
+                            id: Date.now(),
+                            icon: 'thumb_up',
+                            user: myCurrentName,
+                            type: 'like',
+                            desc: `Menyukai postingan Anda (ID #${id}) di linimasa workspace.`,
+                            isUnread: true
+                        });
+                        liveHeaderNotificationCount++;
+                        App.UI.refreshHeaderNotificationBadgeDOM();
+                    }
+
+                    localStorage.setItem('ns_liked_posts_ids', JSON.stringify(likedLogs));
+                    localStorage.setItem('ns_disliked_posts_ids', JSON.stringify(dislikedLogs));
+                    this.renderPosts();
+                },
+
+                async toggleDislike(id, currentLikes, currentDislikes) {
+                    let likedLogs = JSON.parse(localStorage.getItem('ns_liked_posts_ids') || '[]');
+                    let dislikedLogs = JSON.parse(localStorage.getItem('ns_disliked_posts_ids') || '[]');
+                    const myCurrentName = App.ProfileState.getCurrentName();
+
+                    if (dislikedLogs.includes(id)) {
+                        dislikedLogs = dislikedLogs.filter(x => x !== id);
+                        try { await supabaseClient.from('posts').update({ dislikes: Math.max(0, currentDislikes - 1) }).eq('id', id); } catch(e){}
+                    } else {
+                        dislikedLogs.push(id);
+                        let updatePayload = {};
+                        try { updatePayload.dislikes = currentDislikes + 1; } catch(e){}
+                        if (likedLogs.includes(id)) {
+                            likedLogs = likedLogs.filter(x => x !== id);
+                            updatePayload.likes = Math.max(0, currentLikes - 1);
+                        }
+                        await supabaseClient.from('posts').update(updatePayload).eq('id', id);
+
+                        // MENAMBAHKAN PEMBERITAHUAN INTERAKSI DISLIKE
+                        liveNotifications.unshift({
+                            id: Date.now(),
+                            icon: 'thumb_down',
+                            user: myCurrentName,
+                            type: 'like',
+                            desc: `Memberikan dislike pada postingan Anda (ID #${id}) di linimasa.`,
+                            isUnread: true
+                        });
+                        liveHeaderNotificationCount++;
+                        App.UI.refreshHeaderNotificationBadgeDOM();
+                    }
+
+                    localStorage.setItem('ns_liked_posts_ids', JSON.stringify(likedLogs));
+                    localStorage.setItem('ns_disliked_posts_ids', JSON.stringify(dislikedLogs));
+                    this.renderPosts();
+                },
+
+                showNotifications() {
+                    liveHeaderNotificationCount = 0; 
+                    App.UI.refreshHeaderNotificationBadgeDOM();
+
+                    if (liveNotifications.length === 0) {
+                        App.Modal.open("Notifikasi Interaksi", `<p style="padding:12px; text-align:center; color:var(--text-muted);">Tidak ada pemberitahuan baru.</p>`);
+                        return;
+                    }
+
+                    const notiHTML = liveNotifications.map(item => {
+                        const unreadClass = item.isUnread ? 'unread' : '';
+                        let tagLabel = 'FEED'; let tagColorClass = 'meta-tag-feed';
+                        if(item.type === 'chat') { tagLabel = 'PESAN'; tagColorClass = 'meta-tag-chat'; }
+                        if(item.type === 'admin') { tagLabel = 'SUPER ADMIN'; tagColorClass = 'meta-tag-admin'; }
+                        if(item.type === 'like') { tagLabel = 'INTERAKSI'; tagColorClass = 'meta-tag-like'; }
+                        if(item.type === 'comment') { tagLabel = 'KOMENTAR'; tagColorClass = 'meta-tag-comment'; }
+
+                        item.isUnread = false; 
+
+                        return `
+                            <div class="notification-item-card ${unreadClass}">
+                                <div class="notification-icon-wrapper" style="margin-top:2px;">
+                                    <span class="material-symbols-outlined">${item.icon || 'notifications'}</span>
+                                </div>
+                                <div style="flex:1;">
+                                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                                        <strong style="color:var(--text-main); font-size:0.95rem; cursor:pointer;" onclick="App.Modal.close(); App.Router.navigate('profil');">${item.user}</strong>
+                                    </div>
+                                    <p style="font-size:0.85rem; color:var(--text-main); margin-top:4px; line-height:1.4;">${item.desc}</p>
+                                    <span class="notification-meta-tag ${tagColorClass}">${tagLabel}</span>
+                                </div>
+                            </div>
+                        `;
+                    }).join('');
+
+                    App.Modal.open("Notifikasi Lonjeng Jaringan", `<div style="padding:4px 0;">${notiHTML}</div>`);
+                    document.getElementById('modal-ok-btn').style.display = 'inline-flex';
+                },
+
+                togglePostCommentsVisibility(postId) {
+                    const commentSection = document.getElementById(`comments-section-container-${postId}`);
+                    if (commentSection) {
+                        const isHidden = window.getComputedStyle(commentSection).display === 'none';
+                        commentSection.style.display = isHidden ? 'block' : 'none';
+                    }
+                },
+                handleAvatarSelection(event) {
+                    const file = event.target.files[0]; if (!file) return;
+                    const reader = new FileReader(); reader.readAsDataURL(file);
+                    reader.onload = function (e) {
+                        const img = new Image(); img.src = e.target.result;
+                        img.onload = function () {
+                            const canvas = document.createElement('canvas'); canvas.width = 150; canvas.height = 150;
+                            const ctx = canvas.getContext('2d'); ctx.drawImage(img, 0, 0, 150, 150);
+                            App.ProfileState.saveCompressedAvatar(canvas.toDataURL('image/jpeg', 0.8));
+                            const p = document.getElementById('settings-avatar-preview'); if(p) p.src = localStorage.getItem('ns_user_avatar_base64');
+                        };
+                    };
+                },
+                saveNameSettings() {
+                    const nameInput = document.getElementById('settings-display-name');
+                    const bioInput = document.getElementById('settings-bio-status');
+                    const domisiliInput = document.getElementById('settings-domisili');
+                    
+                    if(!nameInput || !nameInput.value.trim()) return App.Toast.show("Nama wajib diisi.", "warning");
+                    
+                    const res = App.ProfileState.updateProfileDataConfiguration(
+                        nameInput.value.trim(), 
+                        bioInput.value.trim(), 
+                        domisiliInput ? domisiliInput.value.trim() : 'Indonesia'
+                    );
+                    
+                    if(res.success) { 
+                        App.Toast.show("Profil berhasil disimpan!", "success"); 
+                        App.Router.navigate('profil'); 
+                    } else {
+                        App.Modal.open("Limit Konfigurasi", res.message);
+                    }
+                },
+                async submitPostCommentAction(postId) {
+                    const input = document.getElementById(`comment-input-field-${postId}`);
+                    if (!input || !input.value.trim()) return;
+                    const commentText = input.value.trim(); const currentUserName = App.ProfileState.getCurrentName();
+
+                    try {
+                        const { data: postData } = await supabaseClient.from('posts').select('role').eq('id', postId).single();
+                        let commentArray = [];
+                        try { if(postData && postData.role && postData.role.startsWith('[')) commentArray = JSON.parse(postData.role); } catch(ex) { commentArray = []; }
+                        commentArray.push({ user: currentUserName, text: commentText, date: new Date().getTime() });
+                        await supabaseClient.from('posts').update({ role: JSON.stringify(commentArray) }).eq('id', postId);
+                        
+                        // MENAMBAHKAN PEMBERITAHUAN INTERAKSI KOMENTAR
+                        liveNotifications.unshift({
+                            id: Date.now(),
+                            icon: 'maps_ugc',
+                            user: currentUserName,
+                            type: 'comment',
+                            desc: `Mengomentari postingan Anda: "${commentText.substring(0, 20)}..."`,
+                            isUnread: true
+                        });
+                        liveHeaderNotificationCount++;
+                        App.UI.refreshHeaderNotificationBadgeDOM();
+                        
+                        input.value = ''; 
+                        this.renderPosts();
+                    } catch(err) { console.error(err); }
+                },
                 async createPost() {
                     const txt = document.getElementById('composer-text'); 
                     const textValue = txt ? txt.value.trim() : "";
@@ -1473,157 +1659,6 @@
                         console.error(err); 
                         App.Toast.show("Gagal mengirim data: " + err.message, "danger");
                     }
-                },
-
-                async toggleLike(id, currentLikes, currentDislikes) {
-                    let likedLogs = JSON.parse(localStorage.getItem('ns_liked_posts_ids') || '[]');
-                    let dislikedLogs = JSON.parse(localStorage.getItem('ns_disliked_posts_ids') || '[]');
-                    const myCurrentName = App.ProfileState.getCurrentName();
-
-                    if (likedLogs.includes(id)) {
-                        likedLogs = likedLogs.filter(x => x !== id);
-                        await supabaseClient.from('posts').update({ likes: Math.max(0, currentLikes - 1) }).eq('id', id);
-                    } else {
-                        likedLogs.push(id);
-                        let updatePayload = { likes: currentLikes + 1 };
-                        if (dislikedLogs.includes(id)) {
-                            dislikedLogs = dislikedLogs.filter(x => x !== id);
-                            try { updatePayload.dislikes = Math.max(0, currentDislikes - 1); } catch(e){}
-                        }
-                        await supabaseClient.from('posts').update(updatePayload).eq('id', id);
-
-                        liveNotifications.unshift({
-                            id: Date.now(),
-                            icon: 'thumb_up',
-                            user: myCurrentName,
-                            type: 'like',
-                            desc: `Menyukai postingan ID #${id} Anda di Newsfeed.`,
-                            isUnread: true
-                        });
-                        liveHeaderNotificationCount++;
-                        App.UI.refreshHeaderNotificationBadgeDOM();
-                    }
-
-                    localStorage.setItem('ns_liked_posts_ids', JSON.stringify(likedLogs));
-                    localStorage.setItem('ns_disliked_posts_ids', JSON.stringify(dislikedLogs));
-                    this.renderPosts();
-                },
-
-                async toggleDislike(id, currentLikes, currentDislikes) {
-                    let likedLogs = JSON.parse(localStorage.getItem('ns_liked_posts_ids') || '[]');
-                    let dislikedLogs = JSON.parse(localStorage.getItem('ns_disliked_posts_ids') || '[]');
-                    const myCurrentName = App.ProfileState.getCurrentName();
-
-                    if (dislikedLogs.includes(id)) {
-                        dislikedLogs = dislikedLogs.filter(x => x !== id);
-                        try { await supabaseClient.from('posts').update({ dislikes: Math.max(0, currentDislikes - 1) }).eq('id', id); } catch(e){}
-                    } else {
-                        dislikedLogs.push(id);
-                        let updatePayload = {};
-                        try { updatePayload.dislikes = currentDislikes + 1; } catch(e){}
-                        if (likedLogs.includes(id)) {
-                            likedLogs = likedLogs.filter(x => x !== id);
-                            updatePayload.likes = Math.max(0, currentLikes - 1);
-                        }
-                        await supabaseClient.from('posts').update(updatePayload).eq('id', id);
-
-                        liveNotifications.unshift({
-                            id: Date.now(),
-                            icon: 'thumb_down',
-                            user: myCurrentName,
-                            type: 'like',
-                            desc: `Memberikan dislike pada postingan ID #${id} Anda di Newsfeed.`,
-                            isUnread: true
-                        });
-                        liveHeaderNotificationCount++;
-                        App.UI.refreshHeaderNotificationBadgeDOM();
-                    }
-
-                    localStorage.setItem('ns_liked_posts_ids', JSON.stringify(likedLogs));
-                    localStorage.setItem('ns_disliked_posts_ids', JSON.stringify(dislikedLogs));
-                    this.renderPosts();
-                },
-
-                showNotifications() {
-                    liveHeaderNotificationCount = 0; 
-                    App.UI.refreshHeaderNotificationBadgeDOM();
-
-                    if (liveNotifications.length === 0) {
-                        App.Modal.open("Notifikasi Jaringan Teman", `<p style="padding:12px; text-align:center; color:var(--text-muted);">Tidak ada pemberitahuan baru.</p>`);
-                        return;
-                    }
-
-                    const notiHTML = liveNotifications.map(item => {
-                        const unreadClass = item.isUnread ? 'unread' : '';
-                        let tagLabel = 'FEED'; let tagColorClass = 'meta-tag-feed';
-                        if(item.type === 'chat') { tagLabel = 'PESAN'; tagColorClass = 'meta-tag-chat'; }
-                        if(item.type === 'admin') { tagLabel = 'SUPER ADMIN'; tagColorClass = 'meta-tag-admin'; }
-                        if(item.type === 'like') { tagLabel = 'LIKE / DISLIKE'; tagColorClass = 'meta-tag-like'; }
-                        if(item.type === 'comment') { tagLabel = 'KOMENTAR'; tagColorClass = 'meta-tag-comment'; }
-
-                        item.isUnread = false; 
-
-                        return `
-                            <div class="notification-item-card ${unreadClass}">
-                                <div class="notification-icon-wrapper" style="margin-top:2px;">
-                                    <span class="material-symbols-outlined">${item.icon || 'notifications'}</span>
-                                </div>
-                                <div style="flex:1;">
-                                    <div style="display:flex; justify-content:space-between; align-items:center;">
-                                        <strong style="color:var(--text-main); font-size:0.95rem; cursor:pointer;" onclick="App.Modal.close(); App.Features.redirectToTargetFriendProfile('${item.user}')">${item.user}</strong>
-                                    </div>
-                                    <p style="font-size:0.85rem; color:var(--text-main); margin-top:4px; line-height:1.4;">${item.desc}</p>
-                                    <span class="notification-meta-tag ${tagColorClass}">${tagLabel}</span>
-                                </div>
-                            </div>
-                        `;
-                    }).join('');
-
-                    App.Modal.open("Notifikasi Jaringan Teman", `<div style="padding:4px 0;">${notiHTML}</div>`);
-                    document.getElementById('modal-ok-btn').style.display = 'inline-flex';
-                },
-
-                togglePostCommentsVisibility(postId) {
-                    const commentSection = document.getElementById(`comments-section-container-${postId}`);
-                    if (commentSection) {
-                        const isHidden = window.getComputedStyle(commentSection).display === 'none';
-                        commentSection.style.display = isHidden ? 'block' : 'none';
-                    }
-                },
-                handleAvatarSelection(event) {
-                    const file = event.target.files[0]; if (!file) return;
-                    const reader = new FileReader(); reader.readAsDataURL(file);
-                    reader.onload = function (e) {
-                        const img = new Image(); img.src = e.target.result;
-                        img.onload = function () {
-                            const canvas = document.createElement('canvas'); canvas.width = 150; canvas.height = 150;
-                            const ctx = canvas.getContext('2d'); ctx.drawImage(img, 0, 0, 150, 150);
-                            App.ProfileState.saveCompressedAvatar(canvas.toDataURL('image/jpeg', 0.8));
-                            const p = document.getElementById('settings-avatar-preview'); if(p) p.src = localStorage.getItem('ns_user_avatar_base64');
-                        };
-                    };
-                },
-                saveNameSettings() {
-                    const nameInput = document.getElementById('settings-display-name');
-                    const bioInput = document.getElementById('settings-bio-status');
-                    if(!nameInput || !nameInput.value.trim()) return App.Toast.show("Nama wajib diisi.", "warning");
-                    const res = App.ProfileState.updateProfileDataConfiguration(nameInput.value.trim(), bioInput.value.trim());
-                    if(res.success) { App.Toast.show("Profil disimpan!", "success"); App.Router.navigate('profil'); }
-                    else App.Modal.open("Limit Tercapai", res.message);
-                },
-                async submitPostCommentAction(postId) {
-                    const input = document.getElementById(`comment-input-field-${postId}`);
-                    if (!input || !input.value.trim()) return;
-                    const commentText = input.value.trim(); const currentUserName = App.ProfileState.getCurrentName();
-
-                    try {
-                        const { data: postData } = await supabaseClient.from('posts').select('role').eq('id', postId).single();
-                        let commentArray = [];
-                        try { if(postData && postData.role && postData.role.startsWith('[')) commentArray = JSON.parse(postData.role); } catch(ex) { commentArray = []; }
-                        commentArray.push({ user: currentUserName, text: commentText, date: new Date().getTime() });
-                        await supabaseClient.from('posts').update({ role: JSON.stringify(commentArray) }).eq('id', postId);
-                        input.value = ''; this.renderPosts();
-                    } catch(err) { console.error(err); }
                 }
             },
 
@@ -1635,7 +1670,7 @@
                 }
             },
 
-            Clock: { start() { /* JAM DAN TANGGAL HEADER DIHILANGKAN SESUAI REQUEST */ } },
+            Clock: { start() {} },
             Network: { listen() { window.addEventListener('online', ()=> { const netTxt = document.getElementById('network-text'); if(netTxt) netTxt.innerText='Online'; }); window.addEventListener('offline', ()=>App.Toast.show("Offline","danger")); } },
             Modal: { open(t, b) { document.getElementById('modal-title').innerText=t; document.getElementById('modal-body').innerHTML=b; document.getElementById('modal-ok-btn').style.display = 'inline-flex'; document.getElementById('global-modal').classList.add('active'); }, close() { document.getElementById('global-modal').classList.remove('active'); } },
             Toast: {
@@ -1671,25 +1706,12 @@
                     });
                     document.getElementById('mobile-overlay')?.addEventListener('click', this.closeMobileSidebar);
                     document.getElementById('btn-theme')?.addEventListener('click', () => App.Theme.toggle());
-                    document.getElementById('btn-refresh')?.addEventListener('click', () => { App.Router.handleRoute(); App.Toast.show("Diperbarui","success"); });
+                    document.getElementById('btn-refresh')?.addEventListener('click', () => { App.Router.handleRoute(); App.Toast.show("Linimasa Diperbarui","success"); });
                     document.getElementById('global-modal').addEventListener('click', (e) => { if(e.target.id==='global-modal') App.Modal.close(); });
-                    
-                    // Fitur Fullscreen tambahan untuk tombol btn-fullscreen jika ditekan
-                    document.getElementById('btn-fullscreen')?.addEventListener('click', () => {
-                        if (!document.fullscreenElement) {
-                            document.documentElement.requestFullscreen().catch(err => console.log(err));
-                        } else {
-                            document.exitFullscreen();
-                        }
-                    });
                 },
                 closeMobileSidebar() {
                     document.getElementById('app-layout')?.classList.remove('sidebar-mobile-open');
                     document.getElementById('mobile-overlay')?.classList.remove('active');
-                },
-                toggleProfileRouteViewportState() {
-                    if(window.location.hash === '#/profil') App.Router.navigate('feed');
-                    else App.Router.navigate('profil');
                 },
                 toggleChatPopup(shouldOpen) {
                     const chatBox = document.getElementById('floating-chat-popup-box'); if(!chatBox) return;
@@ -1725,7 +1747,7 @@
                 },
                 showLoadingBtn(b) {
                     if (!b) return;
-                    const ot = b.innerText; b.innerHTML = 'Loading...'; b.style.pointerEvents='none'; b.style.opacity='0.8';
+                    const ot = b.innerText; b.innerHTML = 'Memproses...'; b.style.pointerEvents='none'; b.style.opacity='0.8';
                     setTimeout(() => { b.innerHTML = ot; b.style.pointerEvents='auto'; b.style.opacity='1'; }, 1000);
                 }
             }
