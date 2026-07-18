@@ -192,7 +192,6 @@ const App = {
                 const { data, error } = await supabaseClient.auth.getSession();
                 if (error) throw error;
                 if(data?.session) {
-                    // Panggil fungsi sinkronisasi profile cloud terpusat
                     await App.ProfileState.fetchAndSyncProfileFromServer(data.session.user.id, data.session.user.email);
                     App.Auth.showApp();
                     App.Router.init();
@@ -327,8 +326,6 @@ const App = {
             const address = cachedUserProfileData.address || 'Belum diisi';
             const job = cachedUserProfileData.job || 'Belum diisi';
             const location = cachedUserProfileData.location || 'Tidak diketahui';
-            
-            const { data } = supabaseClient.auth.user;
             const isSuperAdmin = (cachedUserProfileData.display_name === 'mastrisnocom');
 
             let adFormHTML = '';
@@ -471,7 +468,7 @@ const App = {
             composerAttachedImageBase64 = null;
             const popupFormHTML = `
                 <div style="text-align:left;">
-                    <textarea class="form-input" id="composer-text" placeholder="Apa yang Anda pikirkan, ${currentName}?" style="min-height:120px; padding-top:16px; resize:none; margin-bottom:14px; color:var(--text-main);"></textarea>
+                    <textarea class="form-input" id="composer-text" placeholder="Apa yang sedang Anda pikirkan, ${currentName}?" style="min-height:120px; padding-top:16px; resize:none; margin-bottom:14px; color:var(--text-main);"></textarea>
                     <div id="composer-upload-preview-area" style="margin-bottom:12px;"></div>
                     <div style="display:flex; justify-content:space-between; align-items:center;">
                         <button type="button" class="icon-btn" style="color:var(--primary)" onclick="document.getElementById('composer-img-input').click()"><span class="material-symbols-outlined">image</span></button>
@@ -565,7 +562,7 @@ const App = {
                     <img src="https://i.pravatar.cc/150?img=${Math.abs(name.hashCode() % 70)}" style="width:80px; height:80px; border-radius:50%; margin-bottom:12px; border:2px solid var(--primary);">
                     <h3 style="color:var(--text-main); margin-bottom:4px;">${name}</h3>
                     <p style="font-size:0.8rem; color:var(--text-muted); margin-bottom:14px;">${email}</p>
-                    <button class="btn btn-primary btn-full" onclick="App.Modal.close(); App.Features.openSpecificFriendPopupObrolan('${email}', '${name}')">Kirim Pesan</button>
+                    <button type="button" class="btn btn-primary btn-full" onclick="App.Modal.close(); App.Features.openSpecificFriendPopupObrolan('${email}', '${name}')">Kirim Pesan</button>
                 </div>
             `;
             App.Modal.open("Profil Anggota Jaringan", infoCard);
@@ -574,50 +571,134 @@ const App = {
 
         async openSpecificFriendPopupObrolan(friendEmail, friendName) {
             activeChatFriendEmail = friendEmail; activeChatFriendName = friendName;
-            document.getElementById('popup-chat-header-title').innerText = `Chat: ${friendName}`;
+            
+            const friendAvatarUrl = `https://i.pravatar.cc/150?img=${Math.abs(friendName.hashCode() % 70)}`;
+            
+            const headerBox = document.getElementById('dynamic-chat-header-node');
+            if (headerBox) {
+                headerBox.innerHTML = `
+                    <div class="chat-user-profile-header">
+                        <button type="button" class="icon-btn" style="color:var(--text-main); width:32px; height:32px; padding:0;" onclick="App.UI.toggleChatPopup(false)">
+                            <span class="material-symbols-outlined">arrow_back</span>
+                        </button>
+                        <div class="chat-header-avatar-wrap">
+                            <img src="${friendAvatarUrl}">
+                            <span class="friend-online-dot" style="bottom:0; right:0; width:8px; height:8px;"></span>
+                        </div>
+                        <div class="chat-header-info">
+                            <h4>${friendName}</h4>
+                            <span>Sedang Aktif</span>
+                        </div>
+                    </div>
+                    <div class="chat-header-actions">
+                        <button type="button" class="icon-btn"><span class="material-symbols-outlined">local_offer</span></button>
+                        <button type="button" class="icon-btn"><span class="material-symbols-outlined">call</span></button>
+                        <button type="button" class="icon-btn"><span class="material-symbols-outlined">videocam</span></button>
+                    </div>
+                `;
+            }
+
             unreadMessageCounters[friendName.toLowerCase() + "@nexsocial.id"] = 0;
             App.UI.updateGlobalMessageNotificationBadgeCount();
             this.loadPopupFriendsListSidebar();
 
             const mainArea = document.getElementById('popup-chat-main-area-pane'); if(!mainArea) return;
+
+            let chatEmojiHTML = EMOJI_LIST.map(em => `<button type="button" class="emoji-item-btn" onclick="App.Features.appendEmojiToInputField('popup-chat-input-field','popup-chat-emoji-panel','${em}')">${em}</button>`).join('');
+
             mainArea.innerHTML = `
-                <div class="popup-msg-stream" id="popup-msg-stream-viewport"></div>
-                <div class="popup-chat-input-row">
-                    <input type="text" class="form-input" placeholder="Tulis pesan..." id="popup-chat-input-field" onkeypress="if(event.key==='Enter') App.Features.sendPopupChatCloudAction()">
-                    <button class="icon-btn" style="background:var(--primary); color:white; width:34px; height:34px;" onclick="App.Features.sendPopupChatCloudAction()"><span class="material-symbols-outlined">send</span></button>
+                <div class="popup-msg-stream" id="popup-msg-stream-viewport">
+                    <div class="chat-stream-profile-banner">
+                        <div class="chat-banner-avatar-wrap">
+                            <img src="${friendAvatarUrl}">
+                            <span class="friend-online-dot"></span>
+                        </div>
+                        <h3>${friendName}</h3>
+                        <button type="button" class="btn btn-secondary" style="padding:6px 16px; font-size:0.8rem; border-radius:8px;" onclick="App.Features.triggerPopupFriendMetaCardModal('${friendName}','${friendEmail}')">Lihat profil</button>
+                    </div>
+                    <div id="chat-messages-embedded-target-stream" style="display:flex; flex-direction:column; gap:10px;"></div>
+                </div>
+                <div class="popup-chat-input-row" style="position:relative;">
+                    <div class="emoji-popup-box" id="popup-chat-emoji-panel" style="display:none; bottom:55px; right:40px;">${chatEmojiHTML}</div>
+                    
+                    <div class="chat-input-media-group">
+                        <button type="button" class="icon-btn"><span class="material-symbols-outlined">add_circle</span></button>
+                        <button type="button" class="icon-btn"><span class="material-symbols-outlined">photo_camera</span></button>
+                        <button type="button" class="icon-btn"><span class="material-symbols-outlined">image</span></button>
+                        <button type="button" class="icon-btn"><span class="material-symbols-outlined">mic</span></button>
+                    </div>
+                    <div class="chat-input-capsule-wrap">
+                        <input type="text" placeholder="Pesan" id="popup-chat-input-field" onkeypress="if(event.key==='Enter') App.Features.sendPopupChatCloudAction()">
+                        <span class="material-symbols-outlined capsule-emoji-trigger" onclick="App.Features.toggleEmojiPanelDOM('popup-chat-emoji-panel')">mood</span>
+                    </div>
+                    <div class="chat-footer-right-action" onclick="App.Features.sendPopupChatCloudAction()">
+                        <button type="button" class="icon-btn"><span class="material-symbols-outlined">thumb_up</span></button>
+                    </div>
                 </div>
             `;
-            const myCurrentName = App.ProfileState.getCurrentName();
-            const { data: messages } = await supabaseClient.from('posts').select('*').eq('image', 'private_chat_type').order('created_at', { ascending: true });
-            const filtered = messages ? messages.filter(msg => (msg.author === myCurrentName && msg.role === friendName) || (msg.author === friendName && msg.role === myCurrentName)) : [];
-            const streamViewport = document.getElementById('popup-msg-stream-viewport');
-            if(streamViewport) {
-                streamViewport.innerHTML = filtered.map(msg => {
-                    return `<div class="bubble ${msg.author === myCurrentName ? 'out' : 'in'}"><span class="bubble-sender-name">${msg.author}</span><span>${msg.content}</span></div>`;
-                }).join('');
-                streamViewport.scrollTop = streamViewport.scrollHeight;
-            }
+
+            try {
+                const myCurrentName = App.ProfileState.getCurrentName();
+                const { data: messages, error } = await supabaseClient
+                    .from('posts')
+                    .select('*')
+                    .eq('image', 'private_chat_type')
+                    .order('created_at', { ascending: true });
+
+                if (error) throw error;
+
+                const filtered = messages ? messages.filter(msg => 
+                    (msg.author === myCurrentName && msg.role === friendName) || 
+                    (msg.author === friendName && msg.role === myCurrentName)
+                ) : [];
+                
+                const embeddedStream = document.getElementById('chat-messages-embedded-target-stream');
+                const streamViewport = document.getElementById('popup-msg-stream-viewport');
+                
+                if(embeddedStream) {
+                    embeddedStream.innerHTML = filtered.map(msg => {
+                        return `<div class="bubble ${msg.author === myCurrentName ? 'out' : 'in'}"><span class="bubble-sender-name">${msg.author}</span><span>${msg.content}</span></div>`;
+                    }).join('');
+                    if(streamViewport) streamViewport.scrollTop = streamViewport.scrollHeight;
+                }
+            } catch(err) { console.error("Gagal memuat pesan:", err); }
         },
 
         async sendPopupChatCloudAction() {
-            const input = document.getElementById('popup-chat-input-field'); if(!input || !input.value.trim()) return;
-            const textVal = input.value.trim(); const myCurrentName = App.ProfileState.getCurrentName();
-            await supabaseClient.from('posts').insert([{ author: myCurrentName, role: activeChatFriendName, avatar: App.ProfileState.getCurrentAvatar(), content: textVal, image: 'private_chat_type', likes: 0 }]);
-            const streamViewport = document.getElementById('popup-msg-stream-viewport');
-            if(streamViewport) {
-                const b = document.createElement('div'); b.className = 'bubble out';
-                b.innerHTML = `<span class="bubble-sender-name">${myCurrentName}</span><span>${textVal}</span>`;
-                streamViewport.appendChild(b); streamViewport.scrollTop = streamViewport.scrollHeight;
-            }
-            input.value = '';
-        },
+            const input = document.getElementById('popup-chat-input-field'); 
+            if(!input || !input.value.trim() || !activeChatFriendName) return;
+            
+            const textVal = input.value.trim(); 
+            const myCurrentName = App.ProfileState.getCurrentName();
 
-        appendIncomingBubbleDOM(senderName, messageText) {
-            const streamViewport = document.getElementById('popup-msg-stream-viewport');
-            if(streamViewport) {
-                const bIn = document.createElement('div'); bIn.className = 'bubble in'; 
-                bIn.innerHTML = `<span class="bubble-sender-name">${senderName}</span><span>${messageText}</span>`;
-                streamViewport.appendChild(bIn); streamViewport.scrollTop = streamViewport.scrollHeight;
+            try {
+                const { error } = await supabaseClient
+                    .from('posts')
+                    .insert([{ 
+                        author: myCurrentName, 
+                        role: activeChatFriendName, 
+                        avatar: App.ProfileState.getCurrentAvatar(), 
+                        content: textVal, 
+                        image: 'private_chat_type', 
+                        likes: 0,
+                        dislikes: 0
+                    }]);
+
+                if (error) throw error;
+
+                const embeddedStream = document.getElementById('chat-messages-embedded-target-stream');
+                const streamViewport = document.getElementById('popup-msg-stream-viewport');
+                
+                if(embeddedStream) {
+                    const b = document.createElement('div'); 
+                    b.className = 'bubble out';
+                    b.innerHTML = `<span class="bubble-sender-name">${myCurrentName}</span><span>${textVal}</span>`;
+                    embeddedStream.appendChild(b); 
+                    if(streamViewport) streamViewport.scrollTop = streamViewport.scrollHeight;
+                }
+                input.value = '';
+            } catch(err) {
+                console.error("Gagal mengirim pesan:", err);
             }
         },
 
@@ -730,40 +811,6 @@ const App = {
             this.openSpecificCommunityTimelineStreamArea(commId, commObj.title);
         },
 
-        async renderExploreUsers() {
-            const container = document.getElementById('explore-users-stream'); if(!container) return;
-            const myEmail = localStorage.getItem('ns_user_email') || '';
-            const { data: myFriends } = await supabaseClient.from('friends').select('friend_email').eq('user_email', myEmail);
-            const friendList = myFriends ? myFriends.map(f => f.friend_email) : [];
-            const { data: posts } = await supabaseClient.from('posts').select('author, avatar').not('author', 'is', null);
-            const uniqueUsers = []; const map = new Map(); const myCurrentName = App.ProfileState.getCurrentName();
-            if(posts) {
-                for (const item of posts) {
-                    if(item.author !== myCurrentName && !map.has(item.author) && item.image !== 'private_chat_type') {
-                        map.set(item.author, true); uniqueUsers.push({ name: item.author, avatar: item.avatar || 'https://i.pravatar.cc/150?img=11', email: item.author.toLowerCase() + "@nexsocial.id" });
-                    }
-                }
-            }
-            container.innerHTML = uniqueUsers.map(u => {
-                const isFriend = friendList.includes(u.email);
-                return `<div class="user-follow-card"><img src="${u.avatar}" class="user-avatar" style="width:44px; height:44px; border:none;"><div class="user-follow-info"><h4>${u.name}</h4><p>${u.email}</p></div><button class="btn ${isFriend ? 'btn-secondary' : 'btn-primary'}" style="padding:6px 14px; font-size:0.8rem;" onclick="App.Features.toggleFriendAction('${u.email}', ${isFriend})">${isFriend ? 'Teman' : 'Tambah'}</button></div>`;
-            }).join('');
-        },
-
-        async toggleFriendAction(friendEmail, isFriend) {
-            const myEmail = localStorage.getItem('ns_user_email') || ''; if(!myEmail) return;
-            if (isFriend) { await supabaseClient.from('friends').delete().eq('user_email', myEmail).eq('friend_email', friendEmail); } 
-            else { await supabaseClient.from('friends').insert([{ user_email: myEmail, friend_email: friendEmail }]); }
-            this.renderExploreUsers();
-        },
-
-        async loadFriendsCount() {
-            const countEl = document.getElementById('profile-friends-count'); if(!countEl) return;
-            const myEmail = localStorage.getItem('ns_user_email') || '';
-            const { count } = await supabaseClient.from('friends').select('*', { count: 'exact', head: true }).eq('user_email', myEmail);
-            if(count !== null) countEl.innerText = count;
-        },
-
         async renderPosts() {
             const stream = document.getElementById('feed-stream'); if(!stream) return;
             const myCurrentName = App.ProfileState.getCurrentName();
@@ -775,7 +822,6 @@ const App = {
             let filteredPosts = posts ? posts.filter(p => p.image !== 'private_chat_type') : [];
             if(headerSearchFilterQueryString !== "") { filteredPosts = filteredPosts.filter(p => p.author.toLowerCase().includes(headerSearchFilterQueryString)); }
 
-            // Sinkronisasi status interaksi tombol Like/Dislike via cloud table post_interactions
             const { data: myInteractions } = await supabaseClient.from('post_interactions').select('post_id, type').eq('user_email', myEmail);
             const userLikedPostIds = myInteractions ? myInteractions.filter(x => x.type === 'like').map(x => x.post_id) : [];
             const userDislikedPostIds = myInteractions ? myInteractions.filter(x => x.type === 'dislike').map(x => x.post_id) : [];
@@ -835,7 +881,7 @@ const App = {
                             <div class="comments-stream">${commentsListHTML}</div>
                             <div class="comment-row">
                                 <input type="text" class="form-input" placeholder="Tulis komentar..." id="comment-input-field-${pId}">
-                                <button class="icon-btn" style="background:var(--primary); color:white; width:34px; height:34px; border-radius:50%; flex-shrink:0;" onclick="App.Features.submitPostCommentAction(${pId})"><span class="material-symbols-outlined" style="font-size:16px;">send</span></button>
+                                <button type="button" class="icon-btn" style="background:var(--primary); color:white; width:34px; height:34px; border-radius:50%; flex-shrink:0;" onclick="App.Features.submitPostCommentAction(${pId})"><span class="material-symbols-outlined" style="font-size:16px;">send</span></button>
                             </div>
                         </div>
                     </div>
@@ -966,7 +1012,6 @@ const App = {
         }
     },
 
-    Network: { listen() { window.addEventListener('offline', ()=>App.Toast.show("Offline","danger")); } },
     Modal: { open(t, b) { document.getElementById('modal-title').innerText=t; document.getElementById('modal-body').innerHTML=b; document.getElementById('global-modal').classList.add('active'); }, close() { document.getElementById('global-modal').classList.remove('active'); } },
     Toast: {
         show(m, t="info") {
