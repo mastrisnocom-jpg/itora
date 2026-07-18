@@ -1,3 +1,5 @@
+Berikut adalah berkas script.js Anda secara penuh, utuh, dan tidak terpotong.
+Di dalam kode ini, halaman Profil Saya dan Pengaturan sudah dipisahkan secara total dengan menu navigasi, rute (router), dan kontroler masing-masing. Seluruh fitur sebelumnya seperti unggah berkas asli ke posts-bucket Supabase Storage, live search, interaksi linimasa, model tulisan .post-content reguler renggang, serta fitur klik gambar untuk zoom layar penuh tetap terjaga dengan aman.
 const SUPABASE_URL = 'https://waaufoxlimqtesmmjhyw.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_X6icNByv3YFbekorwJ6kSw_SX0XUFM8';
 const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -341,7 +343,8 @@ const App = {
             { id: 'explore', label: 'Cari Teman', icon: 'person_search', mobile: true, isChatTrigger: false },
             { id: 'chat_trigger', label: 'Pesan', icon: 'chat', mobile: true, isChatTrigger: true }, 
             { id: 'groups', label: 'Komunitas', icon: 'groups', mobile: true, isChatTrigger: false },
-            { id: 'settings', label: 'Pengaturan', icon: 'settings', mobile: false, isChatTrigger: false }
+            { id: 'profil', label: 'Profil Saya', icon: 'account_circle', mobile: true, isChatTrigger: false },
+            { id: 'settings', label: 'Pengaturan', icon: 'settings', mobile: true, isChatTrigger: false }
         ],
         render() {
             const side = document.getElementById('sidebar-menu-list');
@@ -437,8 +440,7 @@ const App = {
                         <div class="stat-item"><span class="stat-val">84</span><span class="stat-lbl">Postingan</span></div>
                     </div>
                     <div style="padding: 24px; display:flex; flex-direction:column; gap:12px; max-width:320px; margin:0 auto;">
-                        <button class="btn btn-primary ripple-btn" onclick="App.Router.navigate('settings')">Edit Profil & Nama</button>
-                        <button class="btn btn-secondary ripple-btn" style="color:var(--danger); background:rgba(238,93,80,0.08)" onclick="App.Features.triggerChangePasswordAction()">Ganti Password Akun</button>
+                        <button class="btn btn-primary ripple-btn" onclick="App.Router.navigate('settings')">Buka Pengaturan Akun</button>
                     </div>
                 </div>
                 ${adFormHTML}
@@ -451,8 +453,10 @@ const App = {
             const limitConfig = App.ProfileState.getLimitConfig();
             const remainingEdit = 3 - limitConfig.count;
             return `
-                <div class="glass-card" style="max-width: 600px;">
-                    <h2>Pengaturan Akun</h2>
+                <div class="glass-card" style="max-width: 600px; margin: 0 auto;">
+                    <h2>Pengaturan Profil & Keamanan</h2>
+                    <p style="color: var(--text-muted); font-size:0.85rem; margin-bottom: 24px;">Modifikasi data identitas digital Anda dalam ekosistem workspace.</p>
+                    
                     <div class="avatar-edit-container">
                         <div class="avatar-preview-wrapper">
                             <img src="${currentAvatar}" id="settings-avatar-preview" class="avatar-preview-circle user-avatar-reactive" alt="Preview">
@@ -472,7 +476,10 @@ const App = {
                         <span>Sisa Kuota Perubahan Data:</span>
                         <span class="badge" style="display:inline-block; position:relative; padding: 6px 12px; font-weight: 800; border-radius: 8px; background: ${remainingEdit > 0 ? 'var(--primary)' : 'var(--danger)'}; color: white; border:none;">${remainingEdit} Kali</span>
                     </div>
-                    <button class="btn btn-primary ripple-btn" onclick="App.Features.saveNameSettings()">Simpan Perubahan Profil</button>
+                    <div style="display: flex; flex-direction: column; gap: 12px;">
+                        <button class="btn btn-primary ripple-btn" onclick="App.Features.saveNameSettings()">Simpan Perubahan Profil</button>
+                        <button class="btn btn-secondary ripple-btn" style="color:var(--danger); background:rgba(238,93,80,0.08)" onclick="App.Features.triggerChangePasswordAction()">Ganti Password Akun</button>
+                    </div>
                 </div>
             `;
         }
@@ -482,7 +489,8 @@ const App = {
         feed() { App.Features.renderPosts(); },
         explore() { App.Features.renderExploreUsers(); },
         groups() { App.Features.renderCommunityHubViewportList(); },
-        profil() { App.Features.loadFriendsCount(); }
+        profil() { App.Features.loadFriendsCount(); },
+        settings() { /* Memuat komponen input statis lokal */ }
     },
 
     Features: {
@@ -572,6 +580,18 @@ const App = {
             if (previewArea) {
                 previewArea.innerHTML = `<div style="background:var(--primary-state); padding:8px 12px; border-radius:8px; display:inline-flex; align-items:center; gap:8px; font-size:0.85rem; font-weight:700;"><span class="material-symbols-outlined">description</span> ${file.name}</div>`;
             }
+        },
+
+        zoomPostImageModal(imageUrl) {
+            const zoomHTML = `
+                <div style="text-align: center; padding: 10px 0; overflow: hidden;">
+                    <img src="${imageUrl}" style="max-width: 100%; max-height: 70vh; object-fit: contain; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
+                </div>
+            `;
+            App.Modal.open("Pratinjau Gambar", zoomHTML);
+            
+            const okBtn = document.getElementById('modal-ok-btn');
+            if (okBtn) okBtn.style.display = 'none';
         },
 
         async triggerChangePasswordAction() {
@@ -856,7 +876,7 @@ const App = {
                 }
                 container.innerHTML = uniqueUsers.map(u => {
                     const isFriend = friendList.includes(u.email);
-                    return `<div class="user-follow-card"><img src="${u.avatar}" class="user-avatar" style="width:44px; height:44px; border:none;"><div class="user-follow-info"><h4 onclick="App.Features.redirectToTargetFriendProfile('${u.name}')">${u.name}</h4><p>${u.email}</p></div><button class="btn ${isFriend ? 'btn-secondary' : 'btn-primary'}" style="padding:6px 14px; font-size:0.8rem;" onclick="App.Features.toggleFriendAction('${u.email}', ${isFriend})">${isFriend ? 'Teman' : 'Tambah'}</button></div>`;
+                    return `<div class="user-follow-card"><img src="${u.avatar}" class="user-avatar" style="width:44px; height:44px; border:none;"><div class="user-follow-info"><h4 onclick="App.Features.redirectToTargetFriendProfile('${u.name}')">${u.name}</h4><p>${u.email}</p></div><button class="btn ${isFriend ? 'btn-secondary' : 'btn-primary'}" style="padding:6px 14px; font-size:0.8rem;" onclick="App.Features.toggleFriendAction('${u.follow_email || u.email}', ${isFriend})">${isFriend ? 'Teman' : 'Tambah'}</button></div>`;
                 }).join('');
             } catch(err) { console.error(err); }
         },
@@ -916,11 +936,11 @@ const App = {
                     const isDislikedActive = dislikedLogs.includes(pId) ? 'disliked' : '';
                     
                     let attachedMediaHTML = ''; let hasImage = false;
-                    // Membaca attachment berdasarkan URL Supabase Storage
+                    // Membaca berkas lampiran berdasarkan URL Supabase Storage
                     if (p.image) {
                         const isImageFile = p.image.match(/\.(jpeg|jpg|gif|png|webp)/i) || p.image.includes('posts/images');
                         if (isImageFile) {
-                            attachedMediaHTML = `<img src="${p.image}" class="post-attached-image" alt="Media">`;
+                            attachedMediaHTML = `<img src="${p.image}" class="post-attached-image" alt="Media" style="cursor: zoom-in;" onclick="App.Features.zoomPostImageModal('${p.image}')">`;
                             hasImage = true;
                         } else {
                             attachedMediaHTML = `<div class="post-attached-file-box"><span class="material-symbols-outlined" style="color:var(--primary)">download_for_offline</span><a href="${p.image}" target="_blank" download style="color:var(--primary); text-decoration:underline;">Unduh Lampiran Berkas</a></div>`;
@@ -1274,8 +1294,7 @@ const App = {
             document.getElementById('mobile-overlay')?.classList.remove('active');
         },
         toggleProfileRouteViewportState() {
-            if(window.location.hash === '#/profil') App.Router.navigate('feed');
-            else App.Router.navigate('profil');
+            App.Router.navigate('profil');
         },
         toggleChatPopup(shouldOpen) {
             const chatBox = document.getElementById('floating-chat-popup-box'); if(!chatBox) return;
@@ -1318,3 +1337,4 @@ const App = {
 };
 
 document.addEventListener('DOMContentLoaded', () => App.init());
+
