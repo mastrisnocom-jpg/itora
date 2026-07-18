@@ -2,11 +2,11 @@ const SUPABASE_URL = 'https://waaufoxlimqtesmmjhyw.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_X6icNByv3YFbekorwJ6kSw_SX0XUFM8'; 
 const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY); 
 
+// Variabel Global
 let liveNotifications = [ 
     { id: 1, icon: 'shield_person', user: 'Super Admin', type: 'admin', desc: 'Sistem Workspace Tech Social versi 2.4 berhasil diperbarui ke server cloud.', isUnread: true }, 
     { id: 2, icon: 'handshake', user: 'System', type: 'admin', desc: 'Fitur network teman aktif. Sekarang Anda dapat mencari user lain di halaman Eksplor.', isUnread: false } 
 ]; 
-
 let activeChatFriendEmail = null; 
 let activeChatFriendName = null; 
 let composerAttachedImageBase64 = null; 
@@ -15,6 +15,7 @@ let composerAttachedFileName = "Dokumen.bin";
 let unreadMessageCounters = {}; 
 let liveHeaderNotificationCount = 1; 
 let headerSearchFilterQueryString = ""; 
+let searchTimeout = null; // Debounce timer
 const EMOJI_LIST = ['😊', '😂', '🔥', '👍', '🙌', '💯', '❤️', '👏', '🎉', '😮', '😢', '🙏']; 
 
 const App = { 
@@ -77,13 +78,12 @@ const App = {
                 .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'friends' }, async (payload) => {
                     const newRequest = payload.new;
                     const myEmail = localStorage.getItem('ns_user_email') || '';
-                    
                     if (newRequest.friend_email.toLowerCase() === myEmail.toLowerCase() && newRequest.status === 'pending') {
                         const senderName = newRequest.user_email.split('@')[0];
                         const exists = liveNotifications.some(n => n.friendRequestId === newRequest.id);
                         if (!exists) {
                             liveNotifications.unshift({
-                                id: newRequest.id, // Gunakan ID database agar konsisten
+                                id: newRequest.id,
                                 friendRequestId: newRequest.id,
                                 icon: 'person_add',
                                 user: senderName,
@@ -401,61 +401,24 @@ const App = {
         async acceptFriendRequestAction(notiId, dbRequestId, senderEmail) {
             const myEmail = localStorage.getItem('ns_user_email') || '';
             try {
-                // 1. Ubah status data asal dari pending menjadi approved
-                const { error: updateError } = await supabaseClient
-                    .from('friends')
-                    .update({ status: 'approved' })
-                    .eq('id', dbRequestId);
-                
-                if(updateError) throw updateError;
-
-                // 2. Buat relasi timbal balik agar sinkron dua arah
-                const { data: checkInverse } = await supabaseClient
-                    .from('friends')
-                    .select('id')
-                    .eq('user_email', myEmail)
-                    .eq('friend_email', senderEmail);
-                
+                await supabaseClient.from('friends').update({ status: 'approved' }).eq('id', dbRequestId);
+                const { data: checkInverse } = await supabaseClient.from('friends').select('id').eq('user_email', myEmail).eq('friend_email', senderEmail);
                 if(!checkInverse || checkInverse.length === 0) {
-                    await supabaseClient.from('friends').insert([
-                        { user_email: myEmail, friend_email: senderEmail, status: 'approved' }
-                    ]);
+                    await supabaseClient.from('friends').insert([{ user_email: myEmail, friend_email: senderEmail, status: 'approved' }]);
                 }
-
-                // Perbarui status notifikasi lokal
-                liveNotifications = liveNotifications.map(n => {
-                    if(n.id === notiId) {
-                        return { ...n, type: 'info', icon: 'handshake', desc: 'Pertemanan berhasil disetujui.', isUnread: false };
-                    }
-                    return n;
-                });
-
+                liveNotifications = liveNotifications.filter(n => n.id !== notiId);
                 App.Toast.show("Pertemanan dikonfirmasi!", "success");
-                App.Features.showNotifications(); // Refresh isi modal
-                
-                if(window.location.hash === '#/explore') App.Features.renderExploreUsers();
-                if(window.location.hash === '#/profil') App.Features.loadFriendsCount();
+                App.Features.showNotifications();
                 App.Features.loadPopupFriendsListSidebar();
-            } catch(err) {
-                console.error(err);
-                App.Toast.show("Gagal menyetujui pertemanan.", "danger");
-            }
+            } catch(err) { console.error(err); App.Toast.show("Gagal menyetujui.", "danger"); }
         },
 
         async rejectFriendRequestAction(notiId, dbRequestId) {
             try {
                 await supabaseClient.from('friends').delete().eq('id', dbRequestId);
-                
-                liveNotifications = liveNotifications.map(n => {
-                    if(n.id === notiId) {
-                        return { ...n, type: 'info', icon: 'close', desc: 'Permintaan pertemanan ditolak.', isUnread: false };
-                    }
-                    return n;
-                });
-                
-                App.Toast.show("Permintaan pertemanan ditolak.", "warning");
+                liveNotifications = liveNotifications.filter(n => n.id !== notiId);
+                App.Toast.show("Permintaan ditolak.", "warning");
                 App.Features.showNotifications();
-                if(window.location.hash === '#/explore') App.Features.renderExploreUsers();
             } catch(e) { console.error(e); }
         },
 
@@ -477,8 +440,11 @@ const App = {
             if (okBtn) okBtn.style.display = 'none'; 
         }, 
         handleHeaderLiveSearchInput(event) { 
-            headerSearchFilterQueryString = event.target.value.trim().toLowerCase(); 
-            if(window.location.hash === '#/feed') this.renderPosts(); 
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(() => {
+                headerSearchFilterQueryString = event.target.value.trim().toLowerCase(); 
+                if(window.location.hash === '#/feed') this.renderPosts(); 
+            }, 500);
         }, 
         toggleEmojiPanelDOM(panelId) { 
             const el = document.getElementById(panelId); 
@@ -627,13 +593,12 @@ const App = {
             input.value = ''; 
             this.openSpecificCommunityTimelineStreamArea(commId, currentSavedList[idx].title); 
         }, 
-        async loadPopupFriendsListSidebar() { 
+        loadPopupFriendsListSidebar() { 
             const listContainer = document.getElementById('popup-friends-sidebar-items'); 
             if(!listContainer) return; 
             const myEmail = localStorage.getItem('ns_user_email') || ''; 
-            try { 
-                const { data: friends, error } = await supabaseClient.from('friends').select('friend_email').eq('user_email', myEmail).eq('status', 'approved'); 
-                if(error) throw error; 
+            supabaseClient.from('friends').select('friend_email').eq('user_email', myEmail).eq('status', 'approved').then(({data: friends, error}) => {
+                if(error) return;
                 listContainer.innerHTML = friends.map(f => { 
                     const displayName = f.friend_email.split('@')[0]; 
                     const isActive = activeChatFriendEmail === f.friend_email ? 'active' : ''; 
@@ -642,7 +607,7 @@ const App = {
                     const counterBadgeHTML = unreadCount > 0 ? `<div class="popup-item-counter-dot">${unreadCount}</div>` : ''; 
                     return `<div class="popup-friend-item ${isActive}" onclick="App.Features.openSpecificFriendPopupObrolan('${f.friend_email}', '${displayName}')"><span class="friend-online-dot"></span><span style="flex:1; text-align:left; overflow:hidden; text-overflow:ellipsis;">${displayName}</span>${counterBadgeHTML}</div>`; 
                 }).join(''); 
-            } catch(err) { console.error(err); } 
+            });
         }, 
         async openSpecificFriendPopupObrolan(friendEmail, friendName) { 
             activeChatFriendEmail = friendEmail; 
@@ -757,10 +722,12 @@ const App = {
                 } 
                 if(incomingReq) {
                     incomingReq.forEach(f => {
-                        // Jika ada kiriman masuk dan statusnya pending, beri tahu antarmuka
-                        if(!relationMap[f.user_email.toLowerCase()] || relationMap[f.user_email.toLowerCase()] === 'pending') {
-                            relationMap[f.user_email.toLowerCase()] = f.status === 'pending' ? 'incoming_pending' : f.status;
-                            dbIdMap[f.user_email.toLowerCase()] = f.id;
+                        const senderEmail = f.user_email.toLowerCase();
+                        if(relationMap[senderEmail] !== 'approved') {
+                            if(f.status === 'pending') {
+                                relationMap[senderEmail] = 'incoming_pending';
+                                dbIdMap[senderEmail] = f.id;
+                            }
                         }
                     });
                 }
