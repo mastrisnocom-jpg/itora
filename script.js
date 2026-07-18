@@ -72,28 +72,24 @@ const App = {
 
     Realtime: { 
         subscribeFriendsRequests() {
-            // Mendengarkan ajakan pertemanan masuk secara realtime
             supabaseClient
                 .channel('schema-friends-changes')
                 .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'friends' }, async (payload) => {
                     const newRequest = payload.new;
                     const myEmail = localStorage.getItem('ns_user_email') || '';
                     
-                    // Jika tujuannya adalah email kita dan statusnya pending
                     if (newRequest.friend_email.toLowerCase() === myEmail.toLowerCase() && newRequest.status === 'pending') {
                         const senderName = newRequest.user_email.split('@')[0];
-                        
-                        // Cek apakah notifikasi ini sudah dimasukkan ke array local agar tidak duplikat
                         const exists = liveNotifications.some(n => n.friendRequestId === newRequest.id);
                         if (!exists) {
                             liveNotifications.unshift({
-                                id: Date.now() + Math.random(),
+                                id: newRequest.id, // Gunakan ID database agar konsisten
                                 friendRequestId: newRequest.id,
                                 icon: 'person_add',
                                 user: senderName,
                                 senderEmail: newRequest.user_email,
                                 type: 'friend_request',
-                                desc: `Mengajak Anda berteman. Apakah Anda ingin mengonfirmasi?`,
+                                desc: `Mengajak Anda berteman.`,
                                 isUnread: true
                             });
                             liveHeaderNotificationCount++;
@@ -106,7 +102,9 @@ const App = {
         },
 
         subscribePosts() { 
-            supabaseClient .channel('schema-db-changes') .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'posts' }, async (payload) => { 
+            supabaseClient .channel('schema-db-changes') .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'friends' }, async () => {
+                if(window.location.hash === '#/explore') App.Features.renderExploreUsers();
+            }) .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'posts' }, async (payload) => { 
                 const newPost = payload.new; 
                 const myCurrentName = App.ProfileState.getCurrentName(); 
                 
@@ -152,7 +150,6 @@ const App = {
                     
                     if (parsedComments.length > 0) { 
                         const latestComment = parsedComments[parsedComments.length - 1]; 
-                        // HANYA MUNCUL DI NOTIFIKASI JIKA YANG KOMEN BUKAN KITA SENDIRI
                         if (latestComment.user !== myCurrentName) { 
                             liveNotifications.unshift({ id: Date.now(), icon: 'maps_ugc', user: latestComment.user, type: 'comment', desc: `Mengomentari postingan Anda: "${latestComment.text.substring(0, 25)}"`, isUnread: true }); 
                             liveHeaderNotificationCount++; 
@@ -176,7 +173,7 @@ const App = {
                     App.UI.syncGlobalAvatarAndName(); 
                     App.Auth.showApp(); 
                     App.Router.init(); 
-                    App.Features.fetchIncomingFriendRequestsSync(); // Tarik ajakan teman tertunda
+                    App.Features.fetchIncomingFriendRequestsSync(); 
                 } else { 
                     localStorage.removeItem('ns_logged_in'); 
                     localStorage.removeItem('ns_user_email'); 
@@ -371,7 +368,6 @@ const App = {
             const myEmail = localStorage.getItem('ns_user_email') || '';
             if(!myEmail) return;
             try {
-                // Tarik pertemanan status 'pending' yang ditujukan ke kita
                 const { data, error } = await supabaseClient
                     .from('friends')
                     .select('*')
@@ -385,13 +381,13 @@ const App = {
                         const exists = liveNotifications.some(n => n.friendRequestId === req.id);
                         if (!exists) {
                             liveNotifications.unshift({
-                                id: Date.now() + Math.random(),
+                                id: req.id,
                                 friendRequestId: req.id,
                                 icon: 'person_add',
                                 user: senderName,
                                 senderEmail: req.user_email,
                                 type: 'friend_request',
-                                desc: `Mengajak Anda berteman. Apakah Anda ingin mengonfirmasi?`,
+                                desc: `Mengajak Anda berteman.`,
                                 isUnread: true
                             });
                             liveHeaderNotificationCount++;
@@ -399,15 +395,13 @@ const App = {
                     });
                     App.UI.refreshHeaderNotificationBadgeDOM();
                 }
-            } catch(e) {
-                console.error(e);
-            }
+            } catch(e) { console.error(e); }
         },
 
         async acceptFriendRequestAction(notiId, dbRequestId, senderEmail) {
             const myEmail = localStorage.getItem('ns_user_email') || '';
             try {
-                // 1. Update status 'pending' menjadi 'approved' pada ajakan yang masuk
+                // 1. Ubah status data asal dari pending menjadi approved
                 const { error: updateError } = await supabaseClient
                     .from('friends')
                     .update({ status: 'approved' })
@@ -415,7 +409,7 @@ const App = {
                 
                 if(updateError) throw updateError;
 
-                // 2. Insert hubungan timbal balik agar kedua pihak menjadi teman saling terhubung
+                // 2. Buat relasi timbal balik agar sinkron dua arah
                 const { data: checkInverse } = await supabaseClient
                     .from('friends')
                     .select('id')
@@ -428,16 +422,17 @@ const App = {
                     ]);
                 }
 
-                // Ubah data status notifikasi lokal agar interaktif
+                // Perbarui status notifikasi lokal
                 liveNotifications = liveNotifications.map(n => {
                     if(n.id === notiId) {
-                        return { ...n, type: 'info', desc: 'Anda telah menyetujui pertemanan ini.', isUnread: false };
+                        return { ...n, type: 'info', icon: 'handshake', desc: 'Pertemanan berhasil disetujui.', isUnread: false };
                     }
                     return n;
                 });
 
                 App.Toast.show("Pertemanan dikonfirmasi!", "success");
-                App.Features.showNotifications(); // Render ulang isi modal notifikasi
+                App.Features.showNotifications(); // Refresh isi modal
+                
                 if(window.location.hash === '#/explore') App.Features.renderExploreUsers();
                 if(window.location.hash === '#/profil') App.Features.loadFriendsCount();
                 App.Features.loadPopupFriendsListSidebar();
@@ -449,12 +444,11 @@ const App = {
 
         async rejectFriendRequestAction(notiId, dbRequestId) {
             try {
-                // Hapus baris data pertemanan dari database jika ditolak
                 await supabaseClient.from('friends').delete().eq('id', dbRequestId);
                 
                 liveNotifications = liveNotifications.map(n => {
                     if(n.id === notiId) {
-                        return { ...n, type: 'info', desc: 'Anda menolak pertemanan ini.', isUnread: false };
+                        return { ...n, type: 'info', icon: 'close', desc: 'Permintaan pertemanan ditolak.', isUnread: false };
                     }
                     return n;
                 });
@@ -462,9 +456,7 @@ const App = {
                 App.Toast.show("Permintaan pertemanan ditolak.", "warning");
                 App.Features.showNotifications();
                 if(window.location.hash === '#/explore') App.Features.renderExploreUsers();
-            } catch(e) {
-                console.error(e);
-            }
+            } catch(e) { console.error(e); }
         },
 
         saveAdminGlobalAdBannerAction(event) { 
@@ -640,7 +632,6 @@ const App = {
             if(!listContainer) return; 
             const myEmail = localStorage.getItem('ns_user_email') || ''; 
             try { 
-                // Hanya memuat teman yang status pertemanannya sudah 'approved'
                 const { data: friends, error } = await supabaseClient.from('friends').select('friend_email').eq('user_email', myEmail).eq('status', 'approved'); 
                 if(error) throw error; 
                 listContainer.innerHTML = friends.map(f => { 
@@ -651,9 +642,7 @@ const App = {
                     const counterBadgeHTML = unreadCount > 0 ? `<div class="popup-item-counter-dot">${unreadCount}</div>` : ''; 
                     return `<div class="popup-friend-item ${isActive}" onclick="App.Features.openSpecificFriendPopupObrolan('${f.friend_email}', '${displayName}')"><span class="friend-online-dot"></span><span style="flex:1; text-align:left; overflow:hidden; text-overflow:ellipsis;">${displayName}</span>${counterBadgeHTML}</div>`; 
                 }).join(''); 
-            } catch(err) { 
-                console.error(err); 
-            } 
+            } catch(err) { console.error(err); } 
         }, 
         async openSpecificFriendPopupObrolan(friendEmail, friendName) { 
             activeChatFriendEmail = friendEmail; 
@@ -680,9 +669,7 @@ const App = {
                     }).join(''); 
                     streamViewport.scrollTop = streamViewport.scrollHeight; 
                 } 
-            } catch(err) { 
-                console.error(err); 
-            } 
+            } catch(err) { console.error(err); } 
         }, 
         redirectToTargetFriendProfile(targetName) { 
             App.UI.toggleChatPopup(false); 
@@ -716,9 +703,7 @@ const App = {
                     streamViewport.scrollTop = streamViewport.scrollHeight; 
                 } 
                 input.value = ''; 
-            } catch(err) { 
-                console.error(err); 
-            } 
+            } catch(err) { console.error(err); } 
         }, 
         appendIncomingBubbleDOM(senderName, messageText) { 
             const streamViewport = document.getElementById('popup-msg-stream-viewport'); 
@@ -758,12 +743,25 @@ const App = {
             if(!container) return; 
             const myEmail = localStorage.getItem('ns_user_email') || ''; 
             try { 
-                const { data: myFriends } = await supabaseClient.from('friends').select('friend_email, status').eq('user_email', myEmail); 
+                const { data: incomingReq } = await supabaseClient.from('friends').select('id, user_email, status').eq('friend_email', myEmail);
+                const { data: outgoingReq } = await supabaseClient.from('friends').select('id, friend_email, status').eq('user_email', myEmail); 
                 
-                const friendMap = {};
-                if(myFriends) {
-                    myFriends.forEach(f => {
-                        friendMap[f.friend_email.toLowerCase()] = f.status;
+                const relationMap = {}; 
+                const dbIdMap = {};
+                
+                if(outgoingReq) { 
+                    outgoingReq.forEach(f => { 
+                        relationMap[f.friend_email.toLowerCase()] = f.status; 
+                        dbIdMap[f.friend_email.toLowerCase()] = f.id;
+                    }); 
+                } 
+                if(incomingReq) {
+                    incomingReq.forEach(f => {
+                        // Jika ada kiriman masuk dan statusnya pending, beri tahu antarmuka
+                        if(!relationMap[f.user_email.toLowerCase()] || relationMap[f.user_email.toLowerCase()] === 'pending') {
+                            relationMap[f.user_email.toLowerCase()] = f.status === 'pending' ? 'incoming_pending' : f.status;
+                            dbIdMap[f.user_email.toLowerCase()] = f.id;
+                        }
                     });
                 }
                 
@@ -782,31 +780,36 @@ const App = {
                 } 
                 
                 container.innerHTML = uniqueUsers.map(u => { 
-                    const statusPertemanan = friendMap[u.email.toLowerCase()];
-                    let buttonHTML = '';
+                    const statusPertemanan = relationMap[u.email.toLowerCase()]; 
+                    const targetDbId = dbIdMap[u.email.toLowerCase()];
+                    let buttonHTML = ''; 
                     
-                    if (statusPertemanan === 'approved') {
-                        buttonHTML = `<button class="btn btn-secondary" style="padding:6px 14px; font-size:0.8rem;" onclick="App.Features.toggleFriendAction('${u.email}', 'approved')">Hapus Teman</button>`;
-                    } else if (statusPertemanan === 'pending') {
-                        buttonHTML = `<button class="btn btn-secondary" style="padding:6px 14px; font-size:0.8rem;" disabled>Pending</button>`;
-                    } else {
-                        buttonHTML = `<button class="btn btn-primary" style="padding:6px 14px; font-size:0.8rem;" onclick="App.Features.toggleFriendAction('${u.email}', 'none')">Tambah</button>`;
-                    }
+                    if (statusPertemanan === 'approved') { 
+                        buttonHTML = `<button class="btn btn-secondary" style="padding:6px 14px; font-size:0.8rem;" onclick="App.Features.toggleFriendAction('${u.email}', 'approved', ${targetDbId})">Hapus Teman</button>`; 
+                    } else if (statusPertemanan === 'pending') { 
+                        buttonHTML = `<button class="btn btn-secondary" style="padding:6px 14px; font-size:0.8rem;" disabled>Menunggu Persetujuan</button>`; 
+                    } else if (statusPertemanan === 'incoming_pending') {
+                        buttonHTML = `
+                            <div style="display:flex; gap:4px;">
+                                <button class="btn btn-primary" style="padding:6px 10px; font-size:0.8rem;" onclick="App.Features.acceptFriendRequestAction(${targetDbId}, ${targetDbId}, '${u.email}')">Setujui</button>
+                                <button class="btn btn-secondary" style="padding:6px 10px; font-size:0.8rem; color:var(--danger);" onclick="App.Features.rejectFriendRequestAction(${targetDbId}, ${targetDbId})">Tolak</button>
+                            </div>`;
+                    } else { 
+                        buttonHTML = `<button class="btn btn-primary" style="padding:6px 14px; font-size:0.8rem;" onclick="App.Features.toggleFriendAction('${u.email}', 'none', null)">Tambah</button>`; 
+                    } 
                     
                     return `<div class="user-follow-card"><img src="${u.avatar}" class="user-avatar" style="width:44px; height:44px; border:none;"><div class="user-follow-info"><h4 onclick="App.Features.redirectToTargetFriendProfile('${u.name}')">${u.name}</h4><p>${u.email}</p></div>${buttonHTML}</div>`; 
                 }).join(''); 
             } catch(err) { console.error(err); } 
         }, 
-        async toggleFriendAction(friendEmail, currentStatus) { 
+        async toggleFriendAction(friendEmail, currentStatus, targetDbId) { 
             const myEmail = localStorage.getItem('ns_user_email') || ''; 
             if(!myEmail) return; 
             try { 
                 if (currentStatus === 'approved') { 
-                    // Batalkan hubungan dari dua arah
                     await supabaseClient.from('friends').delete().eq('user_email', myEmail).eq('friend_email', friendEmail); 
                     await supabaseClient.from('friends').delete().eq('user_email', friendEmail).eq('friend_email', myEmail); 
                 } else { 
-                    // Ajakan pertemanan baru diset menjadi 'pending' agar dikonfirmasi oleh penerima
                     await supabaseClient.from('friends').insert([{ user_email: myEmail, friend_email: friendEmail, status: 'pending' }]); 
                 } 
                 this.renderExploreUsers(); 
@@ -918,7 +921,6 @@ const App = {
                 } 
                 await supabaseClient.from('posts').update(updatePayload).eq('id', id); 
                 
-                // DAPATKAN PEMILIK POSTINGAN UNTUK MEMASTIKAN HANYA PEMILIK YANG MENDAPATKAN NOTIFIKASI
                 const { data: targetPost } = await supabaseClient.from('posts').select('author').eq('id', id).single();
                 if(targetPost && targetPost.author !== myCurrentName) {
                     liveNotifications.unshift({ id: Date.now(), icon: 'thumb_up', user: myCurrentName, type: 'like', desc: `Menyukai postingan ID #${id} Anda di Newsfeed.`, isUnread: true }); 
@@ -960,7 +962,6 @@ const App = {
             this.renderPosts(); 
         }, 
         showNotifications() { 
-            // SAAT DIKLIK, HILANGKAN BADGE MERAH
             liveHeaderNotificationCount = 0; 
             App.UI.refreshHeaderNotificationBadgeDOM(); 
             
@@ -994,7 +995,6 @@ const App = {
                 if(item.type === 'friend_request') {
                     tagLabel = 'PERTEMANAN';
                     tagColorClass = 'meta-tag-friend';
-                    // Tambahkan tombol konfirmasi / approve jika statusnya masih berupa friend_request aktif
                     actionsHTML = `
                         <div style="display:flex; gap:8px; margin-top:10px;">
                             <button class="btn btn-primary" style="padding:4px 12px; font-size:0.75rem; border-radius:6px;" onclick="App.Features.acceptFriendRequestAction(${item.id}, ${item.friendRequestId}, '${item.senderEmail}')">Setujui</button>
