@@ -128,7 +128,7 @@
         .bottom-nav { display: none; }
         .glass-card { background: var(--bg-glass-solid); border: 1px solid var(--border-color); border-radius: var(--radius-xl); padding: 24px; box-shadow: var(--shadow-soft); transition: var(--trans-smooth); position: relative; margin-bottom: 24px;}
         
-        .btn { padding: 12px 24px; border-radius: var(--radius-round); font-weight: 700; font-size: 0.95rem; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 8px; transition: var(--trans-smooth); position: relative; overflow: hidden; border: none; }
+        .btn { padding: 12px 24px; border-radius: var(--radius-round); font-weight: 700; font-size: 0.95rem; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 8px; transition: var(--trans-smooth); border: none; }
         .btn-primary { background: var(--primary); color: white; box-shadow: var(--shadow-float); }
         .btn-primary:hover { background: var(--primary-hover); transform: translateY(-2px); }
         .btn-secondary { background: var(--primary-state); color: var(--primary); }
@@ -259,7 +259,6 @@
             align-items: center;
         }
 
-        /* Styles tambahan untuk tombol suka aktif dan balasan */
         .comment-like-btn.active {
             color: var(--primary) !important;
         }
@@ -383,42 +382,53 @@
            7. KHUSUS MOBILE (HP) RESPONSIVE DESIGN - OPTIMIZED
            ========================================================================== */
         @media (max-width: 768px) {
+            /* Layout Adjustments */
             #app-layout { grid-template-areas: "header" "content"; grid-template-columns: 1fr; grid-template-rows: 60px 1fr; }
             .app-sidebar { display: flex; transform: translateX(-100%); width: 280px; z-index: 2005; position: fixed; top: 0; left: 0; bottom: 0; }
             #app-layout.sidebar-mobile-open .app-sidebar { transform: translateX(0); }
             
+            /* Header Fixes */
             .app-header { padding: 0 16px; height: 60px; }
             .search-box { width: 100%; max-width: 140px; }
             .search-box:hover, .search-box:focus-within { width: 180px; }
-            .search-box input { padding: 8px 12px 8px 36px; font-size: 16px; height: 38px; }
+            .search-box input { padding: 8px 12px 8px 36px; font-size: 16px; height: 38px; } /* font-size 16px prevents iOS zoom */
             
+            /* Ruang bernafas ekstra untuk area bawah (Bottom Nav & Safe Area) */
             .app-content { padding: 12px; padding-bottom: calc(var(--bottom-nav-height) + env(safe-area-inset-bottom) + 20px); }
             
+            /* Bottom Navigation - Mendukung Safe Area iOS */
             .bottom-nav { display: flex !important; position: fixed; bottom: 0; left: 0; right: 0; height: calc(var(--bottom-nav-height) + env(safe-area-inset-bottom)); padding-bottom: env(safe-area-inset-bottom); background: var(--bg-glass); backdrop-filter: blur(10px); border-top: 1px solid var(--border-color); z-index: 1500; justify-content: space-around; align-items: center; box-shadow: 0 -4px 20px rgba(0,0,0,0.03); }
             .bn-item { display: flex; flex-direction: column; align-items: center; gap: 4px; color: var(--text-muted); flex: 1; cursor: pointer; padding-top: 8px; }
             .bn-item.active { color: var(--primary); font-weight: 700; }
             
+            /* Mengubah Modal Biasa menjadi Bottom Sheet (Laci dari bawah) */
             .modal-overlay { align-items: flex-end; }
             .modal-content { width: 100%; max-width: 100%; border-radius: 24px 24px 0 0; transform: translateY(100%); padding-bottom: calc(env(safe-area-inset-bottom) + 24px); max-height: 85vh; margin: 0; }
             .modal-overlay.active .modal-content { transform: translateY(0); }
             
+            /* Memaksimalkan Composer Layar Penuh di HP */
             .pic-composer-card { min-height: 80vh; border-radius: 0; }
             .modal-overlay.active .modal-content:has(.pic-composer-card) { max-height: 90vh; border-radius: 24px 24px 0 0; }
             
+            /* Profile Detail Adjustments */
             .profile-stats { gap: 12px; justify-content: space-around; width: 100%; }
             .profile-avatar-large { width: 100px; height: 100px; }
             
+            /* Penyesuaian Feed Container dan Post Card */
             .feed-container { margin-left: 0; margin-right: 0; }
             .post-card { padding: 16px 12px; border-radius: var(--radius-lg); margin-bottom: 16px; border: 1px solid rgba(0,0,0,0.06); box-shadow: 0 4px 12px rgba(0,0,0,0.02); }
             
+            /* Action Bar Postingan di-fit agar rapi */
             .post-actions-bar { gap: 4px; justify-content: space-between; margin-top: 12px; }
             .post-action-item { font-size: 0.75rem; gap: 4px; padding: 8px 4px; }
             .post-action-item .material-symbols-outlined { font-size: 18px; }
             
+            /* Floating Chat di HP menjadi Layar Penuh */
             .floating-chat-widget { width: 100vw; height: 100vh; right: 0; bottom: 0; border-radius: 0; transform: translateX(100%); z-index: 4000; }
             .floating-chat-widget.active { transform: translateX(0); }
-            .popup-chat-header { padding-top: calc(env(safe-area-inset-top) + 14px); }
+            .popup-chat-header { padding-top: calc(env(safe-area-inset-top) + 14px); } /* iPhone Notch support */
             
+            /* Tata Letak Tambahan */
             .pic-composer-dock-grid { grid-template-columns: repeat(2, 1fr); }
             .share-grid-sheet { grid-template-columns: repeat(3, 1fr); }
             .minimal-composer-bar { padding: 12px; border-radius: var(--radius-md); margin-bottom: 16px; }
@@ -591,7 +601,7 @@
         let activeComposerLocation = "";
         
         let activeBottomSheetPostId = null;
-        let activeReplyTargetCommentId = null; // Menyimpan ID komentar yang sedang dibalas
+        let activeReplyTargetCommentId = null;
 
         const App = {
             init() {
@@ -1478,7 +1488,7 @@
 
                 async openCommentsBottomSheet(postId, postAuthor) {
                     activeBottomSheetPostId = postId;
-                    activeReplyTargetCommentId = null; // Reset target balasan tiap kali membuka sheet baru
+                    activeReplyTargetCommentId = null; 
                     
                     const sheet = document.getElementById('comments-overlay-bottom-sheet');
                     const streamViewport = document.getElementById('comments-sheet-stream-injector');
@@ -1491,7 +1501,6 @@
                     await App.Features.reloadCommentsBottomSheetStreamOnly();
                 },
 
-                /* Render atau kembalikan tampilan input bar di bagian bawah lembar sheet */
                 renderBottomSheetInputBar() {
                     const dockForm = document.getElementById('comments-sheet-input-dock-form');
                     if (!dockForm) return;
@@ -1503,7 +1512,7 @@
                     dockForm.innerHTML = `
                         <input type="text" class="form-input" placeholder="${placeholderText}" id="sheet-comment-input-field" style="border-radius:20px; padding:10px 14px; margin-bottom:0; font-size:0.9rem; background:var(--bg-body);">
                         ${activeReplyTargetCommentId ? `<button class="icon-btn" style="color:var(--danger);" onclick="App.Features.cancelReplyMode()" title="Batal Balas"><span class="material-symbols-outlined">close</span></button>` : ''}
-                        <button class="icon-btn" style="background:var(--primary); color:white; width:36px; height:34px; flex-shrink:0;" onclick="App.Features.submitBottomSheetCommentAction()">
+                        <button class="icon-btn" style="background:var(--primary); color:white; width:34px; height:34px; flex-shrink:0;" onclick="App.Features.submitBottomSheetCommentAction()">
                             <span class="material-symbols-outlined" style="font-size:16px;">send</span>
                         </button>
                     `;
@@ -1522,7 +1531,7 @@
                     App.Features.renderBottomSheetInputBar();
                 },
 
-                /* FITUR SUKA & BALAS KOMEN: Memuat struktur data baru yang dinamis untuk di-render di dalam list */
+                /* PERBAIKAN: SEKARANG MENGGUNAKAN WAKTU RELATIF REAL-TIME (App.UI.calculateRelativeTimeAgo) PADA KONTEN KOMENTAR & BALASAN */
                 async reloadCommentsBottomSheetStreamOnly() {
                     if (!activeBottomSheetPostId) return;
                     const streamViewport = document.getElementById('comments-sheet-stream-injector');
@@ -1554,28 +1563,39 @@
                             const userClean = c.user || 'User';
                             const userAvatarUrl = `https://i.pravatar.cc/150?img=${Math.abs(userClean.hashCode()) % 70 || 12}`;
                             
-                            // Normalisasi parameter Suka (Likes) & Balasan (Replies) internal data JSON
                             const commentId = c.id || `c_${c.date || Date.now()}_${Math.random().toString(36).substring(5)}`;
-                            if (!c.id) c.id = commentId; // Auto patch jika data lama belum punya ID kustom
+                            if (!c.id) c.id = commentId; 
                             
                             const likesArray = c.likes || [];
                             const repliesArray = c.replies || [];
                             const isLikedByMe = likesArray.includes(myName) ? 'active' : '';
                             const likeCounterText = likesArray.length > 0 ? `• <span>👍 ${likesArray.length}</span>` : '';
                             
-                            // Render list balasan (sub-komentar) jika ada di dalam data objek
+                            // Ambil waktu realtime komentar utama (jika c.date tidak ada, pakai waktu sekarang sebagai fallback aman)
+                            const commentTimeText = App.UI.calculateRelativeTimeAgo(c.date || Date.now());
+                            
                             let repliesHTML = '';
                             if (repliesArray.length > 0) {
                                 repliesHTML = `<div style="margin-top: 10px; padding-left: 12px; border-left: 2px solid var(--border-color); display: flex; flex-direction: column; gap: 10px;">`;
                                 repliesHTML += repliesArray.map(r => {
                                     const subUser = r.user || 'User';
                                     const subAvatar = `https://i.pravatar.cc/150?img=${Math.abs(subUser.hashCode()) % 70 || 14}`;
+                                    
+                                    // Ambil waktu realtime balasan komentar
+                                    const replyTimeText = App.UI.calculateRelativeTimeAgo(r.date || Date.now());
+
                                     return `
                                         <div style="display:flex; gap:8px; align-items:flex-start;">
                                             <img src="${subAvatar}" style="width:26px; height:26px; border-radius:50%; object-fit:cover;">
-                                            <div style="background:var(--bg-body); padding:8px 12px; border-radius:14px; max-width:90%;">
-                                                <strong style="font-size:0.78rem; color:var(--text-main); display:block;">${subUser}</strong>
-                                                <span style="font-size:0.82rem; color:var(--text-main);">${r.text}</span>
+                                            <div style="flex:1; display:flex; flex-direction:column; gap:2px;">
+                                                <div style="background:var(--bg-body); padding:8px 12px; border-radius:14px; max-width:90%;">
+                                                    <strong style="font-size:0.78rem; color:var(--text-main); display:block;">${subUser}</strong>
+                                                    <span style="font-size:0.82rem; color:var(--text-main);">${r.text}</span>
+                                                </div>
+                                                <div style="display:flex; gap:12px; font-size:0.7rem; color:var(--text-muted); font-weight:700; margin-left:6px; margin-top:1px;">
+                                                    <span>${replyTimeText}</span>
+                                                    <span style="cursor:pointer;">Suka</span>
+                                                </div>
                                             </div>
                                         </div>
                                     `;
@@ -1592,7 +1612,7 @@
                                             <span style="font-size:0.88rem; color:var(--text-main); white-space:pre-wrap; line-height:1.4;">${c.text}</span>
                                         </div>
                                         <div style="display:flex; gap:16px; font-size:0.75rem; color:var(--text-muted); font-weight:700; margin-left:8px; margin-top:2px; align-items:center;">
-                                            <span>Baru saja</span>
+                                            <span>${commentTimeText}</span>
                                             <span class="comment-like-btn ${isLikedByMe}" style="cursor:pointer;" onclick="App.Features.toggleCommentLikeAction('${commentId}')">Suka</span>
                                             <span style="cursor:pointer;" onclick="App.Features.setCommentReplyMode('${commentId}')">Balas</span>
                                             ${likeCounterText}
@@ -1603,10 +1623,10 @@
                             `;
                         }).join('');
                         
+                        streamViewport.scrollTop = streamViewport.scrollHeight;
                     } catch(err) {}
                 },
 
-                /* Logika pemicu klik aksi Suka Komentar */
                 async toggleCommentLikeAction(commentId) {
                     if (!activeBottomSheetPostId) return;
                     const myName = App.ProfileState.getCurrentName();
@@ -1616,18 +1636,16 @@
                         let postRoleData = { comments: [] };
                         if (data && data.role && data.role.startsWith('{')) postRoleData = JSON.parse(data.role);
                         
-                        // Cari objek id komentar target internal array JSON
                         postRoleData.comments = postRoleData.comments.map(c => {
-                            // Map patching jika ID belum ter-generate
                             const cId = c.id || `c_${c.date || Date.now()}`;
                             c.id = cId;
 
                             if (cId === commentId) {
                                 if (!c.likes) c.likes = [];
                                 if (c.likes.includes(myName)) {
-                                    c.likes = c.likes.filter(u => u !== myName); // Unlike
+                                    c.likes = c.likes.filter(u => u !== myName); 
                                 } else {
-                                    c.likes.push(myName); // Like
+                                    c.likes.push(myName); 
                                 }
                             }
                             return c;
@@ -1659,7 +1677,6 @@
                         if (!postRoleData.comments) postRoleData.comments = [];
 
                         if (activeReplyTargetCommentId) {
-                            // KONDISI A: INPUT ADALAH SUB-BALASAN KOMENTAR
                             postRoleData.comments = postRoleData.comments.map(c => {
                                 const cId = c.id || `c_${c.date || Date.now()}`;
                                 c.id = cId;
@@ -1675,9 +1692,8 @@
                                 }
                                 return c;
                             });
-                            activeReplyTargetCommentId = null; // Keluar dari mode balas
+                            activeReplyTargetCommentId = null; 
                         } else {
-                            // KONDISI B: INPUT ADALAH KOMENTAR UTAMA BARU
                             postRoleData.comments.push({
                                 id: `c_${Date.now()}_${Math.random().toString(36).substring(5)}`,
                                 user: myCurrentName,
