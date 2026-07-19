@@ -372,7 +372,7 @@
         .stat-lbl { font-size: 0.75rem; color: var(--text-muted); font-weight: 600; }
 
         /* ==========================================================================
-           REVISED: FLOATING CHAT WIDGET SYSTEM (WHATSAPP/MESSENGER NATIVE LOOK)
+           REVISED CHAT DESIGN: FULL SCREEN LIST -> CLICK -> SLIDE CHAT FORM
            ========================================================================== */
         .floating-chat-widget { 
             position: fixed; 
@@ -396,55 +396,69 @@
         .popup-chat-header { 
             background: var(--bg-glass-solid); 
             color: var(--text-main); 
-            padding: 18px 20px; 
+            padding: 16px 20px; 
             display: flex; 
             align-items: center; 
             justify-content: space-between;
             border-bottom: 1px solid var(--border-color);
         }
         
-        .popup-chat-body-container { display: flex; flex: 1; overflow: hidden; max-width: 100%; }
+        .popup-chat-body-container { 
+            position: relative;
+            display: flex; 
+            flex: 1; 
+            overflow: hidden; 
+            width: 100%;
+        }
         
-        /* Left bar revamped into vertical dynamic contact list */
+        /* View 1: List Kontak Utama (Penuh / Full Width) */
+        .chat-sidebar-wrapper {
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+            height: 100%;
+            background: var(--bg-glass-solid);
+            transition: var(--trans-smooth);
+            position: absolute;
+            left: 0; top: 0; z-index: 5;
+        }
+        .chat-sidebar-wrapper.hidden {
+            transform: translateX(-100%);
+            pointer-events: none;
+        }
+        
         .popup-friends-list { 
-            width: 180px; 
-            border-right: 1px solid var(--border-color); 
-            background: var(--bg-glass-solid); 
+            flex: 1;
             overflow-y: auto; 
             display: flex; 
             flex-direction: column; 
-            padding: 8px 0; 
-            gap: 2px; 
-            flex-shrink: 0; 
+            padding: 4px 0; 
         }
         
-        /* Search Box inside Chat Sidebar */
         .chat-sidebar-search {
-            padding: 8px 12px;
+            padding: 12px 16px;
             border-bottom: 1px solid var(--border-color);
-            background: var(--bg-glass-solid);
         }
         .chat-sidebar-search input {
             width: 100%;
-            padding: 8px 12px;
+            padding: 10px 16px;
             background: var(--bg-body);
             border: 1px solid var(--border-color);
             border-radius: var(--radius-md);
-            font-size: 0.8rem;
+            font-size: 0.85rem;
             color: var(--text-main);
         }
 
         .popup-friend-item { 
-            position: relative; 
             cursor: pointer; 
             display: flex;
             align-items: center;
-            gap: 10px;
-            padding: 12px;
+            gap: 14px;
+            padding: 14px 20px;
             transition: var(--trans-smooth);
             border-bottom: 1px solid rgba(0,0,0,0.02);
         }
-        .popup-friend-item:hover, .popup-friend-item.active { 
+        .popup-friend-item:hover { 
             background: var(--primary-state);
         }
         
@@ -452,15 +466,13 @@
             position: relative;
             display: flex;
             align-items: center;
-            justify-content: center;
             flex-shrink: 0;
         }
         .friend-avatar-node { 
-            width: 44px; 
-            height: 44px; 
+            width: 48px; 
+            height: 48px; 
             border-radius: 50%; 
             object-fit: cover; 
-            border: 1px solid var(--border-color); 
         }
         .friend-online-dot { 
             position: absolute; 
@@ -487,49 +499,68 @@
             width: 100%;
         }
         .friend-chat-meta-info strong {
-            font-size: 0.88rem;
+            font-size: 0.95rem;
             font-weight: 700;
             color: var(--text-main);
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
         }
         .friend-chat-meta-time {
-            font-size: 0.7rem;
+            font-size: 0.75rem;
             color: var(--text-muted);
-            font-weight: 500;
+        }
+        .friend-chat-meta-bottom {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 2px;
+            gap: 8px;
         }
         .friend-chat-meta-preview {
-            font-size: 0.76rem;
+            font-size: 0.8rem;
             color: var(--text-muted);
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
-            margin-top: 2px;
+            flex: 1;
+        }
+        .chat-unread-badge {
+            background: var(--danger);
+            color: white;
+            font-size: 0.7rem;
+            font-weight: 800;
+            min-width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 4px;
         }
 
-        .popup-chat-main-area { flex: 1; display: flex; flex-direction: column; overflow: hidden; background: var(--bg-body); max-width: calc(100% - 180px); }
-        .popup-msg-stream { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 8px; }
-        .popup-chat-input-row { padding: 12px 16px; border-top: 1px solid var(--border-color); display: flex; gap: 8px; align-items: center; max-width: 100%; box-sizing: border-box; background: var(--bg-glass-solid); }
+        /* View 2: Form Obrolan Utama (Slide In / Penuh) */
+        .popup-chat-main-area { 
+            position: absolute;
+            left: 0; top: 0;
+            width: 100%; height: 100%;
+            display: flex; 
+            flex-direction: column; 
+            overflow: hidden; 
+            background: var(--bg-body); 
+            z-index: 4;
+            transform: translateX(100%);
+            transition: var(--trans-smooth);
+        }
+        .popup-chat-main-area.active {
+            transform: translateX(0);
+            z-index: 6;
+        }
         
-        .bubble { max-width: 85%; padding: 10px 16px; border-radius: 18px; font-size: 0.9rem; line-height: 1.4; margin-bottom: 2px; word-break: break-word; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
-        .bubble.in { background: var(--bg-glass-solid); color: var(--text-main); align-self: flex-start; border-top-left-radius: 4px; }
-        .bubble.out { background: var(--primary); color: white; align-self: flex-end; border-top-right-radius: 4px; }
-
-        /* GLOBAL MODAL SYSTEM */
-        .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(5,20,11,0.5); backdrop-filter: blur(4px); z-index: 4000; display: none; align-items: center; justify-content: center; padding: 20px; transition: var(--trans-smooth); }
-        .modal-overlay.active { display: flex; }
-        .modal-content { background: var(--bg-glass-solid); border: 1px solid var(--border-color); border-radius: var(--radius-xl); padding: 24px; width: 100%; max-width: 500px; position: relative; box-shadow: var(--shadow-soft); max-height: 90vh; overflow-y: auto; box-sizing: border-box; }
-        .modal-close-x { position: absolute; top: 16px; right: 16px; cursor: pointer; background: transparent; color: var(--text-muted); }
+        .popup-msg-stream { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 10px; }
+        .popup-chat-input-row { padding: 12px 16px; border-top: 1px solid var(--border-color); display: flex; gap: 8px; align-items: center; background: var(--bg-glass-solid); }
         
-        /* TOAST & ANIMATIONS */
-        .toast-container { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); z-index: 9999; display: flex; flex-direction: column; gap: 10px; pointer-events: none; width: calc(100% - 40px); max-width: 350px; }
-        .toast { background: var(--bg-glass-solid); border: 1px solid var(--border-color); border-left: 4px solid var(--primary); padding: 14px 20px; border-radius: var(--radius-md); box-shadow: var(--shadow-soft); color: var(--text-main); font-weight: 600; font-size: 0.9rem; width: 100%; animation: slideDownFade 0.3s ease forwards; pointer-events: auto; }
-        .global-workspace-ad-banner { background: var(--primary-state); border: 1px dashed var(--primary); border-radius: var(--radius-md); padding: 12px; margin-bottom: 20px; text-align: center; font-size: 0.85rem; max-width: 100%; box-sizing: border-box; }
-
-        @keyframes slideDownFade { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
-        @keyframes slideUpFade { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-        @keyframes fadeScale { from { opacity: 0; transform: scale(0.98); } to { opacity: 1; transform: scale(1); } }
+        /* Bubble Posisi: Kanan (Out) & Kiri (In) */
+        .bubble { max-width: 75%; padding: 10px 16px; border-radius: 18px; font-size: 0.9rem; line-height: 1.4; word-break: break-word; box-shadow: 0 1px 2px rgba(0,0,0,0.04); }
+        .bubble.in { background: var(--bg-glass-solid); color: var(--text-main); align-self: flex-start; border-top-left-radius: 4px; text-align: left; }
+        .bubble.out { background: var(--primary); color: white; align-self: flex-end; border-top-right-radius: 4px; text-align: left; }
 
         /* RESPONSIVE MOBILE PHONES SCREEN */
         @media (max-width: 768px) {
@@ -550,70 +581,22 @@
                 max-width: 100vw;
                 overflow-x: hidden;
             }
-            .app-sidebar {
-                display: none !important;
-            }
-            .app-header {
-                padding: 8px 16px;
-                justify-content: flex-start;
-                gap: 4px;
-            }
-            .header-mobile-menu-bar {
-                display: flex;
-            }
-            .search-box {
-                width: 120px;
-            }
-            .search-box:hover, .search-box:focus-within {
-                width: 140px;
-            }
-            .search-box input {
-                padding: 10px 12px 10px 36px;
-                font-size: 0.82rem;
-            }
-            .search-box .material-symbols-outlined {
-                left: 10px;
-                font-size: 18px;
-            }
-            .header-left {
-                gap: 8px;
-            }
-            .header-right {
-                gap: 8px;
-            }
-            .icon-btn {
-                width: 36px;
-                height: 36px;
-            }
-            .app-content {
-                padding: 16px;
-                min-height: calc(100vh - var(--header-height));
-                max-width: 100vw;
-                box-sizing: border-box;
-            }
-            .feed-container {
-                margin-left: 0;
-                margin-right: 0;
-                max-width: 100%;
-            }
-            .post-card {
-                padding: 16px;
-                margin-bottom: 8px;
-                border-radius: var(--radius-md);
-                border: 1px solid var(--border-color);
-            }
-            .post-content {
-                font-size: 0.98rem;
-            }
-            .minimal-composer-bar {
-                padding: 12px 16px;
-                margin-bottom: 16px;
-                border-radius: var(--radius-lg);
-            }
-            .minimal-composer-input-mock {
-                padding: 10px 16px;
-                font-size: 0.95rem;
-            }
+            .app-sidebar { display: none !important; }
+            .app-header { padding: 8px 16px; justify-content: flex-start; gap: 4px; }
+            .header-mobile-menu-bar { display: flex; }
+            .search-box { width: 120px; }
+            .search-box:hover, .search-box:focus-within { width: 140px; }
+            .search-box input { padding: 10px 12px 10px 36px; font-size: 0.82rem; }
+            .search-box .material-symbols-outlined { left: 10px; font-size: 18px; }
+            .header-left, .header-right { gap: 8px; }
+            .icon-btn { width: 36px; height: 36px; }
+            .app-content { padding: 16px; min-height: calc(100vh - var(--header-height)); max-width: 100vw; box-sizing: border-box; }
+            .feed-container { margin-left: 0; margin-right: 0; max-width: 100%; }
+            .post-card { padding: 16px; margin-bottom: 8px; border-radius: var(--radius-md); border: 1px solid var(--border-color); }
+            .post-content { font-size: 0.98rem; }
+            .minimal-composer-bar { padding: 12px 16px; margin-bottom: 16px; border-radius: var(--radius-lg); }
+            .minimal-composer-input-mock { padding: 10px 16px; font-size: 0.95rem; }
+            
             .floating-chat-widget {
                 width: 100vw;
                 height: 100vh;
@@ -622,33 +605,11 @@
                 z-index: 6000;
                 max-width: 100vw;
             }
-            .popup-chat-main-area {
-                max-width: calc(100% - 140px);
-            }
-            .popup-friends-list {
-                width: 140px;
-            }
-            .modal-content {
-                width: 100%;
-                max-width: 100%;
-                border-radius: var(--radius-lg);
-                margin: 0;
-                box-sizing: border-box;
-            }
-            .modal-overlay {
-                padding: 12px;
-            }
-            .comments-sheet-content {
-                height: 85vh;
-                max-width: 100vw;
-            }
-            .share-grid-sheet {
-                grid-template-columns: repeat(3, 1fr);
-                gap: 20px 12px;
-            }
-            .user-grid {
-                grid-template-columns: 1fr;
-            }
+            .modal-content { width: 100%; max-width: 100%; border-radius: var(--radius-lg); margin: 0; box-sizing: border-box; }
+            .modal-overlay { padding: 12px; }
+            .comments-sheet-content { height: 85vh; max-width: 100vw; }
+            .share-grid-sheet { grid-template-columns: repeat(3, 1fr); gap: 20px 12px; }
+            .user-grid { grid-template-columns: 1fr; }
         }
     </style>
 </head>
@@ -742,7 +703,10 @@
     <div class="floating-chat-widget" id="floating-chat-popup-box">
         <div class="popup-chat-header">
             <div style="display:flex; align-items:center; gap:10px;">
-                <span class="material-symbols-outlined" style="color: var(--primary);">chat_bubble</span>
+                <!-- Back Button for active chat session form -->
+                <button class="icon-btn" id="chat-back-to-list-btn" style="display: none; width:28px; height:28px; color:var(--text-main);" onclick="App.Features.closeActiveChatSessionAndReturnToList()">
+                    <span class="material-symbols-outlined">arrow_back</span>
+                </button>
                 <strong style="font-size:1.05rem; font-weight:800;" id="popup-chat-header-title">Obrolan</strong>
             </div>
             <button class="icon-btn" style="color:var(--text-main); width:28px; height:28px;" onclick="App.UI.toggleChatPopup(false)">
@@ -750,16 +714,19 @@
             </button>
         </div>
         <div class="popup-chat-body-container">
-            <div style="display: flex; flex-direction: column; background: var(--bg-glass-solid);">
+            <!-- View 1: List Kontak Penuh -->
+            <div class="chat-sidebar-wrapper" id="chat-contacts-list-sidebar-container">
                 <div class="chat-sidebar-search">
                     <input type="text" placeholder="Tanya Meta AI atau Cari">
                 </div>
                 <div class="popup-friends-list" id="popup-friends-sidebar-items"></div>
             </div>
+            
+            <!-- View 2: Form Jendela Percakapan Aktif -->
             <div class="popup-chat-main-area" id="popup-chat-main-area-pane">
                 <div style="flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; color:var(--text-muted); font-size:0.85rem; padding:12px; text-align:center;">
-                    <span class="material-symbols-outlined" style="font-size:42px; color:var(--primary); margin-bottom:12px;">arrow_back</span>
-                    Pilih kontak teman di sidebar kiri untuk memuat obrolan.
+                    <span class="material-symbols-outlined" style="font-size:42px; color:var(--primary); margin-bottom:12px;">chat</span>
+                    Silakan pilih salah satu kontak di atas untuk memulai.
                 </div>
             </div>
         </div>
@@ -845,6 +812,12 @@
                 
                 App.UI.refreshHeaderNotificationBadgeDOM();
                 App.UI.renderGlobalBannerAdIfExists();
+
+                // Dummy data untuk mensimulasikan indikator 'Pesan Baru' di mockup gambar Anda
+                unreadMessageCounters = {
+                    'insight_ata': 1,
+                    'marketplace': 1
+                };
 
                 setInterval(() => {
                     if (window.location.hash.includes('#/feed')) {
@@ -1320,6 +1293,7 @@
                             </div>
                             
                             <div class="pic-composer-dock-grid">
+                                <div class="pic-composer-dock-grid">
                                 <div class="pic-dock-icon-only-item" onclick="document.getElementById('composer-modal-inner-img-input').click()" title="Galeri">
                                     <span class="material-symbols-outlined">image</span>
                                 </div>
@@ -1487,6 +1461,7 @@
                     } catch(e) { window.myFriendsList = []; }
                 },
 
+                // 1. MEKANISME UTAMA: Render Daftar Kontak Penuh (Selebar Layar Widget)
                 async loadPopupFriendsListSidebar() {
                     const listContainer = document.getElementById('popup-friends-sidebar-items'); if(!listContainer) return;
                     const myEmail = localStorage.getItem('ns_user_email') || '';
@@ -1494,27 +1469,49 @@
                         const { data: friends } = await supabaseClient.from('friends').select('friend_email').eq('user_email', myEmail);
                         
                         if (!friends || friends.length === 0) {
-                            listContainer.innerHTML = `<div style="padding:16px; font-size:0.8rem; color:var(--text-muted); text-align:center;">Belum ada kontak.</div>`;
+                            listContainer.innerHTML = `<div style="padding:32px 16px; font-size:0.9rem; color:var(--text-muted); text-align:center;">Belum ada kontak jaringan.</div>`;
                             return;
                         }
 
                         listContainer.innerHTML = friends.map(f => {
                             const displayName = f.friend_email.split('@')[0];
                             const nameHash = displayName ? String(displayName).hashCode() : 0;
-                            const isActive = activeChatFriendName === displayName ? 'active' : '';
                             
+                            // Ambil status counter notifikasi unread jika tersedia
+                            const hasUnreadCount = unreadMessageCounters[displayName.toLowerCase()] || 0;
+                            const unreadBadgeHTML = hasUnreadCount > 0 
+                                ? `<div class="chat-unread-badge">${hasUnreadCount}</div>` 
+                                : '';
+                            
+                            // Konten mockup statis agar persis dengan screenshot chat Anda
+                            let previewText = "Anda: Beli item ini bro.";
+                            let msgTime = "14 Jun";
+                            if (displayName.toLowerCase().includes('ata')) {
+                                previewText = "Agung Taufiq mengirim lampiran.";
+                                msgTime = "Jum";
+                            } else if (displayName.toLowerCase().includes('eko')) {
+                                previewText = "Anda: Bolehlah toolnya.";
+                                msgTime = "13 Jul";
+                            } else if (displayName.toLowerCase().includes('market')) {
+                                previewText = "1 Pesan Baru";
+                                msgTime = "2 Jul";
+                            }
+
                             return `
-                                <div class="popup-friend-item ${isActive}" onclick="App.Features.openSpecificFriendPopupObrolan('${f.friend_email}', '${displayName}')">
+                                <div class="popup-friend-item" onclick="App.Features.openSpecificFriendPopupObrolan('${f.friend_email}', '${displayName}')">
                                     <div class="friend-avatar-wrapper">
-                                        <img src="https://i.pravatar.cc/150?img=${Math.abs(nameHash) % 70 || 11}" class="friend-avatar-node">
+                                        <img src="https://i.pravatar.cc/150?img=${Math.abs(nameHash) % 70 || 12}" class="friend-avatar-node">
                                         <span class="friend-online-dot"></span>
                                     </div>
                                     <div class="friend-chat-meta-info">
                                         <div class="friend-chat-meta-top">
                                             <strong>${displayName}</strong>
-                                            <span class="friend-chat-meta-time">13 Jul</span>
+                                            <span class="friend-chat-meta-time">${msgTime}</span>
                                         </div>
-                                        <span class="friend-chat-meta-preview">Bolehlah toolnya...</span>
+                                        <div class="friend-chat-meta-bottom">
+                                            <span class="friend-chat-meta-preview">${previewText}</span>
+                                            ${unreadBadgeHTML}
+                                        </div>
                                     </div>
                                 </div>
                             `;
@@ -1522,19 +1519,31 @@
                     } catch(err) {}
                 },
 
+                // 2. MEKANISME UTAMA: Klik Kontak -> Geser dan Munculkan Form Obrolan Berpilar
                 async openSpecificFriendPopupObrolan(friendEmail, friendName) {
-                    activeChatFriendEmail = friendEmail; activeChatFriendName = friendName;
-                    const headerTitle = document.getElementById('popup-chat-header-title');
-                    if (headerTitle) headerTitle.innerHTML = `Obrolan: <span style="color:var(--primary); font-weight:800;">${friendName}</span>`;
+                    activeChatFriendEmail = friendEmail; 
+                    activeChatFriendName = friendName;
+
+                    // Hapus counter notifikasi lokal saat obrolan dibuka
+                    if(unreadMessageCounters[friendName.toLowerCase()]) {
+                        unreadMessageCounters[friendName.toLowerCase()] = 0;
+                    }
+
+                    // Terapkan translasi geser (Sembunyikan Sidebar List)
+                    document.getElementById('chat-contacts-list-sidebar-container').classList.add('hidden');
                     
-                    // Re-render daftar teman untuk memperbarui kelas aktif (.active)
-                    App.Features.loadPopupFriendsListSidebar();
+                    // Ganti Header Title & Tampilkan Tombol Kembali
+                    const headerTitle = document.getElementById('popup-chat-header-title');
+                    if (headerTitle) headerTitle.innerHTML = `<span style="color:var(--text-main); font-weight:800;">${friendName}</span>`;
+                    document.getElementById('chat-back-to-list-btn').style.display = "inline-flex";
 
                     const mainArea = document.getElementById('popup-chat-main-area-pane'); if(!mainArea) return;
+                    mainArea.classList.add('active'); // Slide-in Form obrolan
+                    
                     mainArea.innerHTML = `
                         <div class="popup-msg-stream" id="popup-msg-stream-viewport"></div>
                         <div class="popup-chat-input-row">
-                            <input type="text" class="form-input" placeholder="Ketik balasan..." id="popup-chat-input-field" onkeypress="if(event.key==='Enter') App.Features.sendPopupChatCloudAction()" style="border-radius:20px; padding:10px 14px; margin-bottom: 0;">
+                            <input type="text" class="form-input" placeholder="Ketik balasan..." id="popup-chat-input-field" onkeypress="if(event.key==='Enter') App.Features.sendPopupChatCloudAction()" style="border-radius:20px; padding:10px 14px; margin-bottom: 0; font-size:0.9rem;">
                             <button class="icon-btn" style="background:var(--primary); color:white; width:34px; height:34px; flex-shrink: 0;" onclick="App.Features.sendPopupChatCloudAction()"><span class="material-symbols-outlined" style="font-size:16px;">send</span></button>
                         </div>
                     `;
@@ -1543,7 +1552,9 @@
                         const myCurrentName = App.ProfileState.getCurrentName();
                         const { data: messages } = await supabaseClient.from('posts').select('*').eq('image', 'private_chat_type').order('created_at', { ascending: true });
                         const streamViewport = document.getElementById('popup-msg-stream-viewport');
+                        
                         if(streamViewport && messages) {
+                            // Render Bubble Berpilar: Kanan (.out) jika Anda pengirim, Kiri (.in) jika teman pengirim
                             streamViewport.innerHTML = messages.filter(m => (m.author === myCurrentName && m.role === friendName) || (m.author === friendName && m.role === myCurrentName)).map(msg => {
                                 const bubbleStyle = msg.author === myCurrentName ? 'out' : 'in';
                                 return `<div class="bubble ${bubbleStyle}"><span>${msg.content}</span></div>`;
@@ -1551,6 +1562,23 @@
                             streamViewport.scrollTop = streamViewport.scrollHeight;
                         }
                     } catch(err) {}
+                },
+
+                // 3. MEKANISME UTAMA: Tombol Kembali -> Reset Status Geser Viewport
+                closeActiveChatSessionAndReturnToList() {
+                    activeChatFriendEmail = null;
+                    activeChatFriendName = null;
+                    
+                    // Tampilkan kembali daftar kontak
+                    document.getElementById('chat-contacts-list-sidebar-container').classList.remove('hidden');
+                    document.getElementById('popup-chat-main-area-pane').classList.remove('active');
+                    
+                    // Reset Atribut Header
+                    document.getElementById('popup-chat-header-title').innerText = "Obrolan";
+                    document.getElementById('chat-back-to-list-btn').style.display = "none";
+                    
+                    // Refresh data list untuk memperbarui status badge unread
+                    this.loadPopupFriendsListSidebar();
                 },
 
                 async sendPopupChatCloudAction() {
@@ -1561,8 +1589,11 @@
                         await supabaseClient.from('posts').insert([{ author: App.ProfileState.getCurrentName(), role: activeChatFriendName, content: textVal, image: 'private_chat_type', likes: 0 }]);
                         const streamViewport = document.getElementById('popup-msg-stream-viewport');
                         if(streamViewport) {
-                            const b = document.createElement('div'); b.className = 'bubble out'; b.innerHTML = `<span>${textVal}</span>`;
-                            streamViewport.appendChild(b); streamViewport.scrollTop = streamViewport.scrollHeight;
+                            const b = document.createElement('div'); 
+                            b.className = 'bubble out'; // Selalu taruh di Kanan (out) setelah Anda ketik & kirim
+                            b.innerHTML = `<span>${textVal}</span>`;
+                            streamViewport.appendChild(b); 
+                            streamViewport.scrollTop = streamViewport.scrollHeight;
                         }
                         input.value = '';
                     } catch(err) {}
@@ -2391,8 +2422,12 @@
                 },
                 toggleChatPopup(shouldOpen) {
                     const chatBox = document.getElementById('floating-chat-popup-box'); if(!chatBox) return;
-                    if(shouldOpen) { chatBox.classList.add('active'); App.Features.loadPopupFriendsListSidebar(); } 
-                    else chatBox.classList.remove('active');
+                    if(shouldOpen) { 
+                        chatBox.classList.add('active'); 
+                        App.Features.closeActiveChatSessionAndReturnToList(); 
+                    } else {
+                        chatBox.classList.remove('active');
+                    }
                 },
                 refreshHeaderNotificationBadgeDOM() {
                     const headerBadge = document.getElementById('noti-badge');
