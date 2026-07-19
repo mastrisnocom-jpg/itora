@@ -1490,10 +1490,12 @@
                     App.Modal.close(); 
                     if(!confirm("Anda yakin ingin menghapus postingan ini secara permanen dari server?")) return;
                     try {
+                        // Optimasi utama: Langsung hapus via kueri dan render ulang list lokal secara instan
                         const { error } = await supabaseClient.from('posts').delete().eq('id', Number(postId));
                         if (error) throw error;
+                        
                         App.Toast.show("Postingan berhasil dihapus dari server", "success"); 
-                        this.renderPosts();
+                        App.Features.renderPosts(); // Hapus instan dari layar tanpa nunggu realtime reload
                     } catch(e) {
                         App.Toast.show("Gagal menghapus. Pastikan Anda pemilik postingan atau RLS sudah diizinkan.", "danger");
                     }
@@ -1550,7 +1552,7 @@
                             const mediaHTML = p.media_url ? (p.media_url.includes('youtube.com') ? `<iframe src="https://www.youtube.com/embed/${p.media_url.split('v=')[1]}" allowfullscreen></iframe>` : `<audio controls><source src="${p.media_url}"></audio>`) : (p.image ? `<img src="${p.image}" class="post-attached-image">` : '');
 
                             return `
-                                <div class="post-card">
+                                <div class="post-card" id="post-element-node-${p.id}">
                                     <div class="post-header">
                                         <div class="post-author">
                                             ${App.UI.generateAvatarHTML(p.author, p.avatar || 'https://i.pravatar.cc/150?img=12', false, 0, '46px', true)}
