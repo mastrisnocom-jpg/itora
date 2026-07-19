@@ -94,7 +94,7 @@
         .search-box .material-symbols-outlined { position: absolute; left: 16px; color: var(--text-muted); pointer-events: none; font-size: 22px; z-index: 2; }
         .badge { position: absolute; top: 4px; right: 4px; background: var(--danger); color: white; min-width: 18px; height: 18px; padding: 0 5px; border-radius: 9px; font-size: 0.7rem; font-weight: 800; display: none; align-items: center; justify-content: center; box-shadow: 0 2px 6px rgba(238,93,80,0.4); }
 
-        /* SIDEBAR & NAV - HOVER HIJAU DIHILANGKAN */
+        /* SIDEBAR & NAV */
         .menu-item-wrapper { position: relative; width: 100%; }
         .user-avatar { width: 44px; height: 44px; border-radius: var(--radius-round); object-fit: cover; cursor: pointer; border: 2px solid var(--border-color); }
         .icon-btn { width: 44px; height: 44px; border-radius: var(--radius-round); display: flex; align-items: center; justify-content: center; background: transparent; color: var(--text-muted); cursor: pointer; position: relative; transition: var(--trans-smooth); border: none; flex-shrink: 0; }
@@ -164,7 +164,7 @@
         .post-action-item.loved .material-symbols-outlined { font-variation-settings: 'FILL' 1; color: var(--danger) !important; }
 
         .post-attached-image { max-width: 100%; border-radius: var(--radius-md); margin: 12px auto; display: block; max-height: 340px; object-fit: cover; cursor: zoom-in; box-shadow: var(--shadow-soft); }
-        .post-card iframe { display: block; margin: 12px auto; width: 100%; max-width: 100%; height: 260px; border-radius: 12px; border: none; box-shadow: var(--shadow-soft); }
+        .post-card iframe { display: block; margin: 12px auto; width: 100%; max-width: 100%; height: 240px; border-radius: 12px; border: none; box-shadow: var(--shadow-soft); }
         .post-card audio { display: block; margin: 12px auto; width: 100%; max-width: 100%; background: #f1f5f9; border-radius: var(--radius-round); padding: 8px; }
 
         /* OVERLAY BOTTOM SHEET KOMENTAR */
@@ -339,7 +339,7 @@
         }
         .minimal-composer-gallery-icon:hover { color: var(--primary); }
 
-        /* FLOATING CHAT WIDGET SYSTEM */
+        /* FLOATING CHAT WIDGET SYSTEM - PERBAIKAN STRUKTUR TINGGI DAN RESPONSIVITAS KEYBOARD */
         .floating-chat-widget { 
             position: fixed; 
             top: var(--header-height);
@@ -367,6 +367,7 @@
             align-items: center; 
             justify-content: space-between;
             border-bottom: 1px solid var(--border-color);
+            flex-shrink: 0;
         }
         
         .popup-chat-body-container { 
@@ -518,8 +519,8 @@
             z-index: 6;
         }
         
-        .popup-msg-stream { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 10px; }
-        .popup-chat-input-row { padding: 12px 16px; border-top: 1px solid var(--border-color); display: flex; gap: 8px; align-items: center; background: var(--bg-glass-solid); }
+        .popup-msg-stream { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 10px; min-height: 0; }
+        .popup-chat-input-row { padding: 12px 16px; padding-bottom: max(12px, env(safe-area-inset-bottom)); border-top: 1px solid var(--border-color); display: flex; gap: 8px; align-items: center; background: var(--bg-glass-solid); flex-shrink: 0; }
         
         /* PESAN SISI KANAN (OUT) DAN KIRI (IN) BERJALAN AKTIF */
         .bubble { max-width: 75%; padding: 10px 16px; border-radius: 18px; font-size: 0.9rem; line-height: 1.4; word-break: break-word; box-shadow: 0 1px 2px rgba(0,0,0,0.04); }
@@ -564,6 +565,7 @@
             .minimal-composer-bar { padding: 12px 16px; margin-bottom: 16px; border-radius: var(--radius-lg); }
             .minimal-composer-input-mock { padding: 10px 16px; font-size: 0.95rem; }
             
+            /* HEIGHT DIKUNCI BIAR TAMPIL DI ATAS KEYBOARD LAYAR HP */
             .floating-chat-widget { width: 100vw; height: calc(100vh - var(--header-height)); top: var(--header-height); bottom: 0; right: 0; border-radius: 0; z-index: 6000; max-width: 100vw; }
             .modal-content { width: 100%; max-width: 100%; border-radius: var(--radius-lg); margin: 0; box-sizing: border-box; }
             .modal-overlay { padding: 12px; top: var(--header-height); }
@@ -740,7 +742,6 @@
         let activeBottomSheetPostId = null;
         let activeReplyTargetCommentId = null;
 
-        // Daftar relasi pertemanan dinamis lokal untuk memproses filter privasi "teman"
         window.userFriendsList = [];
 
         String.prototype.hashCode = function() {
@@ -860,7 +861,7 @@
                         .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'chats' }, async (payload) => {
                             const myName = App.ProfileState.getCurrentName();
                             if (activeChatFriendName && payload.new.sender === activeChatFriendName && payload.new.receiver === myName) {
-                                App.Features.openSpecificFriendPopupObrolan(activeChatFriendEmail, activeChatFriendName);
+                                App.Features.fetchChatMessagesAndRenderStream();
                             } else if (payload.new.receiver === myName) {
                                 unreadMessageCounters[payload.new.sender.toLowerCase()] = (unreadMessageCounters[payload.new.sender.toLowerCase()] || 0) + 1;
                                 App.Features.loadPopupFriendsListSidebar();
@@ -1036,8 +1037,8 @@
                 },
                 explore() {
                     return `
-                        <div class="glass-card">
-                            <h2>Cari Jaringan Pengguna Asli</h2>
+                        <div class="glass-card" style="border:none;">
+                            <h2 style="font-weight:800; margin-bottom:4px;">Cari Koneksi Jaringan</h2>
                             <p style="color: var(--text-muted); font-size:0.85rem; margin-bottom: 24px;">Berikut adalah akun asli anggota ekosistem Tech Social.</p>
                             <div id="explore-users-stream" class="user-grid"></div>
                         </div>
@@ -1045,9 +1046,9 @@
                 },
                 groups() {
                     return `
-                        <div class="glass-card">
+                        <div class="glass-card" style="border:none;">
                             <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:24px;">
-                                <h2>Komunitas Premium</h2>
+                                <h2 style="font-weight:800;">Komunitas Premium</h2>
                                 <button class="btn btn-primary" onclick="App.Features.triggerCreateCommunityPremiumModal()"><span class="material-symbols-outlined">add_circle</span> Buat</button>
                             </div>
                             <div class="community-list-container" id="community-hub-list-viewport"></div>
@@ -1076,8 +1077,12 @@
                     const isSuperAdmin = (isOwnProfile && myEmail === 'mastrisnocom@gmail.com');
                     const targetPremiumLevel = isOwnProfile ? App.ProfileState.getPremiumLevel() : 0;
 
+                    // Periksa status pertemanan lokal dari localStorage
+                    const followingList = JSON.parse(localStorage.getItem('ns_following_list_cache') || '[]');
+                    const isFollowing = followingList.includes(targetName);
+
                     return `
-                        <div class="glass-card profile-info-card" style="padding:0; overflow:hidden; position: relative;">
+                        <div class="glass-card profile-info-card" style="padding:0; overflow:hidden; position: relative; border:none;">
                             ${isOwnProfile ? `<button class="icon-btn" style="position:absolute; top: 16px; right: 16px; z-index: 10; background: #ffffff; color: var(--text-main);" onclick="App.Router.navigate('settings')"><span class="material-symbols-outlined">settings</span></button>` : ''}
                             <div class="profile-cover"></div>
                             <div style="position:relative; display:inline-block; margin: 0 auto 16px auto; z-index: 2; text-align: center; width: 100%;">
@@ -1085,20 +1090,26 @@
                                 ${targetPremiumLevel > 0 ? `<div class="premium-level-badge" style="top:auto; bottom:-12px; font-size:0.8rem; padding: 4px 12px; z-index:10;">LVL ${targetPremiumLevel}</div>` : ''}
                             </div>
                             <div style="text-align: center; padding: 0 16px;">
-                                <h2>${targetName} ${isSuperAdmin ? '<span style="font-size:0.75rem; background:var(--primary); color:white; padding:2px 8px; border-radius:10px; margin-left:6px; vertical-align:middle;">SUPER ADMIN</span>' : ''}</h2>
-                                <p style="color: var(--text-muted); font-size: 0.82rem; margin-top: 8px; margin-bottom: 8px; font-weight:700;">Bergabung sejak: ${joinDate}</p>
-                                <p style="color: var(--primary); font-weight: 600; margin-bottom: 4px;">${targetBio}</p>
-                                <p style="color: var(--text-muted); font-size: 0.85rem; font-weight: 500; margin-bottom: 16px; display:flex; align-items:center; justify-content:center; gap:4px;">
-                                    <span class="material-symbols-outlined" style="font-size:16px;">location_on</span> ${targetDomisili}
+                                <h2 style="font-weight:800; font-size:1.5rem; color:var(--text-main);">${targetName} ${isSuperAdmin ? '<span style="font-size:0.75rem; background:var(--primary); color:white; padding:2px 8px; border-radius:10px; margin-left:6px; vertical-align:middle; font-weight:800;">SUPER ADMIN</span>' : ''}</h2>
+                                <p style="color: var(--text-muted); font-size: 0.85rem; margin-top: 6px; margin-bottom: 6px; font-weight:700;">Bergabung sejak: ${joinDate}</p>
+                                <p style="color: var(--primary); font-weight: 700; font-size:1.05rem; margin-bottom: 6px;">${targetBio}</p>
+                                <p style="color: var(--text-muted); font-size: 0.88rem; font-weight: 600; margin-bottom: 20px; display:flex; align-items:center; justify-content:center; gap:4px;">
+                                    <span class="material-symbols-outlined" style="font-size:18px;">location_on</span> ${targetDomisili}
                                 </p>
                             </div>
-                            <div class="profile-stats">
-                                <div class="stat-item"><span class="stat-val" id="profile-friends-count">0</span><span class="stat-lbl">Teman</span></div>
+                            <div class="profile-stats" style="background:#fafafa; border:none; border-radius:16px; margin: 0 24px 24px 24px;">
+                                <div class="stat-item"><span class="stat-val" id="profile-friends-count">0</span><span class="stat-lbl">Mengikuti</span></div>
                                 <div class="stat-item"><span class="stat-val">${isOwnProfile ? '2.5K' : '1.4K'}</span><span class="stat-lbl">Pengikut</span></div>
                                 <div class="stat-item"><span class="stat-val">${isOwnProfile ? '84' : '31'}</span><span class="stat-lbl">Postingan</span></div>
                             </div>
-                            <div style="padding: 24px; display:flex; flex-direction:column; gap:12px; max-width:320px; margin:0 auto;">
-                                ${!isOwnProfile ? `<button class="btn btn-primary ripple-btn" onclick="App.UI.toggleChatPopup(true); App.Features.openSpecificFriendPopupObrolan('${targetName.toLowerCase()}@nexsocial.id', '${targetName}')"><span class="material-symbols-outlined" style="font-size:18px;">mail</span> Kirim Pesan</button>` : ''}
+                            <div style="padding: 0 24px 32px 24px; display:flex; justify-content:center; gap:12px; max-width:100%;">
+                                ${!isOwnProfile ? `
+                                    <button class="btn ripple-btn ${isFollowing ? 'btn-secondary' : 'btn-primary'}" style="${isFollowing ? 'color:#64748b; background:#f1f5f9;' : ''}" onclick="App.Features.toggleFollowInExploreFromProfileDOM('${targetName}', this)">
+                                        <span class="material-symbols-outlined" style="font-size:18px;">${isFollowing ? 'done' : 'add'}</span> 
+                                        <span>${isFollowing ? 'Mengikuti' : 'Ikuti'}</span>
+                                    </button>
+                                    <button class="btn btn-primary ripple-btn" onclick="App.UI.toggleChatPopup(true); App.Features.openSpecificFriendPopupObrolan('${targetName.toLowerCase()}@nexsocial.id', '${targetName}')"><span class="material-symbols-outlined" style="font-size:18px;">mail</span> Kirim Pesan</button>
+                                ` : ''}
                             </div>
                         </div>
                     `;
@@ -1114,9 +1125,9 @@
                     const savedAdHTML = localStorage.getItem('ns_ad_html_global') || '';
 
                     return `
-                        <div class="glass-card" style="max-width: 650px; margin: 0 auto; position: relative;">
+                        <div class="glass-card" style="max-width: 650px; margin: 0 auto; position: relative; border:none;">
                             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; border-bottom: 1px solid var(--border-color); padding-bottom: 12px;">
-                                <h2 style="display: flex; align-items: center; gap: 8px; margin: 0;"><span class="material-symbols-outlined" style="font-size: 28px; color: var(--primary);">settings</span><span>Pengaturan Akun</span></h2>
+                                <h2 style="display: flex; align-items: center; gap: 8px; margin: 0; font-weight:800;"><span class="material-symbols-outlined" style="font-size: 28px; color: var(--primary);">settings</span><span>Pengaturan Akun</span></h2>
                             </div>
                             
                             ${isSuperAdmin ? `
@@ -1208,7 +1219,6 @@
                                 <div class="pic-dock-icon-only-item" onclick="document.getElementById('composer-modal-inner-img-input').click()"><span class="material-symbols-outlined">image</span></div>
                                 <div class="pic-dock-icon-only-item" id="dock-btn-location" onclick="App.Features.openNativeLocationPickerPopupModal()"><span class="material-symbols-outlined">location_on</span></div>
                                 <div class="pic-dock-icon-only-item" id="dock-btn-media" onclick="App.Features.triggerEmbeddedLinkModalPopup()"><span class="material-symbols-outlined">link</span></div>
-                                <input type="file" id="composer-modal-inner-img-input" accept="image/*" style="display:none;" onchange="App.Features.handleComposerImageSelection(event)">
                             </div>
                         </div>
                     `;
@@ -1229,7 +1239,6 @@
 
                 closeComposerAndClearCache() { composerAttachedImageBase64 = null; activeComposerLocation = ""; App.Modal.close(); },
                 
-                // PENGUNCIAN LOKASI ABSOLUT: Hanya bisa memakai sensor hardware GPS handphone langsung
                 openNativeLocationPickerPopupModal() {
                     const locationModalHTML = `
                         <div style="display:flex; flex-direction:column; gap:16px; text-align:center; padding:12px;">
@@ -1381,10 +1390,10 @@
 
                 async loadPopupFriendsListSidebar() {
                     const container = document.getElementById('popup-friends-sidebar-items'); if(!container) return;
-                    await App.Features.fetchMyFriendsData();
+                    const followingList = JSON.parse(localStorage.getItem('ns_following_list_cache') || '[]');
                     
-                    // Muat kontak dinamis berdasarkan pertemanan user yang aktif mendaftar/posting
-                    let dynamicContacts = window.userFriendsList.length > 0 ? window.userFriendsList : ['Agung_Taufiq', 'Meta_AI'];
+                    // Prioritaskan kontak dinamis dari list user yang kita ikuti secara nyata
+                    let dynamicContacts = followingList.length > 0 ? followingList : ['Agung_Taufiq', 'Meta_AI'];
                     container.innerHTML = dynamicContacts.map(name => {
                         const hasUnread = unreadMessageCounters[name.toLowerCase()] || 0;
                         return `
@@ -1410,17 +1419,20 @@
                     mainArea.innerHTML = `
                         <div class="popup-msg-stream" id="popup-msg-stream-viewport"></div>
                         <div class="popup-chat-input-row">
-                            <input type="text" class="form-input" placeholder="Ketik pesan..." id="popup-chat-input-field" onkeypress="if(event.key==='Enter') App.Features.sendPopupChatCloudAction()" style="border-radius:20px; padding:10px 14px; margin-bottom:0; font-size:0.9rem;">
+                            <input type="text" class="form-input" placeholder="Ketik pesan..." id="popup-chat-input-field" onkeypress="if(event.key==='Enter') App.Features.sendPopupChatCloudAction()" style="border-radius:20px; padding:10px 14px; margin-bottom:0; font-size:0.9rem; background:#f8fafc;">
                             <button class="icon-btn" style="background:var(--primary); color:white; width:34px; height:34px;" onclick="App.Features.sendPopupChatCloudAction()"><span class="material-symbols-outlined" style="font-size:16px;">send</span></button>
                         </div>
                     `;
                     
+                    await App.Features.fetchChatMessagesAndRenderStream();
+                },
+
+                async fetchChatMessagesAndRenderStream() {
                     try {
                         const myName = App.ProfileState.getCurrentName();
-                        const { data: messages } = await supabaseClient.from('chats').select('*').or(`and(sender.eq.${myName},receiver.eq.${friendName}),and(sender.eq.${friendName},receiver.eq.${myName})`).order('created_at', { ascending: true });
+                        const { data: messages } = await supabaseClient.from('chats').select('*').or(`and(sender.eq.${myName},receiver.eq.${activeChatFriendName}),and(sender.eq.${activeChatFriendName},receiver.eq.${myName})`).order('created_at', { ascending: true });
                         const viewport = document.getElementById('popup-msg-stream-viewport');
                         if(viewport && messages) {
-                            // SISTEM CHAT OUT (KANAN) & IN (KIRI) BERJALAN AKTIF
                             viewport.innerHTML = messages.map(m => `<div class="bubble ${m.sender === myName ? 'out' : 'in'}"><span>${m.message}</span></div>`).join('');
                             viewport.scrollTop = viewport.scrollHeight;
                         }
@@ -1442,7 +1454,7 @@
                     try {
                         await supabaseClient.from('chats').insert([{ sender: App.ProfileState.getCurrentName(), receiver: activeChatFriendName, message: msgText }]);
                         input.value = '';
-                        App.Features.openSpecificFriendPopupObrolan(activeChatFriendEmail, activeChatFriendName);
+                        await App.Features.fetchChatMessagesAndRenderStream();
                     } catch(err) {}
                 },
 
@@ -1530,7 +1542,6 @@
                     }
                 },
 
-                // RENDERING MEDIA DETEKTOR UTK YOUTUBE & MP3 AUDIO
                 extractAndRenderEmbeddedMedia(contentString, directMediaUrl) {
                     let textToCheck = contentString || "";
                     let combinedUrl = directMediaUrl || "";
@@ -1571,12 +1582,14 @@
                         const myName = App.ProfileState.getCurrentName();
                         let filtered = posts || [];
 
-                        // LOGIKA FILTER PRIVASI AKTIF SIFAT RELASIONAL
+                        // Muat cache following list untuk validasi privasi teman
+                        const followingList = JSON.parse(localStorage.getItem('ns_following_list_cache') || '[]');
+
                         filtered = filtered.filter(p => {
                             if (!p.privacy || p.privacy === 'public') return true;
                             if (p.privacy === 'private') return p.author === myName;
                             if (p.privacy === 'friends') {
-                                return (p.author === myName || window.userFriendsList.includes(p.author));
+                                return (p.author === myName || followingList.includes(p.author));
                             }
                             return true;
                         });
@@ -1586,7 +1599,7 @@
                         }
 
                         if (filtered.length === 0) {
-                            stream.innerHTML = `<div class="glass-card" style="text-align:center; color:var(--text-muted); padding:32px 16px;">Belum ada status.</div>`; return;
+                            stream.innerHTML = `<div class="glass-card" style="text-align:center; color:var(--text-muted); padding:32px 16px; border:none;">Belum ada status.</div>`; return;
                         }
 
                         stream.innerHTML = `<div class="feed-container">` + filtered.map(p => {
@@ -1925,7 +1938,7 @@
                     localStorage.setItem('ns_ad_html_global', code); App.Toast.show("Iklan dirilis!", "success"); App.UI.renderGlobalBannerAdIfExists();
                 },
 
-                // PERBAIKAN PENCARIAN EXPLORE: Hanya menampilkan akun asli hasil query database
+                // SISTEM PERTEMANAN INTERAKTIF: IKUTI / MENGIKUTI ABU-ABU
                 async renderExploreUsers() {
                     const container = document.getElementById('explore-users-stream'); if(!container) return;
                     try {
@@ -1937,7 +1950,6 @@
                             return;
                         }
 
-                        // Ambil daftar nama unik yang valid dari user terdaftar
                         const uniqueUsersMap = {};
                         postsData.forEach(item => {
                             if(!uniqueUsersMap[item.author]) {
@@ -1945,14 +1957,21 @@
                             }
                         });
 
+                        const followingList = JSON.parse(localStorage.getItem('ns_following_list_cache') || '[]');
+
                         container.innerHTML = Object.keys(uniqueUsersMap).map(username => {
+                            const isFollowed = followingList.includes(username);
                             return `
-                                <div class="user-follow-card">
+                                <div class="user-follow-card" style="border:none;">
                                     <img src="${uniqueUsersMap[username]}" style="width:44px; height:44px; border-radius:50%; object-fit:cover;">
                                     <div style="flex:1;">
-                                        <strong style="font-size:0.9rem; cursor:pointer;" onclick="App.Router.navigate('profil?name=${encodeURIComponent(username)}')">${username}</strong>
+                                        <strong style="font-size:0.95rem; cursor:pointer; color:var(--text-main);" onclick="App.Router.navigate('profil?name=${encodeURIComponent(username)}')">${username}</strong>
                                     </div>
-                                    <button class="btn btn-primary" style="padding:6px 12px; font-size:0.8rem; border-radius:12px;" onclick="App.Toast.show('Koneksi terhubung!','success')">Ikuti</button>
+                                    <button class="btn ripple-btn" 
+                                            style="padding:6px 16px; font-size:0.82rem; border-radius:12px; font-weight:700; ${isFollowed ? 'background:#f1f5f9; color:#64748b;' : 'background:var(--primary); color:white;'}" 
+                                            onclick="App.Features.toggleFollowInExploreFromExploreDOM('${username}', this)">
+                                        ${isFollowed ? 'Mengikuti' : 'Ikuti'}
+                                    </button>
                                 </div>
                             `;
                         }).join('');
@@ -1960,7 +1979,52 @@
                         container.innerHTML = `<p style="padding:16px; color:var(--danger); font-size:0.9rem;">Gagal memuat database pengguna.</p>`;
                     }
                 },
-                loadFriendsCount() { const el = document.getElementById('profile-friends-count'); if(el) el.innerText = window.userFriendsList ? window.userFriendsList.length : '0'; }
+
+                toggleFollowInExploreFromExploreDOM(targetUsername, buttonNode) {
+                    let followingList = JSON.parse(localStorage.getItem('ns_following_list_cache') || '[]');
+                    if (followingList.includes(targetUsername)) {
+                        followingList = followingList.filter(u => u !== targetUsername);
+                        buttonNode.innerText = 'Ikuti';
+                        buttonNode.style.background = 'var(--primary)';
+                        buttonNode.style.color = 'white';
+                        App.Toast.show("Batal mengikuti " + targetUsername, "info");
+                    } else {
+                        followingList.push(targetUsername);
+                        buttonNode.innerText = 'Mengikuti';
+                        buttonNode.style.background = '#f1f5f9';
+                        buttonNode.style.color = '#64748b';
+                        App.Toast.show("Sekarang mengikuti " + targetUsername, "success");
+                    }
+                    localStorage.setItem('ns_following_list_cache', JSON.stringify(followingList));
+                    App.Features.fetchMyFriendsData();
+                },
+
+                toggleFollowInFollowFromProfileDOM(targetUsername, buttonNode) {
+                    let followingList = JSON.parse(localStorage.getItem('ns_following_list_cache') || '[]');
+                    if (followingList.includes(targetUsername)) {
+                        followingList = followingList.filter(u => u !== targetUsername);
+                        buttonNode.innerHTML = `<span class="material-symbols-outlined" style="font-size:18px;">add</span><span>Ikuti</span>`;
+                        buttonNode.className = "btn btn-primary ripple-btn";
+                        buttonNode.style.background = "var(--primary)";
+                        buttonNode.style.color = "white";
+                    } else {
+                        followingList.push(targetUsername);
+                        buttonNode.innerHTML = `<span class="material-symbols-outlined" style="font-size:18px;">done</span><span>Mengikuti</span>`;
+                        buttonNode.className = "btn btn-secondary ripple-btn";
+                        buttonNode.style.background = "#f1f5f9";
+                        buttonNode.style.color = "#64748b";
+                    }
+                    localStorage.setItem('ns_following_list_cache', JSON.stringify(followingList));
+                    App.Features.fetchMyFriendsData();
+                    const counter = document.getElementById('profile-friends-count');
+                    if (counter) counter.innerText = followingList.length;
+                },
+
+                loadFriendsCount() { 
+                    const el = document.getElementById('profile-friends-count'); 
+                    const followingList = JSON.parse(localStorage.getItem('ns_following_list_cache') || '[]');
+                    if(el) el.innerText = followingList.length; 
+                }
             },
 
             Theme: {
@@ -2015,9 +2079,7 @@
             },
 
             UI: {
-                getTextColorContrast(hex) {
-                    return '#0b2e1e';
-                },
+                getTextColorContrast(hex) { return '#0b2e1e'; },
                 generateAvatarHTML(name, url, isPremium, level, size = '46px', inPost = false) {
                     return `<div class="premium-avatar-container avatar-wrapper" onclick="App.Router.navigate('${inPost ? 'profil?name=' + encodeURIComponent(name) : 'profil'}')"><img src="${url}" class="user-avatar" style="width:${size}; height:${size}; object-fit:cover;" alt="Avatar"></div>`;
                 },
@@ -2077,6 +2139,9 @@
                 showLoadingBtn(b) { if(b) b.innerHTML = 'Memproses...'; setTimeout(() => { if(b) b.innerHTML = 'Masuk'; }, 1500); }
             }
         };
+
+        // Alias fungsi agar kompatibel silang saat dipanggil dari tombol view profil hibrida
+        App.Features.toggleFollowInExploreFromProfileDOM = App.Features.toggleFollowInFollowFromProfileDOM;
 
         document.addEventListener('DOMContentLoaded', () => App.init());
     </script>
