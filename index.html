@@ -143,8 +143,6 @@
            2. SISTEM FEED CONTAINER EDGE-TO-EDGE
            ========================================================================== */
         .feed-container { margin-left: -32px; margin-right: -32px; background: transparent; }
-        
-        /* FITUR 3: POSTINGAN TANPA BORDER, CUKUP GARIS ABU-ABU TRANSPARAN */
         .post-card { padding: 24px 32px; position: relative; border-radius: 0; border: none; border-bottom: 1px solid rgba(128, 128, 128, 0.15); background: var(--bg-glass-solid); margin-bottom: 12px; box-shadow: none; }
         
         .post-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px; }
@@ -175,21 +173,93 @@
         .post-action-item.loved { color: var(--danger) !important; }
         .post-action-item.loved .material-symbols-outlined { font-variation-settings: 'FILL' 1; color: var(--danger) !important; }
 
-        /* FITUR 4 & 6: POSTINGAN MEDIA DAN IFRAME DI TENGAH */
         .post-attached-image { max-width: 100%; border-radius: var(--radius-md); margin: 12px auto; display: block; max-height: 340px; object-fit: cover; cursor: zoom-in; box-shadow: var(--shadow-soft); }
         .post-card iframe { display: block; margin: 12px auto; width: 100%; max-width: 500px; height: 280px; border-radius: 12px; border: none; }
         .post-card audio { display: block; margin: 12px auto; width: 100%; max-width: 500px; }
 
-        .comments-section { margin-top: 0; padding-top: 16px; display: none; animation: slideUpFade 0.4s ease; } 
-        .comments-stream { display: flex; flex-direction: column; gap: 12px; max-height: 250px; overflow-y: auto; margin-bottom: 16px; padding: 4px; }
-        .comment-item-wrapper { display: flex; width: 100%; margin-bottom: 2px; }
-        .comment-item-wrapper.my-comment { justify-content: flex-end; }
-        .comment-item-wrapper.other-comment { justify-content: flex-start; }
-        .comment-bubble { padding: 10px 14px; border-radius: 16px; font-size: 0.85rem; text-align: left; max-width: 80%; box-shadow: 0 1px 4px rgba(0,0,0,0.03); }
-        .comment-item-wrapper.my-comment .comment-bubble { background: var(--primary-state); border-bottom-right-radius: 4px; border: 1px solid rgba(1, 181, 116, 0.2); }
-        .comment-item-wrapper.other-comment .comment-bubble { background: var(--bg-body); border-bottom-left-radius: 4px; border: 1px solid var(--border-color); }
-        .comment-bubble strong { color: var(--primary); display: block; font-size: 0.75rem; margin-bottom: 3px; cursor: pointer; }
-        .comment-row { display: flex; gap: 8px; align-items: center; margin-top: 12px; position: relative; }
+        /* ==========================================================================
+           2B. BARU: OVERLAY BOTTOM SHEET KOMENTAR (ALA FACEBOOK NATIVE MOBILE)
+           ========================================================================== */
+        .comments-bottom-sheet {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            z-index: 5000;
+            display: none;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        .comments-bottom-sheet.active {
+            display: block;
+            opacity: 1;
+        }
+        .comments-sheet-backdrop {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+        }
+        .comments-sheet-content {
+            position: absolute;
+            left: 0; right: 0; bottom: 0;
+            height: 75vh;
+            background: var(--bg-glass-solid);
+            border-radius: 20px 20px 0 0;
+            display: flex;
+            flex-direction: column;
+            transform: translateY(100%);
+            transition: transform 0.35s cubic-bezier(0.25, 1, 0.5, 1);
+            box-shadow: 0 -4px 30px rgba(0,0,0,0.15);
+            overflow: hidden;
+        }
+        .comments-bottom-sheet.active .comments-sheet-content {
+            transform: translateY(0);
+        }
+        /* Handle Geser / Drag */
+        .comments-sheet-drag-handle-area {
+            width: 100%;
+            padding: 10px 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: grab;
+            background: var(--bg-glass-solid);
+            user-select: none;
+            flex-shrink: 0;
+        }
+        .comments-sheet-drag-handle {
+            width: 40px;
+            height: 5px;
+            background: #cbd5e1;
+            border-radius: var(--radius-round);
+        }
+        .comments-sheet-header {
+            padding: 0 16px 12px 16px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-shrink: 0;
+        }
+        .comments-sheet-title {
+            font-size: 0.95rem;
+            font-weight: 800;
+            color: var(--text-main);
+        }
+        .comments-sheet-stream {
+            flex: 1;
+            overflow-y: auto;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+        .comments-sheet-input-row {
+            padding: 12px 16px calc(12px + env(safe-area-inset-bottom));
+            background: var(--bg-glass-solid);
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
 
         /* ==========================================================================
            3. SISTEM MODAL ROBUST & ANTI-BUG
@@ -305,6 +375,9 @@
         .minimal-composer-input-mock:hover { background: rgba(135, 143, 166, 0.1); }
         .minimal-composer-gallery-icon { color: var(--text-muted); font-size: 28px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: var(--trans-smooth); }
         .minimal-composer-gallery-icon:hover { color: var(--primary); }
+
+        .toast-container { position: fixed; top: 24px; right: 24px; z-index: 4000; display: flex; flex-direction: column; gap: 12px; }
+        .toast { background: var(--bg-glass-solid); border-left: 6px solid var(--primary); box-shadow: var(--shadow-soft); padding: 16px 24px; border-radius: var(--radius-md); display: flex; align-items: center; gap: 12px; font-weight: 600; animation: slideInRight 0.4s cubic-bezier(0.25, 1, 0.5, 1); }
 
         /* ==========================================================================
            7. KHUSUS MOBILE (HP) RESPONSIVE DESIGN - OPTIMIZED
@@ -476,6 +549,27 @@
         </div>
     </div>
 
+    <!-- NATIVE-LIKE MOBILE COMMENTS OVERLAY BOTTOM SHEET -->
+    <div class="comments-bottom-sheet" id="comments-overlay-bottom-sheet">
+        <div class="comments-sheet-backdrop" onclick="App.Features.closeCommentsBottomSheet()"></div>
+        <div class="comments-sheet-content" id="comments-sheet-content-node">
+            <!-- Handle gesture bar untuk slide tutup ke bawah -->
+            <div class="comments-sheet-drag-handle-area" id="comments-sheet-drag-zone">
+                <div class="comments-sheet-drag-handle"></div>
+            </div>
+            <div class="comments-sheet-header">
+                <span class="comments-sheet-title">Komentar</span>
+                <button class="icon-btn" style="width:32px; height:32px;" onclick="App.Features.closeCommentsBottomSheet()">
+                    <span class="material-symbols-outlined" style="font-size:20px;">close</span>
+                </button>
+            </div>
+            <!-- Zona Render Stream Aliran Komentar -->
+            <div class="comments-sheet-stream" id="comments-sheet-stream-injector"></div>
+            <!-- Form Input Bottom Bar Mandiri Tetap -->
+            <div class="comments-sheet-input-row" id="comments-sheet-input-dock-form"></div>
+        </div>
+    </div>
+
     <!-- ROBUST MODAL SYSTEM (ANTI BUG) -->
     <div class="modal-overlay" id="global-modal">
         <div class="modal-content" id="modal-content-area">
@@ -509,6 +603,9 @@
         
         let currentComposerBgColor = "#ffffff";
         let activeComposerLocation = "";
+        
+        // Tracking ID postingan aktif yang sedang dibuka lembar komentarnya
+        let activeBottomSheetPostId = null;
 
         const App = {
             init() {
@@ -519,6 +616,7 @@
                 this.Auth.checkCurrentSession();
                 this.Realtime.subscribePosts();
                 this.Features.fetchMyFriendsData(); 
+                this.Features.initCommentsSwipeToCloseGesture(); // Inisialisasi pelacak geser jari tutup komentar
                 
                 App.UI.refreshHeaderNotificationBadgeDOM();
                 App.UI.renderGlobalBannerAdIfExists();
@@ -598,6 +696,8 @@
                             if (window.location.hash.includes('#/profil?name=')) {
                                 App.Router.handleRoute();
                             }
+                            // Realtime sinkronisasi live stream lembar bottom sheet jika postingan terkait menerima komentar baru
+                            if (activeBottomSheetPostId) App.Features.reloadCommentsBottomSheetStreamOnly();
                         })
                         .subscribe();
                 }
@@ -818,7 +918,7 @@
                                 ${levelBadge}
                             </div>
                             
-                            <h2>${targetName} ${isSuperAdmin ? '<span style="font-size:0.75rem; background:var(--primary); color:white; padding:2px 8px; border-radius:10px; margin-left:6px; vertical-align:middle;">SUPER ADMIN</span>' : ''}</h2>
+                            <h2>${targetName}</h2>
                             <p style="color: var(--text-muted); font-size: 0.82rem; margin-top: 8px; margin-bottom: 8px; font-weight:700;">Bergabung sejak: ${joinDate}</p>
                             <p style="color: var(--primary); font-weight: 600; margin-bottom: 4px;">${targetBio}</p>
                             <p style="color: var(--text-muted); font-size: 0.85rem; font-weight: 500; margin-bottom: 16px; display:flex; align-items:center; justify-content:center; gap:4px;">
@@ -988,31 +1088,6 @@
                         txtArea.style.color = App.UI.getTextColorContrast(color);
                     }
                     App.Toast.show("Warna latar dipilih", "success");
-                },
-
-                fetchLocationAction() {
-                    const locBtn = document.getElementById('loc-pill');
-                    if(!locBtn) return;
-                    locBtn.innerHTML = `<span class="material-symbols-outlined">sync</span> Mencari...`;
-                    if (navigator.geolocation) {
-                        navigator.geolocation.getCurrentPosition(async (pos) => {
-                            try {
-                                const res = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${pos.coords.latitude}&lon=${pos.coords.longitude}&format=json`);
-                                const data = await res.json();
-                                const city = data.address.city || data.address.town || data.address.village || data.address.county || 'Lokasi Anda';
-                                locBtn.innerHTML = `<span class="material-symbols-outlined" style="color:var(--primary);">location_on</span> ${city}`;
-                                activeComposerLocation = city;
-                                const locInput = document.getElementById('composer-location-input');
-                                if (locInput) locInput.value = city;
-                            } catch(e) {
-                                locBtn.innerHTML = `<span class="material-symbols-outlined" style="color:var(--primary);">location_on</span> Lokasi Ditemukan`;
-                            }
-                        }, () => {
-                            locBtn.innerHTML = `<span class="material-symbols-outlined" style="color:var(--danger);">location_off</span> Gagal Akses`;
-                        });
-                    } else {
-                        locBtn.innerHTML = `<span class="material-symbols-outlined" style="color:var(--danger);">location_off</span> Tidak Didukung`;
-                    }
                 },
 
                 handleHeaderLiveSearchInput(event) {
@@ -1397,7 +1472,8 @@
                                             <span>Love</span>
                                         </div>
 
-                                        <div class="post-action-item" onclick="App.Features.togglePostCommentsVisibility(${pId})">
+                                        <!-- MODIFIKASI: Mengalihkan pembukaan klik komen langsung memicu Bottom Sheet Native Slide -->
+                                        <div class="post-action-item" onclick="App.Features.openCommentsBottomSheet(${pId}, '${p.author}')">
                                             <span class="material-symbols-outlined">comment</span>
                                             <span>${parsedRoleData.comments ? parsedRoleData.comments.length : 0} Komen</span>
                                         </div>
@@ -1405,23 +1481,6 @@
                                         <div class="post-action-item" onclick="App.Features.openSocialMediaShareSheetModal(${pId}, '${p.author}', '${(p.content || "").replace(/'/g, "\\'")}', ${hasImg})">
                                             <span class="material-symbols-outlined">share</span>
                                             <span>Bagikan</span>
-                                        </div>
-                                    </div>
-                                    
-                                    <div class="comments-section" id="comments-section-container-${pId}">
-                                        <div class="comments-stream">
-                                            ${(parsedRoleData.comments || []).map(c => `
-                                                <div class="comment-item-wrapper ${c.user === myCurrentName ? 'my-comment' : 'other-comment'}">
-                                                    <div class="comment-bubble">
-                                                        <strong onclick="App.Router.navigate('profil?name=${encodeURIComponent(c.user)}')">${c.user}</strong>
-                                                        <span>${c.text}</span>
-                                                    </div>
-                                                </div>
-                                            `).join('')}
-                                        </div>
-                                        <div class="comment-row">
-                                            <input type="text" class="form-input" placeholder="Tulis balasan..." id="comment-input-field-${pId}" style="border-radius:20px; padding:10px 14px; margin-bottom:0;">
-                                            <button class="icon-btn" style="background:var(--primary); color:white; width:34px; height:34px; flex-shrink:0;" onclick="App.Features.submitPostCommentAction(${pId}, '${p.author}')"><span class="material-symbols-outlined" style="font-size:16px;">send</span></button>
                                         </div>
                                     </div>
                                 </div>
@@ -1433,6 +1492,296 @@
                     } catch (err) {}
                 },
 
+                /* FITUR BARU: MANAJEMEN PEMBUKAAN & RENDER BOTTOM SHEET OVERLAY KOMENTAR MOBILE NATIVE STYLE */
+                async openCommentsBottomSheet(postId, postAuthor) {
+                    activeBottomSheetPostId = postId;
+                    
+                    const sheet = document.getElementById('comments-overlay-bottom-sheet');
+                    const streamViewport = document.getElementById('comments-sheet-stream-injector');
+                    const dockForm = document.getElementById('comments-sheet-input-dock-form');
+                    
+                    sheet.classList.add('active');
+                    streamViewport.innerHTML = `<div style="text-align:center; padding:32px; color:var(--text-muted); font-size:0.9rem;">Memuat aliran komentar...</div>`;
+                    
+                    // Render struktur form input bar yang statis di bagian bawah lembar
+                    dockForm.innerHTML = `
+                        <input type="text" class="form-input" placeholder="Komentari sebagai ${App.ProfileState.getCurrentName()}..." id="sheet-comment-input-field" style="border-radius:20px; padding:10px 14px; margin-bottom:0; font-size:0.9rem; background:var(--bg-body);">
+                        <button class="icon-btn" style="background:var(--primary); color:white; width:36px; height:34px; flex-shrink:0;" onclick="App.Features.submitBottomSheetCommentAction('${postAuthor}')">
+                            <span class="material-symbols-outlined" style="font-size:16px;">send</span>
+                        </button>
+                    `;
+                    
+                    // Tambahkan listener enter key kustom ke input bottom sheet
+                    document.getElementById('sheet-comment-input-field').addEventListener('keypress', (e) => {
+                        if (e.key === 'Enter') App.Features.submitBottomSheetCommentAction(postAuthor);
+                    });
+
+                    // Muat streams data riwayat percakapan dari Supabase
+                    await App.Features.reloadCommentsBottomSheetStreamOnly();
+                },
+
+                async reloadCommentsBottomSheetStreamOnly() {
+                    if (!activeBottomSheetPostId) return;
+                    const streamViewport = document.getElementById('comments-sheet-stream-injector');
+                    if (!streamViewport) return;
+                    
+                    try {
+                        const { data } = await supabaseClient.from('posts').select('role').eq('id', activeBottomSheetPostId).single();
+                        let postRoleData = { comments: [] };
+                        try {
+                            if (data && data.role) {
+                                if (data.role.startsWith('{')) postRoleData = JSON.parse(data.role);
+                                else if (data.role.startsWith('[')) postRoleData.comments = JSON.parse(data.role);
+                            }
+                        } catch(ex) {}
+                        
+                        const commentsList = postRoleData.comments || [];
+                        if (commentsList.length === 0) {
+                            streamViewport.innerHTML = `
+                                <div style="text-align:center; padding:48px 16px; color:var(--text-muted);">
+                                    <span class="material-symbols-outlined" style="font-size:36px; color:#cbd5e1; margin-bottom:8px;">maps_ugc</span>
+                                    <p style="font-size:0.85rem; font-weight:500;">Belum ada komentar. Jadilah yang pertama memberikan respon!</p>
+                                </div>`;
+                            return;
+                        }
+
+                        // Menggunakan struktur layout percakapan gelembung menyerupai screenshot FB/IG kustom mobile
+                        streamViewport.innerHTML = commentsList.map(c => {
+                            const userClean = c.user || 'User';
+                            const userAvatarUrl = `https://i.pravatar.cc/150?img=${Math.abs(userClean.hashCode()) % 70 || 12}`;
+                            
+                            return `
+                                <div style="display:flex; gap:10px; align-items:flex-start; text-align:left;">
+                                    <img src="${userAvatarUrl}" style="width:34px; height:34px; border-radius:50%; object-fit:cover; margin-top:2px;">
+                                    <div style="flex:1; display:flex; flex-direction:column; gap:2px;">
+                                        <div style="background:var(--bg-body); padding:10px 14px; border-radius:18px; display:inline-block; max-width:90%; box-shadow:0 1px 3px rgba(0,0,0,0.03);">
+                                            <strong style="color:var(--text-main); font-size:0.82rem; display:block; margin-bottom:2px; cursor:pointer;" onclick="App.Features.closeCommentsBottomSheet(); App.Router.navigate('profil?name=${encodeURIComponent(userClean)}')">${userClean}</strong>
+                                            <span style="font-size:0.88rem; color:var(--text-main); white-space:pre-wrap; line-height:1.4;">${c.text}</span>
+                                        </div>
+                                        <div style="display:flex; gap:16px; font-size:0.75rem; color:var(--text-muted); font-weight:700; margin-left:8px; margin-top:2px; align-items:center;">
+                                            <span>Baru saja</span>
+                                            <span style="cursor:pointer;">Suka</span>
+                                            <span style="cursor:pointer;">Balas</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            `;
+                        }).join('');
+                        
+                        // Auto-scroll scrollbar langsung ke dasar komentar terbawah
+                        streamViewport.scrollTop = streamViewport.scrollHeight;
+                    } catch(err) {}
+                },
+
+                async submitBottomSheetCommentAction(postAuthor) {
+                    if (!activeBottomSheetPostId) return;
+                    const input = document.getElementById('sheet-comment-input-field');
+                    if (!input || !input.value.trim()) return;
+                    
+                    const commentText = input.value.trim();
+                    const myCurrentName = App.ProfileState.getCurrentName();
+
+                    try {
+                        const { data } = await supabaseClient.from('posts').select('role').eq('id', activeBottomSheetPostId).single();
+                        let postRoleData = { comments: [], privacy: 'public', location: '', mediaUrl: '', bgColor: '#ffffff' };
+                        try {
+                            if (data && data.role) {
+                                if (data.role.startsWith('{')) postRoleData = JSON.parse(data.role);
+                                else if (data.role.startsWith('[')) postRoleData.comments = JSON.parse(data.role);
+                            }
+                        } catch(ex) {}
+                        
+                        if (!postRoleData.comments) postRoleData.comments = [];
+                        postRoleData.comments.push({ user: myCurrentName, text: commentText, date: Date.now() });
+                        
+                        // Push pembaruan array objek kustom ke kolom role Supabase
+                        await supabaseClient.from('posts').update({ role: JSON.stringify(postRoleData) }).eq('id', activeBottomSheetPostId);
+                        
+                        if (postAuthor !== myCurrentName) {
+                            liveNotifications.unshift({ id: Date.now(), icon: 'chat_bubble', user: myCurrentName, type: 'comment', desc: `telah mengomentari kiriman Anda: "${commentText.substring(0, 15)}..."`, isUnread: true, timestamp: Date.now() });
+                        }
+                        
+                        input.value = '';
+                        await App.Features.reloadCommentsBottomSheetStreamOnly();
+                        App.Features.renderPosts(); // Refresh hitungan counter komen di feed utama dibelakang layar
+                    } catch(err) {}
+                },
+
+                closeCommentsBottomSheet() {
+                    const sheet = document.getElementById('comments-overlay-bottom-sheet');
+                    if (sheet) sheet.classList.remove('active');
+                    activeBottomSheetPostId = null;
+                },
+
+                /* CODES BARU: HANDLING TOUCH SWIPE GESTURE DETECTOR UNTUK SLIDE DRAWER KE BAWAH HINGGA MENUTUP */
+                initCommentsSwipeToCloseGesture() {
+                    const dragZone = document.getElementById('comments-sheet-drag-zone');
+                    const sheetContent = document.getElementById('comments-sheet-content-node');
+                    
+                    let startY = 0;
+                    let currentY = 0;
+                    let isDragging = false;
+
+                    if (!dragZone || !sheetContent) return;
+
+                    // Touch Start Event
+                    dragZone.addEventListener('touchstart', (e) => {
+                        startY = e.touches[0].clientY;
+                        isDragging = true;
+                        sheetContent.style.transition = 'none'; // Matikan animasi transisi CSS agar geseran jari responsif instan
+                    }, { passive: true });
+
+                    // Touch Move Event
+                    dragZone.addEventListener('touchmove', (e) => {
+                        if (!isDragging) return;
+                        currentY = e.touches[0].clientY;
+                        const deltaY = currentY - startY;
+                        
+                        // Jari ditarik ke bawah (Arah menutup)
+                        if (deltaY > 0) {
+                            sheetContent.style.transform = `translateY(${deltaY}px)`;
+                        }
+                    }, { passive: true });
+
+                    // Touch End Event
+                    dragZone.addEventListener('touchend', (e) => {
+                        if (!isDragging) return;
+                        isDragging = false;
+                        sheetContent.style.transition = 'transform 0.3s cubic-bezier(0.25, 1, 0.5, 1)';
+                        
+                        const finalDeltaY = currentY - startY;
+                        
+                        // Batas ambang batas (threshold) penutupan jika ditarik lebih dari 120 piksel ke bawah
+                        if (finalDeltaY > 120) {
+                            App.Features.closeCommentsBottomSheet();
+                        } else {
+                            // Kembalikan ke posisi semula di atas jika tarikan jari tanggung / tidak melewati batas
+                            sheetContent.style.transform = 'translateY(0)';
+                        }
+                        startY = 0;
+                        currentY = 0;
+                    });
+                },
+
+                toggleLoveReaction(id, postAuthor) {
+                    let lovedLogs = JSON.parse(localStorage.getItem('ns_loved_posts_ids') || '[]');
+                    const myCurrentName = App.ProfileState.getCurrentName();
+                    
+                    if (lovedLogs.includes(id)) {
+                        lovedLogs = lovedLogs.filter(x => x !== id);
+                    } else {
+                        lovedLogs.push(id);
+                        if (postAuthor !== myCurrentName) {
+                            liveNotifications.unshift({ id: Date.now(), icon: 'favorite', user: myCurrentName, type: 'love', desc: `menyukai kiriman Anda dengan Love.`, isUnread: true, timestamp: Date.now() });
+                        }
+                    }
+                    localStorage.setItem('ns_loved_posts_ids', JSON.stringify(lovedLogs));
+                    this.renderPosts();
+                },
+
+                async toggleLike(id, currentLikes, postAuthor) {
+                    let likedLogs = JSON.parse(localStorage.getItem('ns_liked_posts_ids') || '[]');
+                    const myCurrentName = App.ProfileState.getCurrentName();
+                    if (likedLogs.includes(id)) {
+                        likedLogs = likedLogs.filter(x => x !== id);
+                        await supabaseClient.from('posts').update({ likes: Math.max(0, currentLikes - 1) }).eq('id', id);
+                    } else {
+                        likedLogs.push(id);
+                        await supabaseClient.from('posts').update({ likes: currentLikes + 1 }).eq('id', id);
+                        if (postAuthor !== myCurrentName) {
+                            liveNotifications.unshift({ id: Date.now(), icon: 'thumb_up', user: myCurrentName, type: 'like', desc: `menyukai kiriman terbaru Anda.`, isUnread: true, timestamp: Date.now() });
+                        }
+                    }
+                    localStorage.setItem('ns_liked_posts_ids', JSON.stringify(likedLogs));
+                    this.renderPosts();
+                },
+
+                async createPost() {
+                    const textValue = document.getElementById('composer-text').value.trim();
+                    const mediaUrlInput = document.getElementById('composer-media-url');
+                    const mediaUrlValue = mediaUrlInput ? mediaUrlInput.value.trim() : '';
+                    
+                    if(!textValue && !composerAttachedImageBase64 && !mediaUrlValue) return;
+                    try {
+                        const privacySelector = document.getElementById('composer-privacy-select');
+                        const selectedPrivacy = privacySelector ? privacySelector.value : 'public';
+                        
+                        const roleData = { 
+                            comments: [], 
+                            privacy: selectedPrivacy,
+                            location: activeComposerLocation,
+                            mediaUrl: mediaUrlValue,
+                            bgColor: currentComposerBgColor
+                        };
+
+                        await supabaseClient.from('posts').insert([{ author: App.ProfileState.getCurrentName(), avatar: App.ProfileState.getCurrentAvatar(), content: textValue, image: composerAttachedImageBase64, role: JSON.stringify(roleData), likes: 0 }]);
+                        App.Modal.close();
+                        App.Toast.show("Kiriman berhasil diterbitkan!", "success"); 
+                        this.renderPosts();
+                    } catch (err) { App.Toast.show("Gagal memublikasikan kiriman.", "danger"); }
+                },
+
+                showNotifications() {
+                    liveHeaderNotificationCount = 0; App.UI.refreshHeaderNotificationBadgeDOM();
+                    if (liveNotifications.length === 0) {
+                        App.Modal.open("Notifikasi", `<p style="padding:16px; text-align:center; color:var(--text-muted);">Belum ada notifikasi.</p>`, true, false);
+                        return;
+                    }
+
+                    const nowTime = Date.now();
+                    const newNotifications = liveNotifications.filter(n => (nowTime - n.timestamp) < 60000 * 30);
+                    const olderNotifications = liveNotifications.filter(n => (nowTime - n.timestamp) >= 60000 * 30);
+
+                    const mapNotificationToHTML = (item) => {
+                        const unreadClass = item.isUnread ? 'unread' : '';
+                        let badgeIcon = 'notifications';
+                        let badgeColorClass = 'badge-like';
+                        
+                        if(item.type === 'like') { badgeIcon = 'thumb_up'; badgeColorClass = 'badge-like'; }
+                        if(item.type === 'love') { badgeIcon = 'favorite'; badgeColorClass = 'badge-love'; }
+                        if(item.type === 'comment') { badgeIcon = 'chat_bubble'; badgeColorClass = 'badge-comment'; }
+                        if(item.type === 'share') { badgeIcon = 'share'; badgeColorClass = 'badge-share'; }
+
+                        item.isUnread = false;
+                        const userAvatarUrl = `https://i.pravatar.cc/150?img=${Math.abs(item.user.hashCode()) % 70 || 12}`;
+
+                        return `
+                            <div class="fb-noti-item ${unreadClass}" onclick="App.Modal.close(); App.Router.navigate('profil?name=${encodeURIComponent(item.user)}');">
+                                <div class="fb-noti-avatar-zone">
+                                    <img src="${userAvatarUrl}" class="fb-noti-img" alt="">
+                                    <div class="fb-noti-badge-icon ${badgeColorClass}">
+                                        <span class="material-symbols-outlined" style="font-size:12px;">${badgeIcon}</span>
+                                    </div>
+                                </div>
+                                <div class="fb-noti-text-zone">
+                                    <p class="fb-noti-desc"><strong>${item.user}</strong> ${item.desc}</p>
+                                    <span class="fb-noti-time">${App.UI.calculateRelativeTimeAgo(item.timestamp)}</span>
+                                </div>
+                                <div class="fb-noti-opt-btn" onclick="event.stopPropagation(); alert('Opsi selengkapnya segera hadir.')">
+                                    <span class="material-symbols-outlined" style="font-size:20px;">more_horiz</span>
+                                </div>
+                            </div>
+                        `;
+                    };
+
+                    let htmlResult = `<div class="fb-noti-container">`;
+                    htmlResult += `<div class="fb-noti-section-title">Baru</div>`;
+                    if (newNotifications.length === 0) htmlResult += `<p style="padding:10px; color:var(--text-muted); font-size:0.85rem;">Tidak ada interaksi baru.</p>`;
+                    else htmlResult += newNotifications.map(mapNotificationToHTML).join('');
+
+                    htmlResult += `<div class="fb-noti-section-title" style="margin-top:8px;">Terdahulu</div>`;
+                    if (olderNotifications.length === 0) htmlResult += `<p style="padding:10px; color:var(--text-muted); font-size:0.85rem;">Belum ada interaksi lama tersimpan.</p>`;
+                    else htmlResult += olderNotifications.map(mapNotificationToHTML).join('');
+                    htmlResult += `</div>`;
+
+                    App.Modal.open("Notifikasi Anda", htmlResult, true, false);
+                },
+
+                togglePostCommentsVisibility(postId) {
+                    // Dipertahankan sebagai fungsi penyeimbang agar tidak merusak dependensi
+                    App.Features.openCommentsBottomSheet(postId, '');
+                },
+                
                 async handleAvatarSelection(event) {
                     const file = event.target.files[0]; if (!file) return;
                     App.Toast.show("Mengunggah foto ke storage bucket...", "info");
@@ -1485,30 +1834,8 @@
                 },
 
                 async submitPostCommentAction(postId, postAuthor) {
-                    const input = document.getElementById(`comment-input-field-${postId}`);
-                    if (!input || !input.value.trim()) return;
-                    const commentText = input.value.trim();
-                    const myCurrentName = App.ProfileState.getCurrentName();
-
-                    try {
-                        const { data: postData } = await supabaseClient.from('posts').select('role').eq('id', postId).single();
-                        let postRoleData = { comments: [], privacy: 'public' };
-                        try {
-                            if(postData && postData.role) {
-                                if(postData.role.startsWith('[')) postRoleData.comments = JSON.parse(postData.role);
-                                else if(postData.role.startsWith('{')) postRoleData = JSON.parse(postData.role);
-                            }
-                        } catch(ex) {}
-                        
-                        postRoleData.comments.push({ user: myCurrentName, text: commentText, date: Date.now() });
-                        await supabaseClient.from('posts').update({ role: JSON.stringify(postRoleData) }).eq('id', postId);
-                        
-                        if (postAuthor !== myCurrentName) {
-                            liveNotifications.unshift({ id: Date.now(), icon: 'chat_bubble', user: myCurrentName, type: 'comment', desc: `telah mengomentari kiriman Anda: "${commentText.substring(0, 15)}..."`, isUnread: true, timestamp: Date.now() });
-                        }
-                        
-                        input.value = ''; this.renderPosts();
-                    } catch(err) {}
+                    // Mengarahkan logika penyeimbang bawaan ke sistem modular bottom sheet baru
+                    App.Features.openCommentsBottomSheet(postId, postAuthor);
                 }
             },
 
