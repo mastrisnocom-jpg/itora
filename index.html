@@ -1100,14 +1100,14 @@
                     };
                 },
 
+                /* FITUR REAL-TIME GLOBAL SHARE COUNTER */
                 openSocialMediaShareSheetModal(postId, postAuthor, textContext, hasImage) {
                     const encodedLink = window.location.origin + window.location.pathname + "?post=" + postId;
                     const imageInfoText = hasImage ? " [Gambar Terlampir]" : "";
                     const textToShare = `Lihat ini di Tech Social: "${textContext.substring(0,40)}..."${imageInfoText}`;
                     
-                    if (postAuthor === App.ProfileState.getCurrentName()) {
-                        liveNotifications.unshift({ id: Date.now(), icon: 'share', user: 'Seseorang', type: 'share', desc: `membagikan kiriman Anda.`, isUnread: true, timestamp: Date.now() });
-                    }
+                    // Trigger penambahan counter bagikan secara real-time ke database Supabase
+                    App.Features.incrementGlobalShareCounter(postId);
 
                     if (navigator.share && /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
                         navigator.share({
@@ -1150,6 +1150,17 @@
                         </div>
                     `;
                     App.Modal.open("Bagikan Konten", modalHTML, true, false);
+                },
+
+                async incrementGlobalShareCounter(postId) {
+                    try {
+                        const { data } = await supabaseClient.from('posts').select('role').eq('id', postId).single();
+                        let postRoleData = { comments: [], privacy: 'public', location: '', mediaUrl: '', bgColor: '#ffffff', lovedUsers: [], sharedCount: 0 };
+                        if (data && data.role && data.role.startsWith('{')) postRoleData = JSON.parse(data.role);
+                        
+                        postRoleData.sharedCount = (postRoleData.sharedCount || 0) + 1;
+                        await supabaseClient.from('posts').update({ role: JSON.stringify(postRoleData) }).eq('id', postId);
+                    } catch(e) {}
                 },
 
                 copyPostLinkToClipboardAction(textUrl) {
@@ -1303,38 +1314,13 @@
                     } catch(e) { console.error(e); }
                 },
 
-                saveAdminGlobalAdBannerAction(event) {
-                    if(event) event.preventDefault(); 
-                    const txtNode = document.getElementById('admin-ad-html-input');
-                    if(!txtNode) return;
-                    localStorage.setItem('ns_ad_html_global', txtNode.value.trim());
-                    App.Toast.show("Iklan global diperbarui!", "success");
-                    App.UI.renderGlobalBannerAdIfExists();
-                },
-
-                async renderExploreUsers() {
-                    const container = document.getElementById('explore-users-stream'); if(!container) return;
-                    try {
-                        const { data: posts } = await supabaseClient.from('posts').select('author').not('author', 'is', null);
-                        if (!posts) return;
-                        const unique = [...new Set(posts.map(p => p.author))].filter(a => a !== App.ProfileState.getCurrentName());
-                        container.innerHTML = unique.map(name => `
-                            <div class="user-follow-card">
-                                <img src="https://i.pravatar.cc/150?img=${Math.abs(name.hashCode()) % 70 || 15}" class="user-avatar" style="border:none;">
-                                <div class="user-follow-info"><h4 onclick="App.Router.navigate('profil?name=${encodeURIComponent(name)}')">${name}</h4></div>
-                                <button class="btn btn-primary" style="padding:6px 12px; font-size:0.8rem;" onclick="App.Router.navigate('profil?name=${encodeURIComponent(name)}')">Profil</button>
-                            </div>
-                        `).join('');
-                    } catch(err) {}
-                },
-
-                async loadFriendsCount() {
-                    const myEmail = localStorage.getItem('ns_user_email') || '';
-                    try {
-                        const { data } = await supabaseClient.from('friends').select('count', { count: 'exact' }).eq('user_email', myEmail);
-                        const countEl = document.getElementById('profile-friends-count');
-                        if (countEl && data) countEl.innerText = data.length || 0;
-                    } catch(e) {}
+                saveNameSettings() {
+                    const name = document.getElementById('settings-display-name').value.trim();
+                    const bio = document.getElementById('settings-bio-status').value.trim();
+                    const dom = document.getElementById('settings-domisili').value.trim();
+                    const res = App.ProfileState.updateProfileDataConfiguration(name, bio, dom);
+                    if(res.success) { App.Toast.show("Profil disimpan secara cloud!", "success"); App.Router.navigate('profil'); }
+                    else { alert(res.message); }
                 },
 
                 async renderPosts() {
@@ -1367,19 +1353,14 @@
                             return;
                         }
 
-                        const lovedLogs = JSON.parse(localStorage.getItem('ns_loved_posts_ids') || '[]');
-                        const likedLogs = JSON.parse(localStorage.getItem('ns_liked_posts_ids') || '[]');
                         const myPremiumLevel = App.ProfileState.getPremiumLevel();
                         const myCurrentAvatar = App.ProfileState.getCurrentAvatar();
 
                         const feedHTMLContent = filteredPosts.map(p => {
                             const pId = p.id; 
-                            const isLikedActive = likedLogs.includes(pId) ? 'liked' : '';
-                            const isLovedActive = lovedLogs.includes(pId) ? 'loved' : '';
-                            
                             const createdTimestamp = p.created_at ? new Date(p.created_at).getTime() : Date.now();
                             
-                            let parsedRoleData = { comments: [], privacy: 'public', location: '', mediaUrl: '', bgColor: '#ffffff' };
+                            let parsedRoleData = { comments: [], privacy: 'public', location: '', mediaUrl: '', bgColor: '#ffffff', lovedUsers: [], sharedCount: 0, likedUsers: [] };
                             try {
                                 if (p.role && p.role.startsWith('{')) {
                                     parsedRoleData = JSON.parse(p.role);
@@ -1387,6 +1368,14 @@
                                     parsedRoleData.comments = JSON.parse(p.role);
                                 }
                             } catch(e) {}
+                            
+                            // Normalisasi key internal array real-time data database
+                            if(!parsedRoleData.lovedUsers) parsedRoleData.lovedUsers = [];
+                            if(!parsedRoleData.likedUsers) parsedRoleData.likedUsers = [];
+                            if(!parsedRoleData.sharedCount) parsedRoleData.sharedCount = 0;
+
+                            const isLikedActive = parsedRoleData.likedUsers.includes(myCurrentName) ? 'liked' : '';
+                            const isLovedActive = parsedRoleData.lovedUsers.includes(myCurrentName) ? 'loved' : '';
                             
                             const privacyMap = { 'public': 'public', 'friends': 'group', 'private': 'lock' };
                             const privacyIcon = privacyMap[parsedRoleData.privacy] || 'public';
@@ -1457,14 +1446,15 @@
                                     ${attachedMediaContentHTML}
                                     
                                     <div class="post-actions-bar">
-                                        <div class="post-action-item ${isLikedActive}" onclick="App.Features.toggleLike(${pId}, ${p.likes || 0}, '${p.author}')">
+                                        <!-- REALTIME COUNTER BROWSER LAIN -->
+                                        <div class="post-action-item ${isLikedActive}" onclick="App.Features.toggleLike(${pId}, '${p.author}')">
                                             <span class="material-symbols-outlined">thumb_up</span>
-                                            <span>Suka</span>
+                                            <span>${parsedRoleData.likedUsers.length} Suka</span>
                                         </div>
                                         
                                         <div class="post-action-item ${isLovedActive}" onclick="App.Features.toggleLoveReaction(${pId}, '${p.author}')">
                                             <span class="material-symbols-outlined">favorite</span>
-                                            <span>Love</span>
+                                            <span>${parsedRoleData.lovedUsers.length} Love</span>
                                         </div>
 
                                         <div class="post-action-item" onclick="App.Features.openCommentsBottomSheet(${pId}, '${p.author}')">
@@ -1474,7 +1464,7 @@
                                         
                                         <div class="post-action-item" onclick="App.Features.openSocialMediaShareSheetModal(${pId}, '${p.author}', '${(p.content || "").replace(/'/g, "\\'")}', ${hasImg})">
                                             <span class="material-symbols-outlined">share</span>
-                                            <span>Bagikan</span>
+                                            <span>${parsedRoleData.sharedCount} Bagikan</span>
                                         </div>
                                     </div>
                                 </div>
@@ -1486,13 +1476,62 @@
                     } catch (err) {}
                 },
 
+                /* REVISI REAL-TIME GLOBAL LOVE REACTION (SUPABASE ALIGNED) */
+                async toggleLoveReaction(id, postAuthor) {
+                    const myCurrentName = App.ProfileState.getCurrentName();
+                    try {
+                        const { data } = await supabaseClient.from('posts').select('role').eq('id', id).single();
+                        let postRoleData = { comments: [], privacy: 'public', location: '', mediaUrl: '', bgColor: '#ffffff', lovedUsers: [], sharedCount: 0, likedUsers: [] };
+                        if (data && data.role && data.role.startsWith('{')) postRoleData = JSON.parse(data.role);
+                        
+                        if(!postRoleData.lovedUsers) postRoleData.lovedUsers = [];
+                        
+                        if (postRoleData.lovedUsers.includes(myCurrentName)) {
+                            postRoleData.lovedUsers = postRoleData.lovedUsers.filter(x => x !== myCurrentName);
+                        } else {
+                            postRoleData.lovedUsers.push(myCurrentName);
+                            if (postAuthor !== myCurrentName) {
+                                liveNotifications.unshift({ id: Date.now(), icon: 'favorite', user: myCurrentName, type: 'love', desc: `menyukai kiriman Anda dengan Love.`, isUnread: true, timestamp: Date.now() });
+                            }
+                        }
+                        
+                        await supabaseClient.from('posts').update({ role: JSON.stringify(postRoleData) }).eq('id', id);
+                    } catch(e) {}
+                },
+
+                /* REVISI REAL-TIME GLOBAL LIKES REACTION (SUPABASE ALIGNED) */
+                async toggleLike(id, postAuthor) {
+                    const myCurrentName = App.ProfileState.getCurrentName();
+                    try {
+                        const { data } = await supabaseClient.from('posts').select('role').eq('id', id).single();
+                        let postRoleData = { comments: [], privacy: 'public', location: '', mediaUrl: '', bgColor: '#ffffff', lovedUsers: [], sharedCount: 0, likedUsers: [] };
+                        if (data && data.role && data.role.startsWith('{')) postRoleData = JSON.parse(data.role);
+                        
+                        if(!postRoleData.likedUsers) postRoleData.likedUsers = [];
+                        
+                        if (postRoleData.likedUsers.includes(myCurrentName)) {
+                            postRoleData.likedUsers = postRoleData.likedUsers.filter(x => x !== myCurrentName);
+                        } else {
+                            postRoleData.likedUsers.push(myCurrentName);
+                            if (postAuthor !== myCurrentName) {
+                                liveNotifications.unshift({ id: Date.now(), icon: 'thumb_up', user: myCurrentName, type: 'like', desc: `menyukai kiriman terbaru Anda.`, isUnread: true, timestamp: Date.now() });
+                            }
+                        }
+                        
+                        // Update counter biner bawaan database & payload text secara pararel
+                        await supabaseClient.from('posts').update({ 
+                            likes: postRoleData.likedUsers.length,
+                            role: JSON.stringify(postRoleData) 
+                        }).eq('id', id);
+                    } catch(e) {}
+                },
+
                 async openCommentsBottomSheet(postId, postAuthor) {
                     activeBottomSheetPostId = postId;
                     activeReplyTargetCommentId = null; 
                     
                     const sheet = document.getElementById('comments-overlay-bottom-sheet');
                     const streamViewport = document.getElementById('comments-sheet-stream-injector');
-                    const dockForm = document.getElementById('comments-sheet-input-dock-form');
                     
                     sheet.classList.add('active');
                     streamViewport.innerHTML = `<div style="text-align:center; padding:32px; color:var(--text-muted); font-size:0.9rem;">Memuat aliran komentar...</div>`;
@@ -1531,7 +1570,6 @@
                     App.Features.renderBottomSheetInputBar();
                 },
 
-                /* PERBAIKAN: SEKARANG MENGGUNAKAN WAKTU RELATIF REAL-TIME (App.UI.calculateRelativeTimeAgo) PADA KONTEN KOMENTAR & BALASAN */
                 async reloadCommentsBottomSheetStreamOnly() {
                     if (!activeBottomSheetPostId) return;
                     const streamViewport = document.getElementById('comments-sheet-stream-injector');
@@ -1571,7 +1609,6 @@
                             const isLikedByMe = likesArray.includes(myName) ? 'active' : '';
                             const likeCounterText = likesArray.length > 0 ? `• <span>👍 ${likesArray.length}</span>` : '';
                             
-                            // Ambil waktu realtime komentar utama (jika c.date tidak ada, pakai waktu sekarang sebagai fallback aman)
                             const commentTimeText = App.UI.calculateRelativeTimeAgo(c.date || Date.now());
                             
                             let repliesHTML = '';
@@ -1580,8 +1617,6 @@
                                 repliesHTML += repliesArray.map(r => {
                                     const subUser = r.user || 'User';
                                     const subAvatar = `https://i.pravatar.cc/150?img=${Math.abs(subUser.hashCode()) % 70 || 14}`;
-                                    
-                                    // Ambil waktu realtime balasan komentar
                                     const replyTimeText = App.UI.calculateRelativeTimeAgo(r.date || Date.now());
 
                                     return `
@@ -1762,124 +1797,6 @@
                     });
                 },
 
-                toggleLoveReaction(id, postAuthor) {
-                    let lovedLogs = JSON.parse(localStorage.getItem('ns_loved_posts_ids') || '[]');
-                    const myCurrentName = App.ProfileState.getCurrentName();
-                    
-                    if (lovedLogs.includes(id)) {
-                        lovedLogs = lovedLogs.filter(x => x !== id);
-                    } else {
-                        lovedLogs.push(id);
-                        if (postAuthor !== myCurrentName) {
-                            liveNotifications.unshift({ id: Date.now(), icon: 'favorite', user: myCurrentName, type: 'love', desc: `menyukai kiriman Anda dengan Love.`, isUnread: true, timestamp: Date.now() });
-                        }
-                    }
-                    localStorage.setItem('ns_loved_posts_ids', JSON.stringify(lovedLogs));
-                    this.renderPosts();
-                },
-
-                async toggleLike(id, currentLikes, postAuthor) {
-                    let likedLogs = JSON.parse(localStorage.getItem('ns_liked_posts_ids') || '[]');
-                    const myCurrentName = App.ProfileState.getCurrentName();
-                    if (likedLogs.includes(id)) {
-                        likedLogs = likedLogs.filter(x => x !== id);
-                        await supabaseClient.from('posts').update({ likes: Math.max(0, currentLikes - 1) }).eq('id', id);
-                    } else {
-                        likedLogs.push(id);
-                        await supabaseClient.from('posts').update({ likes: currentLikes + 1 }).eq('id', id);
-                        if (postAuthor !== myCurrentName) {
-                            liveNotifications.unshift({ id: Date.now(), icon: 'thumb_up', user: myCurrentName, type: 'like', desc: `menyukai kiriman terbaru Anda.`, isUnread: true, timestamp: Date.now() });
-                        }
-                    }
-                    localStorage.setItem('ns_liked_posts_ids', JSON.stringify(likedLogs));
-                    this.renderPosts();
-                },
-
-                async createPost() {
-                    const textValue = document.getElementById('composer-text').value.trim();
-                    const mediaUrlInput = document.getElementById('composer-media-url');
-                    const mediaUrlValue = mediaUrlInput ? mediaUrlInput.value.trim() : '';
-                    
-                    if(!textValue && !composerAttachedImageBase64 && !mediaUrlValue) return;
-                    try {
-                        const privacySelector = document.getElementById('composer-privacy-select');
-                        const selectedPrivacy = privacySelector ? privacySelector.value : 'public';
-                        
-                        const roleData = { 
-                            comments: [], 
-                            privacy: selectedPrivacy,
-                            location: activeComposerLocation,
-                            mediaUrl: mediaUrlValue,
-                            bgColor: currentComposerBgColor
-                        };
-
-                        await supabaseClient.from('posts').insert([{ author: App.ProfileState.getCurrentName(), avatar: App.ProfileState.getCurrentAvatar(), content: textValue, image: composerAttachedImageBase64, role: JSON.stringify(roleData), likes: 0 }]);
-                        App.Modal.close();
-                        App.Toast.show("Kiriman berhasil diterbitkan!", "success"); 
-                        this.renderPosts();
-                    } catch (err) { App.Toast.show("Gagal memublikasikan kiriman.", "danger"); }
-                },
-
-                showNotifications() {
-                    liveHeaderNotificationCount = 0; App.UI.refreshHeaderNotificationBadgeDOM();
-                    if (liveNotifications.length === 0) {
-                        App.Modal.open("Notifikasi", `<p style="padding:16px; text-align:center; color:var(--text-muted);">Belum ada notifikasi.</p>`, true, false);
-                        return;
-                    }
-
-                    const nowTime = Date.now();
-                    const newNotifications = liveNotifications.filter(n => (nowTime - n.timestamp) < 60000 * 30);
-                    const olderNotifications = liveNotifications.filter(n => (nowTime - n.timestamp) >= 60000 * 30);
-
-                    const mapNotificationToHTML = (item) => {
-                        const unreadClass = item.isUnread ? 'unread' : '';
-                        let badgeIcon = 'notifications';
-                        let badgeColorClass = 'badge-like';
-                        
-                        if(item.type === 'like') { badgeIcon = 'thumb_up'; badgeColorClass = 'badge-like'; }
-                        if(item.type === 'love') { badgeIcon = 'favorite'; badgeColorClass = 'badge-love'; }
-                        if(item.type === 'comment') { badgeIcon = 'chat_bubble'; badgeColorClass = 'badge-comment'; }
-                        if(item.type === 'share') { badgeIcon = 'share'; badgeColorClass = 'badge-share'; }
-
-                        item.isUnread = false;
-                        const userAvatarUrl = `https://i.pravatar.cc/150?img=${Math.abs(item.user.hashCode()) % 70 || 12}`;
-
-                        return `
-                            <div class="fb-noti-item ${unreadClass}" onclick="App.Modal.close(); App.Router.navigate('profil?name=${encodeURIComponent(item.user)}');">
-                                <div class="fb-noti-avatar-zone">
-                                    <img src="${userAvatarUrl}" class="fb-noti-img" alt="">
-                                    <div class="fb-noti-badge-icon ${badgeColorClass}">
-                                        <span class="material-symbols-outlined" style="font-size:12px;">${badgeIcon}</span>
-                                    </div>
-                                </div>
-                                <div class="fb-noti-text-zone">
-                                    <p class="fb-noti-desc"><strong>${item.user}</strong> ${item.desc}</p>
-                                    <span class="fb-noti-time">${App.UI.calculateRelativeTimeAgo(item.timestamp)}</span>
-                                </div>
-                                <div class="fb-noti-opt-btn" onclick="event.stopPropagation(); alert('Opsi selengkapnya segera hadir.')">
-                                    <span class="material-symbols-outlined" style="font-size:20px;">more_horiz</span>
-                                </div>
-                            </div>
-                        `;
-                    };
-
-                    let htmlResult = `<div class="fb-noti-container">`;
-                    htmlResult += `<div class="fb-noti-section-title">Baru</div>`;
-                    if (newNotifications.length === 0) htmlResult += `<p style="padding:10px; color:var(--text-muted); font-size:0.85rem;">Tidak ada interaksi baru.</p>`;
-                    else htmlResult += newNotifications.map(mapNotificationToHTML).join('');
-
-                    htmlResult += `<div class="fb-noti-section-title" style="margin-top:8px;">Terdahulu</div>`;
-                    if (olderNotifications.length === 0) htmlResult += `<p style="padding:10px; color:var(--text-muted); font-size:0.85rem;">Belum ada interaksi lama tersimpan.</p>`;
-                    else htmlResult += olderNotifications.map(mapNotificationToHTML).join('');
-                    htmlResult += `</div>`;
-
-                    App.Modal.open("Notifikasi Anda", htmlResult, true, false);
-                },
-
-                togglePostCommentsVisibility(postId) {
-                    App.Features.openCommentsBottomSheet(postId, '');
-                },
-                
                 async handleAvatarSelection(event) {
                     const file = event.target.files[0]; if (!file) return;
                     App.Toast.show("Mengunggah foto ke storage bucket...", "info");
