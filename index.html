@@ -975,6 +975,7 @@
                         if (error) throw error;
                         if(data?.session) {
                             localStorage.setItem('ns_logged_in', 'true');
+                            localStorage.setItem('ns_user_id', data.session.user.id); // Simpan ID UUID internal secara global
                             localStorage.setItem('ns_user_email', data.session.user.email);
                             App.ProfileState.getJoinDateText();
                             App.UI.syncGlobalAvatarAndName();
@@ -1004,6 +1005,7 @@
                         if (!data.user) throw new Error("Pengguna tidak ditemukan");
                         
                         localStorage.setItem('ns_logged_in', 'true');
+                        localStorage.setItem('ns_user_id', data.user.id);
                         localStorage.setItem('ns_user_email', data.user.email);
                         App.UI.syncGlobalAvatarAndName();
                         this.showApp();
@@ -1806,7 +1808,21 @@
                     const mediaUrl = document.getElementById('composer-media-url')?.value.trim() || '';
                     if(!content && !composerAttachedImageBase64 && !mediaUrl) return;
                     try {
-                        await supabaseClient.from('posts').insert([{ author: App.ProfileState.getCurrentName(), avatar: App.ProfileState.getCurrentAvatar(), content, image: composerAttachedImageBase64, privacy: document.getElementById('composer-privacy-select').value, location: activeComposerLocation, media_url: mediaUrl, bg_color: currentComposerBgColor, liked_users: [], loved_users: [], shared_count: 0 }]);
+                        const myUuidId = localStorage.getItem('ns_user_id'); // Ambil UUID internal yang tersimpan saat login
+                        await supabaseClient.from('posts').insert([{ 
+                            user_id: myUuidId, // Ikat postingan baru secara presisi dengan UUID akun login Anda
+                            author: App.ProfileState.getCurrentName(), 
+                            avatar: App.ProfileState.getCurrentAvatar(), 
+                            content, 
+                            image: composerAttachedImageBase64, 
+                            privacy: document.getElementById('composer-privacy-select').value, 
+                            location: activeComposerLocation, 
+                            media_url: mediaUrl, 
+                            bg_color: currentComposerBgColor, 
+                            liked_users: [], 
+                            loved_users: [], 
+                            shared_count: 0 
+                        }]);
                         App.Modal.close(); composerAttachedImageBase64 = null; App.Toast.show("Status diterbitkan!", "success"); this.renderPosts();
                     } catch (err) {}
                 },
