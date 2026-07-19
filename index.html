@@ -597,7 +597,7 @@
             .minimal-composer-bar { padding: 12px 16px; margin-bottom: 16px; border-radius: var(--radius-lg); }
             .minimal-composer-input-mock { padding: 10px 16px; font-size: 0.95rem; }
             
-            /* FIX: Chat mode handphone tetap di bawah header (tidak full screen) */
+            /* Chat mode handphone tetap di bawah header (tidak full screen) */
             .floating-chat-widget {
                 width: 100vw;
                 height: calc(100vh - var(--header-height));
@@ -1152,6 +1152,7 @@
                         </div>
                     `;
                 },
+                // FIX: Membersihkan view Settings dari sisa-sisa elemen post popup yang salah alamat
                 settings() {
                     const currentName = App.ProfileState.getCurrentName();
                     const currentAvatar = App.ProfileState.getCurrentAvatar();
@@ -1166,7 +1167,7 @@
                             <h3 style="margin-bottom: 8px; color: var(--primary);">Panel Pasang Iklan Super Admin</h3>
                             <form id="global-admin-ad-form" onsubmit="App.Features.saveAdminGlobalAdBannerAction(event)">
                                 <div class="form-group" style="margin-bottom: 14px;">
-                                    <textarea class="form-input" id="admin-ad-html-input" placeholder=" " required style="min-height: 120px;">${localStorage.getItem('ns_ad_html_global') || ''}</textarea>
+                                    <textarea class="form-input" id="admin-ad-html-input" placeholder=" " required style="min-height: 120px;"></textarea>
                                     <label class="form-label">Kode Iklan HTML/JS</label>
                                 </div>
                                 <button type="submit" class="btn btn-primary btn-full">Publikasikan Banner Iklan</button>
@@ -1182,6 +1183,7 @@
                             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; border-bottom: 1px solid var(--border-color); padding-bottom: 12px;">
                                 <h2 style="display: flex; align-items: center; gap: 8px; margin: 0;">
                                     <span class="material-symbols-outlined" style="font-size: 28px; color: var(--primary);">settings</span>
+                                    <span>Pengaturan Akun</span>
                                 </h2>
                                 <button class="icon-btn" onclick="App.Router.navigate('feed')" title="Tutup" style="color: var(--text-muted);">
                                     <span class="material-symbols-outlined">close</span>
@@ -1242,7 +1244,7 @@
                     };
                 },
 
-                // FIX: Menjadikan form modal pembuatan status bisa diklik dengan aman tanpa penumpukan rawMode layout
+                // Pemindahan & Perbaikan form posting status yang terisolasi dan modular
                 openComposerModalPopupForm() {
                     const currentName = App.ProfileState.getCurrentName();
                     const premiumLevel = App.ProfileState.getPremiumLevel();
