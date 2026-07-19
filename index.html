@@ -157,9 +157,9 @@
         .post-content { font-family: var(--font-main); font-size: 1.05rem; font-weight: 400; line-height: 1.65; letter-spacing: -0.1px; margin-bottom: 16px; color: var(--text-main); text-align: left; white-space: pre-wrap; word-break: break-word; max-width: 100%; }
         
         .post-actions-bar { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 12px 4px; border-top: 1px solid rgba(0,0,0,0.05); border-bottom: 1px solid rgba(0,0,0,0.05); margin-top: 16px; max-width: 100%; }
-        .post-action-item { display: inline-flex; align-items: center; gap: 6px; color: var(--text-muted); font-weight: 600; font-size: 0.88rem; cursor: pointer; transition: var(--trans-smooth); user-select: none; }
+        .post-action-item { display: inline-flex; align-items: center; gap: 8px; color: var(--text-muted); font-weight: 600; font-size: 0.95rem; cursor: pointer; transition: var(--trans-smooth); user-select: none; }
         .post-action-item:hover { color: var(--primary); }
-        .post-action-item .material-symbols-outlined { font-size: 20px; transition: var(--trans-smooth); }
+        .post-action-item .material-symbols-outlined { font-size: 22px; transition: var(--trans-smooth); }
         
         .post-action-item.liked { color: var(--primary) !important; }
         .post-action-item.liked .material-symbols-outlined { font-variation-settings: 'FILL' 1; color: var(--primary) !important; }
@@ -942,6 +942,7 @@
                         .channel('realtime-comments')
                         .on('postgres_changes', { event: '*', schema: 'public', table: 'comments' }, async () => {
                             if (activeBottomSheetPostId) App.Features.reloadCommentsBottomSheetStreamOnly();
+                            App.Features.renderPosts();
                         })
                         .subscribe();
 
@@ -1445,16 +1446,28 @@
                     } catch(err) {}
                 },
 
-                openPostActionMenuDOM(postId) {
-                    let html = `
-                        <div style="display:flex; flex-direction:column; gap:10px;">
-                            <button class="btn btn-secondary btn-full" onclick="App.Features.updatePostPrivacy(${postId}, 'public')"><span class="material-symbols-outlined">public</span> Publik</button>
-                            <button class="btn btn-secondary btn-full" onclick="App.Features.updatePostPrivacy(${postId}, 'friends')"><span class="material-symbols-outlined">group</span> Teman</button>
-                            <button class="btn btn-secondary btn-full" onclick="App.Features.updatePostPrivacy(${postId}, 'private')"><span class="material-symbols-outlined">lock</span> Privat</button>
-                            <button class="btn btn-secondary btn-full" onclick="App.Features.triggerPostTextEditAction(${postId})"><span class="material-symbols-outlined">edit</span> Edit Konten</button>
-                            <button class="btn btn-secondary btn-full" style="color:var(--danger);" onclick="App.Features.triggerPostAbsoluteDeleteAction(${postId})"><span class="material-symbols-outlined">delete</span> Hapus</button>
-                        </div>`;
-                    App.Modal.open("Pengaturan Postingan", html, true, false);
+                openPostActionMenuDOM(postId, postAuthor) {
+                    const myName = App.ProfileState.getCurrentName();
+                    let html = '';
+                    
+                    if (postAuthor === myName) {
+                        html = `
+                            <div style="display:flex; flex-direction:column; gap:10px;">
+                                <button class="btn btn-secondary btn-full" onclick="App.Features.updatePostPrivacy(${postId}, 'public')"><span class="material-symbols-outlined">public</span> Publik</button>
+                                <button class="btn btn-secondary btn-full" onclick="App.Features.updatePostPrivacy(${postId}, 'friends')"><span class="material-symbols-outlined">group</span> Teman</button>
+                                <button class="btn btn-secondary btn-full" onclick="App.Features.updatePostPrivacy(${postId}, 'private')"><span class="material-symbols-outlined">lock</span> Privat</button>
+                                <button class="btn btn-secondary btn-full" onclick="App.Features.triggerPostTextEditAction(${postId})"><span class="material-symbols-outlined">edit</span> Edit Konten</button>
+                                <button class="btn btn-secondary btn-full" style="color:var(--danger);" onclick="App.Features.triggerPostAbsoluteDeleteAction(${postId})"><span class="material-symbols-outlined">delete</span> Hapus</button>
+                            </div>`;
+                    } else {
+                        html = `
+                            <div style="display:flex; flex-direction:column; gap:10px;">
+                                <button class="btn btn-secondary btn-full" onclick="App.Modal.close(); App.Features.toggleLike(${postId}, '${postAuthor}')"><span class="material-symbols-outlined">thumb_up</span> Sukai Postingan</button>
+                                <button class="btn btn-secondary btn-full" onclick="App.Modal.close(); App.Router.navigate('profil?name=${encodeURIComponent(postAuthor)}')"><span class="material-symbols-outlined">account_circle</span> Lihat Profil ${postAuthor}</button>
+                                <button class="btn btn-secondary btn-full" style="color:var(--danger);" onclick="App.Modal.close(); App.Toast.show('Konten dilaporkan ke admin', 'info')"><span class="material-symbols-outlined">report</span> Laporkan Konten</button>
+                            </div>`;
+                    }
+                    App.Modal.open("Opsi Pengaturan", html, true, false);
                 },
 
                 async updatePostPrivacy(postId, val) {
@@ -1485,6 +1498,7 @@
                     const stream = document.getElementById('feed-stream'); if(!stream) return;
                     try {
                         const { data: posts } = await supabaseClient.from('posts').select('*').order('created_at', { ascending: false });
+                        const { data: allComments } = await supabaseClient.from('comments').select('post_id');
                         const myName = App.ProfileState.getCurrentName();
                         let filtered = posts || [];
 
@@ -1506,6 +1520,9 @@
                             const hasLoved = (p.loved_users || []).includes(myName) ? 'loved' : '';
                             const mediaHTML = p.media_url ? (p.media_url.includes('youtube.com') ? `<iframe src="https://www.youtube.com/embed/${p.media_url.split('v=')[1]}" allowfullscreen></iframe>` : `<audio controls><source src="${p.media_url}"></audio>`) : (p.image ? `<img src="${p.image}" class="post-attached-image">` : '');
                             
+                            // Hitung jumlah data komentar secara dinamis dari tabel comments
+                            const commentCount = allComments ? allComments.filter(c => c.post_id === p.id).length : 0;
+
                             return `
                                 <div class="post-card">
                                     <div class="post-header">
@@ -1519,16 +1536,16 @@
                                                 </div>
                                             </div>
                                         </div>
-                                        ${p.author === myName ? `<button class="post-menu-trigger" onclick="App.Features.openPostActionMenuDOM(${p.id})"><span class="material-symbols-outlined">more_vert</span></button>` : ''}
+                                        <button class="post-menu-trigger" onclick="App.Features.openPostActionMenuDOM(${p.id}, '${p.author}')"><span class="material-symbols-outlined">more_vert</span></button>
                                     </div>
                                     <div class="post-content" style="background:${p.bg_color || '#ffffff'};">${p.content || ''}</div>
                                     ${p.location ? `<div style="color:var(--primary); font-size:0.8rem; margin-top:8px;">📍 ${p.location}</div>` : ''}
                                     ${mediaHTML}
                                     <div class="post-actions-bar">
-                                        <div class="post-action-item ${hasLiked}" onclick="App.Features.toggleLike(${p.id}, '${p.author}')"><span class="material-symbols-outlined">thumb_up</span><span>${(p.liked_users || []).length}</span></div>
-                                        <div class="post-action-item ${hasLoved}" onclick="App.Features.toggleLoveReaction(${p.id}, '${p.author}')"><span class="material-symbols-outlined">favorite</span><span>${(p.loved_users || []).length}</span></div>
-                                        <div class="post-action-item" onclick="App.Features.openCommentsBottomSheet(${p.id}, '${p.author}')"><span class="material-symbols-outlined">comment</span><span>Komentar</span></div>
-                                        <div class="post-action-item" onclick="App.Features.openSocialMediaShareSheetModal(${p.id}, '${p.author}', '${(p.content || "").replace(/'/g, "\\'")}', ${!!p.image})"><span class="material-symbols-outlined">share</span><span>${p.shared_count || 0}</span></div>
+                                        <div class="post-action-item ${hasLiked}" onclick="App.Features.toggleLike(${p.id}, '${p.author}')"><span class="material-symbols-outlined">thumb_up</span><span> ${(p.liked_users || []).length}</span></div>
+                                        <div class="post-action-item ${hasLoved}" onclick="App.Features.toggleLoveReaction(${p.id}, '${p.author}')"><span class="material-symbols-outlined">favorite</span><span> ${(p.loved_users || []).length}</span></div>
+                                        <div class="post-action-item" onclick="App.Features.openCommentsBottomSheet(${p.id}, '${p.author}')"><span class="material-symbols-outlined">comment</span><span>Komentar (${commentCount})</span></div>
+                                        <div class="post-action-item" onclick="App.Features.openSocialMediaShareSheetModal(${p.id}, '${p.author}', '${(p.content || "").replace(/'/g, "\\'")}', ${!!p.image})"><span class="material-symbols-outlined">share</span><span> ${p.shared_count || 0}</span></div>
                                     </div>
                                 </div>`;
                         }).join('') + `</div>`;
