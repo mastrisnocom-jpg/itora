@@ -1516,11 +1516,12 @@
                         }
 
                         stream.innerHTML = `<div class="feed-container">` + filtered.map(p => {
-                            const hasLiked = (p.liked_users || []).includes(myName) ? 'liked' : '';
-                            const hasLoved = (p.loved_users || []).includes(myName) ? 'loved' : '';
+                            const likedList = p.liked_users || [];
+                            const lovedList = p.loved_users || [];
+                            const hasLiked = likedList.includes(myName) ? 'liked' : '';
+                            const hasLoved = lovedList.includes(myName) ? 'loved' : '';
                             const mediaHTML = p.media_url ? (p.media_url.includes('youtube.com') ? `<iframe src="https://www.youtube.com/embed/${p.media_url.split('v=')[1]}" allowfullscreen></iframe>` : `<audio controls><source src="${p.media_url}"></audio>`) : (p.image ? `<img src="${p.image}" class="post-attached-image">` : '');
                             
-                            // Hitung jumlah data komentar secara dinamis dari tabel comments
                             const commentCount = allComments ? allComments.filter(c => c.post_id === p.id).length : 0;
 
                             return `
@@ -1542,9 +1543,9 @@
                                     ${p.location ? `<div style="color:var(--primary); font-size:0.8rem; margin-top:8px;">📍 ${p.location}</div>` : ''}
                                     ${mediaHTML}
                                     <div class="post-actions-bar">
-                                        <div class="post-action-item ${hasLiked}" onclick="App.Features.toggleLike(${p.id}, '${p.author}')"><span class="material-symbols-outlined">thumb_up</span><span> ${(p.liked_users || []).length}</span></div>
-                                        <div class="post-action-item ${hasLoved}" onclick="App.Features.toggleLoveReaction(${p.id}, '${p.author}')"><span class="material-symbols-outlined">favorite</span><span> ${(p.loved_users || []).length}</span></div>
-                                        <div class="post-action-item" onclick="App.Features.openCommentsBottomSheet(${p.id}, '${p.author}')"><span class="material-symbols-outlined">comment</span><span>Komentar (${commentCount})</span></div>
+                                        <div class="post-action-item ${hasLiked}" onclick="App.Features.toggleLike(${p.id}, '${p.author}')"><span class="material-symbols-outlined">thumb_up</span><span> ${likedList.length}</span></div>
+                                        <div class="post-action-item ${hasLoved}" onclick="App.Features.toggleLoveReaction(${p.id}, '${p.author}')"><span class="material-symbols-outlined">favorite</span><span> ${lovedList.length}</span></div>
+                                        <div class="post-action-item" onclick="App.Features.openCommentsBottomSheet(${p.id}, '${p.author}')"><span class="material-symbols-outlined">comment</span><span> Komentar (${commentCount})</span></div>
                                         <div class="post-action-item" onclick="App.Features.openSocialMediaShareSheetModal(${p.id}, '${p.author}', '${(p.content || "").replace(/'/g, "\\'")}', ${!!p.image})"><span class="material-symbols-outlined">share</span><span> ${p.shared_count || 0}</span></div>
                                     </div>
                                 </div>`;
@@ -1582,13 +1583,15 @@
                     const myName = App.ProfileState.getCurrentName();
                     try {
                         const { data } = await supabaseClient.from('posts').select('liked_users').eq('id', id).single();
-                        let list = data?.liked_users || [];
+                        let list = data && data.liked_users ? data.liked_users : [];
+                        
                         if (list.includes(myName)) {
                             list = list.filter(u => u !== myName);
                         } else {
                             list.push(myName); 
                             if(postAuthor !== myName) await this.pushCloudNotificationPayload(postAuthor, 'like', 'menyukai status Anda.'); 
                         }
+                        
                         await supabaseClient.from('posts').update({ liked_users: list }).eq('id', id); 
                         this.renderPosts();
                     } catch(e) {}
@@ -1598,13 +1601,15 @@
                     const myName = App.ProfileState.getCurrentName();
                     try {
                         const { data } = await supabaseClient.from('posts').select('loved_users').eq('id', id).single();
-                        let list = data?.loved_users || [];
+                        let list = data && data.loved_users ? data.loved_users : [];
+                        
                         if (list.includes(myName)) {
                             list = list.filter(u => u !== myName);
                         } else {
                             list.push(myName); 
                             if(postAuthor !== myName) await this.pushCloudNotificationPayload(postAuthor, 'love', 'menyukai status Anda dengan Cinta.'); 
                         }
+                        
                         await supabaseClient.from('posts').update({ loved_users: list }).eq('id', id); 
                         this.renderPosts();
                     } catch(e) {}
