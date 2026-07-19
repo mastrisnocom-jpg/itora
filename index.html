@@ -45,35 +45,35 @@
         }
 
         [data-theme="dark"] {
-            --bg-body: #05140b;
-            --bg-glass: rgba(11, 36, 21, 0.75);
-            --bg-glass-hover: rgba(11, 36, 21, 0.95);
-            --bg-glass-solid: #0b2415;
+            --bg-body: #0d1117;
+            --bg-glass: rgba(22, 27, 34, 0.75);
+            --bg-glass-hover: rgba(22, 27, 34, 0.95);
+            --bg-glass-solid: #161b22;
             --border-glass: rgba(255, 255, 255, 0.05);
-            --border-color: rgba(255, 255, 255, 0.1);
-            --text-main: #ffffff;
-            --text-muted: #6e9481;
+            --border-color: rgba(255, 255, 255, 0.08);
+            --text-main: #c9d1d9;
+            --text-muted: #8b949e;
             --primary: #01B574;
-            --primary-state: rgba(1, 181, 116, 0.15);
-            --shadow-soft: 0 18px 40px rgba(0, 0, 0, 0.3);
-            --shadow-float: 0 10px 20px rgba(1, 181, 116, 0.25);
+            --primary-state: rgba(255, 255, 255, 0.05);
+            --shadow-soft: 0 18px 40px rgba(0, 0, 0, 0.4);
+            --shadow-float: 0 10px 20px rgba(0, 0, 0, 0.25);
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: var(--font-main); -webkit-tap-highlight-color: transparent; }
-        body { background-color: var(--bg-body); color: var(--text-main); overflow-x: hidden; transition: var(--trans-smooth); min-height: 100vh; background-image: radial-gradient(at 0% 0%, rgba(1, 181, 116, 0.05) 0px, transparent 50%), radial-gradient(at 100% 100%, rgba(1, 181, 116, 0.03) 0px, transparent 50%); background-attachment: fixed; }
+        body { background-color: var(--bg-body); color: var(--text-main); overflow-x: hidden; transition: var(--trans-smooth); min-height: 100vh; background-image: radial-gradient(at 0% 0%, rgba(1, 181, 116, 0.03) 0px, transparent 50%), radial-gradient(at 100% 100%, rgba(0, 0, 0, 0.02) 0px, transparent 50%); background-attachment: fixed; }
         a { text-decoration: none; color: inherit; } ul { list-style: none; } button, input, textarea { font-family: inherit; outline: none; border: none; }
-        ::-webkit-scrollbar { width: 6px; height: 6px; } ::-webkit-scrollbar-track { background: transparent; } ::-webkit-scrollbar-thumb { background: rgba(1, 181, 116, 0.3); border-radius: var(--radius-round); } ::-webkit-scrollbar-thumb:hover { background: var(--primary); }
+        ::-webkit-scrollbar { width: 6px; height: 6px; } ::-webkit-scrollbar-track { background: transparent; } ::-webkit-scrollbar-thumb { background: rgba(128, 128, 128, 0.3); border-radius: var(--radius-round); } ::-webkit-scrollbar-thumb:hover { background: var(--primary); }
 
         /* AUTH LAYOUT */
         #auth-layout { display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 24px; position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 2000; background: var(--bg-body); transition: var(--trans-smooth); }
-        .auth-card { background: var(--bg-glass); backdrop-filter: blur(20px); border: 1px solid var(--border-glass); border-radius: var(--radius-xl); padding: 40px; width: 100%; max-width: 450px; box-shadow: var(--shadow-soft); text-align: center; }
+        .auth-card { background: var(--bg-glass); backdrop-filter: blur(20px); border: 1px solid var(--border-color); border-radius: var(--radius-xl); padding: 40px; width: 100%; max-width: 450px; box-shadow: var(--shadow-soft); text-align: center; }
         .auth-logo { width: 64px; height: 64px; background: linear-gradient(135deg, var(--primary), #52e0a5); border-radius: var(--radius-lg); display: flex; align-items: center; justify-content: center; color: white; font-size: 32px; font-weight: 700; margin: 0 auto 24px auto; box-shadow: var(--shadow-float); }
 
         /* APP LAYOUT */
         #app-layout { display: grid; grid-template-areas: "sidebar header" "sidebar content"; grid-template-columns: var(--sidebar-width) 1fr; grid-template-rows: var(--header-height) 1fr; min-height: 100vh; display: none; opacity: 0; transition: opacity 0.5s ease; }
         #app-layout.active { display: grid; opacity: 1; }
         #app-layout.sidebar-collapsed { --sidebar-width: 90px; }
-        .mobile-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(5, 20, 11, 0.5); backdrop-filter: blur(4px); z-index: 1000; opacity: 0; pointer-events: none; transition: var(--trans-smooth); }
+        .mobile-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.5); backdrop-filter: blur(4px); z-index: 1000; opacity: 0; pointer-events: none; transition: var(--trans-smooth); }
         .mobile-overlay.active { opacity: 1; pointer-events: auto; }
 
         /* HEADER */
@@ -95,23 +95,6 @@
         .badge { position: absolute; top: 4px; right: 4px; background: var(--danger); color: white; min-width: 18px; height: 18px; padding: 0 5px; border-radius: 9px; font-size: 0.7rem; font-weight: 800; display: none; align-items: center; justify-content: center; box-shadow: 0 2px 6px rgba(238,93,80,0.4); }
 
         /* SIDEBAR & NAV */
-        .menu-item-wrapper { position: relative; width: 100%; }
-        
-        /* PREMIUM AVATAR STYLES - REVISED FOR PERFECT MOBILE ALIGNMENT */
-        .premium-avatar-container { position: relative; display: inline-flex; cursor: pointer; align-items: center; justify-content: center; padding: 4px; margin-top: 2px; }
-        .premium-border { border: 2px solid #10B981 !important; }
-        .premium-level-badge { position: absolute; top: -3px; left: 50%; transform: translateX(-50%); background: #10B981; color: white; font-size: 0.55rem; font-weight: 900; padding: 1px 5px; border-radius: 6px; border: 1.5px solid var(--bg-glass-solid); z-index: 3; white-space: nowrap; line-height: 1; }
-        .verified-badge { position: absolute; bottom: 1px; right: 1px; background: #10B981; color: white; border-radius: 50%; font-size: 9px; width: 15px; height: 16px; display: flex; align-items: center; justify-content: center; border: 1.5px solid var(--bg-glass-solid); z-index: 2; font-weight: 900; }
-        
-        .user-avatar { width: 44px; height: 44px; border-radius: var(--radius-round); object-fit: cover; cursor: pointer; border: 2px solid var(--border-color); }
-        .icon-btn { width: 44px; height: 44px; border-radius: var(--radius-round); display: flex; align-items: center; justify-content: center; background: transparent; color: var(--text-muted); cursor: pointer; position: relative; transition: var(--trans-smooth); border: none; flex-shrink: 0; }
-        .icon-btn:hover { background: var(--bg-body); color: var(--primary); }
-        
-        .app-sidebar { grid-area: sidebar; background: var(--bg-glass-solid); border-right: 1px solid var(--border-color); padding: 32px 20px; display: flex; flex-direction: column; position: fixed; top: 0; left: 0; bottom: 0; width: var(--sidebar-width); z-index: 1001; transition: var(--trans-smooth); box-shadow: var(--shadow-soft); }
-        .brand { display: flex; align-items: center; gap: 12px; margin-bottom: 40px; padding: 0 12px; cursor: pointer; }
-        .brand-logo { width: 36px; height: 36px; background: var(--primary); color: white; border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 18px; }
-        .brand-name { font-size: 20px; font-weight: 800; color: var(--text-main); letter-spacing: -0.5px; }
-        #app-layout.sidebar-collapsed .brand-name { display: none; }
         .sidebar-menu { display: flex; flex-direction: column; gap: 6px; flex: 1; }
         .menu-item { display: flex; align-items: center; gap: 16px; padding: 14px 16px; border-radius: var(--radius-md); color: var(--text-muted); font-weight: 600; cursor: pointer; transition: var(--trans-smooth); position: relative; overflow: hidden; }
         .menu-item:hover { background: var(--primary-state); color: var(--primary); }
@@ -158,7 +141,7 @@
 
         .post-content { font-family: var(--font-main); font-size: 1.05rem; font-weight: 400; line-height: 1.65; letter-spacing: -0.1px; margin-bottom: 16px; color: var(--text-main); text-align: left; white-space: pre-wrap; word-break: break-word; max-width: 100%; }
         
-        .post-actions-bar { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 12px 4px; border-top: 1px solid rgba(0,0,0,0.05); border-bottom: 1px solid rgba(0,0,0,0.05); margin-top: 16px; max-width: 100%; }
+        .post-actions-bar { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 12px 4px; border-top: 1px solid rgba(128,128,128,0.15); border-bottom: 1px solid rgba(128,128,128,0.15); margin-top: 16px; max-width: 100%; }
         .post-action-item { display: inline-flex; align-items: center; gap: 6px; color: var(--text-muted); font-weight: 600; font-size: 0.88rem; cursor: pointer; transition: var(--trans-smooth); user-select: none; }
         .post-action-item:hover { color: var(--primary); }
         .post-action-item .material-symbols-outlined { font-size: 20px; transition: var(--trans-smooth); }
@@ -228,9 +211,6 @@
             background: #cbd5e1;
             border-radius: var(--radius-round);
         }
-        .comments-sheet-drag-handle-area:active {
-            cursor: grabbing;
-        }
         .comments-sheet-header {
             padding: 0 16px 12px 16px;
             border-bottom: 1px solid var(--border-color);
@@ -268,157 +248,44 @@
             color: var(--primary) !important;
         }
 
-        /* ==========================================================================
-           4. KOMPONEN POP UP COMPOSER (IKON MINIMALIS & INPUT SLIDE)
-           ========================================================================== */
+        /* COMPOSER POP UP */
         .pic-composer-card { display: flex; flex-direction: column; width: 100%; background: var(--bg-glass-solid); min-height: 100%; text-align: left; position: relative; max-width: 100%; }
-        .pic-composer-header { display: flex; align-items: center; justify-content: space-between; padding: 16px; border-bottom: 1px solid rgba(0,0,0,0.05); }
+        .pic-composer-header { display: flex; align-items: center; justify-content: space-between; padding: 16px; border-bottom: 1px solid rgba(128,128,128,0.1); }
         .pic-composer-close { font-size: 26px; color: var(--text-main); cursor: pointer; border: none; background: transparent; }
         .pic-composer-title { font-size: 1.1rem; font-weight: 800; color: var(--text-main); }
         .pic-composer-next-btn { background: #e2e8f0; color: #94a3b8; padding: 8px 18px; border-radius: 8px; font-weight: 700; font-size: 0.88rem; cursor: pointer; transition: var(--trans-smooth); border: none; }
         .pic-composer-next-btn.ready { background: var(--primary); color: white; box-shadow: var(--shadow-float); }
-        
-        .pic-composer-profile-row { display: flex; align-items: center; gap: 12px; padding: 16px; }
-        .pic-composer-username { font-size: 1.05rem; font-weight: 800; color: var(--text-main); }
-        
-        .pic-composer-body { flex: 1; padding: 0 16px; display: flex; flex-direction: column; max-width: 100%; }
-        .pic-composer-textarea { width: 100%; border: none; resize: none; background: transparent; color: var(--text-main); font-size: 1.1rem; min-height: 140px; font-family: var(--font-main); line-height: 1.5; box-sizing: border-box; }
-        .pic-composer-textarea:focus { outline: none; }
-        .pic-composer-preview-box { margin-top: 12px; border-radius: 12px; overflow: hidden; max-height: 140px; text-align: center; }
-        .pic-composer-preview-box img { max-height: 130px; object-fit: cover; border: 2px solid var(--primary); border-radius: 8px; margin: 0 auto; display: block; max-width: 100%; }
 
-        .composer-dynamic-input-zone {
-            padding: 0 16px;
+        /* MOBILE HEADER SEARCH CONTROL ROW */
+        .mobile-header-search-expanded-row {
+            display: none;
+            width: 100%;
+            padding: 4px 0 8px 0;
+            animation: slideDownFade 0.3s ease forwards;
+        }
+        .mobile-header-search-expanded-row.active {
             display: flex;
-            flex-direction: column;
-            gap: 8px;
-            max-height: 0;
-            overflow: hidden;
-            transition: max-height 0.3s cubic-bezier(0.25, 1, 0.5, 1);
-            max-width: 100%;
         }
-        .composer-dynamic-input-zone.active {
-            max-height: 120px;
-            margin-bottom: 12px;
+        .mobile-header-search-expanded-row .search-box {
+            width: 100% !important;
         }
 
-        .pic-composer-dock-grid { display: flex; justify-content: space-around; padding: 16px; border-top: 1px solid rgba(0,0,0,0.04); background: var(--bg-glass-solid); max-width: 100%; }
-        .pic-dock-icon-only-item { display: flex; flex-direction: column; align-items: center; justify-content: center; width: 50px; height: 50px; border-radius: 50%; background: var(--bg-body); border: 1px solid rgba(0,0,0,0.04); cursor: pointer; transition: var(--trans-smooth); }
-        .pic-dock-icon-only-item:hover, .pic-dock-icon-only-item.active { background: var(--primary-state); border-color: var(--primary); }
-        .pic-dock-icon-only-item .material-symbols-outlined { font-size: 24px; color: var(--text-main); }
-        .pic-dock-icon-only-item.active .material-symbols-outlined { color: var(--primary); }
-
-        /* ==========================================================================
-           5. MULTI SHARE SHEET CSS
-           ========================================================================== */
-        .share-grid-sheet { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; padding: 12px 0; text-align: center; max-width: 100%; }
-        .share-item-node { display: flex; flex-direction: column; align-items: center; gap: 8px; cursor: pointer; transition: var(--trans-smooth); }
-        .share-item-node:hover { transform: translateY(-3px); }
-        .share-icon-circle { width: 54px; height: 54px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: 800; font-size: 1.2rem; box-shadow: var(--shadow-float); }
-        .share-grid-sheet span { font-size: 0.75rem; font-weight: 700; color: var(--text-main); }
-
-        .user-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 16px; text-align: left; max-width: 100%; }
-        .user-follow-card { display: flex; align-items: center; gap: 12px; padding: 14px; background: var(--bg-body); border: 1px solid var(--border-color); border-radius: var(--radius-md); max-width: 100%; box-sizing: border-box; }
-        .user-follow-info { flex: 1; overflow: hidden; }
-
-        .avatar-edit-container { display: flex; flex-direction: column; align-items: center; gap: 14px; margin-bottom: 28px; }
-        .avatar-preview-wrapper { position: relative; width: 100px; height: 100px; }
-        .avatar-preview-circle { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; padding: 2px; }
-        .avatar-upload-label { position: absolute; bottom: 0; right: 0; width: 32px; height: 32px; border-radius: 50%; background: var(--primary); color: white; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: var(--shadow-float); }
-
-        /* ==========================================================================
-           9. FIX: MINIMAL COMPOSER BAR SEBELUM DIKLIK (SEJAJAR HORIZONTAL)
-           ========================================================================== */
-        .minimal-composer-bar { 
-            display: flex; 
-            align-items: center; 
-            gap: 14px; 
-            background: var(--bg-glass-solid); 
-            border: 1px solid var(--border-color); 
-            padding: 16px 24px; 
-            border-radius: var(--radius-xl); 
-            box-shadow: var(--shadow-soft); 
-            margin-bottom: 28px; 
-            transition: var(--trans-smooth); 
-            max-width: 100%;
-            box-sizing: border-box;
-        }
-        .minimal-composer-input-mock { 
-            flex: 1; 
-            border: 1px solid rgba(135, 143, 166, 0.3); 
-            padding: 12px 24px; 
-            border-radius: var(--radius-round); 
-            color: var(--text-muted); 
-            font-size: 1.05rem; 
-            font-weight: 500; 
-            text-align: left; 
-            background: var(--bg-body); 
-            cursor: pointer; 
-            transition: var(--trans-smooth); 
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-        .minimal-composer-input-mock:hover { background: rgba(135, 143, 166, 0.1); }
-        .minimal-composer-gallery-icon { 
-            color: var(--text-muted); 
-            font-size: 28px; 
-            display: flex; 
-            align-items: center; 
-            justify-content: center; 
-            cursor: pointer; 
-            transition: var(--trans-smooth); 
-            user-select: none;
-            flex-shrink: 0;
-        }
-        .minimal-composer-gallery-icon:hover { color: var(--primary); }
-
-        /* PROFILE LAYOUT UTILS */
-        .profile-cover { height: 140px; background: linear-gradient(135deg, var(--primary-hover), var(--primary)); width: 100%; }
-        .profile-avatar-large { width: 110px; height: 110px; border-radius: 50%; object-fit: cover; border: 4px solid var(--bg-glass-solid); margin-top: -55px; position: relative; background: var(--bg-glass-solid); }
-        .profile-stats { display: flex; justify-content: space-around; padding: 16px 0; border-top: 1px solid var(--border-color); border-bottom: 1px solid var(--border-color); margin-top: 16px; max-width: 100%; }
-        .stat-item { display: flex; flex-direction: column; align-items: center; }
-        .stat-val { font-weight: 800; font-size: 1.1rem; color: var(--text-main); }
-        .stat-lbl { font-size: 0.75rem; color: var(--text-muted); font-weight: 600; }
-
-        /* FLOATING CHAT WIDGET SYSTEM */
-        .floating-chat-widget { position: fixed; bottom: 85px; right: 20px; width: 360px; height: 480px; background: var(--bg-glass-solid); border: 1px solid var(--border-color); border-radius: var(--radius-xl); box-shadow: var(--shadow-soft); display: none; flex-direction: column; overflow: hidden; z-index: 1002; transition: var(--trans-smooth); max-width: calc(100% - 40px); }
-        .floating-chat-widget.active { display: flex; }
-        .popup-chat-header { background: var(--primary); color: white; padding: 14px 16px; display: flex; align-items: center; justify-content: space-between; }
-        .popup-chat-body-container { display: flex; flex: 1; overflow: hidden; max-width: 100%; }
-        .popup-friends-list { width: 70px; border-right: 1px solid var(--border-color); background: var(--bg-body); overflow-y: auto; display: flex; flex-direction: column; align-items: center; padding: 10px 0; gap: 12px; flex-shrink: 0; }
-        .popup-friend-item { position: relative; cursor: pointer; }
-        .friend-avatar-node { width: 44px; height: 44px; border-radius: 50%; object-fit: cover; border: 2px solid transparent; }
-        .popup-friend-item:hover .friend-avatar-node { border-color: var(--primary); }
-        .friend-online-dot { position: absolute; bottom: 2px; right: 2px; width: 10px; height: 10px; background: #10B981; border-radius: 50%; border: 2px solid var(--bg-body); }
-        .popup-chat-main-area { flex: 1; display: flex; flex-direction: column; overflow: hidden; background: var(--bg-glass-solid); max-width: calc(100% - 70px); }
-        .popup-msg-stream { flex: 1; overflow-y: auto; padding: 12px; display: flex; flex-direction: column; gap: 8px; }
-        .popup-chat-input-row { padding: 10px; border-top: 1px solid var(--border-color); display: flex; gap: 8px; align-items: center; max-width: 100%; box-sizing: border-box; }
-        .bubble { max-width: 85%; padding: 8px 14px; border-radius: 16px; font-size: 0.88rem; line-height: 1.4; margin-bottom: 2px; word-break: break-word; }
-        .bubble.in { background: var(--bg-body); align-self: flex-start; border-bottom-left-radius: 4px; }
-        .bubble.out { background: var(--primary); color: white; align-self: flex-end; border-bottom-right-radius: 4px; }
-
-        /* GLOBAL ROBUST MODAL SYSTEM */
-        .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(5,20,11,0.5); backdrop-filter: blur(4px); z-index: 4000; display: none; align-items: center; justify-content: center; padding: 20px; transition: var(--trans-smooth); }
-        .modal-overlay.active { display: flex; }
-        .modal-content { background: var(--bg-glass-solid); border: 1px solid var(--border-color); border-radius: var(--radius-xl); padding: 24px; width: 100%; max-width: 500px; position: relative; box-shadow: var(--shadow-soft); max-height: 90vh; overflow-y: auto; box-sizing: border-box; }
-        .modal-close-x { position: absolute; top: 16px; right: 16px; cursor: pointer; background: transparent; color: var(--text-muted); }
+        /* PREMIUM AVATAR STYLES */
+        .premium-avatar-container { position: relative; display: inline-flex; cursor: pointer; align-items: center; justify-content: center; padding: 4px; margin-top: 2px; }
+        .premium-border { border: 2px solid #10B981 !important; }
+        .premium-level-badge { position: absolute; top: -3px; left: 50%; transform: translateX(-50%); background: #10B981; color: white; font-size: 0.55rem; font-weight: 900; padding: 1px 5px; border-radius: 6px; border: 1.5px solid var(--bg-glass-solid); z-index: 3; white-space: nowrap; line-height: 1; }
+        .verified-badge { position: absolute; bottom: 1px; right: 1px; background: #10B981; color: white; border-radius: 50%; font-size: 9px; width: 15px; height: 16px; display: flex; align-items: center; justify-content: center; border: 1.5px solid var(--bg-glass-solid); z-index: 2; font-weight: 900; }
         
-        /* TOAST & ANIMATIONS */
-        .toast-container { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); z-index: 9999; display: flex; flex-direction: column; gap: 10px; pointer-events: none; width: calc(100% - 40px); max-width: 350px; }
-        .toast { background: var(--bg-glass-solid); border: 1px solid var(--border-color); border-left: 4px solid var(--primary); padding: 14px 20px; border-radius: var(--radius-md); box-shadow: var(--shadow-soft); color: var(--text-main); font-weight: 600; font-size: 0.9rem; width: 100%; animation: slideDownFade 0.3s ease forwards; pointer-events: auto; }
-        .global-workspace-ad-banner { background: var(--primary-state); border: 1px dashed var(--primary); border-radius: var(--radius-md); padding: 12px; margin-bottom: 20px; text-align: center; font-size: 0.85rem; max-width: 100%; box-sizing: border-box; }
-
-        @keyframes slideDownFade { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
-        @keyframes slideUpFade { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-        @keyframes fadeScale { from { opacity: 0; transform: scale(0.98); } to { opacity: 1; transform: scale(1); } }
+        .user-avatar { width: 44px; height: 44px; border-radius: var(--radius-round); object-fit: cover; cursor: pointer; border: 2px solid var(--border-color); }
+        .icon-btn { width: 44px; height: 44px; border-radius: var(--radius-round); display: flex; align-items: center; justify-content: center; background: transparent; color: var(--text-muted); cursor: pointer; position: relative; transition: var(--trans-smooth); border: none; flex-shrink: 0; }
+        .icon-btn:hover { background: var(--primary-state); color: var(--primary); }
 
         /* ==========================================================================
            10. MEDIA QUERIES DATA - MOBILE PHONE SCREEN OPTIMIZATION
            ========================================================================== */
         @media (max-width: 768px) {
             :root {
-                --header-height: 120px;
+                --header-height: auto;
                 --sidebar-width: 0px;
             }
             body {
@@ -430,7 +297,7 @@
             #app-layout {
                 grid-template-areas: "header" "content";
                 grid-template-columns: 1fr;
-                grid-template-rows: var(--header-height) 1fr;
+                grid-template-rows: auto 1fr;
                 max-width: 100vw;
                 overflow-x: hidden;
             }
@@ -438,26 +305,15 @@
                 display: none !important;
             }
             .app-header {
-                padding: 8px 16px;
+                padding: 12px 16px;
                 justify-content: flex-start;
                 gap: 4px;
             }
+            .header-top-row .search-box {
+                display: none !important; /* Hide default search bar box on mobile top row */
+            }
             .header-mobile-menu-bar {
                 display: flex;
-            }
-            .search-box {
-                width: 120px;
-            }
-            .search-box:hover, .search-box:focus-within {
-                width: 140px;
-            }
-            .search-box input {
-                padding: 10px 12px 10px 36px;
-                font-size: 0.82rem;
-            }
-            .search-box .material-symbols-outlined {
-                left: 10px;
-                font-size: 18px;
             }
             .header-left {
                 gap: 8px;
@@ -466,12 +322,12 @@
                 gap: 8px;
             }
             .icon-btn {
-                width: 36px;
-                height: 36px;
+                width: 38px;
+                height: 38px;
             }
             .app-content {
                 padding: 16px;
-                min-height: calc(100vh - var(--header-height));
+                min-height: 80vh;
                 max-width: 100vw;
                 box-sizing: border-box;
             }
@@ -481,10 +337,11 @@
                 max-width: 100%;
             }
             .post-card {
-                padding: 16px;
-                margin-bottom: 8px;
-                border-radius: var(--radius-md);
-                border: 1px solid var(--border-color);
+                padding: 16px 0px;
+                margin-bottom: 0px;
+                border-radius: 0px !important;
+                border: none !important; /* Absolute border remove on phone viewport */
+                background: transparent !important;
             }
             .post-content {
                 font-size: 0.98rem;
@@ -493,10 +350,6 @@
                 padding: 12px 16px;
                 margin-bottom: 16px;
                 border-radius: var(--radius-lg);
-            }
-            .minimal-composer-input-mock {
-                padding: 10px 16px;
-                font-size: 0.95rem;
             }
             .floating-chat-widget {
                 width: 100vw;
@@ -581,6 +434,11 @@
                     <button class="icon-btn ripple-btn" id="btn-toggle-sidebar" aria-label="Toggle Menu" style="background: var(--primary); color: white; font-weight: 800; border-radius: 50%; font-size: 1.1rem;">
                         T
                     </button>
+                    
+                    <!-- Search Icon Button (Visible exclusively on Mobile via JS Toggle) -->
+                    <button class="icon-btn ripple-btn" id="btn-mobile-search-toggle" onclick="App.UI.toggleMobileSearchRow()" style="display: none;"><span class="material-symbols-outlined">search</span></button>
+                    
+                    <!-- Desktop Standard Search Box -->
                     <div class="search-box">
                         <span class="material-symbols-outlined">search</span>
                         <input type="text" id="header-global-search" placeholder="Cari..." oninput="App.Features.handleHeaderLiveSearchInput(event)">
@@ -595,6 +453,14 @@
                     </button>
                     
                     <div id="header-avatar-toggle-node"></div>
+                </div>
+            </div>
+            
+            <!-- Mobile Expanded Search Bar Container Row -->
+            <div class="mobile-header-search-expanded-row" id="mobile-search-expanded-zone">
+                <div class="search-box">
+                    <span class="material-symbols-outlined">search</span>
+                    <input type="text" id="header-mobile-global-search" placeholder="Ketik kata kunci pencarian..." oninput="App.Features.handleHeaderLiveSearchInput(event)">
                 </div>
             </div>
             
@@ -913,8 +779,7 @@
                     { id: 'explore', label: 'Cari Teman', icon: 'person_search', isChatTrigger: false },
                     { id: 'chat_trigger', label: 'Pesan', icon: 'chat', isChatTrigger: true }, 
                     { id: 'groups', label: 'Komunitas', icon: 'groups', isChatTrigger: false },
-                    { id: 'profil', label: 'Profil Saya', icon: 'account_circle', isChatTrigger: false },
-                    { id: 'settings', label: 'Pengaturan', icon: 'settings', isChatTrigger: false }
+                    { id: 'profil', label: 'Profil Saya', icon: 'account_circle', isChatTrigger: false }
                 ],
                 render() {
                     const side = document.getElementById('sidebar-menu-list');
@@ -952,8 +817,8 @@
                 explore() {
                     return `
                         <div class="glass-card">
-                            <h2>Cari Koneksi Jaringan</h2>
-                            <p style="color: var(--text-muted); font-size:0.85rem; margin-bottom: 24px;">Jelajahi dan temukan pengguna Workspace lain.</p>
+                            <h2>Cari Koneksi Jaringan Real</h2>
+                            <p style="color: var(--text-muted); font-size:0.85rem; margin-bottom: 24px;">Temukan profil pengguna Tech Social yang aktif membagikan pemikiran.</p>
                             <div id="explore-users-stream" class="user-grid"></div>
                         </div>
                     `;
@@ -1005,8 +870,8 @@
                     return `
                         <div class="glass-card profile-info-card" style="padding:0; overflow:hidden; position: relative;">
                             ${isOwnProfile ? `
-                                <button class="icon-btn" style="position:absolute; top: 16px; right: 16px; z-index: 10; background: rgba(0,0,0,0.3); color: white;" onclick="App.Router.navigate('settings')">
-                                    <span class="material-symbols-outlined">settings</span>
+                                <button class="icon-btn" style="position:absolute; top: 16px; right: 16px; z-index: 10; background: rgba(0,0,0,0.4); color: white; border-radius:50%; width:36px; height:36px;" onclick="App.Router.navigate('settings')">
+                                    <span class="material-symbols-outlined" style="font-size:20px;">settings</span>
                                 </button>
                             ` : ''}
                             <div class="profile-cover"></div>
@@ -1072,7 +937,7 @@
                                 <h2 style="display: flex; align-items: center; gap: 8px; margin: 0;">
                                     <span class="material-symbols-outlined" style="font-size: 28px; color: var(--primary);">settings</span>
                                 </h2>
-                                <button class="icon-btn" onclick="App.Router.navigate('feed')" title="Tutup" style="color: var(--text-muted);">
+                                <button class="icon-btn" onclick="App.Router.navigate('profil')" title="Kembali ke Profil" style="color: var(--text-muted);">
                                     <span class="material-symbols-outlined">close</span>
                                 </button>
                             </div>
@@ -1151,9 +1016,9 @@
                                 ${avatarHTML}
                                 <div style="display:flex; flex-direction:column; gap:2px; margin-left: 8px;">
                                     <span class="pic-composer-username">${currentName}</span>
-                                    <div class="pic-status-pill" style="padding: 0; align-self: flex-start; margin-top:2px; border: 1px solid rgba(0,0,0,0.1); display: inline-flex; align-items:center;">
+                                    <div class="pic-status-pill" style="padding: 0; align-self: flex-start; margin-top:2px; border: 1px solid rgba(128,128,128,0.2); display: inline-flex; align-items:center;">
                                         <span class="material-symbols-outlined" style="margin-left: 8px; font-size: 14px;" id="composer-privacy-icon">public</span>
-                                        <select id="composer-privacy-select" onchange="document.getElementById('composer-privacy-icon').innerText = this.options[this.selectedIndex].getAttribute('data-icon')" style="background: transparent; border: none; font-weight: 700; color: #334155; font-size: 0.75rem; padding: 4px 8px 4px 4px; outline: none; cursor: pointer;">
+                                        <select id="composer-privacy-select" onchange="document.getElementById('composer-privacy-icon').innerText = this.options[this.selectedIndex].getAttribute('data-icon')" style="background: transparent; border: none; font-weight: 700; color: var(--text-main); font-size: 0.75rem; padding: 4px 8px 4px 4px; outline: none; cursor: pointer;">
                                             <option value="public" data-icon="public">Publik</option>
                                             <option value="friends" data-icon="group">Teman</option>
                                             <option value="private" data-icon="lock">Privat</option>
@@ -2062,7 +1927,7 @@
                     const res = App.ProfileState.updateProfileDataConfiguration(name, bio, domisili);
                     if(res.success) {
                         App.Toast.show("Data profil Anda berhasil disimpan!", "success");
-                        App.Router.navigate('feed');
+                        App.Router.navigate('profil');
                     } else {
                         App.Toast.show(res.message, "danger");
                     }
@@ -2076,23 +1941,53 @@
                     App.UI.renderGlobalBannerAdIfExists();
                 },
 
-                renderExploreUsers() {
+                async renderExploreUsers() {
                     const container = document.getElementById('explore-users-stream'); if(!container) return;
-                    const users = ["Andi_Tech", "Budi_Developer", "Siti_Designer", "Rian_Data", "Dewi_Manager"];
-                    container.innerHTML = users.map(u => `
-                        <div class="user-follow-card">
-                            <img src="https://i.pravatar.cc/150?img=${Math.abs(u.hashCode()) % 70 || 15}" style="width:44px; height:44px; border-radius:50%; object-fit:cover;">
-                            <div class="user-follow-info">
-                                <strong style="font-size:0.9rem; color:var(--text-main);">${u}</strong>
-                                <span style="font-size:0.75rem; color:var(--text-muted); display:block;">Workspace Member</span>
+                    container.innerHTML = `<div style="grid-column:1/-1; text-align:center; padding:16px; color:var(--text-muted);">Memuat jaringan pengguna real dari database...</div>`;
+                    
+                    try {
+                        // Fetch distinct real authors from existing database posts table
+                        const { data: postsData, error } = await supabaseClient.from('posts').select('author, avatar').not('author', 'is', null).order('created_at', { ascending: false });
+                        if(error) throw error;
+                        
+                        // Filter to get unique active names configuration list
+                        const uniqueMap = {};
+                        const realActiveUsersList = [];
+                        
+                        if(postsData) {
+                            postsData.forEach(p => {
+                                if(!uniqueMap[p.author.toLowerCase()]) {
+                                    uniqueMap[p.author.toLowerCase()] = true;
+                                    realActiveUsersList.push({
+                                        name: p.author,
+                                        avatar: p.avatar || `https://i.pravatar.cc/150?img=${Math.abs(p.author.hashCode()) % 70 || 18}`
+                                    });
+                                }
+                            });
+                        }
+                        
+                        if(realActiveUsersList.length === 0) {
+                            container.innerHTML = `<div style="grid-column:1/-1; text-align:center; padding:16px; color:var(--text-muted);">Belum ada database pengguna real lain yang ditemukan.</div>`;
+                            return;
+                        }
+
+                        container.innerHTML = realActiveUsersList.map(u => `
+                            <div class="user-follow-card">
+                                <img src="${u.avatar}" style="width:44px; height:44px; border-radius:50%; object-fit:cover;">
+                                <div class="user-follow-info">
+                                    <strong style="font-size:0.9rem; color:var(--text-main); cursor:pointer;" onclick="App.Router.navigate('profil?name=${encodeURIComponent(u.name)}')">${u.name}</strong>
+                                    <span style="font-size:0.75rem; color:var(--text-muted); display:block;">Active Workspace Contributor</span>
+                                </div>
+                                <button class="btn btn-primary" style="padding:6px 12px; font-size:0.8rem; border-radius:8px;" onclick="App.Features.followExploreUserAction('${u.name.replace(/'/g, "\\'")}')">Ikuti</button>
                             </div>
-                            <button class="btn btn-primary" style="padding:6px 12px; font-size:0.8rem; border-radius:8px;" onclick="App.Features.followExploreUserAction('${u}')">Ikuti</button>
-                        </div>
-                    `).join('');
+                        `).join('');
+                    } catch(err) {
+                        container.innerHTML = `<div style="grid-column:1/-1; text-align:center; padding:16px; color:var(--danger);">Gagal memuat koneksi pengguna real: ${err.message}</div>`;
+                    }
                 },
 
                 followExploreUserAction(username) {
-                    App.Toast.show(`Berhasil mengikuti ${username}`, "success");
+                    App.Toast.show(`Berhasil mengikuti jaringan ${username}`, "success");
                 },
 
                 loadFriendsCount() {
@@ -2156,13 +2051,22 @@
             },
 
             UI: {
+                toggleMobileSearchRow() {
+                    const searchZone = document.getElementById('mobile-search-expanded-zone');
+                    if(searchZone) {
+                        searchZone.classList.toggle('active');
+                        if(searchZone.classList.contains('active')) {
+                            document.getElementById('header-mobile-global-search')?.focus();
+                        }
+                    }
+                },
                 getTextColorContrast(hexColor) {
                     const hex = hexColor.replace('#', '');
                     const r = parseInt(hex.substr(0, 2), 16);
                     const g = parseInt(hex.substr(2, 2), 16);
                     const b = parseInt(hex.substr(4, 2), 16);
                     const brightness = ((r * 299) + (g * 587) + (b * 114)) / 1000;
-                    return (brightness >= 128) ? '#0b2e1e' : '#ffffff';
+                    return (brightness >= 128) ? '#0d1117' : '#ffffff';
                 },
                 generateAvatarHTML(name, rawAvatarUrl, isPremium, level, size = '46px', inPost = false) {
                     let borderClass = isPremium ? 'premium-border' : '';
@@ -2178,11 +2082,7 @@
                     `;
                 },
                 handleHeaderAvatarToggleAction() {
-                    if (window.location.hash.includes('#/profil')) {
-                        App.Router.navigate('feed');
-                    } else {
-                        App.Router.navigate('profil');
-                    }
+                    App.Router.navigate('profil');
                 },
                 calculateRelativeTimeAgo(timestamp) {
                     const diffMs = Date.now() - parseInt(timestamp);
@@ -2208,7 +2108,6 @@
                 },
                 bindGlobalEvents() {
                     document.getElementById('btn-toggle-sidebar')?.addEventListener('click', () => {
-                        // Disabled clicking the side drawer completely on mobile viewport as requested
                         if(window.innerWidth > 768) {
                             const l = document.getElementById('app-layout');
                             l.classList.toggle('sidebar-collapsed');
@@ -2224,7 +2123,7 @@
                 toggleChatPopup(shouldOpen) {
                     const chatBox = document.getElementById('floating-chat-popup-box'); if(!chatBox) return;
                     if(shouldOpen) { chatBox.classList.add('active'); App.Features.loadPopupFriendsListSidebar(); } 
-                    else chatBox.classList.remove('active');
+                    else chatBox.remove('active');
                 },
                 refreshHeaderNotificationBadgeDOM() {
                     const headerBadge = document.getElementById('noti-badge');
