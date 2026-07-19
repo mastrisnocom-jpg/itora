@@ -8,7 +8,7 @@
     <!-- Google Fonts & Material Symbols -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2 family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet">
     
     <!-- Supabase SDK -->
@@ -67,7 +67,7 @@
 
         /* AUTH LAYOUT */
         #auth-layout { display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 24px; position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 2000; background: var(--bg-body); transition: var(--trans-smooth); }
-        .auth-card { background: var(--bg-glass); backdrop-filter: blur(var(--blur-lg)); border: 1px solid var(--border-glass); border-radius: var(--radius-xl); padding: 40px; width: 100%; max-width: 450px; box-shadow: var(--shadow-soft); animation: slideUpFade 0.6s cubic-bezier(0.25, 1, 0.5, 1); text-align: center; }
+        .auth-card { background: var(--bg-glass); backdrop-filter: blur(20px); border: 1px solid var(--border-glass); border-radius: var(--radius-xl); padding: 40px; width: 100%; max-width: 450px; box-shadow: var(--shadow-soft); text-align: center; }
         .auth-logo { width: 64px; height: 64px; background: linear-gradient(135deg, var(--primary), #52e0a5); border-radius: var(--radius-lg); display: flex; align-items: center; justify-content: center; color: white; font-size: 32px; font-weight: 700; margin: 0 auto 24px auto; box-shadow: var(--shadow-float); }
 
         /* APP LAYOUT */
@@ -161,7 +161,7 @@
 
         .post-content { font-family: var(--font-main); font-size: 1.05rem; font-weight: 400; line-height: 1.65; letter-spacing: -0.1px; margin-bottom: 16px; color: var(--text-main); text-align: left; white-space: pre-wrap; }
         
-        .post-actions-bar { display: flex; align-items: center; gap: 12px; padding: 12px 4px; border-top: 1px solid rgba(0,0,0,0.05); border-bottom: 1px solid rgba(0,0,0,0.05); margin-top: 16px; }
+        .post-actions-bar { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 12px 4px; border-top: 1px solid rgba(0,0,0,0.05); border-bottom: 1px solid rgba(0,0,0,0.05); margin-top: 16px; }
         .post-action-item { display: inline-flex; align-items: center; gap: 6px; color: var(--text-muted); font-weight: 600; font-size: 0.88rem; cursor: pointer; transition: var(--trans-smooth); user-select: none; }
         .post-action-item:hover { color: var(--primary); }
         .post-action-item .material-symbols-outlined { font-size: 20px; transition: var(--trans-smooth); }
@@ -173,8 +173,8 @@
         .post-action-item.loved .material-symbols-outlined { font-variation-settings: 'FILL' 1; color: var(--danger) !important; }
 
         .post-attached-image { max-width: 100%; border-radius: var(--radius-md); margin: 12px auto; display: block; max-height: 340px; object-fit: cover; cursor: zoom-in; box-shadow: var(--shadow-soft); }
-        .post-card iframe { display: block; margin: 12px auto; width: 100%; max-width: 500px; height: 280px; border-radius: 12px; border: none; }
-        .post-card audio { display: block; margin: 12px auto; width: 100%; max-width: 500px; }
+        .post-card iframe { display: block; margin: 12px auto; width: 100%; max-width: 100%; height: 240px; border-radius: 12px; border: none; }
+        .post-card audio { display: block; margin: 12px auto; width: 100%; max-width: 100%; }
 
         /* ==========================================================================
            2B. OVERLAY BOTTOM SHEET KOMENTAR (ALA FACEBOOK NATIVE MOBILE)
@@ -199,7 +199,7 @@
         .comments-sheet-content {
             position: absolute;
             left: 0; right: 0; bottom: 0;
-            height: 75vh;
+            height: 80vh;
             background: var(--bg-glass-solid);
             border-radius: 20px 20px 0 0;
             display: flex;
@@ -208,13 +208,14 @@
             transition: transform 0.35s cubic-bezier(0.25, 1, 0.5, 1);
             box-shadow: 0 -4px 30px rgba(0,0,0,0.15);
             overflow: hidden;
+            padding-bottom: env(safe-area-inset-bottom);
         }
         .comments-bottom-sheet.active .comments-sheet-content {
             transform: translateY(0);
         }
         .comments-sheet-drag-handle-area {
             width: 100%;
-            padding: 10px 0;
+            padding: 12px 0;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -251,7 +252,7 @@
             gap: 14px;
         }
         .comments-sheet-input-row {
-            padding: 12px 16px calc(12px + env(safe-area-inset-bottom));
+            padding: 12px 16px;
             background: var(--bg-glass-solid);
             border-top: 1px solid var(--border-color);
             display: flex;
@@ -266,8 +267,8 @@
         /* ==========================================================================
            4. KOMPONEN POP UP COMPOSER (IKON MINIMALIS & INPUT SLIDE)
            ========================================================================== */
-        .pic-composer-card { display: flex; flex-direction: column; width: 100%; background: var(--bg-glass-solid); min-height: 480px; text-align: left; position: relative; }
-        .pic-composer-header { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; border-bottom: 1px solid rgba(0,0,0,0.05); }
+        .pic-composer-card { display: flex; flex-direction: column; width: 100%; background: var(--bg-glass-solid); min-height: 100%; text-align: left; position: relative; }
+        .pic-composer-header { display: flex; align-items: center; justify-content: space-between; padding: 16px; border-bottom: 1px solid rgba(0,0,0,0.05); }
         .pic-composer-close { font-size: 26px; color: var(--text-main); cursor: pointer; border: none; background: transparent; }
         .pic-composer-title { font-size: 1.1rem; font-weight: 800; color: var(--text-main); }
         .pic-composer-next-btn { background: #e2e8f0; color: #94a3b8; padding: 8px 18px; border-radius: 8px; font-weight: 700; font-size: 0.88rem; cursor: pointer; transition: var(--trans-smooth); border: none; }
@@ -311,7 +312,7 @@
         .share-icon-circle { width: 54px; height: 54px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: 800; font-size: 1.2rem; box-shadow: var(--shadow-float); }
         .share-grid-sheet span { font-size: 0.75rem; font-weight: 700; color: var(--text-main); }
 
-        .user-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 16px; text-align: left; }
+        .user-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 16px; text-align: left; }
         .user-follow-card { display: flex; align-items: center; gap: 12px; padding: 14px; background: var(--bg-body); border: 1px solid var(--border-color); border-radius: var(--radius-md); }
         .user-follow-info { flex: 1; overflow: hidden; }
 
@@ -360,6 +361,168 @@
             user-select: none;
         }
         .minimal-composer-gallery-icon:hover { color: var(--primary); }
+
+        /* PROFILE LAYOUT UTILS */
+        .profile-cover { height: 140px; background: linear-gradient(135deg, var(--primary-hover), var(--primary)); width: 100%; }
+        .profile-avatar-large { width: 110px; height: 110px; border-radius: 50%; object-fit: cover; border: 4px solid var(--bg-glass-solid); margin-top: -55px; position: relative; background: var(--bg-glass-solid); }
+        .profile-stats { display: flex; justify-content: space-around; padding: 16px 0; border-top: 1px solid var(--border-color); border-bottom: 1px solid var(--border-color); margin-top: 16px; }
+        .stat-item { display: flex; flex-direction: column; align-items: center; }
+        .stat-val { font-weight: 800; font-size: 1.1rem; color: var(--text-main); }
+        .stat-lbl { font-size: 0.75rem; color: var(--text-muted); font-weight: 600; }
+
+        /* FLOATING CHAT WIDGET SYSTEM */
+        .floating-chat-widget { position: fixed; bottom: 85px; right: 20px; width: 360px; height: 480px; background: var(--bg-glass-solid); border: 1px solid var(--border-color); border-radius: var(--radius-xl); box-shadow: var(--shadow-soft); display: none; flex-direction: column; overflow: hidden; z-index: 1002; transition: var(--trans-smooth); }
+        .floating-chat-widget.active { display: flex; }
+        .popup-chat-header { background: var(--primary); color: white; padding: 14px 16px; display: flex; align-items: center; justify-content: space-between; }
+        .popup-chat-body-container { display: flex; flex: 1; overflow: hidden; }
+        .popup-friends-list { width: 70px; border-right: 1px solid var(--border-color); background: var(--bg-body); overflow-y: auto; display: flex; flex-direction: column; align-items: center; padding: 10px 0; gap: 12px; }
+        .popup-friend-item { position: relative; cursor: pointer; }
+        .friend-avatar-node { width: 44px; height: 44px; border-radius: 50%; object-fit: cover; border: 2px solid transparent; }
+        .popup-friend-item:hover .friend-avatar-node { border-color: var(--primary); }
+        .friend-online-dot { position: absolute; bottom: 2px; right: 2px; width: 10px; height: 10px; background: #10B981; border-radius: 50%; border: 2px solid var(--bg-body); }
+        .popup-chat-main-area { flex: 1; display: flex; flex-direction: column; overflow: hidden; background: var(--bg-glass-solid); }
+        .popup-msg-stream { flex: 1; overflow-y: auto; padding: 12px; display: flex; flex-direction: column; gap: 8px; }
+        .popup-chat-input-row { padding: 10px; border-top: 1px solid var(--border-color); display: flex; gap: 8px; align-items: center; }
+        .bubble { max-width: 80%; padding: 8px 14px; border-radius: 16px; font-size: 0.88rem; line-height: 1.4; margin-bottom: 2px; }
+        .bubble.in { background: var(--bg-body); align-self: flex-start; border-bottom-left-radius: 4px; }
+        .bubble.out { background: var(--primary); color: white; align-self: flex-end; border-bottom-right-radius: 4px; }
+
+        /* GLOBAL ROBUST MODAL SYSTEM */
+        .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(5,20,11,0.5); backdrop-filter: blur(4px); z-index: 4000; display: none; align-items: center; justify-content: center; padding: 20px; transition: var(--trans-smooth); }
+        .modal-overlay.active { display: flex; }
+        .modal-content { background: var(--bg-glass-solid); border: 1px solid var(--border-color); border-radius: var(--radius-xl); padding: 24px; width: 100%; max-width: 500px; position: relative; box-shadow: var(--shadow-soft); max-height: 90vh; overflow-y: auto; }
+        .modal-close-x { position: absolute; top: 16px; right: 16px; cursor: pointer; background: transparent; color: var(--text-muted); }
+        
+        /* TOAST & ANIMATIONS */
+        .toast-container { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); z-index: 9999; display: flex; flex-direction: column; gap: 10px; pointer-events: none; width: calc(100% - 40px); max-width: 350px; }
+        .toast { background: var(--bg-glass-solid); border: 1px solid var(--border-color); border-left: 4px solid var(--primary); padding: 14px 20px; border-radius: var(--radius-md); box-shadow: var(--shadow-soft); color: var(--text-main); font-weight: 600; font-size: 0.9rem; width: 100%; animation: slideDownFade 0.3s ease forwards; pointer-events: auto; }
+        .global-workspace-ad-banner { background: var(--primary-state); border: 1px dashed var(--primary); border-radius: var(--radius-md); padding: 12px; margin-bottom: 20px; text-align: center; font-size: 0.85rem; }
+
+        @keyframes slideDownFade { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes slideUpFade { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fadeScale { from { opacity: 0; transform: scale(0.98); } to { opacity: 1; transform: scale(1); } }
+
+        /* ==========================================================================
+           10. MEDIA QUERIES DATA - MOBILE PHONE SCREEN OPTIMIZATION
+           ========================================================================== */
+        @media (max-width: 768px) {
+            :root {
+                --header-height: 70px;
+                --sidebar-width: 260px;
+            }
+            body {
+                padding-bottom: calc(var(--bottom-nav-height) + env(safe-area-inset-bottom));
+            }
+            #app-layout {
+                grid-template-areas: "header" "content";
+                grid-template-columns: 1fr;
+                grid-template-rows: var(--header-height) 1fr;
+            }
+            .app-sidebar {
+                transform: translateX(-100%);
+                box-shadow: 0 0 30px rgba(0,0,0,0.2);
+            }
+            #app-layout.sidebar-mobile-open .app-sidebar {
+                transform: translateX(0);
+            }
+            .app-header {
+                padding: 0 16px;
+            }
+            .search-box {
+                width: 140px;
+            }
+            .search-box:hover, .search-box:focus-within {
+                width: 180px;
+            }
+            .search-box input {
+                padding: 10px 12px 10px 36px;
+                font-size: 0.85rem;
+            }
+            .search-box .material-symbols-outlined {
+                left: 10px;
+                font-size: 18px;
+            }
+            .app-content {
+                padding: 16px;
+                min-height: calc(100vh - var(--header-height) - var(--bottom-nav-height));
+            }
+            .feed-container {
+                margin-left: -16px;
+                margin-right: -16px;
+            }
+            .post-card {
+                padding: 16px 16px;
+                margin-bottom: 8px;
+            }
+            .post-content {
+                font-size: 0.98rem;
+            }
+            .minimal-composer-bar {
+                padding: 12px 16px;
+                margin-bottom: 16px;
+                border-radius: var(--radius-lg);
+            }
+            .minimal-composer-input-mock {
+                padding: 10px 16px;
+                font-size: 0.95rem;
+            }
+            .bottom-nav {
+                display: flex;
+                position: fixed;
+                bottom: 0; left: 0; right: 0;
+                height: calc(var(--bottom-nav-height) + env(safe-area-inset-bottom));
+                background: var(--bg-glass-solid);
+                backdrop-filter: blur(15px);
+                border-top: 1px solid var(--border-color);
+                z-index: 1000;
+                padding-bottom: env(safe-area-inset-bottom);
+                box-shadow: 0 -4px 20px rgba(0,0,0,0.03);
+            }
+            .bn-item {
+                flex: 1;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                color: var(--text-muted);
+                gap: 4px;
+                padding: 6px 0;
+                cursor: pointer;
+                transition: var(--trans-smooth);
+            }
+            .bn-item.active {
+                color: var(--primary);
+            }
+            .bn-item .material-symbols-outlined {
+                font-size: 24px;
+            }
+            .floating-chat-widget {
+                width: 100%;
+                height: 100%;
+                bottom: 0; right: 0;
+                border-radius: 0;
+                z-index: 6000;
+            }
+            .modal-content {
+                width: 100%;
+                max-width: 100%;
+                border-radius: var(--radius-lg);
+                margin: 0;
+            }
+            .modal-overlay {
+                padding: 12px;
+            }
+            .comments-sheet-content {
+                height: 85vh;
+            }
+            .share-grid-sheet {
+                grid-template-columns: repeat(3, 1fr);
+                gap: 20px 12px;
+            }
+            .user-grid {
+                grid-template-columns: 1fr;
+            }
+        }
     </style>
 </head>
 <body>
@@ -677,12 +840,6 @@
                         this.toggleView('login');
                     } catch (error) { alert("Pendaftaran gagal: " + error.message); }
                 },
-                async logout() {
-                    try { await supabaseClient.auth.signOut(); } catch(e){}
-                    localStorage.clear();
-                    window.location.hash = '';
-                    window.location.reload();
-                },
                 showApp() {
                     const auth = document.getElementById('auth-layout');
                     const app = document.getElementById('app-layout');
@@ -691,6 +848,12 @@
                         if(auth) auth.style.display = 'none'; 
                         if(app) app.classList.add('active'); 
                     }, 400);
+                },
+                async logout() {
+                    try { await supabaseClient.auth.signOut(); } catch(e){}
+                    localStorage.clear();
+                    window.location.hash = '';
+                    window.location.reload();
                 }
             },
 
@@ -789,7 +952,7 @@
                         <div class="glass-card">
                             <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:24px;">
                                 <h2>Komunitas Premium</h2>
-                                <button class="btn btn-primary" onclick="App.Features.triggerCreateCommunityPremiumModal()"><span class="material-symbols-outlined">add_circle</span> Buat Komunitas</button>
+                                <button class="btn btn-primary" onclick="App.Features.triggerCreateCommunityPremiumModal()"><span class="material-symbols-outlined">add_circle</span> Buat</button>
                             </div>
                             <div class="community-list-container" id="community-hub-list-viewport"></div>
                         </div>
@@ -837,17 +1000,19 @@
                             ` : ''}
                             <div class="profile-cover"></div>
                             
-                            <div style="position:relative; display:inline-block; margin: 0 auto 16px auto; z-index: 2;">
+                            <div style="position:relative; display:inline-block; margin: 0 auto 16px auto; z-index: 2; text-align: center; width: 100%;">
                                 <img src="${targetAvatar}" class="profile-avatar-large ${borderClass}" style="margin-bottom:0;" alt="Profile">
                                 ${levelBadge}
                             </div>
                             
-                            <h2>${targetName} ${isSuperAdmin ? '<span style="font-size:0.75rem; background:var(--primary); color:white; padding:2px 8px; border-radius:10px; margin-left:6px; vertical-align:middle;">SUPER ADMIN</span>' : ''}</h2>
-                            <p style="color: var(--text-muted); font-size: 0.82rem; margin-top: 8px; margin-bottom: 8px; font-weight:700;">Bergabung sejak: ${joinDate}</p>
-                            <p style="color: var(--primary); font-weight: 600; margin-bottom: 4px;">${targetBio}</p>
-                            <p style="color: var(--text-muted); font-size: 0.85rem; font-weight: 500; margin-bottom: 16px; display:flex; align-items:center; justify-content:center; gap:4px;">
-                                <span class="material-symbols-outlined" style="font-size:16px;">location_on</span> ${targetDomisili}
-                            </p>
+                            <div style="text-align: center; padding: 0 16px;">
+                                <h2>${targetName} ${isSuperAdmin ? '<span style="font-size:0.75rem; background:var(--primary); color:white; padding:2px 8px; border-radius:10px; margin-left:6px; vertical-align:middle;">SUPER ADMIN</span>' : ''}</h2>
+                                <p style="color: var(--text-muted); font-size: 0.82rem; margin-top: 8px; margin-bottom: 8px; font-weight:700;">Bergabung sejak: ${joinDate}</p>
+                                <p style="color: var(--primary); font-weight: 600; margin-bottom: 4px;">${targetBio}</p>
+                                <p style="color: var(--text-muted); font-size: 0.85rem; font-weight: 500; margin-bottom: 16px; display:flex; align-items:center; justify-content:center; gap:4px;">
+                                    <span class="material-symbols-outlined" style="font-size:16px;">location_on</span> ${targetDomisili}
+                                </p>
+                            </div>
                             
                             <div class="profile-stats">
                                 <div class="stat-item"><span class="stat-val" id="profile-friends-count">${isOwnProfile ? '0' : '28'}</span><span class="stat-lbl">Teman</span></div>
@@ -858,7 +1023,7 @@
                             <div style="padding: 24px; display:flex; flex-direction:column; gap:12px; max-width:320px; margin:0 auto;">
                                 ${!isOwnProfile ? `
                                     <button class="btn btn-primary ripple-btn" onclick="App.UI.toggleChatPopup(true); App.Features.openSpecificFriendPopupObrolan('${targetName.toLowerCase()}@nexsocial.id', '${targetName}')">
-                                        <span class="material-symbols-outlined" style="font-size:18px;">mail</span> Kirim Pesan Langsung
+                                        <span class="material-symbols-outlined" style="font-size:18px;">mail</span> Kirim Pesan
                                     </button>
                                 ` : ''}
                             </div>
@@ -974,7 +1139,7 @@
                                 ${avatarHTML}
                                 <div style="display:flex; flex-direction:column; gap:2px; margin-left: 8px;">
                                     <span class="pic-composer-username">${currentName}</span>
-                                    <div class="pic-status-pill" style="padding: 0; align-self: flex-start; margin-top:2px; border: 1px solid rgba(0,0,0,0.1);">
+                                    <div class="pic-status-pill" style="padding: 0; align-self: flex-start; margin-top:2px; border: 1px solid rgba(0,0,0,0.1); display: inline-flex; align-items:center;">
                                         <span class="material-symbols-outlined" style="margin-left: 8px; font-size: 14px;" id="composer-privacy-icon">public</span>
                                         <select id="composer-privacy-select" onchange="document.getElementById('composer-privacy-icon').innerText = this.options[this.selectedIndex].getAttribute('data-icon')" style="background: transparent; border: none; font-weight: 700; color: #334155; font-size: 0.75rem; padding: 4px 8px 4px 4px; outline: none; cursor: pointer;">
                                             <option value="public" data-icon="public">Publik</option>
@@ -986,7 +1151,7 @@
                             </div>
                             
                             <div class="pic-composer-body" style="padding: 8px 16px;">
-                                <textarea class="pic-composer-textarea" id="composer-text" placeholder="Apa yang Anda pikirkan?" oninput="document.getElementById('pic-submit-btn').classList.add('ready')" style="border-radius: 8px; padding: 8px;"></textarea>
+                                <textarea class="pic-composer-textarea" id="composer-text" placeholder="Apa yang Anda pikirkan?" oninput="document.getElementById('pic-submit-btn').classList.add('ready')" style="border-radius: 8px; padding: 8px; width: 100%;"></textarea>
                                 <div id="composer-upload-preview-area" class="pic-composer-preview-box">
                                     ${composerAttachedImageBase64 ? `<img src="${composerAttachedImageBase64}">` : ''}
                                 </div>
@@ -1001,7 +1166,7 @@
                             <div class="composer-dynamic-input-zone" id="composer-media-zone">
                                 <div style="display: flex; gap: 8px; align-items: center; width: 100%;">
                                     <span class="material-symbols-outlined" style="color: var(--primary);">link</span>
-                                    <input type="text" id="composer-media-url" placeholder="Paste link YouTube / Audio (.mp3) / Gambar web..." style="background: var(--bg-body); padding: 10px 14px; border-radius: 20px; font-size: 0.9rem; width: 100%; border: 1px solid var(--border-color);">
+                                    <input type="text" id="composer-media-url" placeholder="Paste link YouTube / Audio (.mp3)..." style="background: var(--bg-body); padding: 10px 14px; border-radius: 20px; font-size: 0.9rem; width: 100%; border: 1px solid var(--border-color);">
                                 </div>
                             </div>
                             
@@ -1096,7 +1261,7 @@
                         <div class="share-grid-sheet">
                             <div class="share-item-node" onclick="App.Features.copyPostLinkToClipboardAction('${encodedLink}')">
                                 <div class="share-icon-circle" style="background:#64748b;"><span class="material-symbols-outlined">link</span></div>
-                                <span>Salin Tautan</span>
+                                <span>Salin</span>
                             </div>
                             <a href="https://api.whatsapp.com/send?text=${encodedTextURI}%20${encodedLinkURI}" target="_blank" class="share-item-node" onclick="App.Modal.close()">
                                 <div class="share-icon-circle" style="background:#25D366;"><span class="material-symbols-outlined">chat</span></div>
@@ -1109,14 +1274,6 @@
                             <a href="https://www.facebook.com/sharer/sharer.php?u=${encodedLinkURI}" target="_blank" class="share-item-node" onclick="App.Modal.close()">
                                 <div class="share-icon-circle" style="background:#1877F2; font-family:sans-serif;">f</div>
                                 <span>Facebook</span>
-                            </a>
-                            <a href="https://twitter.com/intent/tweet?text=${encodedTextURI}&url=${encodedLinkURI}" target="_blank" class="share-item-node" onclick="App.Modal.close()">
-                                <div class="share-icon-circle" style="background:#000000; font-family:sans-serif;">X</div>
-                                <span>Twitter</span>
-                            </a>
-                            <a href="https://www.linkedin.com/sharing/share-offsite/?url=${encodedLinkURI}" target="_blank" class="share-item-node" onclick="App.Modal.close()">
-                                <div class="share-icon-circle" style="background:#0a66c2; font-family:sans-serif;">in</div>
-                                <span>LinkedIn</span>
                             </a>
                         </div>
                     `;
@@ -1165,8 +1322,8 @@
                     const container = document.getElementById('community-hub-list-viewport'); if(!container) return;
                     let currentSavedList = JSON.parse(localStorage.getItem('ns_premium_communities_logs') || '[]');
                     container.innerHTML = currentSavedList.map(c => `
-                        <div class="community-card-item glass-card" style="display:flex; align-items:center; gap:16px; padding:16px;">
-                            <div class="community-avatar-box" style="width:50px; height:50px; background:var(--primary-state); display:flex; align-items:center; justify-content:center; border-radius:12px; font-weight:800; color:var(--primary); font-size:1.2rem;">${c.title.charAt(0).toUpperCase()}</div>
+                        <div class="community-card-item glass-card" style="display:flex; align-items:center; gap:16px; padding:16px; margin-bottom: 12px;">
+                            <div class="community-avatar-box" style="width:50px; height:50px; background:var(--primary-state); display:flex; align-items:center; justify-content:center; border-radius:12px; font-weight:800; color:var(--primary); font-size:1.2rem; flex-shrink: 0;">${c.title.charAt(0).toUpperCase()}</div>
                             <div><h3 style="font-size:1.05rem;">${c.title}</h3><p style="font-size:0.8rem; color:var(--text-muted);">Pemilik: ${c.creator}</p></div>
                         </div>
                     `).join('');
@@ -1202,8 +1359,8 @@
                     mainArea.innerHTML = `
                         <div class="popup-msg-stream" id="popup-msg-stream-viewport"></div>
                         <div class="popup-chat-input-row">
-                            <input type="text" class="form-input" placeholder="Ketik balasan..." id="popup-chat-input-field" onkeypress="if(event.key==='Enter') App.Features.sendPopupChatCloudAction()" style="border-radius:20px; padding:10px 14px;">
-                            <button class="icon-btn" style="background:var(--primary); color:white; width:34px; height:34px;" onclick="App.Features.sendPopupChatCloudAction()"><span class="material-symbols-outlined" style="font-size:16px;">send</span></button>
+                            <input type="text" class="form-input" placeholder="Ketik balasan..." id="popup-chat-input-field" onkeypress="if(event.key==='Enter') App.Features.sendPopupChatCloudAction()" style="border-radius:20px; padding:10px 14px; margin-bottom: 0;">
+                            <button class="icon-btn" style="background:var(--primary); color:white; width:34px; height:34px; flex-shrink: 0;" onclick="App.Features.sendPopupChatCloudAction()"><span class="material-symbols-outlined" style="font-size:16px;">send</span></button>
                         </div>
                     `;
                     
@@ -1239,9 +1396,9 @@
                 openPostActionMenuDOM(postId) {
                     let menuBodyHTML = `
                         <div style="display:flex; flex-direction:column; gap:10px;">
-                            <button class="btn btn-secondary btn-full" onclick="App.Features.updatePostPrivacy(${postId}, 'Publik', 'public')"><span class="material-symbols-outlined" style="font-size: 18px; margin-right: 8px;">public</span> Ubah Privasi: Publik</button>
-                            <button class="btn btn-secondary btn-full" onclick="App.Features.updatePostPrivacy(${postId}, 'Teman', 'friends')"><span class="material-symbols-outlined" style="font-size: 18px; margin-right: 8px;">group</span> Ubah Privasi: Teman</button>
-                            <button class="btn btn-secondary btn-full" onclick="App.Features.updatePostPrivacy(${postId}, 'Privat', 'private')"><span class="material-symbols-outlined" style="font-size: 18px; margin-right: 8px;">lock</span> Ubah Privasi: Privat</button>
+                            <button class="btn btn-secondary btn-full" onclick="App.Features.updatePostPrivacy(${postId}, 'Publik', 'public')"><span class="material-symbols-outlined" style="font-size: 18px; margin-right: 8px;">public</span> Privasi: Publik</button>
+                            <button class="btn btn-secondary btn-full" onclick="App.Features.updatePostPrivacy(${postId}, 'Teman', 'friends')"><span class="material-symbols-outlined" style="font-size: 18px; margin-right: 8px;">group</span> Privasi: Teman</button>
+                            <button class="btn btn-secondary btn-full" onclick="App.Features.updatePostPrivacy(${postId}, 'Privat', 'private')"><span class="material-symbols-outlined" style="font-size: 18px; margin-right: 8px;">lock</span> Privasi: Privat</button>
                             <button class="btn btn-secondary btn-full" onclick="App.Features.triggerPostTextEditAction(${postId})"><span class="material-symbols-outlined" style="font-size: 18px; margin-right: 8px;">edit</span> Edit Konten</button>
                             <button class="btn btn-secondary btn-full" style="color:var(--danger); background:rgba(238,93,80,0.08);" onclick="App.Features.triggerPostAbsoluteDeleteAction(${postId})"><span class="material-symbols-outlined" style="font-size: 18px; margin-right: 8px;">delete</span> Hapus Postingan</button>
                         </div>
@@ -1367,7 +1524,7 @@
                                         attachedMediaContentHTML = `<iframe src="https://www.youtube.com/embed/${ytID}" allowfullscreen></iframe>`;
                                     }
                                 } else if (mediaUrl.match(/\.(mp3|wav|ogg)$/i) || mediaUrl.includes('audio')) {
-                                    attachedMediaContentHTML = `<audio controls><source src="${mediaUrl}">Browser Anda tidak mendukung pemutar audio.</audio>`;
+                                    attachedMediaContentHTML = `<audio controls style="width:100%;"><source src="${mediaUrl}">Browser Anda tidak mendukung pemutar audio.</audio>`;
                                 } else {
                                     attachedMediaContentHTML = `<img src="${mediaUrl}" class="post-attached-image">`;
                                 }
@@ -1409,22 +1566,22 @@
                                     <div class="post-actions-bar">
                                         <div class="post-action-item ${isLikedActive}" onclick="App.Features.toggleLike(${pId}, '${p.author}')">
                                             <span class="material-symbols-outlined">thumb_up</span>
-                                            <span>${parsedRoleData.likedUsers.length} Suka</span>
+                                            <span>${parsedRoleData.likedUsers.length}</span>
                                         </div>
                                         
                                         <div class="post-action-item ${isLovedActive}" onclick="App.Features.toggleLoveReaction(${pId}, '${p.author}')">
                                             <span class="material-symbols-outlined">favorite</span>
-                                            <span>${parsedRoleData.lovedUsers.length} Love</span>
+                                            <span>${parsedRoleData.lovedUsers.length}</span>
                                         </div>
 
                                         <div class="post-action-item" onclick="App.Features.openCommentsBottomSheet(${pId}, '${p.author}')">
                                             <span class="material-symbols-outlined">comment</span>
-                                            <span>${parsedRoleData.comments ? parsedRoleData.comments.length : 0} Komen</span>
+                                            <span>${parsedRoleData.comments ? parsedRoleData.comments.length : 0}</span>
                                         </div>
                                         
                                         <div class="post-action-item" onclick="App.Features.openSocialMediaShareSheetModal(${pId}, '${p.author}', '${(p.content || "").replace(/'/g, "\\'")}', ${hasImg})">
                                             <span class="material-symbols-outlined">share</span>
-                                            <span>${parsedRoleData.sharedCount} Bagikan</span>
+                                            <span>${parsedRoleData.sharedCount}</span>
                                         </div>
                                     </div>
                                 </div>
@@ -1580,7 +1737,7 @@
                                         <div style="display:flex; gap:8px; align-items:flex-start;">
                                             <img src="${subAvatar}" style="width:26px; height:26px; border-radius:50%; object-fit:cover;">
                                             <div style="flex:1; display:flex; flex-direction:column; gap:2px;">
-                                                <div style="background:var(--bg-body); padding:8px 12px; border-radius:14px; max-width:90%;">
+                                                <div style="background:var(--bg-body); padding:8px 12px; border-radius:14px; max-width:95%;">
                                                     <strong style="font-size:0.78rem; color:var(--text-main); display:block;">${subUser}</strong>
                                                     <span style="font-size:0.82rem; color:var(--text-main);">${r.text}</span>
                                                 </div>
@@ -1599,7 +1756,7 @@
                                 <div style="display:flex; gap:10px; align-items:flex-start; text-align:left;">
                                     <img src="${userAvatarUrl}" style="width:34px; height:34px; border-radius:50%; object-fit:cover; margin-top:2px;">
                                     <div style="flex:1; display:flex; flex-direction:column; gap:2px;">
-                                        <div style="background:var(--bg-body); padding:10px 14px; border-radius:18px; display:inline-block; max-width:90%; box-shadow:0 1px 3px rgba(0,0,0,0.03);">
+                                        <div style="background:var(--bg-body); padding:10px 14px; border-radius:18px; display:inline-block; max-width:95%; box-shadow:0 1px 3px rgba(0,0,0,0.03);">
                                             <strong style="color:var(--text-main); font-size:0.82rem; display:block; margin-bottom:2px; cursor:pointer;" onclick="App.Features.closeCommentsBottomSheet(); App.Router.navigate('profil?name=${encodeURIComponent(userClean)}')">${userClean}</strong>
                                             <span style="font-size:0.88rem; color:var(--text-main); white-space:pre-wrap; line-height:1.4;">${c.text}</span>
                                         </div>
@@ -1829,6 +1986,69 @@
 
                 async submitPostCommentAction(postId, postAuthor) {
                     App.Features.openCommentsBottomSheet(postId, postAuthor);
+                },
+
+                showNotifications() {
+                    let notiHTML = liveNotifications.length === 0 
+                        ? `<div style="text-align:center; padding:24px; color:var(--text-muted);">Tidak ada notifikasi baru.</div>`
+                        : liveNotifications.map(n => `
+                            <div style="display:flex; gap:12px; padding:12px; border-bottom:1px solid var(--border-color); align-items:center;">
+                                <span class="material-symbols-outlined" style="color:var(--primary);">${n.icon}</span>
+                                <div style="font-size:0.9rem;"><strong>${n.user}</strong> ${n.desc}</div>
+                            </div>
+                        `).join('');
+                    
+                    App.Modal.open("Notifikasi", notiHTML, true, false);
+                    liveHeaderNotificationCount = 0;
+                    App.UI.refreshHeaderNotificationBadgeDOM();
+                },
+
+                saveNameSettings() {
+                    const name = document.getElementById('settings-display-name').value.trim();
+                    const bio = document.getElementById('settings-bio-status').value.trim();
+                    const domisili = document.getElementById('settings-domisili').value.trim();
+                    
+                    if(!name) return;
+                    
+                    const res = App.ProfileState.updateProfileDataConfiguration(name, bio, domisili);
+                    if(res.success) {
+                        App.Toast.show("Data profil Anda berhasil disimpan!", "success");
+                        App.Router.navigate('feed');
+                    } else {
+                        App.Toast.show(res.message, "danger");
+                    }
+                },
+
+                saveAdminGlobalAdBannerAction(event) {
+                    event.preventDefault();
+                    const code = document.getElementById('admin-ad-html-input').value.trim();
+                    localStorage.setItem('ns_ad_html_global', code);
+                    App.Toast.show("Iklan Super Admin dipublikasikan!", "success");
+                    App.UI.renderGlobalBannerAdIfExists();
+                },
+
+                renderExploreUsers() {
+                    const container = document.getElementById('explore-users-stream'); if(!container) return;
+                    const users = ["Andi_Tech", "Budi_Developer", "Siti_Designer", "Rian_Data", "Dewi_Manager"];
+                    container.innerHTML = users.map(u => `
+                        <div class="user-follow-card">
+                            <img src="https://i.pravatar.cc/150?img=${Math.abs(u.hashCode()) % 70 || 15}" style="width:44px; height:44px; border-radius:50%; object-fit:cover;">
+                            <div class="user-follow-info">
+                                <strong style="font-size:0.9rem; color:var(--text-main);">${u}</strong>
+                                <span style="font-size:0.75rem; color:var(--text-muted); display:block;">Workspace Member</span>
+                            </div>
+                            <button class="btn btn-primary" style="padding:6px 12px; font-size:0.8rem; border-radius:8px;" onclick="App.Features.followExploreUserAction('${u}')">Ikuti</button>
+                        </div>
+                    `).join('');
+                },
+
+                followExploreUserAction(username) {
+                    App.Toast.show(`Berhasil mengikuti ${username}`, "success");
+                },
+
+                loadFriendsCount() {
+                    const el = document.getElementById('profile-friends-count');
+                    if (el) el.innerText = window.myFriendsList ? window.myFriendsList.length : '12';
                 }
             },
 
@@ -1854,6 +2074,7 @@
                         modalContentArea.style.padding = '0';
                         modalContentArea.style.background = 'transparent';
                         modalContentArea.style.boxShadow = 'none';
+                        modalContentArea.style.border = 'none';
                         titleEl.style.display = 'none';
                         footerEl.style.display = 'none';
                         if (closeBtnEl) closeBtnEl.style.display = 'none';
@@ -1862,6 +2083,7 @@
                         modalContentArea.style.padding = '24px';
                         modalContentArea.style.background = 'var(--bg-glass-solid)';
                         modalContentArea.style.boxShadow = 'var(--shadow-soft)';
+                        modalContentArea.style.border = '1px solid var(--border-color)';
                         titleEl.style.display = title ? 'block' : 'none';
                         titleEl.innerText = title || '';
                         footerEl.style.display = hideFooter ? 'none' : 'flex';
