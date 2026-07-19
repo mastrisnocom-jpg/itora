@@ -296,7 +296,7 @@
             margin-bottom: 12px;
         }
 
-        .pic-composer-dock-grid { display: flex; justify-content: space-around; padding: 20px; border-top: 1px solid rgba(0,0,0,0.04); background: var(--bg-glass-solid); max-width: 100%; }
+        .pic-composer-dock-grid { display: flex; justify-width: space-around; padding: 20px; border-top: 1px solid rgba(0,0,0,0.04); background: var(--bg-glass-solid); max-width: 100%; justify-content: space-around;}
         .pic-dock-icon-only-item { display: flex; flex-direction: column; align-items: center; justify-content: center; width: 50px; height: 50px; border-radius: 50%; background: var(--bg-body); border: 1px solid rgba(0,0,0,0.04); cursor: pointer; transition: var(--trans-smooth); }
         .pic-dock-icon-only-item:hover, .pic-dock-icon-only-item.active { background: var(--primary-state); border-color: var(--primary); }
         .pic-dock-icon-only-item .material-symbols-outlined { font-size: 24px; color: var(--text-main); }
@@ -362,6 +362,35 @@
             flex-shrink: 0;
         }
         .minimal-composer-gallery-icon:hover { color: var(--primary); }
+
+        /* PREMIUM APP-THEME MATCHED COLOR PICKER ZONE */
+        .premium-color-picker-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 14px;
+            padding: 16px 20px;
+            background: var(--bg-body);
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border-color);
+            margin-top: 12px;
+        }
+        .color-palette-circle-node {
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            cursor: pointer;
+            border: 2.5px solid transparent;
+            transition: var(--trans-smooth);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.06);
+        }
+        .color-palette-circle-node:hover {
+            transform: scale(1.15);
+        }
+        .color-palette-circle-node.active-selected {
+            border-color: var(--primary);
+            box-shadow: var(--shadow-float);
+            transform: scale(1.1);
+        }
 
         /* PROFILE LAYOUT UTILS */
         .profile-cover { height: 140px; background: linear-gradient(135deg, var(--primary-hover), var(--primary)); width: 100%; }
@@ -1302,11 +1331,36 @@
                             <div class="composer-dynamic-input-zone" id="composer-media-zone">
                                 <div style="display:flex; gap:8px; align-items:center; width:100%;"><span class="material-symbols-outlined" style="color:var(--primary);">link</span><input type="text" id="composer-media-url" placeholder="Paste link YouTube / MP3..." style="background:var(--bg-body); padding:10px 14px; border-radius:20px; font-size:0.9rem; width:100%; border:1px solid var(--border-color);"></div>
                             </div>
+                            
+                            <!-- DESAIN PREMIUM COLOR PICKER ZONE SINKRON TEMA -->
+                            <div class="composer-dynamic-input-zone" id="composer-color-palette-zone">
+                                <div style="display:flex; flex-direction:column; gap:4px; width:100%;">
+                                    <span style="font-size:0.82rem; font-weight:700; color:var(--text-main); padding-left:4px;">Pilih warna latar belakang</span>
+                                    <div class="premium-color-picker-grid">
+                                        <div class="color-palette-circle-node active-selected" style="background:#ffffff;" onclick="App.Features.selectPaletteColorCloudAction(this, '#ffffff')"></div>
+                                        <div class="color-palette-circle-node" style="background:#FF3B30;" onclick="App.Features.selectPaletteColorCloudAction(this, '#FF3B30')"></div>
+                                        <div class="color-palette-circle-node" style="background:#007AFF;" onclick="App.Features.selectPaletteColorCloudAction(this, '#007AFF')"></div>
+                                        <div class="color-palette-circle-node" style="background:#34C759;" onclick="App.Features.selectPaletteColorCloudAction(this, '#34C759')"></div>
+                                        <div class="color-palette-circle-node" style="background:#FF9500;" onclick="App.Features.selectPaletteColorCloudAction(this, '#FF9500')"></div>
+                                        <div class="color-palette-circle-node" style="background:#AF52DE;" onclick="App.Features.selectPaletteColorCloudAction(this, '#AF52DE')"></div>
+                                        <div class="color-palette-circle-node" style="background:#5AC8FA;" onclick="App.Features.selectPaletteColorCloudAction(this, '#5AC8FA')"></div>
+                                        <div class="color-palette-circle-node" style="background:#FF2D55;" onclick="App.Features.selectPaletteColorCloudAction(this, '#FF2D55')"></div>
+                                        <div class="color-palette-circle-node" style="background:#111111;" onclick="App.Features.selectPaletteColorCloudAction(this, '#111111')"></div>
+                                        
+                                        <!-- CIRLCE UNTUK INPUT CUSTOM SECARA PREMIUM -->
+                                        <div class="color-palette-circle-node" id="custom-palette-color-circle-btn" style="background:linear-gradient(45deg, #f093fb 0%, #f5576c 100%); display:flex; align-items:center; justify-content:center; position:relative;" title="Suaikan">
+                                            <span class="material-symbols-outlined" style="font-size:18px; color:white; font-weight:800;">add</span>
+                                            <input type="color" id="composer-bg-picker-hidden-node" value="#ffffff" style="position:absolute; top:0; left:0; width:100%; height:100%; opacity:0; cursor:pointer;" onchange="App.Features.handleCustomColorPickerNodeChange(this.value)">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
                             <div class="pic-composer-dock-grid">
                                 <div class="pic-dock-icon-only-item" onclick="document.getElementById('composer-modal-inner-img-input').click()"><span class="material-symbols-outlined">image</span></div>
                                 <div class="pic-dock-icon-only-item" id="dock-btn-location" onclick="App.Features.toggleComposerInputRow('location')"><span class="material-symbols-outlined">location_on</span></div>
                                 <div class="pic-dock-icon-only-item" id="dock-btn-media" onclick="App.Features.toggleComposerInputRow('media')"><span class="material-symbols-outlined">link</span></div>
-                                <div class="pic-dock-icon-only-item" style="position:relative;"><span class="material-symbols-outlined">palette</span><input type="color" value="#ffffff" style="position:absolute; top:0; left:0; width:100%; height:100%; opacity:0; cursor:pointer;" onchange="App.Features.handleComposerBgColorChange(this.value)"></div>
+                                <div class="pic-dock-icon-only-item" id="dock-btn-color-palette" onclick="App.Features.toggleComposerInputRow('color-palette')"><span class="material-symbols-outlined">palette</span></div>
                                 <input type="file" id="composer-modal-inner-img-input" accept="image/*" style="display:none;" onchange="App.Features.handleComposerImageSelection(event)">
                             </div>
                         </div>
@@ -1319,7 +1373,26 @@
                     const zone = document.getElementById(`composer-${type}-zone`), btn = document.getElementById(`dock-btn-${type}`);
                     if (!zone || !btn) return;
                     zone.classList.toggle('active'); btn.classList.toggle('active');
-                    if(zone.classList.contains('active')) setTimeout(() => document.getElementById(type === 'location' ? 'composer-location-input' : 'composer-media-url')?.focus(), 150);
+                    if(zone.classList.contains('active')) {
+                        if (type === 'location') setTimeout(() => document.getElementById('composer-location-input')?.focus(), 150);
+                        if (type === 'media') setTimeout(() => document.getElementById('composer-media-url')?.focus(), 150);
+                    }
+                },
+
+                selectPaletteColorCloudAction(elementNode, hexColor) {
+                    document.querySelectorAll('.color-palette-circle-node').forEach(el => el.classList.remove('active-selected'));
+                    elementNode.classList.add('active-selected');
+                    App.Features.handleComposerBgColorChange(hexColor);
+                },
+
+                handleCustomColorPickerNodeChange(hexColor) {
+                    const customCircle = document.getElementById('custom-palette-color-circle-btn');
+                    if (customCircle) {
+                        customCircle.style.background = hexColor;
+                        document.querySelectorAll('.color-palette-circle-node').forEach(el => el.classList.remove('active-selected'));
+                        customCircle.classList.add('active-selected');
+                    }
+                    App.Features.handleComposerBgColorChange(hexColor);
                 },
 
                 handleComposerBgColorChange(color) {
@@ -1483,11 +1556,9 @@
                 async triggerPostTextEditAction(postId) {
                     App.Modal.close(); 
                     try {
-                        // 1. Ambil teks konten postingan yang aktif saat ini dari database
                         const { data: post, error } = await supabaseClient.from('posts').select('content').eq('id', Number(postId)).single();
                         if (error || !post) return;
 
-                        // 2. Desain form edit kustom yang sepenuhnya terintegrasi dengan variabel warna Tema aplikasi
                         const editFormHTML = `
                             <div style="text-align: left; background: var(--bg-glass-solid); display: flex; flex-direction: column; gap: 16px;">
                                 <p style="color: var(--text-muted); font-size: 0.88rem; font-weight: 500;">Modifikasi narasi atau status kiriman Anda secara realtime.</p>
@@ -1501,7 +1572,6 @@
                             </div>
                         `;
 
-                        // 3. Buka form edit menggunakan sistem Pop-Up Modal Premium aplikasi
                         App.Modal.open("Edit Konten Status", editFormHTML, true, false);
                     } catch(err) {
                         App.Toast.show("Gagal memuat konten pos", "danger");
@@ -1511,17 +1581,12 @@
                 async submitCustomEditedContentCloudAction(postId) {
                     const editedTextValue = document.getElementById('custom-edit-textarea-field')?.value.trim();
                     if (!editedTextValue) {
-                        App.Toast.show("Konten teks status tidak boleh kosong!", "danger");
-                        return;
+                        App.Toast.show("Konten teks status tidak boleh kosong!", "danger"); return;
                     }
-
                     try {
                         const { error } = await supabaseClient.from('posts').update({ content: editedTextValue }).eq('id', Number(postId));
                         if (error) throw error;
-
-                        App.Modal.close();
-                        App.Toast.show("Konten status Anda berhasil diperbarui!", "success");
-                        this.renderPosts();
+                        App.Modal.close(); App.Toast.show("Konten status Anda berhasil diperbarui!", "success"); this.renderPosts();
                     } catch(err) {
                         App.Toast.show("Gagal memperbarui status ke server", "danger");
                     }
