@@ -1354,9 +1354,9 @@
 
                 async incrementGlobalShareCounter(postId, postAuthor) {
                     try {
-                        const { data } = await supabaseClient.from('posts').select('shared_count').eq('id', postId).single();
+                        const { data } = await supabaseClient.from('posts').select('shared_count').eq('id', Number(postId)).single();
                         const currentCount = data ? (data.shared_count || 0) : 0;
-                        await supabaseClient.from('posts').update({ shared_count: currentCount + 1 }).eq('id', postId);
+                        await supabaseClient.from('posts').update({ shared_count: currentCount + 1 }).eq('id', Number(postId));
                         if (postAuthor !== App.ProfileState.getCurrentName()) {
                             await App.Features.pushCloudNotificationPayload(postAuthor, 'share', `membagikan postingan status Anda.`);
                         }
@@ -1473,7 +1473,7 @@
                 async updatePostPrivacy(postId, val) {
                     App.Modal.close();
                     try {
-                        await supabaseClient.from('posts').update({ privacy: val }).eq('id', postId);
+                        await supabaseClient.from('posts').update({ privacy: val }).eq('id', Number(postId));
                         App.Toast.show("Privasi diperbarui", "success"); this.renderPosts();
                     } catch (e) {}
                 },
@@ -1481,17 +1481,22 @@
                 async triggerPostTextEditAction(postId) {
                     App.Modal.close(); const newTxt = prompt("Revisi teks status Anda:"); if(!newTxt?.trim()) return;
                     try {
-                        await supabaseClient.from('posts').update({ content: newTxt.trim() }).eq('id', postId);
+                        await supabaseClient.from('posts').update({ content: newTxt.trim() }).eq('id', Number(postId));
                         App.Toast.show("Berhasil diedit", "success"); this.renderPosts();
                     } catch(e) {}
                 },
 
                 async triggerPostAbsoluteDeleteAction(postId) {
-                    App.Modal.close(); if(!confirm("Hapus postingan ini?")) return;
+                    App.Modal.close(); 
+                    if(!confirm("Anda yakin ingin menghapus postingan ini secara permanen dari server?")) return;
                     try {
-                        await supabaseClient.from('posts').delete().eq('id', postId);
-                        App.Toast.show("Postingan dihapus", "success"); this.renderPosts();
-                    } catch(e) {}
+                        const { error } = await supabaseClient.from('posts').delete().eq('id', Number(postId));
+                        if (error) throw error;
+                        App.Toast.show("Postingan berhasil dihapus dari server", "success"); 
+                        this.renderPosts();
+                    } catch(e) {
+                        App.Toast.show("Gagal menghapus. Pastikan Anda pemilik postingan atau RLS sudah diizinkan.", "danger");
+                    }
                 },
 
                 async renderPosts() {
@@ -1582,7 +1587,7 @@
                 async toggleLike(id, postAuthor) {
                     const myName = App.ProfileState.getCurrentName();
                     try {
-                        const { data } = await supabaseClient.from('posts').select('liked_users').eq('id', id).single();
+                        const { data } = await supabaseClient.from('posts').select('liked_users').eq('id', Number(id)).single();
                         let list = data && data.liked_users ? data.liked_users : [];
                         
                         if (list.includes(myName)) {
@@ -1592,7 +1597,7 @@
                             if(postAuthor !== myName) await this.pushCloudNotificationPayload(postAuthor, 'like', 'menyukai status Anda.'); 
                         }
                         
-                        await supabaseClient.from('posts').update({ liked_users: list }).eq('id', id); 
+                        await supabaseClient.from('posts').update({ liked_users: list }).eq('id', Number(id)); 
                         this.renderPosts();
                     } catch(e) {}
                 },
@@ -1600,7 +1605,7 @@
                 async toggleLoveReaction(id, postAuthor) {
                     const myName = App.ProfileState.getCurrentName();
                     try {
-                        const { data } = await supabaseClient.from('posts').select('loved_users').eq('id', id).single();
+                        const { data } = await supabaseClient.from('posts').select('loved_users').eq('id', Number(id)).single();
                         let list = data && data.loved_users ? data.loved_users : [];
                         
                         if (list.includes(myName)) {
@@ -1610,7 +1615,7 @@
                             if(postAuthor !== myName) await this.pushCloudNotificationPayload(postAuthor, 'love', 'menyukai status Anda dengan Cinta.'); 
                         }
                         
-                        await supabaseClient.from('posts').update({ loved_users: list }).eq('id', id); 
+                        await supabaseClient.from('posts').update({ loved_users: list }).eq('id', Number(id)); 
                         this.renderPosts();
                     } catch(e) {}
                 },
