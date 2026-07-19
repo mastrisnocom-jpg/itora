@@ -1488,16 +1488,26 @@
 
                 async triggerPostAbsoluteDeleteAction(postId) {
                     App.Modal.close(); 
-                    if(!confirm("Anda yakin ingin menghapus postingan ini secara permanen dari server?")) return;
+                    if(!confirm("Anda yakin ingin menghapus postingan ini secara permanen? Semua komentar dan like di dalamnya juga akan terhapus otomatis.")) return;
                     try {
-                        // Optimasi utama: Langsung hapus via kueri dan render ulang list lokal secara instan
+                        // 1. Bersihkan komentar relasional di Supabase secara aman sebelum menghapus post utama
+                        await supabaseClient.from('comments').delete().eq('post_id', Number(postId));
+                        
+                        // 2. Jalankan eksekusi hapus baris postingan utama
                         const { error } = await supabaseClient.from('posts').delete().eq('id', Number(postId));
                         if (error) throw error;
                         
                         App.Toast.show("Postingan berhasil dihapus dari server", "success"); 
-                        App.Features.renderPosts(); // Hapus instan dari layar tanpa nunggu realtime reload
+                        
+                        // 3. Hapus kartu status langsung dari layar DOM secara instan tanpa menunggu reload delay database
+                        const targetCardNode = document.getElementById(`post-element-node-${postId}`);
+                        if (targetCardNode) {
+                            targetCardNode.remove();
+                        } else {
+                            this.renderPosts();
+                        }
                     } catch(e) {
-                        App.Toast.show("Gagal menghapus. Pastikan Anda pemilik postingan atau RLS sudah diizinkan.", "danger");
+                        App.Toast.show("Gagal menghapus. Periksa izin hak milik RLS Anda.", "danger");
                     }
                 },
 
