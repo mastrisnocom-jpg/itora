@@ -265,24 +265,24 @@
         }
 
         /* COMPOSER CARD */
-        .pic-composer-card { display: flex; flex-direction: column; width: 100%; background: var(--bg-glass-solid); min-height: 100%; text-align: left; position: relative; max-width: 100%; }
-        .pic-composer-header { display: flex; align-items: center; justify-content: space-between; padding: 16px; border-bottom: 1px solid rgba(0,0,0,0.05); }
-        .pic-composer-close { font-size: 26px; color: var(--text-main); cursor: pointer; border: none; background: transparent; }
-        .pic-composer-title { font-size: 1.1rem; font-weight: 800; color: var(--text-main); }
-        .pic-composer-next-btn { background: #e2e8f0; color: #94a3b8; padding: 8px 18px; border-radius: 8px; font-weight: 700; font-size: 0.88rem; cursor: pointer; transition: var(--trans-smooth); border: none; }
+        .pic-composer-card { display: flex; flex-direction: column; width: 100%; background: var(--bg-glass-solid); border-radius: var(--radius-xl); box-shadow: var(--shadow-soft); padding: 0; min-height: auto; text-align: left; position: relative; max-width: 100%; overflow: hidden; }
+        .pic-composer-header { display: flex; align-items: center; justify-content: space-between; padding: 16px 20px; border-bottom: 1px solid rgba(0,0,0,0.05); background: var(--bg-glass-solid); }
+        .pic-composer-close { font-size: 26px; color: var(--text-main); cursor: pointer; border: none; background: transparent; display: flex; align-items: center; justify-content: center; }
+        .pic-composer-title { font-size: 1.1rem; font-weight: 800; color: var(--text-main); flex: 1; text-align: center; margin-left: -10px; }
+        .pic-composer-next-btn { background: #e2e8f0; color: #94a3b8; padding: 8px 20px; border-radius: 8px; font-weight: 700; font-size: 0.88rem; cursor: pointer; transition: var(--trans-smooth); border: none; }
         .pic-composer-next-btn.ready { background: var(--primary); color: white; box-shadow: var(--shadow-float); }
         
-        .pic-composer-profile-row { display: flex; align-items: center; gap: 12px; padding: 16px; }
+        .pic-composer-profile-row { display: flex; align-items: center; gap: 12px; padding: 16px 20px; }
         .pic-composer-username { font-size: 1.05rem; font-weight: 800; color: var(--text-main); }
         
-        .pic-composer-body { flex: 1; padding: 0 16px; display: flex; flex-direction: column; max-width: 100%; }
-        .pic-composer-textarea { width: 100%; border: none; resize: none; background: transparent; color: var(--text-main); font-size: 1.1rem; min-height: 140px; font-family: var(--font-main); line-height: 1.5; box-sizing: border-box; }
-        .pic-composer-textarea:focus { outline: none; }
+        .pic-composer-body { flex: 1; padding: 0 20px; display: flex; flex-direction: column; max-width: 100%; }
+        .pic-composer-textarea { width: 100%; border: 1px solid rgba(1, 181, 116, 0.1); border-radius: var(--radius-md); background: var(--bg-body); color: var(--text-main); font-size: 1.05rem; padding: 16px; min-height: 140px; font-family: var(--font-main); line-height: 1.5; box-sizing: border-box; resize: none; transition: var(--trans-smooth); }
+        .pic-composer-textarea:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 4px var(--primary-state); }
         .pic-composer-preview-box { margin-top: 12px; border-radius: 12px; overflow: hidden; max-height: 140px; text-align: center; }
         .pic-composer-preview-box img { max-height: 130px; object-fit: cover; border: 2px solid var(--primary); border-radius: 8px; margin: 0 auto; display: block; max-width: 100%; }
 
         .composer-dynamic-input-zone {
-            padding: 0 16px;
+            padding: 0 20px;
             display: flex;
             flex-direction: column;
             gap: 8px;
@@ -296,7 +296,7 @@
             margin-bottom: 12px;
         }
 
-        .pic-composer-dock-grid { display: flex; justify-content: space-around; padding: 16px; border-top: 1px solid rgba(0,0,0,0.04); background: var(--bg-glass-solid); max-width: 100%; }
+        .pic-composer-dock-grid { display: flex; justify-content: space-around; padding: 20px; border-top: 1px solid rgba(0,0,0,0.04); background: var(--bg-glass-solid); max-width: 100%; }
         .pic-dock-icon-only-item { display: flex; flex-direction: column; align-items: center; justify-content: center; width: 50px; height: 50px; border-radius: 50%; background: var(--bg-body); border: 1px solid rgba(0,0,0,0.04); cursor: pointer; transition: var(--trans-smooth); }
         .pic-dock-icon-only-item:hover, .pic-dock-icon-only-item.active { background: var(--primary-state); border-color: var(--primary); }
         .pic-dock-icon-only-item .material-symbols-outlined { font-size: 24px; color: var(--text-main); }
@@ -371,9 +371,7 @@
         .stat-val { font-weight: 800; font-size: 1.1rem; color: var(--text-main); }
         .stat-lbl { font-size: 0.75rem; color: var(--text-muted); font-weight: 600; }
 
-        /* ==========================================================================
-           FLOATING CHAT WIDGET SYSTEM (WHATSAPP/MESSENGER LOOK)
-           ========================================================================== */
+        /* FLOATING CHAT WIDGET SYSTEM */
         .floating-chat-widget { 
             position: fixed; 
             bottom: 85px; 
@@ -411,7 +409,6 @@
             width: 100%;
         }
         
-        /* View 1: List Kontak Utama (Penuh / Full Width) */
         .chat-sidebar-wrapper {
             display: flex;
             flex-direction: column;
@@ -536,7 +533,7 @@
             padding: 0 4px;
         }
 
-        /* View 2: Form Obrolan Utama (Slide In / Penuh) */
+        /* View 2: Form Obrolan Utama */
         .popup-chat-main-area { 
             position: absolute;
             left: 0; top: 0;
@@ -557,10 +554,24 @@
         .popup-msg-stream { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 10px; }
         .popup-chat-input-row { padding: 12px 16px; border-top: 1px solid var(--border-color); display: flex; gap: 8px; align-items: center; background: var(--bg-glass-solid); }
         
-        /* Bubble Posisi: Kanan (Out) & Kiri (In) */
         .bubble { max-width: 75%; padding: 10px 16px; border-radius: 18px; font-size: 0.9rem; line-height: 1.4; word-break: break-word; box-shadow: 0 1px 2px rgba(0,0,0,0.04); }
         .bubble.in { background: var(--bg-glass-solid); color: var(--text-main); align-self: flex-start; border-top-left-radius: 4px; text-align: left; }
         .bubble.out { background: var(--primary); color: white; align-self: flex-end; border-top-right-radius: 4px; text-align: left; }
+
+        /* GLOBAL MODAL SYSTEM */
+        .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(5,20,11,0.5); backdrop-filter: blur(4px); z-index: 4000; display: none; align-items: center; justify-content: center; padding: 20px; transition: var(--trans-smooth); }
+        .modal-overlay.active { display: flex; }
+        .modal-content { background: var(--bg-glass-solid); border: 1px solid var(--border-color); border-radius: var(--radius-xl); padding: 24px; width: 100%; max-width: 500px; position: relative; box-shadow: var(--shadow-soft); max-height: 90vh; overflow-y: auto; box-sizing: border-box; }
+        .modal-close-x { position: absolute; top: 16px; right: 16px; cursor: pointer; background: transparent; color: var(--text-muted); z-index: 10; }
+        
+        /* TOAST & ANIMATIONS */
+        .toast-container { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); z-index: 9999; display: flex; flex-direction: column; gap: 10px; pointer-events: none; width: calc(100% - 40px); max-width: 350px; }
+        .toast { background: var(--bg-glass-solid); border: 1px solid var(--border-color); border-left: 4px solid var(--primary); padding: 14px 20px; border-radius: var(--radius-md); box-shadow: var(--shadow-soft); color: var(--text-main); font-weight: 600; font-size: 0.9rem; width: 100%; animation: slideDownFade 0.3s ease forwards; pointer-events: auto; }
+        .global-workspace-ad-banner { background: var(--primary-state); border: 1px dashed var(--primary); border-radius: var(--radius-md); padding: 12px; margin-bottom: 20px; text-align: center; font-size: 0.85rem; max-width: 100%; box-sizing: border-box; }
+
+        @keyframes slideDownFade { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes slideUpFade { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fadeScale { from { opacity: 0; transform: scale(0.98); } to { opacity: 1; transform: scale(1); } }
 
         /* RESPONSIVE MOBILE PHONES SCREEN */
         @media (max-width: 768px) {
@@ -597,7 +608,6 @@
             .minimal-composer-bar { padding: 12px 16px; margin-bottom: 16px; border-radius: var(--radius-lg); }
             .minimal-composer-input-mock { padding: 10px 16px; font-size: 0.95rem; }
             
-            /* Chat mode handphone tetap di bawah header (tidak full screen) */
             .floating-chat-widget {
                 width: 100vw;
                 height: calc(100vh - var(--header-height));
@@ -923,7 +933,7 @@
                 },
                 toggleView(view) {
                     document.getElementById('login-view').style.display = view === 'login' ? 'block' : 'none';
-                    document.getElementById('signup-view').style.display = view === 'signup' ? 'block' : 'none';
+                    document.getElementById('signup-view').style.display = view === 'signup' : 'block' : 'none';
                 },
                 async login(e) {
                     if (e && e.preventDefault) e.preventDefault();
@@ -1152,7 +1162,6 @@
                         </div>
                     `;
                 },
-                // FIX: Membersihkan view Settings dari sisa-sisa elemen post popup yang salah alamat
                 settings() {
                     const currentName = App.ProfileState.getCurrentName();
                     const currentAvatar = App.ProfileState.getCurrentAvatar();
@@ -1244,7 +1253,8 @@
                     };
                 },
 
-                // Pemindahan & Perbaikan form posting status yang terisolasi dan modular
+                // FIX: Menyalakan parameter rawMode = true (argumen ke-4) agar container modal sistem bawaan disembunyikan.
+                // Hal ini mencegah judul bertumpuk ganda (Status Baru vs Postingan baru) seperti keluhan pada gambar lampiran.
                 openComposerModalPopupForm() {
                     const currentName = App.ProfileState.getCurrentName();
                     const premiumLevel = App.ProfileState.getPremiumLevel();
@@ -1276,21 +1286,21 @@
                                 </div>
                             </div>
                             
-                            <div class="pic-composer-body" style="padding: 8px 16px;">
-                                <textarea class="pic-composer-textarea" id="composer-text" placeholder="Apa yang Anda pikirkan?" oninput="document.getElementById('pic-submit-btn').classList.add('ready')" style="border: 1px solid var(--border-color); border-radius: 8px; padding: 12px; width: 100%; min-height: 120px; background: var(--bg-body);"></textarea>
+                            <div class="pic-composer-body">
+                                <textarea class="pic-composer-textarea" id="composer-text" placeholder="Apa yang Anda pikirkan?" oninput="document.getElementById('pic-submit-btn').classList.add('ready')"></textarea>
                                 <div id="composer-upload-preview-area" class="pic-composer-preview-box">
                                     ${composerAttachedImageBase64 ? `<img src="${composerAttachedImageBase64}">` : ''}
                                 </div>
                             </div>
 
                             <div class="composer-dynamic-input-zone" id="composer-location-zone">
-                                <div style="display: flex; gap: 8px; align-items: center; width: 100%; padding: 0 16px;">
+                                <div style="display: flex; gap: 8px; align-items: center; width: 100%;">
                                     <span class="material-symbols-outlined" style="color: var(--primary);">location_on</span>
                                     <input type="text" id="composer-location-input" placeholder="Ketik nama lokasi..." style="background: var(--bg-body); padding: 10px 14px; border-radius: 20px; font-size: 0.9rem; width: 100%; border: 1px solid var(--border-color);" oninput="activeComposerLocation = this.value">
                                 </div>
                             </div>
                             <div class="composer-dynamic-input-zone" id="composer-media-zone">
-                                <div style="display: flex; gap: 8px; align-items: center; width: 100%; padding: 0 16px;">
+                                <div style="display: flex; gap: 8px; align-items: center; width: 100%;">
                                     <span class="material-symbols-outlined" style="color: var(--primary);">link</span>
                                     <input type="text" id="composer-media-url" placeholder="Paste link YouTube / Audio (.mp3)..." style="background: var(--bg-body); padding: 10px 14px; border-radius: 20px; font-size: 0.9rem; width: 100%; border: 1px solid var(--border-color);">
                                 </div>
@@ -1315,7 +1325,8 @@
                         </div>
                     `;
                     
-                    App.Modal.open("Status Baru", popupFormHTML, true, false);
+                    // Argumen ke-3: hideFooter = true, Argumen ke-4: rawMode = true
+                    App.Modal.open(null, popupFormHTML, true, true);
                 },
 
                 closeComposerAndClearCache() {
