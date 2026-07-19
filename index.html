@@ -836,6 +836,9 @@
         
         let activeBottomSheetPostId = null;
         let activeReplyTargetCommentId = null;
+        
+        // Memori cache lokal untuk performa render feed super cepat
+        let localFeedCacheMemory = [];
 
         String.prototype.hashCode = function() {
             let hash = 0;
@@ -937,8 +940,13 @@
                         .channel('schema-db-changes')
                         .on('postgres_changes', { event: '*', schema: 'public', table: 'posts' }, async (payload) => {
                             App.Features.fetchCloudNotificationsDataZone();
-
-                            if (window.location.hash === '#/feed' || window.location.hash === '') App.Features.renderPosts();
+                            
+                            const { data } = await supabaseClient.from('posts').select('*').order('created_at', { ascending: false });
+                            if (data) {
+                                localFeedCacheMemory = data;
+                                if (window.location.hash === '#/feed' || window.location.hash === '') App.Features.executeUIRenderFromCache();
+                            }
+                            
                             if (window.location.hash.includes('#/profil?name=')) {
                                 App.Router.handleRoute();
                             }
@@ -1138,15 +1146,20 @@
                         targetAvatar = App.ProfileState.getCurrentAvatar();
                     } else {
                         try {
-                            const { data } = await supabaseClient
-                                .from('posts')
-                                .select('avatar')
-                                .eq('author', targetName)
-                                .not('avatar', 'is', null)
-                                .order('created_at', { ascending: false })
-                                .limit(1);
-                            if (data && data.length > 0 && data[0].avatar) {
-                                targetAvatar = data[0].avatar;
+                            const match = localFeedCacheMemory.find(p => p.author === targetName && p.avatar);
+                            if (match) {
+                                targetAvatar = match.avatar;
+                            } else {
+                                const { data } = await supabaseClient
+                                    .from('posts')
+                                    .select('avatar')
+                                    .eq('author', targetName)
+                                    .not('avatar', 'is', null)
+                                    .order('created_at', { ascending: false })
+                                    .limit(1);
+                                if (data && data.length > 0 && data[0].avatar) {
+                                    targetAvatar = data[0].avatar;
+                                }
                             }
                         } catch (err) {
                             console.error(err);
@@ -1400,7 +1413,7 @@
 
                 handleHeaderLiveSearchInput(event) {
                     headerSearchFilterQueryString = event.target.value.trim().toLowerCase();
-                    if(window.location.hash === '#/feed') this.renderPosts();
+                    if(window.location.hash === '#/feed' || window.location.hash === '') this.executeUIRenderFromCache();
                 },
 
                 handleComposerImageSelection(event) {
@@ -1457,6 +1470,14 @@
 
                 async incrementGlobalShareCounter(postId, postAuthor) {
                     try {
+                        const target = localFeedCacheMemory.find(x => x.id === postId);
+                        if(target) {
+                            let roleObj = {}; try{ roleObj = JSON.parse(target.role); }catch(e){}
+                            roleObj.sharedCount = (roleObj.sharedCount || 0) + 1;
+                            target.role = JSON.stringify(roleObj);
+                            this.executeUIRenderFromCache();
+                        }
+
                         const { data } = await supabaseClient.from('posts').select('role').eq('id', postId).single();
                         let postRoleData = { comments: [], privacy: 'public', location: '', mediaUrl: '', bgColor: '#ffffff', lovedUsers: [], sharedCount: 0, likedUsers: [] };
                         if (data && data.role && data.role.startsWith('{')) postRoleData = JSON.parse(data.role);
@@ -1528,14 +1549,9 @@
                             return;
                         }
 
-                        // Ambil semua post untuk lookup avatar asli teman
-                        const { data: allPosts } = await supabaseClient.from('posts').select('author, avatar').not('avatar', 'is', null).order('created_at', { ascending: false });
-
                         listContainer.innerHTML = friends.map(f => {
                             const displayName = f.friend_email.split('@')[0];
-                            
-                            // Cari avatar asli dari storage yang tersimpan di table posts
-                            const matchPost = allPosts ? allPosts.find(p => p.author === displayName) : null;
+                            const matchPost = localFeedCacheMemory.find(p => p.author === displayName && p.avatar);
                             const finalAvatarUrl = matchPost ? matchPost.avatar : 'https://i.pravatar.cc/150?img=12';
                             
                             const hasUnreadCount = unreadMessageCounters[displayName.toLowerCase()] || 0;
@@ -1665,15 +1681,21 @@
                 async updatePostPrivacy(postId, label, val) {
                     App.Modal.close();
                     try {
+                        const target = localFeedCacheMemory.find(x => x.id === postId);
+                        if(target) {
+                            let roleObj = {}; try{ roleObj = JSON.parse(target.role); }catch(e){}
+                            roleObj.privacy = val;
+                            target.role = JSON.stringify(roleObj);
+                            this.executeUIRenderFromCache();
+                        }
                         const { data: postData } = await supabaseClient.from('posts').select('role').eq('id', postId).single();
                         let postRoleData = { comments: [], privacy: val };
                         try { if(postData && postData.role && postData.role.startsWith('{')) postRoleData = JSON.parse(postData.role); } catch(ex) {}
                         postRoleData.privacy = val;
                         await supabaseClient.from('posts').update({ role: JSON.stringify(postRoleData) }).eq('id', postId);
                         App.Toast.show(`Privasi postingan diperbarui menjadi ${label}.`, "success");
-                        this.renderPosts();
                     } catch (e) {
-                        App.Toast.show(`Privasi postingan diperbarui menjadi ${label}.`, "success");
+                        console.error(e);
                     }
                 },
 
@@ -1682,9 +1704,10 @@
                     const newTxt = prompt("Revisi teks untuk postingan ini:");
                     if(!newTxt || !newTxt.trim()) return;
                     try {
+                        const target = localFeedCacheMemory.find(x => x.id === postId);
+                        if(target) { target.content = newTxt.trim(); this.executeUIRenderFromCache(); }
                         await supabaseClient.from('posts').update({ content: newTxt.trim() }).eq('id', postId);
                         App.Toast.show("Postingan berhasil diperbarui!", "success");
-                        this.renderPosts();
                     } catch(e) { console.error(e); }
                 },
 
@@ -1692,170 +1715,143 @@
                     App.Modal.close();
                     if(!confirm("Anda yakin ingin menghapus postingan ini?")) return;
                     try {
+                        localFeedCacheMemory = localFeedCacheMemory.filter(x => x.id !== postId);
+                        this.executeUIRenderFromCache();
                         await supabaseClient.from('posts').delete().eq('id', postId);
                         App.Toast.show("Postingan dihapus!", "success");
-                        this.renderPosts();
                     } catch(e) { console.error(e); }
                 },
 
                 async renderPosts() {
-                    const stream = document.getElementById('feed-stream'); if(!stream) return;
+                    if (localFeedCacheMemory.length > 0) {
+                        this.executeUIRenderFromCache();
+                    }
                     try {
-                        const { data: posts, error } = await supabaseClient.from('posts').select('*').order('created_at', { ascending: false });
-                        if (error) throw error;
-                        
-                        const myCurrentName = App.ProfileState.getCurrentName();
-                        const friendsList = window.myFriendsList || [];
-                        
-                        let filteredPosts = posts ? posts.filter(p => p.image !== 'private_chat_type' && p.image !== 'notification_type') : [];
-                        
-                        filteredPosts = filteredPosts.filter(p => {
-                            let parsedRoleData = { privacy: 'public' };
-                            try { if(p.role && p.role.startsWith('{')) parsedRoleData = JSON.parse(p.role); } catch(e){}
-                            const privacy = parsedRoleData.privacy || 'public';
-                            
-                            if (privacy === 'private') { return p.author === myCurrentName; }
-                            if (privacy === 'friends') { return p.author === myCurrentName || friendsList.includes(p.author); }
-                            return true;
-                        });
+                        const { data: posts } = await supabaseClient.from('posts').select('*').order('created_at', { ascending: false });
+                        if (posts) {
+                            localFeedCacheMemory = posts;
+                            this.executeUIRenderFromCache();
+                        }
+                    } catch (err) { console.error(err); }
+                },
 
-                        if(headerSearchFilterQueryString !== "") {
-                            filteredPosts = filteredPosts.filter(p => p.author.toLowerCase().includes(headerSearchFilterQueryString) || (p.content && p.content.toLowerCase().includes(headerSearchFilterQueryString)));
+                executeUIRenderFromCache() {
+                    const stream = document.getElementById('feed-stream'); if(!stream) return;
+                    const myCurrentName = App.ProfileState.getCurrentName();
+                    const friendsList = window.myFriendsList || [];
+                    
+                    let filteredPosts = localFeedCacheMemory.filter(p => p.image !== 'private_chat_type' && p.image !== 'notification_type');
+                    
+                    filteredPosts = filteredPosts.filter(p => {
+                        let parsedRoleData = { privacy: 'public' };
+                        try { if(p.role && p.role.startsWith('{')) parsedRoleData = JSON.parse(p.role); } catch(e){}
+                        const privacy = parsedRoleData.privacy || 'public';
+                        
+                        if (privacy === 'private') { return p.author === myCurrentName; }
+                        if (privacy === 'friends') { return p.author === myCurrentName || friendsList.includes(p.author); }
+                        return true;
+                    });
+
+                    if(headerSearchFilterQueryString !== "") {
+                        filteredPosts = filteredPosts.filter(p => p.author.toLowerCase().includes(headerSearchFilterQueryString) || (p.content && p.content.toLowerCase().includes(headerSearchFilterQueryString)));
+                    }
+
+                    if (filteredPosts.length === 0) {
+                        stream.innerHTML = `<div class="glass-card" style="text-align:center; color:var(--text-muted); padding:32px 16px;">Belum ada postingan yang sesuai pencarian.</div>`;
+                        return;
+                    }
+
+                    const myPremiumLevel = App.ProfileState.getPremiumLevel();
+                    const myCurrentAvatar = App.ProfileState.getCurrentAvatar();
+
+                    const latestAvatarMap = {};
+                    localFeedCacheMemory.forEach(p => {
+                        if (p.avatar && !latestAvatarMap[p.author]) latestAvatarMap[p.author] = p.avatar;
+                    });
+
+                    const feedHTMLContent = filteredPosts.map(p => {
+                        const pId = p.id; 
+                        const createdTimestamp = p.created_at ? new Date(p.created_at).getTime() : Date.now();
+                        
+                        let parsedRoleData = { comments: [], privacy: 'public', location: '', mediaUrl: '', bgColor: '#ffffff', lovedUsers: [], sharedCount: 0, likedUsers: [] };
+                        try {
+                            if (p.role && p.role.startsWith('{')) parsedRoleData = JSON.parse(p.role);
+                        } catch(e) {}
+                        
+                        if(!parsedRoleData.lovedUsers) parsedRoleData.lovedUsers = [];
+                        if(!parsedRoleData.likedUsers) parsedRoleData.likedUsers = [];
+                        if(!parsedRoleData.sharedCount) parsedRoleData.sharedCount = 0;
+
+                        const isLikedActive = parsedRoleData.likedUsers.includes(myCurrentName) ? 'liked' : '';
+                        const isLovedActive = parsedRoleData.lovedUsers.includes(myCurrentName) ? 'loved' : '';
+                        
+                        const privacyMap = { 'public': 'public', 'friends': 'group', 'private': 'lock' };
+                        const privacyIcon = privacyMap[parsedRoleData.privacy] || 'public';
+                        
+                        let postMenuConfigHTML = p.author === myCurrentName ? `<button class="post-menu-trigger" onclick="App.Features.openPostActionMenuDOM(${pId})"><span class="material-symbols-outlined">more_vert</span></button>` : '';
+
+                        let finalAvatar = latestAvatarMap[p.author] || p.avatar || 'https://i.pravatar.cc/150?img=12';
+                        if (p.author === myCurrentName) {
+                            finalAvatar = myCurrentAvatar;
+                        }
+                        
+                        const avatarHTML = App.UI.generateAvatarHTML(p.author, finalAvatar, myPremiumLevel > 0, myPremiumLevel, '46px', true);
+                        const postBgColor = parsedRoleData.bgColor || '#ffffff';
+                        const postTextColor = postBgColor !== '#ffffff' ? App.UI.getTextColorContrast(postBgColor) : 'var(--text-main)';
+                        const isCustomBg = postBgColor !== '#ffffff';
+
+                        let attachedMediaContentHTML = '';
+                        const mediaUrl = parsedRoleData.mediaUrl || '';
+                        const hasImg = p.image && p.image.startsWith('data:image') || (p.image && p.image.startsWith('http'));
+
+                        if (mediaUrl !== '') {
+                            if (mediaUrl.includes('youtube.com') || mediaUrl.includes('youtu.be')) {
+                                const ytID = mediaUrl.match(/(?:youtu\.be\/|youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/i)?.[1];
+                                if (ytID) attachedMediaContentHTML = `<iframe src="https://www.youtube.com/embed/${ytID}" allowfullscreen></iframe>`;
+                            } else if (mediaUrl.match(/\.(mp3|wav|ogg)$/i) || mediaUrl.includes('audio')) {
+                                attachedMediaContentHTML = `<audio controls style="width:100%;"><source src="${mediaUrl}"></audio>`;
+                            } else {
+                                attachedMediaContentHTML = `<img src="${mediaUrl}" class="post-attached-image">`;
+                            }
+                        } else if (hasImg) {
+                            attachedMediaContentHTML = `<img src="${p.image}" class="post-attached-image">`;
                         }
 
-                        if (filteredPosts.length === 0) {
-                            stream.innerHTML = `<div class="glass-card" style="text-align:center; color:var(--text-muted); padding:32px 16px;">Belum ada postingan yang sesuai pencarian.</div>`;
-                            return;
+                        let locationBadgeHTML = '';
+                        if (parsedRoleData.location && parsedRoleData.location.trim() !== '') {
+                            locationBadgeHTML = `<div style="display: inline-flex; align-items: center; gap: 4px; background: rgba(1, 181, 116, 0.1); color: var(--primary); padding: 4px 10px; border-radius: 12px; font-size: 0.8rem; font-weight: 700; margin-top: 8px;"><span class="material-symbols-outlined" style="font-size: 14px;">location_on</span>${parsedRoleData.location}</div>`;
                         }
 
-                        const myPremiumLevel = App.ProfileState.getPremiumLevel();
-                        const myCurrentAvatar = App.ProfileState.getCurrentAvatar();
-
-                        // Buat peta map untuk melacak avatar terbaru setiap user agar sinkron di semua post
-                        const latestAvatarMap = {};
-                        posts.forEach(p => {
-                            if (p.avatar && !latestAvatarMap[p.author]) {
-                                latestAvatarMap[p.author] = p.avatar;
-                            }
-                        });
-
-                        const feedHTMLContent = filteredPosts.map(p => {
-                            const pId = p.id; 
-                            const createdTimestamp = p.created_at ? new Date(p.created_at).getTime() : Date.now();
-                            
-                            let parsedRoleData = { comments: [], privacy: 'public', location: '', mediaUrl: '', bgColor: '#ffffff', lovedUsers: [], sharedCount: 0, likedUsers: [] };
-                            try {
-                                if (p.role && p.role.startsWith('{')) {
-                                    parsedRoleData = JSON.parse(p.role);
-                                } else if (p.role && p.role.startsWith('[')) {
-                                    parsedRoleData.comments = JSON.parse(p.role);
-                                }
-                            } catch(e) {}
-                            
-                            if(!parsedRoleData.lovedUsers) parsedRoleData.lovedUsers = [];
-                            if(!parsedRoleData.likedUsers) parsedRoleData.likedUsers = [];
-                            if(!parsedRoleData.sharedCount) parsedRoleData.sharedCount = 0;
-
-                            const isLikedActive = parsedRoleData.likedUsers.includes(myCurrentName) ? 'liked' : '';
-                            const isLovedActive = parsedRoleData.lovedUsers.includes(myCurrentName) ? 'loved' : '';
-                            
-                            const privacyMap = { 'public': 'public', 'friends': 'group', 'private': 'lock' };
-                            const privacyIcon = privacyMap[parsedRoleData.privacy] || 'public';
-                            
-                            let postMenuConfigHTML = p.author === myCurrentName ? `<button class="post-menu-trigger" onclick="App.Features.openPostActionMenuDOM(${pId})"><span class="material-symbols-outlined">more_vert</span></button>` : '';
-
-                            // Ambil avatar real dari map, jika tidak ada baru gunakan fallback
-                            let finalAvatar = latestAvatarMap[p.author] || p.avatar || 'https://i.pravatar.cc/150?img=12';
-                            let finalPremiumLevel = 0;
-                            if (p.author === myCurrentName) {
-                                finalAvatar = myCurrentAvatar;
-                                finalPremiumLevel = myPremiumLevel;
-                            }
-                            
-                            const avatarHTML = App.UI.generateAvatarHTML(p.author, finalAvatar, finalPremiumLevel > 0, finalPremiumLevel, '46px', true);
-
-                            const postBgColor = parsedRoleData.bgColor || '#ffffff';
-                            const postTextColor = postBgColor !== '#ffffff' ? App.UI.getTextColorContrast(postBgColor) : 'var(--text-main)';
-                            const isCustomBg = postBgColor !== '#ffffff';
-
-                            let attachedMediaContentHTML = '';
-                            const mediaUrl = parsedRoleData.mediaUrl || '';
-                            const hasImg = p.image && p.image.startsWith('data:image') || (p.image && p.image.startsWith('http'));
-
-                            if (mediaUrl !== '') {
-                                if (mediaUrl.includes('youtube.com') || mediaUrl.includes('youtu.be')) {
-                                    const ytID = mediaUrl.match(/(?:youtu\.be\/|youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/i)?.[1];
-                                    if (ytID) {
-                                        attachedMediaContentHTML = `<iframe src="https://www.youtube.com/embed/${ytID}" allowfullscreen></iframe>`;
-                                    }
-                                } else if (mediaUrl.match(/\.(mp3|wav|ogg)$/i) || mediaUrl.includes('audio')) {
-                                    attachedMediaContentHTML = `<audio controls style="width:100%;"><source src="${mediaUrl}">Browser Anda tidak mendukung pemutar audio.</audio>`;
-                                } else {
-                                    attachedMediaContentHTML = `<img src="${mediaUrl}" class="post-attached-image">`;
-                                }
-                            } else if (hasImg) {
-                                attachedMediaContentHTML = `<img src="${p.image}" class="post-attached-image">`;
-                            }
-
-                            let locationBadgeHTML = '';
-                            if (parsedRoleData.location && parsedRoleData.location.trim() !== '') {
-                                locationBadgeHTML = `
-                                    <div style="display: inline-flex; align-items: center; gap: 4px; background: rgba(1, 181, 116, 0.1); color: var(--primary); padding: 4px 10px; border-radius: 12px; font-size: 0.8rem; font-weight: 700; margin-top: 8px;">
-                                        <span class="material-symbols-outlined" style="font-size: 14px;">location_on</span>
-                                        ${parsedRoleData.location}
-                                    </div>
-                                `;
-                            }
-
-                            return `
-                                <div class="post-card">
-                                    <div class="post-header">
-                                        <div class="post-author">
-                                            ${avatarHTML}
-                                            <div class="post-meta-container">
-                                                <div class="post-author-row">
-                                                    <h4 onclick="App.Router.navigate('profil?name=${encodeURIComponent(p.author)}')">${p.author}</h4>
-                                                    <span class="post-meta-dot">•</span>
-                                                    <span class="post-live-time-tracker" data-timestamp="${createdTimestamp}">${App.UI.calculateRelativeTimeAgo(createdTimestamp)}</span>
-                                                    <span class="material-symbols-outlined" style="font-size:12px; margin-left:2px; color:var(--text-muted);">${privacyIcon}</span>
-                                                </div>
-                                                <span class="post-author-role-sub">Tech Workspace Member</span>
+                        return `
+                            <div class="post-card">
+                                <div class="post-header">
+                                    <div class="post-author">
+                                        ${avatarHTML}
+                                        <div class="post-meta-container">
+                                            <div class="post-author-row">
+                                                <h4 onclick="App.Router.navigate('profil?name=${encodeURIComponent(p.author)}')">${p.author}</h4>
+                                                <span class="post-meta-dot">•</span>
+                                                <span class="post-live-time-tracker" data-timestamp="${createdTimestamp}">${App.UI.calculateRelativeTimeAgo(createdTimestamp)}</span>
+                                                <span class="material-symbols-outlined" style="font-size:12px; margin-left:2px; color:var(--text-muted);">${privacyIcon}</span>
                                             </div>
-                                        </div>
-                                        ${postMenuConfigHTML}
-                                    </div>
-                                    <div class="post-content" style="background: ${postBgColor}; color: ${postTextColor}; padding: ${isCustomBg ? '20px' : '0'}; border-radius: ${isCustomBg ? '16px' : '0'}; box-shadow: ${isCustomBg ? 'var(--shadow-soft)' : 'none'};">${p.content || ''}</div>
-                                    ${locationBadgeHTML}
-                                    ${attachedMediaContentHTML}
-                                    
-                                    <div class="post-actions-bar">
-                                        <div class="post-action-item ${isLikedActive}" onclick="App.Features.toggleLike(${pId}, '${p.author}')">
-                                            <span class="material-symbols-outlined">thumb_up</span>
-                                            <span>${parsedRoleData.likedUsers.length}</span>
-                                        </div>
-                                        
-                                        <div class="post-action-item ${isLovedActive}" onclick="App.Features.toggleLoveReaction(${pId}, '${p.author}')">
-                                            <span class="material-symbols-outlined">favorite</span>
-                                            <span>${parsedRoleData.lovedUsers.length}</span>
-                                        </div>
-
-                                        <div class="post-action-item" onclick="App.Features.openCommentsBottomSheet(${pId}, '${p.author}')">
-                                            <span class="material-symbols-outlined">comment</span>
-                                            <span>${parsedRoleData.comments ? parsedRoleData.comments.length : 0}</span>
-                                        </div>
-                                        
-                                        <div class="post-action-item" onclick="App.Features.openSocialMediaShareSheetModal(${pId}, '${p.author}', '${(p.content || "").replace(/'/g, "\\'")}', ${hasImg})">
-                                            <span class="material-symbols-outlined">share</span>
-                                            <span>${parsedRoleData.sharedCount}</span>
+                                            <span class="post-author-role-sub">Tech Workspace Member</span>
                                         </div>
                                     </div>
+                                    ${postMenuConfigHTML}
                                 </div>
-                            `;
-                        }).join('');
-                        
-                        stream.innerHTML = `<div class="feed-container">${feedHTMLContent}</div>`;
-                        
-                    } catch (err) {}
+                                <div class="post-content" style="background: ${postBgColor}; color: ${postTextColor}; padding: ${isCustomBg ? '20px' : '0'}; border-radius: ${isCustomBg ? '16px' : '0'};">${p.content || ''}</div>
+                                ${locationBadgeHTML}
+                                ${attachedMediaContentHTML}
+                                <div class="post-actions-bar">
+                                    <div class="post-action-item ${isLikedActive}" onclick="App.Features.toggleLike(${pId}, '${p.author}')"><span class="material-symbols-outlined">thumb_up</span><span>${parsedRoleData.likedUsers.length}</span></div>
+                                    <div class="post-action-item ${isLovedActive}" onclick="App.Features.toggleLoveReaction(${pId}, '${p.author}')"><span class="material-symbols-outlined">favorite</span><span>${parsedRoleData.lovedUsers.length}</span></div>
+                                    <div class="post-action-item" onclick="App.Features.openCommentsBottomSheet(${pId}, '${p.author}')"><span class="material-symbols-outlined">comment</span><span>${parsedRoleData.comments ? parsedRoleData.comments.length : 0}</span></div>
+                                    <div class="post-action-item" onclick="App.Features.openSocialMediaShareSheetModal(${pId}, '${p.author}', '${(p.content || "").replace(/'/g, "\\'")}', ${hasImg})"><span class="material-symbols-outlined">share</span><span>${parsedRoleData.sharedCount}</span></div>
+                                </div>
+                            </div>`;
+                    }).join('');
+                    
+                    stream.innerHTML = `<div class="feed-container">${feedHTMLContent}</div>`;
                 },
 
                 async pushCloudNotificationPayload(targetUser, actionType, textDesc) {
@@ -1892,14 +1888,11 @@
                             .order('created_at', { ascending: false });
 
                         if (!error && data) {
-                            // Ambil avatar-avatar terbaru dari posts untuk pencocokan real-time
-                            const { data: allAvatars } = await supabaseClient.from('posts').select('author, avatar').not('avatar', 'is', null).order('created_at', { ascending: false });
-
                             liveNotifications = data.map(item => {
                                 let payload = { action: 'like', description: 'berinteraksi dengan Anda', isUnread: true, timestamp: Date.now(), avatar: '' };
                                 try { payload = JSON.parse(item.content); } catch (e) {}
                                 
-                                const matchAv = allAvatars ? allAvatars.find(a => a.author === item.author) : null;
+                                const matchAv = localFeedCacheMemory.find(a => a.author === item.author && a.avatar);
                                 const verifiedAvatar = matchAv ? matchAv.avatar : (payload.avatar || 'https://i.pravatar.cc/150?img=12');
 
                                 return {
@@ -1942,6 +1935,16 @@
                 async toggleLoveReaction(id, postAuthor) {
                     const myCurrentName = App.ProfileState.getCurrentName();
                     try {
+                        const target = localFeedCacheMemory.find(x => x.id === id);
+                        if(target) {
+                            let rData = { lovedUsers: [] }; try{ rData = JSON.parse(target.role); }catch(e){}
+                            if(!rData.lovedUsers) rData.lovedUsers = [];
+                            if(rData.lovedUsers.includes(myCurrentName)) rData.lovedUsers = rData.lovedUsers.filter(x => x !== myCurrentName);
+                            else rData.lovedUsers.push(myCurrentName);
+                            target.role = JSON.stringify(rData);
+                            this.executeUIRenderFromCache();
+                        }
+
                         const { data } = await supabaseClient.from('posts').select('role').eq('id', id).single();
                         let postRoleData = { comments: [], privacy: 'public', location: '', mediaUrl: '', bgColor: '#ffffff', lovedUsers: [], sharedCount: 0, likedUsers: [] };
                         if (data && data.role && data.role.startsWith('{')) postRoleData = JSON.parse(data.role);
@@ -1957,18 +1960,25 @@
                         }
                         
                         await supabaseClient.from('posts').update({ role: JSON.stringify(postRoleData) }).eq('id', id);
-                        
                         if (isGivingLove && postAuthor !== myCurrentName) {
                             await App.Features.pushCloudNotificationPayload(postAuthor, 'love', `menyukai kiriman Anda dengan Love.`);
                         }
-                        
-                        this.renderPosts();
                     } catch(e) {}
                 },
 
                 async toggleLike(id, postAuthor) {
                     const myCurrentName = App.ProfileState.getCurrentName();
                     try {
+                        const target = localFeedCacheMemory.find(x => x.id === id);
+                        if(target) {
+                            let rData = { likedUsers: [] }; try{ rData = JSON.parse(target.role); }catch(e){}
+                            if(!rData.likedUsers) rData.likedUsers = [];
+                            if(rData.likedUsers.includes(myCurrentName)) rData.likedUsers = rData.likedUsers.filter(x => x !== myCurrentName);
+                            else rData.likedUsers.push(myCurrentName);
+                            target.role = JSON.stringify(rData);
+                            this.executeUIRenderFromCache();
+                        }
+
                         const { data } = await supabaseClient.from('posts').select('role').eq('id', id).single();
                         let postRoleData = { comments: [], privacy: 'public', location: '', mediaUrl: '', bgColor: '#ffffff', lovedUsers: [], sharedCount: 0, likedUsers: [] };
                         if (data && data.role && data.role.startsWith('{')) postRoleData = JSON.parse(data.role);
@@ -1991,8 +2001,6 @@
                         if (isGivingLike && postAuthor !== myCurrentName) {
                             await App.Features.pushCloudNotificationPayload(postAuthor, 'like', `menyukai kiriman terbaru Anda.`);
                         }
-
-                        this.renderPosts();
                     } catch(e) {}
                 },
 
@@ -2046,45 +2054,36 @@
                     if (!streamViewport) return;
                     
                     try {
-                        const { data } = await supabaseClient.from('posts').select('role, author').eq('id', activeBottomSheetPostId).single();
+                        const target = localFeedCacheMemory.find(x => x.id === activeBottomSheetPostId);
                         let postRoleData = { comments: [] };
-                        try {
-                            if (data && data.role) {
-                                if (data.role.startsWith('{')) postRoleData = JSON.parse(data.role);
-                                else if (data.role.startsWith('[')) postRoleData.comments = JSON.parse(data.role);
-                            }
-                        } catch(ex) {}
+                        if(target && target.role) {
+                            try{ postRoleData = JSON.parse(target.role); }catch(e){}
+                        }
                         
                         const commentsList = postRoleData.comments || [];
                         if (commentsList.length === 0) {
                             streamViewport.innerHTML = `
                                 <div style="text-align:center; padding:48px 16px; color:var(--text-muted);">
                                     <span class="material-symbols-outlined" style="font-size:36px; color:#cbd5e1; margin-bottom:8px;">maps_ugc</span>
-                                    <p style="font-size:0.85rem; font-weight:500;">Belum ada komentar. Jadilah yang Thoroughbred memberikan respon!</p>
+                                    <p style="font-size:0.85rem; font-weight:500;">Belum ada komentar. Jadilah yang pertama memberikan respon!</p>
                                 </div>`;
                             return;
                         }
 
                         const myName = App.ProfileState.getCurrentName();
-                        const postAuthor = data.author || "";
-
-                        // Lookup avatar asli para komentator dari post histories Supabase
-                        const { data: commentatorsAvatars } = await supabaseClient.from('posts').select('author, avatar').not('avatar', 'is', null).order('created_at', { ascending: false });
+                        const postAuthor = target ? target.author : "";
 
                         streamViewport.innerHTML = commentsList.map(c => {
                             const userClean = c.user || 'User';
-                            
-                            const matchAv = commentatorsAvatars ? commentatorsAvatars.find(a => a.author === userClean) : null;
+                            const matchAv = localFeedCacheMemory.find(a => a.author === userClean && a.avatar);
                             const userAvatarUrl = matchAv ? matchAv.avatar : 'https://i.pravatar.cc/150?img=12';
                             
-                            const commentId = c.id || `c_${c.date || Date.now()}_${Math.random().toString(36).substring(5)}`;
-                            if (!c.id) c.id = commentId; 
+                            const commentId = c.id || `c_${c.date || Date.now()}`;
                             
                             const likesArray = c.likes || [];
                             const repliesArray = c.replies || [];
                             const isLikedByMe = likesArray.includes(myName) ? 'active' : '';
                             const likeCounterText = likesArray.length > 0 ? `• <span style="font-size:0.75rem;">👍 ${likesArray.length}</span>` : '';
-                            
                             const commentTimeText = App.UI.calculateRelativeTimeAgo(c.date || Date.now());
                             
                             let repliesHTML = '';
@@ -2092,7 +2091,7 @@
                                 repliesHTML = `<div style="margin-top: 10px; padding-left: 12px; border-left: 2px solid var(--border-color); display: flex; flex-direction: column; gap: 10px;">`;
                                 repliesHTML += repliesArray.map(r => {
                                     const subUser = r.user || 'User';
-                                    const matchSubAv = commentatorsAvatars ? commentatorsAvatars.find(a => a.author === subUser) : null;
+                                    const matchSubAv = localFeedCacheMemory.find(a => a.author === subUser && a.avatar);
                                     const subAvatar = matchSubAv ? matchSubAv.avatar : 'https://i.pravatar.cc/150?img=14';
                                     
                                     const replyTimeText = App.UI.calculateRelativeTimeAgo(r.date || Date.now());
@@ -2114,8 +2113,7 @@
                                                     ${replyLikeCounterText}
                                                 </div>
                                             </div>
-                                        </div>
-                                    `;
+                                        </div>`;
                                 }).join('');
                                 repliesHTML += `</div>`;
                             }
@@ -2124,7 +2122,7 @@
                                 <div style="display:flex; gap:10px; align-items:flex-start; text-align:left;">
                                     <img src="${userAvatarUrl}" style="width:34px; height:34px; border-radius:50%; object-fit:cover; margin-top:2px;">
                                     <div style="flex:1; display:flex; flex-direction:column; gap:2px;">
-                                        <div style="background:var(--bg-body); padding:10px 14px; border-radius:18px; display:inline-block; max-width:95%; box-shadow:0 1px 3px rgba(0,0,0,0.03);">
+                                        <div style="background:var(--bg-body); padding:10px 14px; border-radius:18px; display:inline-block; max-width:95%;">
                                             <strong style="color:var(--text-main); font-size:0.82rem; display:block; margin-bottom:2px; cursor:pointer;" onclick="App.Features.closeCommentsBottomSheet(); App.Router.navigate('profil?name=${encodeURIComponent(userClean)}')">${userClean}</strong>
                                             <span style="font-size:0.88rem; color:var(--text-main); white-space:pre-wrap; line-height:1.4; word-break: break-word;">${c.text}</span>
                                         </div>
@@ -2136,8 +2134,7 @@
                                         </div>
                                         ${repliesHTML}
                                     </div>
-                                </div>
-                            `;
+                                </div>`;
                         }).join('');
                         
                         streamViewport.scrollTop = streamViewport.scrollHeight;
@@ -2156,14 +2153,10 @@
                         postRoleData.comments = postRoleData.comments.map(c => {
                             const cId = c.id || `c_${c.date || Date.now()}`;
                             c.id = cId;
-
                             if (cId === commentId) {
                                 if (!c.likes) c.likes = [];
-                                if (c.likes.includes(myName)) {
-                                    c.likes = c.likes.filter(u => u !== myName); 
-                                } else {
-                                    c.likes.push(myName); 
-                                }
+                                if (c.likes.includes(myName)) c.likes = c.likes.filter(u => u !== myName); 
+                                else c.likes.push(myName); 
                             }
                             return c;
                         });
@@ -2188,11 +2181,8 @@
                                 c.replies = c.replies.map(r => {
                                     if (r.id === replyId) {
                                         if (!r.likes) r.likes = [];
-                                        if (r.likes.includes(myName)) {
-                                            r.likes = r.likes.filter(u => u !== myName);
-                                        } else {
-                                            r.likes.push(myName);
-                                        }
+                                        if (r.likes.includes(myName)) r.likes = r.likes.filter(u => u !== myName);
+                                        else r.likes.push(myName);
                                     }
                                     return r;
                                 });
@@ -2222,38 +2212,26 @@
                         const { data } = await supabaseClient.from('posts').select('role').eq('id', activeBottomSheetPostId).single();
                         let postRoleData = { comments: [] };
                         if (data && data.role && data.role.startsWith('{')) postRoleData = JSON.parse(data.role);
-                        
                         if (!postRoleData.comments) postRoleData.comments = [];
 
                         if (activeReplyTargetCommentId) {
                             postRoleData.comments = postRoleData.comments.map(c => {
                                 const cId = c.id || `c_${c.date || Date.now()}`;
                                 c.id = cId;
-
                                 if (cId === activeReplyTargetCommentId) {
                                     if (!c.replies) c.replies = [];
-                                    c.replies.push({
-                                        id: `r_${Date.now()}`,
-                                        user: myCurrentName,
-                                        text: commentText,
-                                        date: Date.now(),
-                                        likes: []
-                                    });
+                                    c.replies.push({ id: `r_${Date.now()}`, user: myCurrentName, text: commentText, date: Date.now(), likes: [] });
                                 }
                                 return c;
                             });
                             activeReplyTargetCommentId = null; 
                         } else {
-                            postRoleData.comments.push({
-                                id: `c_${Date.now()}_${Math.random().toString(36).substring(5)}`,
-                                user: myCurrentName,
-                                text: commentText,
-                                date: Date.now(),
-                                likes: [],
-                                replies: []
-                            });
+                            postRoleData.comments.push({ id: `c_${Date.now()}`, user: myCurrentName, text: commentText, date: Date.now(), likes: [], replies: [] });
                         }
                         
+                        const memoryMatch = localFeedCacheMemory.find(x => x.id === activeBottomSheetPostId);
+                        if(memoryMatch) memoryMatch.role = JSON.stringify(postRoleData);
+
                         await supabaseClient.from('posts').update({ role: JSON.stringify(postRoleData) }).eq('id', activeBottomSheetPostId);
                         
                         if (postAuthor !== "" && postAuthor !== myCurrentName) {
@@ -2263,7 +2241,7 @@
                         input.value = '';
                         App.Features.renderBottomSheetInputBar(postAuthor);
                         await App.Features.reloadCommentsBottomSheetStreamOnly();
-                        App.Features.renderPosts();
+                        this.executeUIRenderFromCache();
                     } catch(err) {}
                 },
 
@@ -2294,10 +2272,7 @@
                         if (!isDragging) return;
                         currentY = e.touches[0].clientY;
                         const deltaY = currentY - startY;
-                        
-                        if (deltaY > 0) {
-                            sheetContent.style.transform = `translateY(${deltaY}px)`;
-                        }
+                        if (deltaY > 0) sheetContent.style.transform = `translateY(${deltaY}px)`;
                     }, { passive: true });
 
                     dragZone.addEventListener('touchend', (e) => {
@@ -2306,11 +2281,8 @@
                         sheetContent.style.transition = 'transform 0.3s cubic-bezier(0.25, 1, 0.5, 1)';
                         
                         const finalDeltaY = currentY - startY;
-                        if (finalDeltaY > 120) {
-                            App.Features.closeCommentsBottomSheet();
-                        } else {
-                            sheetContent.style.transform = 'translateY(0)';
-                        }
+                        if (finalDeltaY > 120) App.Features.closeCommentsBottomSheet();
+                        else sheetContent.style.transform = 'translateY(0)';
                         startY = 0;
                         currentY = 0;
                     });
@@ -2322,40 +2294,27 @@
                     
                     try {
                         const fileExt = file.name.split('.').pop();
-                        const fileName = `profile_${Date.now()}_${Math.random().toString(36).substring(7)}.${fileExt}`;
+                        const fileName = `profile_${Date.now()}.${fileExt}`;
                         
                         const { data, error } = await supabaseClient.storage.from('avatars').upload(fileName, file, {
                             cacheControl: '3600',
                             upsert: false
                         });
-                        
                         if (error) throw error;
                         
                         const { data: urlData } = supabaseClient.storage.from('avatars').getPublicUrl(fileName);
                         const publicUrl = urlData.publicUrl;
                         
                         App.ProfileState.saveCompressedAvatar(publicUrl);
-                        
-                        // Perbarui avatar di seluruh data postingan awalan milik user aktif di database
                         await supabaseClient.from('posts').update({ avatar: publicUrl }).eq('author', App.ProfileState.getCurrentName());
                         
                         const previewImg = document.getElementById('settings-avatar-preview');
                         if (previewImg) previewImg.src = publicUrl;
                         
                         App.Toast.show("Foto profil diperbarui di cloud storage!", "success");
-                        this.renderPosts();
+                        App.Router.navigate('feed');
                     } catch(err) {
-                        console.error("Storage upload error: ", err);
-                        App.Toast.show("Gagal upload ke storage bucket. Menggunakan fallback lokal.", "warning");
-                        
-                        const reader = new FileReader(); 
-                        reader.readAsDataURL(file);
-                        reader.onload = (e) => {
-                            App.ProfileState.saveCompressedAvatar(e.target.result);
-                            const previewImg = document.getElementById('settings-avatar-preview');
-                            if (previewImg) previewImg.src = e.target.result;
-                            this.renderPosts();
-                        };
+                        console.error(err);
                     }
                 },
 
@@ -2380,13 +2339,24 @@
                             likedUsers: []
                         };
 
-                        await supabaseClient.from('posts').insert([{ author: App.ProfileState.getCurrentName(), avatar: App.ProfileState.getCurrentAvatar(), content: textValue, image: composerAttachedImageBase64, role: JSON.stringify(roleData), likes: 0 }]);
-                        
-                        composerAttachedImageBase64 = null;
-                        
+                        const mockOptimisticRow = {
+                            id: Date.now(), 
+                            author: App.ProfileState.getCurrentName(),
+                            avatar: App.ProfileState.getCurrentAvatar(),
+                            content: textValue,
+                            image: composerAttachedImageBase64,
+                            role: JSON.stringify(roleData),
+                            likes: 0,
+                            created_at: new Date().toISOString()
+                        };
+
+                        localFeedCacheMemory.unshift(mockOptimisticRow);
+                        this.executeUIRenderFromCache();
                         App.Modal.close();
-                        App.Toast.show("Kiriman berhasil diterbitkan!", "success"); 
-                        this.renderPosts();
+
+                        await supabaseClient.from('posts').insert([{ author: App.ProfileState.getCurrentName(), avatar: App.ProfileState.getCurrentAvatar(), content: textValue, image: composerAttachedImageBase64, role: JSON.stringify(roleData), likes: 0 }]);
+                        composerAttachedImageBase64 = null;
+                        App.Toast.show("Kiriman diterbitkan!", "success"); 
                     } catch (err) { App.Toast.show("Gagal memublikasikan kiriman.", "danger"); }
                 },
 
@@ -2427,8 +2397,7 @@
                                         <span class="native-noti-live-time">${App.UI.calculateRelativeTimeAgo(n.timestamp)}</span>
                                     </div>
                                     <span class="material-symbols-outlined native-noti-action-more-btn" style="font-size:18px;">more_horiz</span>
-                                </div>
-                            `;
+                                </div>`;
                         }).join('');
                         notiHTML += `</div>`;
                     }
@@ -2472,8 +2441,7 @@
                                     <span style="font-size:0.75rem; color:var(--text-muted); display:block;">Workspace Member</span>
                                 </div>
                                 <button class="btn btn-primary" style="padding:6px 12px; font-size:0.8rem; border-radius:8px;" onclick="App.Features.followExploreUserAction('${u}')">Ikuti</button>
-                            </div>
-                        `;
+                            </div>`;
                     }).join('');
                 },
 
@@ -2481,6 +2449,7 @@
                     App.Toast.show(`Berhasil mengikuti ${username}`, "success");
                 },
 
+                style: {},
                 loadFriendsCount() {
                     const el = document.getElementById('profile-friends-count');
                     if (el) el.innerText = window.myFriendsList ? window.myFriendsList.length : '12';
@@ -2560,8 +2529,7 @@
                             ${levelBadge}
                             <img src="${rawAvatarUrl}" class="user-avatar ${borderClass}" style="width:${size}; height:${size}; margin-bottom:0;" alt="Avatar">
                             ${verifiedBadge}
-                        </div>
-                    `;
+                        </div>`;
                 },
                 handleHeaderAvatarToggleAction() {
                     if (window.location.hash.includes('#/profil')) {
@@ -2599,7 +2567,6 @@
                             l.classList.toggle('sidebar-collapsed');
                         }
                     });
-                    document.documentElement.setAttribute('data-theme', localStorage.getItem('ns_theme') || 'light');
                     document.getElementById('btn-theme')?.addEventListener('click', () => App.Theme.toggle());
                     document.getElementById('btn-refresh')?.addEventListener('click', () => { App.Router.handleRoute(); App.Toast.show("Diperbarui","success"); });
                 },
