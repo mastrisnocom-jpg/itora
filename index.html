@@ -83,7 +83,7 @@
         .header-mobile-menu-bar { display: none; width: 100%; padding-top: 8px; overflow-x: auto; gap: 8px; justify-content: space-around; }
         .header-mobile-menu-bar::-webkit-scrollbar { display: none; }
         
-        .mobile-menu-tab-btn { display: inline-flex; align-items: center; justify-content: center; padding: 8px; border-radius: var(--radius-md); background: #f3f4f6; color: var(--text-muted); cursor: pointer; transition: var(--trans-smooth); min-width: 40px; }
+        .mobile-menu-tab-btn { display: inline-flex; align-items: center; justify-content: center; padding: 8px; border-radius: var(--radius-md); background: #f1f5f9; color: var(--text-muted); cursor: pointer; transition: var(--trans-smooth); min-width: 40px; }
         .mobile-menu-tab-btn.active { background: var(--primary); color: white; box-shadow: var(--shadow-float); }
         .mobile-menu-tab-btn .material-symbols-outlined { font-size: 22px; }
 
@@ -98,7 +98,7 @@
         .menu-item-wrapper { position: relative; width: 100%; }
         .user-avatar { width: 44px; height: 44px; border-radius: var(--radius-round); object-fit: cover; cursor: pointer; border: 2px solid var(--border-color); }
         .icon-btn { width: 44px; height: 44px; border-radius: var(--radius-round); display: flex; align-items: center; justify-content: center; background: transparent; color: var(--text-muted); cursor: pointer; position: relative; transition: var(--trans-smooth); border: none; flex-shrink: 0; }
-        .icon-btn:hover { color: var(--primary); background: #f9fafb; }
+        .icon-btn:hover { color: var(--primary); background: #f8fafc; }
         
         .app-sidebar { grid-area: sidebar; background: var(--bg-glass-solid); border-right: 1px solid var(--border-color); padding: 32px 20px; display: flex; flex-direction: column; position: fixed; top: 0; left: 0; bottom: 0; width: var(--sidebar-width); z-index: 1001; transition: var(--trans-smooth); box-shadow: var(--shadow-soft); }
         .brand { display: flex; align-items: center; gap: 12px; margin-bottom: 40px; padding: 0 12px; cursor: pointer; }
@@ -107,7 +107,7 @@
         #app-layout.sidebar-collapsed .brand-name { display: none; }
         .sidebar-menu { display: flex; flex-direction: column; gap: 6px; flex: 1; }
         .menu-item { display: flex; align-items: center; gap: 16px; padding: 14px 16px; border-radius: var(--radius-md); color: var(--text-muted); font-weight: 600; cursor: pointer; transition: var(--trans-smooth); position: relative; overflow: hidden; }
-        .menu-item:hover { color: var(--primary); background: #f9fafb; }
+        .menu-item:hover { color: var(--primary); background: #f8fafc; }
         .menu-item.active { background: var(--primary); color: white; box-shadow: var(--shadow-float); }
         .menu-item .menu-text { white-space: nowrap; transition: opacity 0.3s; }
         #app-layout.sidebar-collapsed .menu-text { opacity: 0; width: 0; display: none; }
@@ -120,7 +120,7 @@
         .btn { padding: 12px 24px; border-radius: var(--radius-round); font-weight: 700; font-size: 0.95rem; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 8px; transition: var(--trans-smooth); border: none; max-width: 100%; }
         .btn-primary { background: var(--primary); color: white; box-shadow: var(--shadow-float); }
         .btn-primary:hover { background: var(--primary-hover); transform: translateY(-2px); }
-        .btn-secondary { background: #f3f4f6; color: var(--text-main); }
+        .btn-secondary { background: #f1f5f9; color: var(--text-main); }
         .btn-danger { background: var(--danger); color: white; }
         .btn-full { width: 100%; }
         .form-group { position: relative; margin-bottom: 24px; text-align: left; max-width: 100%; }
@@ -130,7 +130,9 @@
 
         /* FEED CONTAINER */
         .feed-container { margin-left: -32px; margin-right: -32px; background: transparent; max-width: calc(100% + 64px); }
-        .post-card { padding: 24px 32px; position: relative; border-radius: 0; border: none; border-bottom: 1px solid rgba(128, 128, 128, 0.15); background: var(--bg-glass-solid); margin-bottom: 12px; box-shadow: none; max-width: 100%; box-sizing: border-box; overflow-x: hidden; }
+        
+        /* BORDER POSTINGAN DI CARD JUGA DIHILANGKAN */
+        .post-card { padding: 24px 32px; position: relative; border-radius: 0; border: none !important; border-bottom: 1px solid rgba(128, 128, 128, 0.15) !important; background: var(--bg-glass-solid); margin-bottom: 12px; box-shadow: none; max-width: 100%; box-sizing: border-box; overflow-x: hidden; }
         
         .post-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px; max-width: 100%; }
         .post-author { display: flex; align-items: center; gap: 12px; max-width: 85%; }
@@ -145,10 +147,10 @@
         .post-privacy-indicator-icon { font-size: 15px; color: var(--text-muted); display: inline-flex; align-items: center; }
 
         .post-menu-trigger { cursor: pointer; color: var(--text-muted); padding: 4px; border-radius: 50%; border: none; background: transparent; }
-        .post-menu-trigger:hover { color: var(--primary); background: #f9fafb; }
+        .post-menu-trigger:hover { color: var(--primary); background: #f8fafc; }
 
-        /* BORDER POSTINGAN DIHILANGKAN SESUAI PERMINTAAN */
-        .post-content { font-family: var(--font-main); font-size: 1.05rem; font-weight: 400; line-height: 1.65; letter-spacing: -0.1px; margin-bottom: 16px; color: var(--text-main); text-align: left; white-space: pre-wrap; word-break: break-word; max-width: 100%; background: #ffffff !important; padding: 12px; border-radius: var(--radius-md); border: none !important; }
+        /* BORDER POSTINGAN MUTLAK DIHILANGKAN */
+        .post-content { font-family: var(--font-main); font-size: 1.05rem; font-weight: 400; line-height: 1.65; letter-spacing: -0.1px; margin-bottom: 16px; color: var(--text-main); text-align: left; white-space: pre-wrap; word-break: break-word; max-width: 100%; background: #ffffff !important; padding: 12px; border-radius: var(--radius-md); border: none !important; box-shadow: none !important; }
         
         .post-actions-bar { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 12px 4px; border-top: 1px solid rgba(0,0,0,0.05); border-bottom: 1px solid rgba(0,0,0,0.05); margin-top: 16px; max-width: 100%; }
         .post-action-item { display: inline-flex; align-items: center; gap: 8px; color: var(--text-muted); font-weight: 600; font-size: 0.95rem; cursor: pointer; transition: var(--trans-smooth); user-select: none; }
@@ -163,7 +165,7 @@
 
         .post-attached-image { max-width: 100%; border-radius: var(--radius-md); margin: 12px auto; display: block; max-height: 340px; object-fit: cover; cursor: zoom-in; box-shadow: var(--shadow-soft); }
         .post-card iframe { display: block; margin: 12px auto; width: 100%; max-width: 100%; height: 260px; border-radius: 12px; border: none; box-shadow: var(--shadow-soft); }
-        .post-card audio { display: block; margin: 12px auto; width: 100%; max-width: 100%; background: #f3f4f6; border-radius: var(--radius-round); padding: 4px; }
+        .post-card audio { display: block; margin: 12px auto; width: 100%; max-width: 100%; background: #f1f5f9; border-radius: var(--radius-round); padding: 8px; }
 
         /* OVERLAY BOTTOM SHEET KOMENTAR */
         .comments-bottom-sheet {
@@ -274,7 +276,7 @@
 
         .pic-composer-dock-grid { display: flex; justify-content: space-around; padding: 20px; border-top: 1px solid rgba(0,0,0,0.04); background: var(--bg-glass-solid); max-width: 100%; }
         .pic-dock-icon-only-item { display: flex; flex-direction: column; align-items: center; justify-content: center; width: 50px; height: 50px; border-radius: 50%; background: var(--bg-body); border: 1px solid rgba(0,0,0,0.04); cursor: pointer; transition: var(--trans-smooth); }
-        .pic-dock-icon-only-item:hover { color: var(--primary); background: #f3f4f6; }
+        .pic-dock-icon-only-item:hover { color: var(--primary); background: #f1f5f9; }
         .pic-dock-icon-only-item .material-symbols-outlined { font-size: 24px; color: var(--text-main); }
 
         /* MULTI SHARE SHEET CSS */
@@ -284,8 +286,8 @@
         .share-icon-circle { width: 54px; height: 54px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: 800; font-size: 1.2rem; box-shadow: var(--shadow-float); }
         .share-grid-sheet span { font-size: 0.75rem; font-weight: 700; color: var(--text-main); }
 
-        .user-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 16px; text-align: left; max-width: 100%; }
-        .user-follow-card { display: flex; align-items: center; gap: 12px; padding: 14px; background: var(--bg-body); border: 1px solid var(--border-color); border-radius: var(--radius-md); max-width: 100%; box-sizing: border-box; }
+        .user-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 16px; text-align: left; max-width: 100%; }
+        .user-follow-card { display: flex; align-items: center; gap: 12px; padding: 14px; background: #f8fafc; border: 1px solid var(--border-color); border-radius: var(--radius-md); max-width: 100%; box-sizing: border-box; }
 
         .avatar-edit-container { display: flex; flex-direction: column; align-items: center; gap: 14px; margin-bottom: 28px; }
         .avatar-preview-wrapper { position: relative; width: 100px; height: 100px; }
@@ -336,41 +338,6 @@
             flex-shrink: 0;
         }
         .minimal-composer-gallery-icon:hover { color: var(--primary); }
-
-        /* NATIVE LOCATION POP-UP PICKER */
-        .native-location-row-item {
-            display: flex;
-            align-items: flex-start;
-            gap: 16px;
-            padding: 14px 16px;
-            cursor: pointer;
-            transition: var(--trans-smooth);
-            border-bottom: 1px solid rgba(0,0,0,0.04);
-            text-align: left;
-        }
-        .native-location-row-item:hover { background: var(--primary-state); }
-        .location-icon-frame {
-            width: 44px;
-            height: 44px;
-            background: #e2e8f0;
-            color: #334155;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-shrink: 0;
-        }
-        .location-text-info-frame { display: flex; flex-direction: column; overflow: hidden; flex: 1; }
-        .location-text-info-frame strong { font-size: 0.98rem; color: var(--text-main); }
-        .location-text-info-frame p { font-size: 0.82rem; color: var(--text-muted); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-
-        /* PROFILE LAYOUT UTILS */
-        .profile-cover { height: 140px; background: linear-gradient(135deg, var(--primary-hover), var(--primary)); width: 100%; }
-        .profile-avatar-large { width: 110px; height: 110px; border-radius: 50%; object-fit: cover; border: 4px solid var(--bg-glass-solid); margin-top: -55px; position: relative; background: var(--bg-glass-solid); }
-        .profile-stats { display: flex; justify-content: space-around; padding: 16px 0; border-top: 1px solid var(--border-color); border-bottom: 1px solid var(--border-color); margin-top: 16px; max-width: 100%; }
-        .stat-item { display: flex; flex-direction: column; align-items: center; }
-        .stat-val { font-weight: 800; font-size: 1.1rem; color: var(--text-main); }
-        .stat-lbl { font-size: 0.75rem; color: var(--text-muted); font-weight: 600; }
 
         /* FLOATING CHAT WIDGET SYSTEM */
         .floating-chat-widget { 
@@ -457,7 +424,7 @@
             border-bottom: 1px solid rgba(0,0,0,0.02);
         }
         .popup-friend-item:hover { 
-            background: #f9fafb;
+            background: #f8fafc;
         }
         
         .friend-avatar-wrapper {
@@ -554,9 +521,9 @@
         .popup-msg-stream { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 10px; }
         .popup-chat-input-row { padding: 12px 16px; border-top: 1px solid var(--border-color); display: flex; gap: 8px; align-items: center; background: var(--bg-glass-solid); }
         
-        /* LOGIKA GELEMBUNG PESAN DI-AKTIFKAN: SENDER KANAN (OUT), LAINNYA KIRI (IN) */
+        /* PESAN SISI KANAN (OUT) DAN KIRI (IN) BERJALAN AKTIF */
         .bubble { max-width: 75%; padding: 10px 16px; border-radius: 18px; font-size: 0.9rem; line-height: 1.4; word-break: break-word; box-shadow: 0 1px 2px rgba(0,0,0,0.04); }
-        .bubble.in { background: #f3f4f6; color: var(--text-main); align-self: flex-start; border-top-left-radius: 4px; text-align: left; border: 1px solid var(--border-color); }
+        .bubble.in { background: #f1f5f9; color: var(--text-main); align-self: flex-start; border-top-left-radius: 4px; text-align: left; border: 1px solid var(--border-color); }
         .bubble.out { background: var(--primary); color: white; align-self: flex-end; border-top-right-radius: 4px; text-align: left; }
 
         /* GLOBAL MODAL SYSTEM */
@@ -592,7 +559,7 @@
             .app-content { padding: 16px; min-height: calc(100vh - var(--header-height)); max-width: 100vw; box-sizing: border-box; }
             
             .feed-container { margin-left: -16px; margin-right: -16px; background: transparent; max-width: calc(100% + 32px); }
-            .post-card { padding: 16px; position: relative; border-radius: 0; border: none; border-bottom: 1px solid rgba(128, 128, 128, 0.15); background: var(--bg-glass-solid); margin-bottom: 8px; box-shadow: none; max-width: 100%; box-sizing: border-box; overflow-x: hidden; }
+            .post-card { padding: 16px; position: relative; border-radius: 0; border: none !important; border-bottom: 1px solid rgba(128, 128, 128, 0.15) !important; background: var(--bg-glass-solid); margin-bottom: 8px; box-shadow: none; max-width: 100%; box-sizing: border-box; overflow-x: hidden; }
             .post-content { font-size: 0.98rem; }
             .minimal-composer-bar { padding: 12px 16px; margin-bottom: 16px; border-radius: var(--radius-lg); }
             .minimal-composer-input-mock { padding: 10px 16px; font-size: 0.95rem; }
@@ -773,8 +740,8 @@
         let activeBottomSheetPostId = null;
         let activeReplyTargetCommentId = null;
 
-        // Simulasi database relasi pertemanan statis untuk memenuhi logika privasi kiriman
-        window.userFriendsList = ['Agung_Taufiq', 'Eko_Prasetyo'];
+        // Daftar relasi pertemanan dinamis lokal untuk memproses filter privasi "teman"
+        window.userFriendsList = [];
 
         String.prototype.hashCode = function() {
             let hash = 0;
@@ -1070,8 +1037,8 @@
                 explore() {
                     return `
                         <div class="glass-card">
-                            <h2>Cari Koneksi Jaringan</h2>
-                            <p style="color: var(--text-muted); font-size:0.85rem; margin-bottom: 24px;">Jelajahi dan temukan pengguna Workspace lain.</p>
+                            <h2>Cari Jaringan Pengguna Asli</h2>
+                            <p style="color: var(--text-muted); font-size:0.85rem; margin-bottom: 24px;">Berikut adalah akun asli anggota ekosistem Tech Social.</p>
                             <div id="explore-users-stream" class="user-grid"></div>
                         </div>
                     `;
@@ -1232,7 +1199,7 @@
                                 </div>
                             </div>
                             <div class="pic-composer-body">
-                                <textarea class="pic-composer-textarea" id="composer-text" placeholder="Apa yang Anda pikirkan? Sematkan link YouTube/MP3 di sini jika ada." oninput="App.Features.syncComposerSubmitButtonState()"></textarea>
+                                <textarea class="pic-composer-textarea" id="composer-text" placeholder="Apa yang Anda pikirkan? Sisipkan tautan YouTube atau file musik .mp3 langsung di sini jika ada." oninput="App.Features.syncComposerSubmitButtonState()"></textarea>
                                 <div id="composer-upload-preview-area" class="pic-composer-preview-box">${composerAttachedImageBase64 ? `<img src="${composerAttachedImageBase64}">` : ''}</div>
                                 <div id="composer-location-badge-preview-slot" style="margin-top:8px; text-align:left;"></div>
                             </div>
@@ -1262,22 +1229,22 @@
 
                 closeComposerAndClearCache() { composerAttachedImageBase64 = null; activeComposerLocation = ""; App.Modal.close(); },
                 
-                // PEMBARUAN LOKASI: Dikunci hanya berdasarkan koordinat asli perangkat HP
+                // PENGUNCIAN LOKASI ABSOLUT: Hanya bisa memakai sensor hardware GPS handphone langsung
                 openNativeLocationPickerPopupModal() {
                     const locationModalHTML = `
                         <div style="display:flex; flex-direction:column; gap:16px; text-align:center; padding:12px;">
-                            <span class="material-symbols-outlined" style="font-size:48px; color:var(--primary);">my_location</span>
-                            <h3 style="font-size:1.1rem; font-weight:800;">Kunci Lokasi Perangkat</h3>
-                            <p style="font-size:0.88rem; color:var(--text-muted);">Sesuai regulasi privasi ekosistem, Anda tidak diperkenankan memalsukan lokasi di luar jangkauan sensor GPS handphone Anda.</p>
-                            <button class="btn btn-primary btn-full" onclick="App.Features.detectDeviceGPSLocationAction()">Deteksi Realtime Koordinat HP</button>
+                            <span class="material-symbols-outlined" style="font-size:48px; color:var(--primary);">gps_fixed</span>
+                            <h3 style="font-size:1.1rem; font-weight:800;">Verifikasi Lokasi Sensor</h3>
+                            <p style="font-size:0.88rem; color:var(--text-muted);">Sistem pencarian bebas telah dinonaktifkan. Anda hanya diizinkan menandai postingan berdasarkan lokasi riil satelit Handphone Anda.</p>
+                            <button class="btn btn-primary btn-full" onclick="App.Features.detectDeviceGPSLocationAction()">Ambil Lokasi HP Sekarang</button>
                         </div>
                     `;
-                    App.Modal.openSecondary("Validasi Lokasi", locationModalHTML);
+                    App.Modal.openSecondary("Kunci Koordinat", locationModalHTML);
                 },
 
                 detectDeviceGPSLocationAction() {
                     if (navigator.geolocation) {
-                        App.Toast.show("Membaca koordinat sensor HP...", "info");
+                        App.Toast.show("Menghubungi satelit GPS...", "info");
                         navigator.geolocation.getCurrentPosition(async (position) => {
                             const lat = position.coords.latitude;
                             const lon = position.coords.longitude;
@@ -1290,24 +1257,23 @@
                                     App.Toast.show("Lokasi HP berhasil dikunci!", "success");
                                     App.Modal.closeSecondaryPopupModal();
                                 } else {
-                                    activeComposerLocation = `Koordinat: ${lat.toFixed(4)}, ${lon.toFixed(4)}`;
+                                    activeComposerLocation = `Lokasi HP (${lat.toFixed(3)}, ${lon.toFixed(3)})`;
                                     App.Features.renderComposerLocationBadgeDOM(activeComposerLocation);
                                     App.Modal.closeSecondaryPopupModal();
                                 }
                             } catch(e) {
-                                activeComposerLocation = `Koordinat: ${lat.toFixed(4)}, ${lon.toFixed(4)}`;
+                                activeComposerLocation = `Lokasi HP (${lat.toFixed(3)}, ${lon.toFixed(3)})`;
                                 App.Features.renderComposerLocationBadgeDOM(activeComposerLocation);
                                 App.Modal.closeSecondaryPopupModal();
                             }
                         }, () => {
-                            // Default Fallback Jika Izin GPS Browser Diblokir
-                            activeComposerLocation = "Surabaya, Indonesia";
+                            activeComposerLocation = App.ProfileState.getCurrentDomisili();
                             App.Features.renderComposerLocationBadgeDOM(activeComposerLocation);
-                            App.Toast.show("GPS diblokir, memakai data domisili standar.", "info");
+                            App.Toast.show("Gagal membaca GPS, menggunakan lokasi profil default.", "info");
                             App.Modal.closeSecondaryPopupModal();
                         });
                     } else {
-                        App.Toast.show("Sensor Geolocation tidak didukung browser.", "danger");
+                        App.Toast.show("Browser tidak memiliki dukungan Geolocation.", "danger");
                     }
                 },
 
@@ -1326,11 +1292,11 @@
                 triggerEmbeddedLinkModalPopup() {
                     const html = `
                         <div style="display:flex; flex-direction:column; gap:14px;">
-                            <div class="form-group" style="margin-bottom:0;"><input type="text" id="popup-sub-media-url-field" class="form-input" placeholder=" "><label class="form-label">URL Tautan Youtube atau MP3 Audio</label></div>
-                            <button class="btn btn-primary btn-full" onclick="App.Features.saveEmbeddedLinkFromPopup()">Sematkan Tautan Media</button>
+                            <div class="form-group" style="margin-bottom:0;"><input type="text" id="popup-sub-media-url-field" class="form-input" placeholder=" "><label class="form-label">Sematkan URL Link Youtube / File MP3</label></div>
+                            <button class="btn btn-primary btn-full" onclick="App.Features.saveEmbeddedLinkFromPopup()">Sematkan ke Postingan</button>
                         </div>
                     `;
-                    App.Modal.openSecondary("Sematkan Tautan", html);
+                    App.Modal.openSecondary("Sematkan Media", html);
                 },
 
                 saveEmbeddedLinkFromPopup() {
@@ -1338,10 +1304,10 @@
                     window.lastEmbeddedMediaUrl = url || "";
                     App.Modal.closeSecondaryPopupModal();
                     if(url) {
-                        App.Toast.show("Tautan media terdaftar", "success");
-                        const textComposer = document.getElementById('composer-text');
-                        if (textComposer && !textComposer.value.includes(url)) {
-                            textComposer.value += "\n" + url;
+                        App.Toast.show("Link media tersemat", "success");
+                        const txtBox = document.getElementById('composer-text');
+                        if (txtBox && !txtBox.value.includes(url)) {
+                            txtBox.value += "\n" + url;
                         }
                     }
                 },
@@ -1399,15 +1365,27 @@
                 renderCommunityHubViewportList() {
                     const container = document.getElementById('community-hub-list-viewport'); if(!container) return;
                     let list = JSON.parse(localStorage.getItem('ns_premium_communities_logs') || '[]');
-                    container.innerHTML = list.map(c => `<div class="community-card-item glass-card" style="display:flex; align-items:center; gap:16px; padding:16px; margin-bottom:12px;"><div style="width:50px; height:50px; background:#f3f4f6; display:flex; align-items:center; justify-content:center; border-radius:12px; font-weight:800; color:var(--primary); font-size:1.2rem;">${c.title.charAt(0).toUpperCase()}</div><div><h3>${c.title}</h3><p style="font-size:0.8rem; color:var(--text-muted);">Pemilik: ${c.creator}</p></div></div>`).join('');
+                    container.innerHTML = list.map(c => `<div class="community-card-item glass-card" style="display:flex; align-items:center; gap:16px; padding:16px; margin-bottom:12px;"><div style="width:50px; height:50px; background:#f1f5f9; display:flex; align-items:center; justify-content:center; border-radius:12px; font-weight:800; color:var(--primary); font-size:1.2rem;">${c.title.charAt(0).toUpperCase()}</div><div><h3>${c.title}</h3><p style="font-size:0.8rem; color:var(--text-muted);">Pemilik: ${c.creator}</p></div></div>`).join('');
                 },
 
-                async fetchMyFriendsData() { window.myFriendsList = window.userFriendsList; }, 
+                async fetchMyFriendsData() { 
+                    try {
+                        const myName = App.ProfileState.getCurrentName();
+                        const { data } = await supabaseClient.from('posts').select('author').not('author', 'eq', myName);
+                        if(data) {
+                            const uniqueNames = [...new Set(data.map(item => item.author))];
+                            window.userFriendsList = uniqueNames; 
+                        }
+                    } catch(e) { window.userFriendsList = []; }
+                }, 
 
                 async loadPopupFriendsListSidebar() {
                     const container = document.getElementById('popup-friends-sidebar-items'); if(!container) return;
-                    const staticContacts = ['Agung_Taufiq', 'Eko_Prasetyo', 'Meta_AI'];
-                    container.innerHTML = staticContacts.map(name => {
+                    await App.Features.fetchMyFriendsData();
+                    
+                    // Muat kontak dinamis berdasarkan pertemanan user yang aktif mendaftar/posting
+                    let dynamicContacts = window.userFriendsList.length > 0 ? window.userFriendsList : ['Agung_Taufiq', 'Meta_AI'];
+                    container.innerHTML = dynamicContacts.map(name => {
                         const hasUnread = unreadMessageCounters[name.toLowerCase()] || 0;
                         return `
                             <div class="popup-friend-item" onclick="App.Features.openSpecificFriendPopupObrolan('${name.toLowerCase()}@nexsocial.id', '${name}')">
@@ -1442,7 +1420,7 @@
                         const { data: messages } = await supabaseClient.from('chats').select('*').or(`and(sender.eq.${myName},receiver.eq.${friendName}),and(sender.eq.${friendName},receiver.eq.${myName})`).order('created_at', { ascending: true });
                         const viewport = document.getElementById('popup-msg-stream-viewport');
                         if(viewport && messages) {
-                            // PEMBARUAN LOGIKA GELEMBUNG PESAN AKTIF: Jika kita (myName) -> Kanan (out), jika orang lain -> Kiri (in)
+                            // SISTEM CHAT OUT (KANAN) & IN (KIRI) BERJALAN AKTIF
                             viewport.innerHTML = messages.map(m => `<div class="bubble ${m.sender === myName ? 'out' : 'in'}"><span>${m.message}</span></div>`).join('');
                             viewport.scrollTop = viewport.scrollHeight;
                         }
@@ -1486,7 +1464,6 @@
                             <div style="display:flex; flex-direction:column; gap:10px;">
                                 <button class="btn btn-secondary btn-full" onclick="App.Modal.close(); App.Features.toggleLike(${postId}, '${postAuthor}')"><span class="material-symbols-outlined">thumb_up</span> Sukai Postingan</button>
                                 <button class="btn btn-secondary btn-full" onclick="App.Modal.close(); App.Router.navigate('profil?name=${encodeURIComponent(postAuthor)}')"><span class="material-symbols-outlined">account_circle</span> Lihat Profil ${postAuthor}</button>
-                                <button class="btn btn-secondary btn-full" style="color:var(--danger);" onclick="App.Modal.close(); App.Toast.show('Konten dilaporkan ke admin', 'info')"><span class="material-symbols-outlined">report</span> Laporkan Konten</button>
                             </div>`;
                     }
                     App.Modal.open("Opsi Pengaturan", html, true, false);
@@ -1553,15 +1530,17 @@
                     }
                 },
 
-                // PARSING KONTEN MEDIA (YOUTUBE & MP3): Mengekstrak link secara fleksibel langsung dari teks konten status
+                // RENDERING MEDIA DETEKTOR UTK YOUTUBE & MP3 AUDIO
                 extractAndRenderEmbeddedMedia(contentString, directMediaUrl) {
+                    let textToCheck = contentString || "";
                     let combinedUrl = directMediaUrl || "";
+                    
                     if (!combinedUrl) {
                         const youtubeRegex = /(https?:\/\/(?:www\.)?(?:youtube\.com\/watch\?v=|youtu\.be\/)[^\s]+)/gi;
                         const mp3Regex = /(https?:\/\/[^\s]+\.(?:mp3|wav|ogg))/gi;
                         
-                        const ytMatch = contentString.match(youtubeRegex);
-                        const mp3Match = contentString.match(mp3Regex);
+                        const ytMatch = textToCheck.match(youtubeRegex);
+                        const mp3Match = textToCheck.match(mp3Regex);
                         
                         if (ytMatch && ytMatch.length > 0) combinedUrl = ytMatch[0];
                         else if (mp3Match && mp3Match.length > 0) combinedUrl = mp3Match[0];
@@ -1576,8 +1555,8 @@
                                 videoId = combinedUrl.split('youtu.be/')[1].split('?')[0];
                             }
                             return videoId ? `<iframe src="https://www.youtube.com/embed/${videoId}" allowfullscreen></iframe>` : '';
-                        } else if (/\.(mp3|wav|ogg)/i.test(combinedUrl) || combinedUrl.includes('drive.google.com') || combinedUrl.includes('soundcloud')) {
-                            return `<audio controls><source src="${combinedUrl}"></audio>`;
+                        } else if (/\.(mp3|wav|ogg)/i.test(combinedUrl)) {
+                            return `<audio controls style="width:100%;"><source src="${combinedUrl}"></audio>`;
                         }
                     }
                     return "";
@@ -1592,10 +1571,7 @@
                         const myName = App.ProfileState.getCurrentName();
                         let filtered = posts || [];
 
-                        // LOGIKA PRIVASI DI-AKTIFKAN: 
-                        // Public: Semua bisa lihat. 
-                        // Friends: Hanya pembuat status atau jika nama pembaca terdaftar di array teman pembaca.
-                        // Private: Hanya pembuat status itu sendiri yang berhak memuat kiriman.
+                        // LOGIKA FILTER PRIVASI AKTIF SIFAT RELASIONAL
                         filtered = filtered.filter(p => {
                             if (!p.privacy || p.privacy === 'public') return true;
                             if (p.privacy === 'private') return p.author === myName;
@@ -1610,7 +1586,7 @@
                         }
 
                         if (filtered.length === 0) {
-                            stream.innerHTML = `<div class="glass-card" style="text-align:center; color:var(--text-muted); padding:32px 16px;">Belum ada status yang sesuai hak akses privasi Anda.</div>`; return;
+                            stream.innerHTML = `<div class="glass-card" style="text-align:center; color:var(--text-muted); padding:32px 16px;">Belum ada status.</div>`; return;
                         }
 
                         stream.innerHTML = `<div class="feed-container">` + filtered.map(p => {
@@ -1638,7 +1614,6 @@
                             const hasLiked = postLikesArray.includes(myName) ? 'liked' : '';
                             const hasLoved = (p.loved_users || []).includes(myName) ? 'loved' : '';
                             
-                            // Integrasi Parser Media Dinamis
                             const mediaHTML = this.extractAndRenderEmbeddedMedia(p.content || "", p.media_url) || (p.image ? `<img src="${p.image}" class="post-attached-image">` : '');
 
                             let privacyIconName = 'public';
@@ -1950,11 +1925,42 @@
                     localStorage.setItem('ns_ad_html_global', code); App.Toast.show("Iklan dirilis!", "success"); App.UI.renderGlobalBannerAdIfExists();
                 },
 
-                renderExploreUsers() {
+                // PERBAIKAN PENCARIAN EXPLORE: Hanya menampilkan akun asli hasil query database
+                async renderExploreUsers() {
                     const container = document.getElementById('explore-users-stream'); if(!container) return;
-                    container.innerHTML = ["Andi_Tech", "Budi_Dev"].map(u => `<div class="user-follow-card"><img src="https://i.pravatar.cc/150?img=20" style="width:44px; height:44px; border-radius:50%;"><div><strong>${u}</strong></div><button class="btn btn-primary" style="padding:6px 12px; font-size:0.8rem;" onclick="App.Toast.show('Diikuti!','success')">Ikuti</button></div>`).join('');
+                    try {
+                        const myName = App.ProfileState.getCurrentName();
+                        const { data: postsData } = await supabaseClient.from('posts').select('author, avatar').not('author', 'eq', myName);
+                        
+                        if (!postsData || postsData.length === 0) {
+                            container.innerHTML = `<p style="padding:16px; color:var(--text-muted); font-size:0.9rem;">Belum ada pengguna lain yang mendaftar.</p>`;
+                            return;
+                        }
+
+                        // Ambil daftar nama unik yang valid dari user terdaftar
+                        const uniqueUsersMap = {};
+                        postsData.forEach(item => {
+                            if(!uniqueUsersMap[item.author]) {
+                                uniqueUsersMap[item.author] = item.avatar || 'https://i.pravatar.cc/150?img=12';
+                            }
+                        });
+
+                        container.innerHTML = Object.keys(uniqueUsersMap).map(username => {
+                            return `
+                                <div class="user-follow-card">
+                                    <img src="${uniqueUsersMap[username]}" style="width:44px; height:44px; border-radius:50%; object-fit:cover;">
+                                    <div style="flex:1;">
+                                        <strong style="font-size:0.9rem; cursor:pointer;" onclick="App.Router.navigate('profil?name=${encodeURIComponent(username)}')">${username}</strong>
+                                    </div>
+                                    <button class="btn btn-primary" style="padding:6px 12px; font-size:0.8rem; border-radius:12px;" onclick="App.Toast.show('Koneksi terhubung!','success')">Ikuti</button>
+                                </div>
+                            `;
+                        }).join('');
+                    } catch (err) {
+                        container.innerHTML = `<p style="padding:16px; color:var(--danger); font-size:0.9rem;">Gagal memuat database pengguna.</p>`;
+                    }
                 },
-                loadFriendsCount() { const el = document.getElementById('profile-friends-count'); if(el) el.innerText = '12'; }
+                loadFriendsCount() { const el = document.getElementById('profile-friends-count'); if(el) el.innerText = window.userFriendsList ? window.userFriendsList.length : '0'; }
             },
 
             Theme: {
