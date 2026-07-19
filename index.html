@@ -80,12 +80,12 @@
         .app-header { grid-area: header; background: var(--bg-glass); backdrop-filter: blur(10px); border-bottom: 1px solid var(--border-color); padding: 0 32px; display: flex; flex-direction: column; justify-content: center; position: sticky; top: 0; z-index: 999; }
         .header-top-row { width: 100%; display: flex; align-items: center; justify-content: space-between; }
         .header-left, .header-right { display: flex; align-items: center; gap: 16px; }
-        .header-mobile-menu-bar { display: none; width: 100%; padding-top: 8px; overflow-x: auto; gap: 8px; }
+        .header-mobile-menu-bar { display: none; width: 100%; padding-top: 8px; overflow-x: auto; gap: 8px; justify-content: space-around; }
         .header-mobile-menu-bar::-webkit-scrollbar { display: none; }
         
-        .mobile-menu-tab-btn { display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: var(--radius-md); background: var(--primary-state); color: var(--text-muted); font-size: 0.82rem; font-weight: 700; white-space: nowrap; cursor: pointer; transition: var(--trans-smooth); }
+        .mobile-menu-tab-btn { display: inline-flex; align-items: center; justify-content: center; padding: 8px; border-radius: var(--radius-md); background: var(--primary-state); color: var(--text-muted); cursor: pointer; transition: var(--trans-smooth); min-width: 40px; }
         .mobile-menu-tab-btn.active { background: var(--primary); color: white; box-shadow: var(--shadow-float); }
-        .mobile-menu-tab-btn .material-symbols-outlined { font-size: 18px; }
+        .mobile-menu-tab-btn .material-symbols-outlined { font-size: 22px; }
 
         .search-box { position: relative; width: 200px; display: flex; align-items: center; transition: var(--trans-smooth); }
         .search-box:hover, .search-box:focus-within { width: 320px; }
@@ -915,10 +915,10 @@
                     this.menuConfig.forEach(m => {
                         if(m.isChatTrigger) {
                             sideHTML += `<li class="menu-item-wrapper"><a class="menu-item ripple-btn" onclick="App.UI.toggleChatPopup(true)"><span class="material-symbols-outlined">${m.icon}</span><span class="menu-text">${m.label}</span></a></li>`;
-                            topInjectedHTML += `<div class="mobile-menu-tab-btn" onclick="App.UI.toggleChatPopup(true)"><span class="material-symbols-outlined">${m.icon}</span><span>${m.label}</span></div>`;
+                            topInjectedHTML += `<div class="mobile-menu-tab-btn" onclick="App.UI.toggleChatPopup(true)" title="${m.label}"><span class="material-symbols-outlined">${m.icon}</span></div>`;
                         } else {
                             sideHTML += `<li><a class="menu-item ripple-btn" data-route="${m.id}" onclick="App.Router.navigate('${m.id}')"><span class="material-symbols-outlined">${m.icon}</span><span class="menu-text">${m.label}</span></a></li>`;
-                            topInjectedHTML += `<div class="mobile-menu-tab-btn" data-route="${m.id}" onclick="App.Router.navigate('${m.id}')"><span class="material-symbols-outlined">${m.icon}</span><span>${m.label}</span></div>`;
+                            topInjectedHTML += `<div class="mobile-menu-tab-btn" data-route="${m.id}" onclick="App.Router.navigate('${m.id}')" title="${m.label}"><span class="material-symbols-outlined">${m.icon}</span></div>`;
                         }
                     });
                     
@@ -2121,7 +2121,7 @@
                 generateAvatarHTML(name, rawAvatarUrl, isPremium, level, size = '46px', inPost = false) {
                     let borderClass = isPremium ? 'premium-border' : '';
                     let levelBadge = isPremium && level > 0 ? `<div class="premium-level-badge">LVL ${level}</div>` : '';
-                    let verifiedBadge = isPremium ? `<span class="material-symbols-outlined verified-badge">check</span>` : '';
+                    let verifiedBadge = isPremium ? `<span class="material-symbols-outlined verified-badge">check</span>' : '';
                     let navClick = inPost ? `onclick="App.Router.navigate('profil?name=${encodeURIComponent(name)}')"` : `onclick="App.Router.navigate('profil')"`;
                     return `
                         <div class="premium-avatar-container avatar-wrapper" ${navClick}>
