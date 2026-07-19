@@ -81,6 +81,7 @@
         .app-header { grid-area: header; background: var(--bg-glass); backdrop-filter: blur(10px); border-bottom: 1px solid var(--border-color); padding: 0 32px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 999; }
         .header-left, .header-right { display: flex; align-items: center; gap: 16px; }
         
+        /* FITUR 5: PENCARIAN LIVE HOVER/FOCUS MEMANJANG */
         .search-box { position: relative; width: 200px; display: flex; align-items: center; transition: var(--trans-smooth); }
         .search-box:hover, .search-box:focus-within { width: 320px; }
         .search-box input { width: 100%; background: var(--bg-body); border: 1px solid var(--border-color); padding: 12px 20px 12px 46px; border-radius: var(--radius-round); color: var(--text-main); transition: var(--trans-smooth); font-size: 0.9rem; }
@@ -142,6 +143,8 @@
            2. SISTEM FEED CONTAINER EDGE-TO-EDGE
            ========================================================================== */
         .feed-container { margin-left: -32px; margin-right: -32px; background: transparent; }
+        
+        /* FITUR 3: POSTINGAN TANPA BORDER, CUKUP GARIS ABU-ABU TRANSPARAN */
         .post-card { padding: 24px 32px; position: relative; border-radius: 0; border: none; border-bottom: 1px solid rgba(128, 128, 128, 0.15); background: var(--bg-glass-solid); margin-bottom: 12px; box-shadow: none; }
         
         .post-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px; }
@@ -172,6 +175,7 @@
         .post-action-item.loved { color: var(--danger) !important; }
         .post-action-item.loved .material-symbols-outlined { font-variation-settings: 'FILL' 1; color: var(--danger) !important; }
 
+        /* FITUR 4 & 6: POSTINGAN MEDIA DAN IFRAME DI TENGAH */
         .post-attached-image { max-width: 100%; border-radius: var(--radius-md); margin: 12px auto; display: block; max-height: 340px; object-fit: cover; cursor: zoom-in; box-shadow: var(--shadow-soft); }
         .post-card iframe { display: block; margin: 12px auto; width: 100%; max-width: 500px; height: 280px; border-radius: 12px; border: none; }
         .post-card audio { display: block; margin: 12px auto; width: 100%; max-width: 500px; }
@@ -306,42 +310,53 @@
            7. KHUSUS MOBILE (HP) RESPONSIVE DESIGN - OPTIMIZED
            ========================================================================== */
         @media (max-width: 768px) {
+            /* Layout Adjustments */
             #app-layout { grid-template-areas: "header" "content"; grid-template-columns: 1fr; grid-template-rows: 60px 1fr; }
             .app-sidebar { display: flex; transform: translateX(-100%); width: 280px; z-index: 2005; position: fixed; top: 0; left: 0; bottom: 0; }
             #app-layout.sidebar-mobile-open .app-sidebar { transform: translateX(0); }
             
+            /* Header Fixes */
             .app-header { padding: 0 16px; height: 60px; }
             .search-box { width: 100%; max-width: 140px; }
             .search-box:hover, .search-box:focus-within { width: 180px; }
-            .search-box input { padding: 8px 12px 8px 36px; font-size: 16px; height: 38px; }
+            .search-box input { padding: 8px 12px 8px 36px; font-size: 16px; height: 38px; } /* font-size 16px prevents iOS zoom */
             
+            /* Ruang bernafas ekstra untuk area bawah (Bottom Nav & Safe Area) */
             .app-content { padding: 12px; padding-bottom: calc(var(--bottom-nav-height) + env(safe-area-inset-bottom) + 20px); }
             
+            /* Bottom Navigation - Mendukung Safe Area iOS */
             .bottom-nav { display: flex !important; position: fixed; bottom: 0; left: 0; right: 0; height: calc(var(--bottom-nav-height) + env(safe-area-inset-bottom)); padding-bottom: env(safe-area-inset-bottom); background: var(--bg-glass); backdrop-filter: blur(10px); border-top: 1px solid var(--border-color); z-index: 1500; justify-content: space-around; align-items: center; box-shadow: 0 -4px 20px rgba(0,0,0,0.03); }
             .bn-item { display: flex; flex-direction: column; align-items: center; gap: 4px; color: var(--text-muted); flex: 1; cursor: pointer; padding-top: 8px; }
             .bn-item.active { color: var(--primary); font-weight: 700; }
             
+            /* Mengubah Modal Biasa menjadi Bottom Sheet (Laci dari bawah) */
             .modal-overlay { align-items: flex-end; }
             .modal-content { width: 100%; max-width: 100%; border-radius: 24px 24px 0 0; transform: translateY(100%); padding-bottom: calc(env(safe-area-inset-bottom) + 24px); max-height: 85vh; margin: 0; }
             .modal-overlay.active .modal-content { transform: translateY(0); }
             
+            /* Memaksimalkan Composer Layar Penuh di HP */
             .pic-composer-card { min-height: 80vh; border-radius: 0; }
             .modal-overlay.active .modal-content:has(.pic-composer-card) { max-height: 90vh; border-radius: 24px 24px 0 0; }
             
+            /* Profile Detail Adjustments */
             .profile-stats { gap: 12px; justify-content: space-around; width: 100%; }
             .profile-avatar-large { width: 100px; height: 100px; }
             
+            /* Penyesuaian Feed Container dan Post Card */
             .feed-container { margin-left: 0; margin-right: 0; }
             .post-card { padding: 16px 12px; border-radius: var(--radius-lg); margin-bottom: 16px; border: 1px solid rgba(0,0,0,0.06); box-shadow: 0 4px 12px rgba(0,0,0,0.02); }
             
+            /* Action Bar Postingan di-fit agar rapi */
             .post-actions-bar { gap: 4px; justify-content: space-between; margin-top: 12px; }
             .post-action-item { font-size: 0.75rem; gap: 4px; padding: 8px 4px; }
             .post-action-item .material-symbols-outlined { font-size: 18px; }
             
+            /* Floating Chat di HP menjadi Layar Penuh */
             .floating-chat-widget { width: 100vw; height: 100vh; right: 0; bottom: 0; border-radius: 0; transform: translateX(100%); z-index: 4000; }
             .floating-chat-widget.active { transform: translateX(0); }
-            .popup-chat-header { padding-top: calc(env(safe-area-inset-top) + 14px); }
+            .popup-chat-header { padding-top: calc(env(safe-area-inset-top) + 14px); } /* iPhone Notch support */
             
+            /* Tata Letak Tambahan */
             .pic-composer-dock-grid { grid-template-columns: repeat(2, 1fr); }
             .share-grid-sheet { grid-template-columns: repeat(3, 1fr); }
             .minimal-composer-bar { padding: 12px; border-radius: var(--radius-md); margin-bottom: 16px; }
@@ -412,7 +427,7 @@
                     <span class="badge" id="noti-badge">0</span>
                 </button>
                 
-                <div id="header-avatar-toggle-node"></div>
+                <div id="header-avatar-toggle-node"></div> <!-- Injected by JS -->
             </div>
         </header>
 
@@ -423,7 +438,7 @@
             </div>
             <ul class="sidebar-menu" id="sidebar-menu-list"></ul>
             <div class="sidebar-profile" onclick="App.Router.navigate('profil')">
-                <div id="sidebar-avatar-node"></div>
+                <div id="sidebar-avatar-node"></div> <!-- Injected by JS -->
                 <div class="sidebar-profile-info">
                     <span class="sp-name" id="sidebar-user-name">User</span>
                     <span class="sp-role" id="sidebar-user-role-label">Tech Workspace Member</span>
@@ -579,8 +594,7 @@
                     supabaseClient
                         .channel('schema-db-changes')
                         .on('postgres_changes', { event: '*', schema: 'public', table: 'posts' }, async () => {
-                            if (window.location.hash === '#/feed') App.Features.renderPosts();
-                            // Realtime re-fetch profil jika sedang dibuka
+                            if (window.location.hash === '#/feed' || window.location.hash === '') App.Features.renderPosts();
                             if (window.location.hash.includes('#/profil?name=')) {
                                 App.Router.handleRoute();
                             }
@@ -686,7 +700,6 @@
                     }
 
                     if(App.Views[baseRoute]) {
-                        // Periksa apakah view bertipe fungsi asinkronus (Promise)
                         const result = App.Views[baseRoute]();
                         if (result instanceof Promise) {
                             viewport.innerHTML = `<div class="view-container">${await result}</div>`;
@@ -758,19 +771,16 @@
                         </div>
                     `;
                 },
-                
-                /* PERBAIKAN UTAMA: FUNGSI PROFIL SEKARANG ASINKRONUS & MEMBACA URL STORAGE SUPABASE SECARA REALTIME DARI TABEL POSTS JIKA DILIHAT AKUN LAIN */
                 async profil(specifiedTargetName = null) {
                     const loggedInUser = App.ProfileState.getCurrentName();
                     const isOwnProfile = (!specifiedTargetName || specifiedTargetName === loggedInUser);
-                    const targetName = isOwnProfile ? loggedInUser : specifiedTargetName;
                     
+                    const targetName = isOwnProfile ? loggedInUser : specifiedTargetName;
                     let targetAvatar = 'https://i.pravatar.cc/150?img=12';
                     
                     if (isOwnProfile) {
                         targetAvatar = App.ProfileState.getCurrentAvatar();
                     } else {
-                        // Cari data postingan terbaru dari user ini untuk menarik URL avatar Supabase Storage aslinya
                         try {
                             const { data } = await supabaseClient.from('posts').select('avatar').eq('author', targetName).not('avatar', 'is', null).order('created_at', { ascending: false }).limit(1);
                             if (data && data.length > 0 && data[0].avatar) {
@@ -892,6 +902,17 @@
                 }
             },
 
+            ViewControllers: {
+                feed() { 
+                    App.UI.syncGlobalAvatarAndName(); 
+                    App.Features.renderPosts(); 
+                },
+                explore() { App.Features.renderExploreUsers(); },
+                groups() { App.Features.renderCommunityHubViewportList(); },
+                profil() { App.Features.loadFriendsCount(); },
+                settings() {}
+            },
+
             Features: {
                 openComposerModalPopupForm() {
                     const currentName = App.ProfileState.getCurrentName();
@@ -967,6 +988,31 @@
                         txtArea.style.color = App.UI.getTextColorContrast(color);
                     }
                     App.Toast.show("Warna latar dipilih", "success");
+                },
+
+                fetchLocationAction() {
+                    const locBtn = document.getElementById('loc-pill');
+                    if(!locBtn) return;
+                    locBtn.innerHTML = `<span class="material-symbols-outlined">sync</span> Mencari...`;
+                    if (navigator.geolocation) {
+                        navigator.geolocation.getCurrentPosition(async (pos) => {
+                            try {
+                                const res = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${pos.coords.latitude}&lon=${pos.coords.longitude}&format=json`);
+                                const data = await res.json();
+                                const city = data.address.city || data.address.town || data.address.village || data.address.county || 'Lokasi Anda';
+                                locBtn.innerHTML = `<span class="material-symbols-outlined" style="color:var(--primary);">location_on</span> ${city}`;
+                                activeComposerLocation = city;
+                                const locInput = document.getElementById('composer-location-input');
+                                if (locInput) locInput.value = city;
+                            } catch(e) {
+                                locBtn.innerHTML = `<span class="material-symbols-outlined" style="color:var(--primary);">location_on</span> Lokasi Ditemukan`;
+                            }
+                        }, () => {
+                            locBtn.innerHTML = `<span class="material-symbols-outlined" style="color:var(--danger);">location_off</span> Gagal Akses`;
+                        });
+                    } else {
+                        locBtn.innerHTML = `<span class="material-symbols-outlined" style="color:var(--danger);">location_off</span> Tidak Didukung`;
+                    }
                 },
 
                 handleHeaderLiveSearchInput(event) {
@@ -1212,6 +1258,15 @@
                     } catch(err) {}
                 },
 
+                async loadFriendsCount() {
+                    const myEmail = localStorage.getItem('ns_user_email') || '';
+                    try {
+                        const { data } = await supabaseClient.from('friends').select('count', { count: 'exact' }).eq('user_email', myEmail);
+                        const countEl = document.getElementById('profile-friends-count');
+                        if (countEl && data) countEl.innerText = data.length || 0;
+                    } catch(e) {}
+                },
+
                 async renderPosts() {
                     const stream = document.getElementById('feed-stream'); if(!stream) return;
                     try {
@@ -1398,7 +1453,6 @@
                         
                         App.ProfileState.saveCompressedAvatar(publicUrl);
                         
-                        /* SEKALIGUS UPDATE KOLOM AVATAR DI DATABASE UNTUK POSTINGAN LAMA AGAR SINKRON DI AKUN LAIN */
                         await supabaseClient.from('posts').update({ avatar: publicUrl }).eq('author', App.ProfileState.getCurrentName());
                         
                         const previewImg = document.getElementById('settings-avatar-preview');
