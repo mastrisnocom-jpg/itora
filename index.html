@@ -228,6 +228,9 @@
             background: #cbd5e1;
             border-radius: var(--radius-round);
         }
+        .comments-sheet-drag-handle-area:active {
+            cursor: grabbing;
+        }
         .comments-sheet-header {
             padding: 0 16px 12px 16px;
             border-bottom: 1px solid var(--border-color);
@@ -261,7 +264,7 @@
             box-sizing: border-box;
         }
 
-        .comment-like-btn.active {
+        .comment-like-btn.active, .reply-like-btn.active {
             color: var(--primary) !important;
         }
 
@@ -1313,7 +1316,7 @@
                             <button class="btn btn-primary btn-full" onclick="App.Features.processPremiumCommunityPaymentAction()">Konfirmasi & Buat</button>
                         </div>
                     `;
-                    App.Modal.open("Buat Komunitas Baru", invoiceHTML, true, false);
+                    App.Modal.open("Bagikan Konten", invoiceHTML, true, false);
                 },
 
                 processPremiumCommunityPaymentAction() {
@@ -1730,7 +1733,7 @@
                             const likesArray = c.likes || [];
                             const repliesArray = c.replies || [];
                             const isLikedByMe = likesArray.includes(myName) ? 'active' : '';
-                            const likeCounterText = likesArray.length > 0 ? `• <span>👍 ${likesArray.length}</span>` : '';
+                            const likeCounterText = likesArray.length > 0 ? `• <span style="font-size:0.75rem;">👍 ${likesArray.length}</span>` : '';
                             
                             const commentTimeText = App.UI.calculateRelativeTimeAgo(c.date || Date.now());
                             
@@ -1741,6 +1744,9 @@
                                     const subUser = r.user || 'User';
                                     const subAvatar = `https://i.pravatar.cc/150?img=${Math.abs(subUser.hashCode()) % 70 || 14}`;
                                     const replyTimeText = App.UI.calculateRelativeTimeAgo(r.date || Date.now());
+                                    const rLikesArray = r.likes || [];
+                                    const isReplyLikedByMe = rLikesArray.includes(myName) ? 'active' : '';
+                                    const replyLikeCounterText = rLikesArray.length > 0 ? `• <span style="font-size:0.7rem;">👍 ${rLikesArray.length}</span>` : '';
 
                                     return `
                                         <div style="display:flex; gap:8px; align-items:flex-start;">
@@ -1750,9 +1756,10 @@
                                                     <strong style="font-size:0.78rem; color:var(--text-main); display:block;">${subUser}</strong>
                                                     <span style="font-size:0.82rem; color:var(--text-main);">${r.text}</span>
                                                 </div>
-                                                <div style="display:flex; gap:12px; font-size:0.7rem; color:var(--text-muted); font-weight:700; margin-left:6px; margin-top:1px;">
+                                                <div style="display:flex; gap:12px; font-size:0.7rem; color:var(--text-muted); font-weight:700; margin-left:6px; margin-top:1px; align-items:center;">
                                                     <span>${replyTimeText}</span>
-                                                    <span style="cursor:pointer;">Suka</span>
+                                                    <span class="reply-like-btn ${isReplyLikedByMe}" style="cursor:pointer;" onclick="App.Features.toggleReplyLikeAction('${commentId}', '${r.id}')">Suka</span>
+                                                    ${replyLikeCounterText}
                                                 </div>
                                             </div>
                                         </div>
@@ -1814,6 +1821,38 @@
                     } catch(e) {}
                 },
 
+                async toggleReplyLikeAction(commentId, replyId) {
+                    if (!activeBottomSheetPostId) return;
+                    const myName = App.ProfileState.getCurrentName();
+
+                    try {
+                        const { data } = await supabaseClient.from('posts').select('role').eq('id', activeBottomSheetPostId).single();
+                        let postRoleData = { comments: [] };
+                        if (data && data.role && data.role.startsWith('{')) postRoleData = JSON.parse(data.role);
+
+                        postRoleData.comments = postRoleData.comments.map(c => {
+                            if (c.id === commentId) {
+                                if (!c.replies) c.replies = [];
+                                c.replies = c.replies.map(r => {
+                                    if (r.id === replyId) {
+                                        if (!r.likes) r.likes = [];
+                                        if (r.likes.includes(myName)) {
+                                            r.likes = r.likes.filter(u => u !== myName);
+                                        } else {
+                                            r.likes.push(myName);
+                                        }
+                                    }
+                                    return r;
+                                });
+                            }
+                            return c;
+                        });
+
+                        await supabaseClient.from('posts').update({ role: JSON.stringify(postRoleData) }).eq('id', activeBottomSheetPostId);
+                        App.Features.reloadCommentsBottomSheetStreamOnly();
+                    } catch(e) {}
+                },
+
                 setCommentReplyMode(commentId) {
                     activeReplyTargetCommentId = commentId;
                     App.Features.renderBottomSheetInputBar();
@@ -1830,7 +1869,7 @@
                     try {
                         const { data } = await supabaseClient.from('posts').select('role').eq('id', activeBottomSheetPostId).single();
                         let postRoleData = { comments: [] };
-                        if (data && data.role && data.role.startsWith('{')) postRoleData = JSON.parse(postRoleData);
+                        if (data && data.role && data.role.startsWith('{')) postRoleData = JSON.parse(data.role);
                         
                         if (!postRoleData.comments) postRoleData.comments = [];
 
@@ -1845,7 +1884,8 @@
                                         id: `r_${Date.now()}`,
                                         user: myCurrentName,
                                         text: commentText,
-                                        date: Date.now()
+                                        date: Date.now(),
+                                        likes: []
                                     });
                                 }
                                 return c;
