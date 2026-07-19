@@ -618,9 +618,6 @@
             .icon-btn { width: 36px; height: 36px; }
             .app-content { padding: 16px; min-height: calc(100vh - var(--header-height)); max-width: 100vw; box-sizing: border-box; }
             
-            /* ==========================================================================
-               REVISED: SISTEM FEED CONTAINER EDGE-TO-EDGE (ALA FACEBOOK NATIVE MOBILE)
-               ========================================================================== */
             .feed-container { 
                 margin-left: -16px; 
                 margin-right: -16px; 
@@ -743,7 +740,6 @@
 
         <!-- MAIN VIEWPORT -->
         <main class="app-content">
-            <!-- SLOT PENAYANGAN IKLAN GLOBAL TETAP DI SINI (DI BAWAH HEADER) -->
             <div id="global-superadmin-ad-slot-container"></div>
             <div id="app-viewport"></div>
         </main>
@@ -820,7 +816,7 @@
     <!-- JavaScript Application Script -->
     <script>
         const SUPABASE_URL = 'https://waaufoxlimqtesmmjhyw.supabase.co';
-        const SUPABASE_KEY = 'sb_publishable_X6icNByv3YFbekorwJ6kSw_SX0XUFM8';
+        const SUPABASE_KEY = 'sb_publishable_X6icNByv3YFbekorwJ6kSw_SX0XUFM8'; // Pastikan Key ini memiliki hak akses RLS ke tabel baru
         const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
         let liveNotifications = [];
@@ -855,12 +851,11 @@
                 this.UI.bindGlobalEvents();
                 this.Navigation.render();
                 this.Auth.checkCurrentSession();
-                this.Realtime.subscribePosts();
+                this.Realtime.subscribeRealtimeChannels();
                 this.Features.fetchMyFriendsData(); 
                 this.Features.initCommentsSwipeToCloseGesture();
                 
                 App.UI.renderGlobalBannerAdIfExists();
-                App.UI.renderAdminAdFormPanelIfNeeded();
 
                 unreadMessageCounters = {
                     'insight_ata': 1,
@@ -934,17 +929,44 @@
             },
 
             Realtime: {
-                subscribePosts() {
+                subscribeRealtimeChannels() {
+                    // Monitor Perubahan Status/Posts
                     supabaseClient
-                        .channel('schema-db-changes')
-                        .on('postgres_changes', { event: '*', schema: 'public', table: 'posts' }, async (payload) => {
-                            App.Features.fetchCloudNotificationsDataZone();
-
+                        .channel('realtime-posts')
+                        .on('postgres_changes', { event: '*', schema: 'public', table: 'posts' }, async () => {
                             if (window.location.hash === '#/feed' || window.location.hash === '') App.Features.renderPosts();
-                            if (window.location.hash.includes('#/profil?name=')) {
-                                App.Router.handleRoute();
-                            }
+                            if (window.location.hash.includes('#/profil?name=')) App.Router.handleRoute();
+                        })
+                        .subscribe();
+
+                    // Monitor Perubahan Sistem Komentar
+                    supabaseClient
+                        .channel('realtime-comments')
+                        .on('postgres_changes', { event: '*', schema: 'public', table: 'comments' }, async () => {
                             if (activeBottomSheetPostId) App.Features.reloadCommentsBottomSheetStreamOnly();
+                            App.Features.renderPosts();
+                        })
+                        .subscribe();
+
+                    // Monitor Perubahan Obrolan / Chat
+                    supabaseClient
+                        .channel('realtime-chats')
+                        .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'chats' }, async (payload) => {
+                            const myName = App.ProfileState.getCurrentName();
+                            if (activeChatFriendName && payload.new.sender === activeChatFriendName && payload.new.receiver === myName) {
+                                App.Features.openSpecificFriendPopupObrolan(activeChatFriendEmail, activeChatFriendName);
+                            } else if (payload.new.receiver === myName) {
+                                unreadMessageCounters[payload.new.sender.toLowerCase()] = (unreadMessageCounters[payload.new.sender.toLowerCase()] || 0) + 1;
+                                App.Features.loadPopupFriendsListSidebar();
+                            }
+                        })
+                        .subscribe();
+
+                    // Monitor Perubahan Notifikasi Cloud
+                    supabaseClient
+                        .channel('realtime-notifications')
+                        .on('postgres_changes', { event: '*', schema: 'public', table: 'notifications' }, async () => {
+                            App.Features.fetchCloudNotificationsDataZone();
                         })
                         .subscribe();
                 }
@@ -962,7 +984,6 @@
                             App.UI.syncGlobalAvatarAndName();
                             App.Auth.showApp();
                             App.Features.fetchCloudNotificationsDataZone();
-                            App.UI.renderAdminAdFormPanelIfNeeded();
                             App.Router.init();
                         } else {
                             localStorage.removeItem('ns_logged_in');
@@ -991,7 +1012,6 @@
                         App.UI.syncGlobalAvatarAndName();
                         this.showApp();
                         App.Features.fetchCloudNotificationsDataZone();
-                        App.UI.renderAdminAdFormPanelIfNeeded();
                         App.Router.init();
                     } catch (error) { 
                         alert("Masuk gagal: " + error.message); 
@@ -1027,6 +1047,7 @@
                 }
             },
 
+            // ROUTER SYSTEM
             Router: {
                 init() {
                     window.addEventListener('hashchange', () => this.handleRoute());
@@ -1058,11 +1079,7 @@
 
                     if(App.Views[baseRoute]) {
                         const result = App.Views[baseRoute]();
-                        if (result instanceof Promise) {
-                            viewport.innerHTML = `<div class="view-container">${await result}</div>`;
-                        } else {
-                            viewport.innerHTML = `<div class="view-container">${result}</div>`;
-                        }
+                        viewport.innerHTML = `<div class="view-container">${(result instanceof Promise) ? await result : result}</div>`;
                         if(App.ViewControllers[baseRoute]) App.ViewControllers[baseRoute]();
                         window.scrollTo({ top: 0, behavior: 'smooth' });
                     }
@@ -1134,7 +1151,6 @@
                 async profil(specifiedTargetName = null) {
                     const loggedInUser = App.ProfileState.getCurrentName();
                     const isOwnProfile = (!specifiedTargetName || specifiedTargetName === loggedInUser);
-                    
                     const targetName = isOwnProfile ? loggedInUser : specifiedTargetName;
                     let targetAvatar = 'https://i.pravatar.cc/150?img=12';
                     
@@ -1142,19 +1158,9 @@
                         targetAvatar = App.ProfileState.getCurrentAvatar();
                     } else {
                         try {
-                            const { data } = await supabaseClient
-                                .from('posts')
-                                .select('avatar')
-                                .eq('author', targetName)
-                                .not('avatar', 'is', null)
-                                .order('created_at', { ascending: false })
-                                .limit(1);
-                            if (data && data.length > 0 && data[0].avatar) {
-                                targetAvatar = data[0].avatar;
-                            }
-                        } catch (err) {
-                            console.error(err);
-                        }
+                            const { data } = await supabaseClient.from('posts').select('avatar').eq('author', targetName).not('avatar', 'is', null).order('created_at', { ascending: false }).limit(1);
+                            if (data && data.length > 0) targetAvatar = data[0].avatar;
+                        } catch (err) {}
                     }
                     
                     const targetBio = isOwnProfile ? App.ProfileState.getCurrentRoleBioStatus() : 'Tech Workspace Professional Member';
@@ -1163,25 +1169,16 @@
                     
                     const myEmail = (localStorage.getItem('ns_user_email') || '').toLowerCase();
                     const isSuperAdmin = (isOwnProfile && myEmail === 'mastrisnocom@gmail.com');
-                    
                     const targetPremiumLevel = isOwnProfile ? App.ProfileState.getPremiumLevel() : 0;
-                    const borderClass = targetPremiumLevel > 0 ? 'premium-border' : '';
-                    const levelBadge = targetPremiumLevel > 0 ? `<div class="premium-level-badge" style="top:auto; bottom:-12px; font-size:0.8rem; padding: 4px 12px; z-index:10;">LVL ${targetPremiumLevel}</div>` : '';
 
                     return `
                         <div class="glass-card profile-info-card" style="padding:0; overflow:hidden; position: relative;">
-                            ${isOwnProfile ? `
-                                <button class="icon-btn" style="position:absolute; top: 16px; right: 16px; z-index: 10; background: rgba(0,0,0,0.3); color: white;" onclick="App.Router.navigate('settings')">
-                                    <span class="material-symbols-outlined">settings</span>
-                                </button>
-                            ` : ''}
+                            ${isOwnProfile ? `<button class="icon-btn" style="position:absolute; top: 16px; right: 16px; z-index: 10; background: rgba(0,0,0,0.3); color: white;" onclick="App.Router.navigate('settings')"><span class="material-symbols-outlined">settings</span></button>` : ''}
                             <div class="profile-cover"></div>
-                            
                             <div style="position:relative; display:inline-block; margin: 0 auto 16px auto; z-index: 2; text-align: center; width: 100%;">
-                                <img src="${targetAvatar}" class="profile-avatar-large ${borderClass}" style="margin-bottom:0;" alt="Profile">
-                                ${levelBadge}
+                                <img src="${targetAvatar}" class="profile-avatar-large ${targetPremiumLevel > 0 ? 'premium-border' : ''}" style="margin-bottom:0;" alt="Profile">
+                                ${targetPremiumLevel > 0 ? `<div class="premium-level-badge" style="top:auto; bottom:-12px; font-size:0.8rem; padding: 4px 12px; z-index:10;">LVL ${targetPremiumLevel}</div>` : ''}
                             </div>
-                            
                             <div style="text-align: center; padding: 0 16px;">
                                 <h2>${targetName} ${isSuperAdmin ? '<span style="font-size:0.75rem; background:var(--primary); color:white; padding:2px 8px; border-radius:10px; margin-left:6px; vertical-align:middle;">SUPER ADMIN</span>' : ''}</h2>
                                 <p style="color: var(--text-muted); font-size: 0.82rem; margin-top: 8px; margin-bottom: 8px; font-weight:700;">Bergabung sejak: ${joinDate}</p>
@@ -1190,19 +1187,13 @@
                                     <span class="material-symbols-outlined" style="font-size:16px;">location_on</span> ${targetDomisili}
                                 </p>
                             </div>
-                            
                             <div class="profile-stats">
-                                <div class="stat-item"><span class="stat-val" id="profile-friends-count">${isOwnProfile ? '0' : '28'}</span><span class="stat-lbl">Teman</span></div>
+                                <div class="stat-item"><span class="stat-val" id="profile-friends-count">0</span><span class="stat-lbl">Teman</span></div>
                                 <div class="stat-item"><span class="stat-val">${isOwnProfile ? '2.5K' : '1.4K'}</span><span class="stat-lbl">Pengikut</span></div>
                                 <div class="stat-item"><span class="stat-val">${isOwnProfile ? '84' : '31'}</span><span class="stat-lbl">Postingan</span></div>
                             </div>
-                            
                             <div style="padding: 24px; display:flex; flex-direction:column; gap:12px; max-width:320px; margin:0 auto;">
-                                ${!isOwnProfile ? `
-                                    <button class="btn btn-primary ripple-btn" onclick="App.UI.toggleChatPopup(true); App.Features.openSpecificFriendPopupObrolan('${targetName.toLowerCase()}@nexsocial.id', '${targetName}')">
-                                        <span class="material-symbols-outlined" style="font-size:18px;">mail</span> Kirim Pesan
-                                    </button>
-                                ` : ''}
+                                ${!isOwnProfile ? `<button class="btn btn-primary ripple-btn" onclick="App.UI.toggleChatPopup(true); App.Features.openSpecificFriendPopupObrolan('${targetName.toLowerCase()}@nexsocial.id', '${targetName}')"><span class="material-symbols-outlined" style="font-size:18px;">mail</span> Kirim Pesan</button>` : ''}
                             </div>
                         </div>
                     `;
@@ -1212,10 +1203,7 @@
                     const currentAvatar = App.ProfileState.getCurrentAvatar();
                     const currentBioRole = App.ProfileState.getCurrentRoleBioStatus();
                     const currentDomisili = App.ProfileState.getCurrentDomisili();
-
                     const premiumLevel = App.ProfileState.getPremiumLevel();
-                    const borderClass = premiumLevel > 0 ? 'premium-border' : '';
-
                     const myEmail = (localStorage.getItem('ns_user_email') || '').toLowerCase();
                     const isSuperAdmin = (myEmail === 'mastrisnocom@gmail.com');
                     const savedAdHTML = localStorage.getItem('ns_ad_html_global') || '';
@@ -1223,21 +1211,13 @@
                     return `
                         <div class="glass-card" style="max-width: 650px; margin: 0 auto; position: relative;">
                             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; border-bottom: 1px solid var(--border-color); padding-bottom: 12px;">
-                                <h2 style="display: flex; align-items: center; gap: 8px; margin: 0;">
-                                    <span class="material-symbols-outlined" style="font-size: 28px; color: var(--primary);">settings</span>
-                                    <span>Pengaturan Akun</span>
-                                </h2>
-                                <button class="icon-btn" onclick="App.Router.navigate('feed')" title="Tutup" style="color: var(--text-muted);">
-                                    <span class="material-symbols-outlined">close</span>
-                                </button>
+                                <h2 style="display: flex; align-items: center; gap: 8px; margin: 0;"><span class="material-symbols-outlined" style="font-size: 28px; color: var(--primary);">settings</span><span>Pengaturan Akun</span></h2>
+                                <button class="icon-btn" onclick="App.Router.navigate('feed')" title="Tutup" style="color: var(--text-muted);"><span class="material-symbols-outlined">close</span></button>
                             </div>
                             
-                            <!-- FORM PENGATURAN IKLAN DI DALAM SETTINGS -->
                             ${isSuperAdmin ? `
                                 <div class="glass-card" style="border: 1px solid var(--primary); text-align: left; margin-bottom: 24px; background: var(--bg-body);">
-                                    <h3 style="margin-bottom: 12px; color: var(--primary); display: flex; align-items: center; gap: 6px;">
-                                        <span class="material-symbols-outlined">campaign</span>Panel Pasang Iklan Super Admin
-                                    </h3>
+                                    <h3 style="margin-bottom: 12px; color: var(--primary); display: flex; align-items: center; gap: 6px;"><span class="material-symbols-outlined">campaign</span>Panel Pasang Iklan Super Admin</h3>
                                     <form id="global-admin-ad-form" onsubmit="App.Features.saveAdminGlobalAdBannerAction(event)">
                                         <div class="form-group" style="margin-bottom: 14px;">
                                             <textarea class="form-input" id="admin-ad-html-input" placeholder=" " required style="min-height: 100px;">${savedAdHTML}</textarea>
@@ -1251,23 +1231,14 @@
 
                             <div class="avatar-edit-container">
                                 <div class="avatar-preview-wrapper" style="width: 110px; height: 110px;">
-                                    <img src="${currentAvatar}" id="settings-avatar-preview" class="avatar-preview-circle ${borderClass}" alt="Preview">
+                                    <img src="${currentAvatar}" id="settings-avatar-preview" class="avatar-preview-circle ${premiumLevel > 0 ? 'premium-border' : ''}" alt="Preview">
                                     <label for="avatar-file-input" class="avatar-upload-label"><span class="material-symbols-outlined" style="font-size:18px;">photo_camera</span></label>
                                     <input type="file" id="avatar-file-input" style="display:none;" accept="image/*" onchange="App.Features.handleAvatarSelection(event)">
                                 </div>
                             </div>
-                            <div class="form-group">
-                                <input type="text" class="form-input" id="settings-display-name" placeholder=" " value="${currentName}">
-                                <label class="form-label">Nama Tampilan</label>
-                            </div>
-                            <div class="form-group">
-                                <input type="text" class="form-input" id="settings-bio-status" placeholder=" " value="${currentBioRole}">
-                                <label class="form-label">Pekerjaan / Jabatan Profesional</label>
-                            </div>
-                            <div class="form-group">
-                                <input type="text" class="form-input" id="settings-domisili" placeholder=" " value="${currentDomisili}">
-                                <label class="form-label">Domisili / Lokasi Tempat Living</label>
-                            </div>
+                            <div class="form-group"><input type="text" class="form-input" id="settings-display-name" placeholder=" " value="${currentName}"><label class="form-label">Nama Tampilan</label></div>
+                            <div class="form-group"><input type="text" class="form-input" id="settings-bio-status" placeholder=" " value="${currentBioRole}"><label class="form-label">Pekerjaan / Jabatan Profesional</label></div>
+                            <div class="form-group"><input type="text" class="form-input" id="settings-domisili" placeholder=" " value="${currentDomisili}"><label class="form-label">Domisili / Lokasi</label></div>
                             <button class="btn btn-primary ripple-btn btn-full" onclick="App.Features.saveNameSettings()" style="margin-bottom: 16px;">Simpan Profil Data</button>
                             <button class="btn btn-danger btn-full ripple-btn" onclick="App.Auth.logout()"><span class="material-symbols-outlined">logout</span> Keluar dari Akun</button>
                         </div>
@@ -1276,10 +1247,7 @@
             },
 
             ViewControllers: {
-                feed() { 
-                    App.UI.syncGlobalAvatarAndName(); 
-                    App.Features.renderPosts(); 
-                },
+                feed() { App.UI.syncGlobalAvatarAndName(); App.Features.renderPosts(); },
                 explore() { App.Features.renderExploreUsers(); },
                 groups() { App.Features.renderCommunityHubViewportList(); },
                 profil() { App.Features.loadFriendsCount(); },
@@ -1293,12 +1261,10 @@
                     reader.onload = function (e) {
                         composerAttachedImageBase64 = e.target.result;
                         App.Features.openComposerModalPopupForm();
-                        
                         const previewArea = document.getElementById('composer-upload-preview-area');
                         if(previewArea) previewArea.innerHTML = `<img src="${composerAttachedImageBase64}">`;
                         const submitBtn = document.getElementById('pic-submit-btn');
                         if(submitBtn) submitBtn.classList.add('ready');
-                        
                         event.target.value = '';
                     };
                 },
@@ -1307,9 +1273,7 @@
                     const currentName = App.ProfileState.getCurrentName();
                     const premiumLevel = App.ProfileState.getPremiumLevel();
                     const avatarHTML = App.UI.generateAvatarHTML(currentName, App.ProfileState.getCurrentAvatar(), premiumLevel > 0, premiumLevel, '52px', false);
-                    
-                    currentComposerBgColor = "#ffffff";
-                    activeComposerLocation = "";
+                    currentComposerBgColor = "#ffffff"; activeComposerLocation = "";
 
                     const popupFormHTML = `
                         <div class="pic-composer-card">
@@ -1318,14 +1282,13 @@
                                 <span class="pic-composer-title">Postingan baru</span>
                                 <button class="pic-composer-next-btn" id="pic-submit-btn" onclick="App.Features.createPost()">Kirim</button>
                             </div>
-                            
                             <div class="pic-composer-profile-row">
                                 ${avatarHTML}
                                 <div style="display:flex; flex-direction:column; gap:2px; margin-left: 8px;">
                                     <span class="pic-composer-username">${currentName}</span>
-                                    <div class="pic-status-pill" style="padding: 0; align-self: flex-start; margin-top:2px; border: 1px solid rgba(0,0,0,0.1); display: inline-flex; align-items:center;">
+                                    <div class="pic-status-pill" style="border:1px solid rgba(0,0,0,0.1); display:inline-flex; align-items:center;">
                                         <span class="material-symbols-outlined" style="margin-left: 8px; font-size: 14px;" id="composer-privacy-icon">public</span>
-                                        <select id="composer-privacy-select" onchange="document.getElementById('composer-privacy-icon').innerText = this.options[this.selectedIndex].getAttribute('data-icon')" style="background: transparent; border: none; font-weight: 700; color: #334155; font-size: 0.75rem; padding: 4px 8px 4px 4px; outline: none; cursor: pointer;">
+                                        <select id="composer-privacy-select" onchange="document.getElementById('composer-privacy-icon').innerText = this.options[this.selectedIndex].getAttribute('data-icon')" style="background:transparent; border:none; font-weight:700; color:#334155; font-size:0.75rem; padding:4px 8px 4px 4px; outline:none; cursor:pointer;">
                                             <option value="public" data-icon="public">Publik</option>
                                             <option value="friends" data-icon="group">Teman</option>
                                             <option value="private" data-icon="lock">Privat</option>
@@ -1333,85 +1296,42 @@
                                     </div>
                                 </div>
                             </div>
-                            
                             <div class="pic-composer-body">
                                 <textarea class="pic-composer-textarea" id="composer-text" placeholder="Apa yang Anda pikirkan?"></textarea>
-                                <div id="composer-upload-preview-area" class="pic-composer-preview-box">
-                                    ${composerAttachedImageBase64 ? `<img src="${composerAttachedImageBase64}">` : ''}
-                                </div>
+                                <div id="composer-upload-preview-area" class="pic-composer-preview-box">${composerAttachedImageBase64 ? `<img src="${composerAttachedImageBase64}">` : ''}</div>
                             </div>
-
                             <div class="composer-dynamic-input-zone" id="composer-location-zone">
-                                <div style="display: flex; gap: 8px; align-items: center; width: 100%;">
-                                    <span class="material-symbols-outlined" style="color: var(--primary);">location_on</span>
-                                    <input type="text" id="composer-location-input" placeholder="Ketik nama lokasi..." style="background: var(--bg-body); padding: 10px 14px; border-radius: 20px; font-size: 0.9rem; width: 100%; border: 1px solid var(--border-color);" oninput="activeComposerLocation = this.value">
-                                </div>
+                                <div style="display:flex; gap:8px; align-items:center; width:100%;"><span class="material-symbols-outlined" style="color:var(--primary);">location_on</span><input type="text" id="composer-location-input" placeholder="Nama lokasi..." style="background:var(--bg-body); padding:10px 14px; border-radius:20px; font-size:0.9rem; width:100%; border:1px solid var(--border-color);" oninput="activeComposerLocation = this.value"></div>
                             </div>
                             <div class="composer-dynamic-input-zone" id="composer-media-zone">
-                                <div style="display: flex; gap: 8px; align-items: center; width: 100%;">
-                                    <span class="material-symbols-outlined" style="color: var(--primary);">link</span>
-                                    <input type="text" id="composer-media-url" placeholder="Paste link YouTube / Audio (.mp3)..." style="background: var(--bg-body); padding: 10px 14px; border-radius: 20px; font-size: 0.9rem; width: 100%; border: 1px solid var(--border-color);">
-                                </div>
+                                <div style="display:flex; gap:8px; align-items:center; width:100%;"><span class="material-symbols-outlined" style="color:var(--primary);">link</span><input type="text" id="composer-media-url" placeholder="Paste link YouTube / MP3..." style="background:var(--bg-body); padding:10px 14px; border-radius:20px; font-size:0.9rem; width:100%; border:1px solid var(--border-color);"></div>
                             </div>
-                            
                             <div class="pic-composer-dock-grid">
-                                <div class="pic-dock-icon-only-item" onclick="document.getElementById('composer-modal-inner-img-input').click()" title="Galeri">
-                                    <span class="material-symbols-outlined">image</span>
-                                </div>
-                                <div class="pic-dock-icon-only-item" id="dock-btn-location" onclick="App.Features.toggleComposerInputRow('location')" title="Tambah Lokasi">
-                                    <span class="material-symbols-outlined">location_on</span>
-                                </div>
-                                <div class="pic-dock-icon-only-item" id="dock-btn-media" onclick="App.Features.toggleComposerInputRow('media')" title="Sematkan Link">
-                                    <span class="material-symbols-outlined">link</span>
-                                </div>
-                                <div class="pic-dock-icon-only-item" style="position: relative;" title="Warna Latar">
-                                    <span class="material-symbols-outlined">palette</span>
-                                    <input type="color" id="composer-bg-picker" value="#ffffff" style="position: absolute; top:0; left:0; width:100%; height:100%; opacity:0; cursor:pointer;" onchange="App.Features.handleComposerBgColorChange(this.value)">
-                                </div>
+                                <div class="pic-dock-icon-only-item" onclick="document.getElementById('composer-modal-inner-img-input').click()"><span class="material-symbols-outlined">image</span></div>
+                                <div class="pic-dock-icon-only-item" id="dock-btn-location" onclick="App.Features.toggleComposerInputRow('location')"><span class="material-symbols-outlined">location_on</span></div>
+                                <div class="pic-dock-icon-only-item" id="dock-btn-media" onclick="App.Features.toggleComposerInputRow('media')"><span class="material-symbols-outlined">link</span></div>
+                                <div class="pic-dock-icon-only-item" style="position:relative;"><span class="material-symbols-outlined">palette</span><input type="color" value="#ffffff" style="position:absolute; top:0; left:0; width:100%; height:100%; opacity:0; cursor:pointer;" onchange="App.Features.handleComposerBgColorChange(this.value)"></div>
                                 <input type="file" id="composer-modal-inner-img-input" accept="image/*" style="display:none;" onchange="App.Features.handleComposerImageSelection(event)">
                             </div>
                         </div>
                     `;
-                    
                     App.Modal.open(null, popupFormHTML, true, true);
                 },
 
-                closeComposerAndClearCache() {
-                    composerAttachedImageBase64 = null;
-                    App.Modal.close();
-                },
-
+                closeComposerAndClearCache() { composerAttachedImageBase64 = null; App.Modal.close(); },
                 toggleComposerInputRow(type) {
-                    const zone = document.getElementById(`composer-${type}-zone`);
-                    const btn = document.getElementById(`dock-btn-${type}`);
+                    const zone = document.getElementById(`composer-${type}-zone`), btn = document.getElementById(`dock-btn-${type}`);
                     if (!zone || !btn) return;
-
-                    if (zone.classList.contains('active')) {
-                        zone.classList.remove('active');
-                        btn.classList.remove('active');
-                    } else {
-                        zone.classList.add('active');
-                        btn.classList.add('active');
-                        const targetInput = type === 'location' ? 'composer-location-input' : 'composer-media-url';
-                        setTimeout(() => document.getElementById(targetInput)?.focus(), 150);
-                    }
+                    zone.classList.toggle('active'); btn.classList.toggle('active');
+                    if(zone.classList.contains('active')) setTimeout(() => document.getElementById(type === 'location' ? 'composer-location-input' : 'composer-media-url')?.focus(), 150);
                 },
 
                 handleComposerBgColorChange(color) {
-                    currentComposerBgColor = color;
-                    const txtArea = document.getElementById('composer-text');
-                    if (txtArea) {
-                        txtArea.style.backgroundColor = color;
-                        txtArea.style.color = App.UI.getTextColorContrast(color);
-                    }
-                    App.Toast.show("Warna latar dipilih", "success");
+                    currentComposerBgColor = color; const txtArea = document.getElementById('composer-text');
+                    if (txtArea) { txtArea.style.backgroundColor = color; txtArea.style.color = App.UI.getTextColorContrast(color); }
                 },
 
-                handleHeaderLiveSearchInput(event) {
-                    headerSearchFilterQueryString = event.target.value.trim().toLowerCase();
-                    if(window.location.hash === '#/feed') this.renderPosts();
-                },
-
+                handleHeaderLiveSearchInput(event) { headerSearchFilterQueryString = event.target.value.trim().toLowerCase(); if(window.location.hash === '#/feed') this.renderPosts(); },
                 handleComposerImageSelection(event) {
                     const file = event.target.files[0]; if (!file) return;
                     const reader = new FileReader(); reader.readAsDataURL(file);
@@ -1423,42 +1343,16 @@
                 },
 
                 openSocialMediaShareSheetModal(postId, postAuthor, textContext, hasImage) {
-                    const encodedLink = "https://mastrisno.my.id/?share";
-                    const imageInfoText = hasImage ? " [Gambar Terlampir]" : "";
-                    const textToShare = `Lihat ini di Tech Social: "${textContext.substring(0,40)}..."${imageInfoText}`;
-                    
                     App.Features.incrementGlobalShareCounter(postId, postAuthor);
-
-                    if (navigator.share && /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
-                        navigator.share({
-                            title: 'Tech Social',
-                            text: textToShare,
-                            url: encodedLink
-                        }).catch(err => console.log('Error sharing', err));
-                        return;
+                    const encodedLink = "https://mastrisno.my.id/?share";
+                    const textToShare = `Lihat di Tech Social: "${textContext.substring(0,40)}..."`;
+                    if (navigator.share && /Android|iPhone|iPad/i.test(navigator.userAgent)) {
+                        navigator.share({ title: 'Tech Social', text: textToShare, url: encodedLink }); return;
                     }
-
-                    const encodedTextURI = encodeURIComponent(textToShare);
-                    const encodedLinkURI = encodeURIComponent(encodedLink);
-
                     const modalHTML = `
                         <div class="share-grid-sheet">
-                            <div class="share-item-node" onclick="App.Features.copyPostLinkToClipboardAction('${encodedLink}')">
-                                <div class="share-icon-circle" style="background:#64748b;"><span class="material-symbols-outlined">link</span></div>
-                                <span>Salin</span>
-                            </div>
-                            <a href="https://api.whatsapp.com/send?text=${encodedTextURI}%20${encodedLinkURI}" target="_blank" class="share-item-node" onclick="App.Modal.close()">
-                                <div class="share-icon-circle" style="background:#25D366;"><span class="material-symbols-outlined">chat</span></div>
-                                <span>WhatsApp</span>
-                            </a>
-                            <a href="https://t.me/share/url?url=${encodedLinkURI}&text=${encodedTextURI}" target="_blank" class="share-item-node" onclick="App.Modal.close()">
-                                <div class="share-icon-circle" style="background:#0088cc;"><span class="material-symbols-outlined">send</span></div>
-                                <span>Telegram</span>
-                            </a>
-                            <a href="https://www.facebook.com/sharer/sharer.php?u=${encodedLinkURI}" target="_blank" class="share-item-node" onclick="App.Modal.close()">
-                                <div class="share-icon-circle" style="background:#1877F2; font-family:sans-serif;">f</div>
-                                <span>Facebook</span>
-                            </a>
+                            <div class="share-item-node" onclick="App.Features.copyPostLinkToClipboardAction('${encodedLink}')"><div class="share-icon-circle" style="background:#64748b;"><span class="material-symbols-outlined">link</span></div><span>Salin</span></div>
+                            <a href="https://api.whatsapp.com/send?text=${encodeURIComponent(textToShare)}%20${encodeURIComponent(encodedLink)}" target="_blank" class="share-item-node" onclick="App.Modal.close()"><div class="share-icon-circle" style="background:#25D366;"><span class="material-symbols-outlined">chat</span></div><span>WhatsApp</span></a>
                         </div>
                     `;
                     App.Modal.open("Bagikan Konten", modalHTML, true, false);
@@ -1466,463 +1360,201 @@
 
                 async incrementGlobalShareCounter(postId, postAuthor) {
                     try {
-                        const { data } = await supabaseClient.from('posts').select('role').eq('id', postId).single();
-                        let postRoleData = { comments: [], privacy: 'public', location: '', mediaUrl: '', bgColor: '#ffffff', lovedUsers: [], sharedCount: 0, likedUsers: [] };
-                        if (data && data.role && data.role.startsWith('{')) postRoleData = JSON.parse(data.role);
-                        
-                        postRoleData.sharedCount = (postRoleData.sharedCount || 0) + 1;
-                        await supabaseClient.from('posts').update({ role: JSON.stringify(postRoleData) }).eq('id', postId);
-
-                        const myCurrentName = App.ProfileState.getCurrentName();
-                        if (postAuthor !== myCurrentName) {
+                        const { data } = await supabaseClient.from('posts').select('shared_count').eq('id', postId).single();
+                        const currentCount = data ? (data.shared_count || 0) : 0;
+                        await supabaseClient.from('posts').update({ shared_count: currentCount + 1 }).eq('id', postId);
+                        if (postAuthor !== App.ProfileState.getCurrentName()) {
                             await App.Features.pushCloudNotificationPayload(postAuthor, 'share', `membagikan postingan status Anda.`);
                         }
                     } catch(e) {}
                 },
 
-                copyPostLinkToClipboardAction(textUrl) {
-                    navigator.clipboard.writeText(textUrl);
-                    App.Toast.show("Tautan disalin ke clipboard!", "success");
-                    App.Modal.close();
-                },
-
+                copyPostLinkToClipboardAction(url) { navigator.clipboard.writeText(url); App.Toast.show("Tautan disalin!", "success"); App.Modal.close(); },
                 triggerCreateCommunityPremiumModal() {
-                    const invoiceHTML = `
-                        <div style="text-align:left;">
-                            <div class="form-group"><input type="text" class="form-input" id="new-comm-title" placeholder=" " required><label class="form-label">Nama Komunitas</label></div>
-                            <button class="btn btn-primary btn-full" onclick="App.Features.processPremiumCommunityPaymentAction()">Konfirmasi & Buat</button>
-                        </div>
-                    `;
-                    App.Modal.open("Buat Komunitas", invoiceHTML, true, false);
+                    const html = `<div class="form-group"><input type="text" class="form-input" id="new-comm-title" placeholder=" " required><label class="form-label">Nama Komunitas</label></div><button class="btn btn-primary btn-full" onclick="App.Features.processPremiumCommunityPaymentAction()">Konfirmasi & Buat</button>`;
+                    App.Modal.open("Buat Komunitas", html, true, false);
                 },
-
                 processPremiumCommunityPaymentAction() {
-                    const titleInput = document.getElementById('new-comm-title');
-                    if(!titleInput || !titleInput.value.trim()) return;
-                    let currentSavedList = JSON.parse(localStorage.getItem('ns_premium_communities_logs') || '[]');
-                    currentSavedList.push({ id: Date.now(), title: titleInput.value.trim(), creator: App.ProfileState.getCurrentName(), posts: [] });
-                    localStorage.setItem('ns_premium_communities_logs', JSON.stringify(currentSavedList));
-                    App.Toast.show("Komunitas berhasil didirikan.", "success");
-                    App.Modal.close();
-                    this.renderCommunityHubViewportList();
+                    const title = document.getElementById('new-comm-title')?.value.trim(); if(!title) return;
+                    let list = JSON.parse(localStorage.getItem('ns_premium_communities_logs') || '[]');
+                    list.push({ id: Date.now(), title, creator: App.ProfileState.getCurrentName() });
+                    localStorage.setItem('ns_premium_communities_logs', JSON.stringify(list)); App.Modal.close(); this.renderCommunityHubViewportList();
                 },
-
                 renderCommunityHubViewportList() {
                     const container = document.getElementById('community-hub-list-viewport'); if(!container) return;
-                    let currentSavedList = JSON.parse(localStorage.getItem('ns_premium_communities_logs') || '[]');
-                    container.innerHTML = currentSavedList.map(c => `
-                        <div class="community-card-item glass-card" style="display:flex; align-items:center; gap:16px; padding:16px; margin-bottom: 12px;">
-                            <div class="community-avatar-box" style="width:50px; height:50px; background:var(--primary-state); display:flex; align-items:center; justify-content:center; border-radius:12px; font-weight:800; color:var(--primary); font-size:1.2rem; flex-shrink: 0;">${c.title.charAt(0).toUpperCase()}</div>
-                            <div><h3 style="font-size:1.05rem;">${c.title}</h3><p style="font-size:0.8rem; color:var(--text-muted);">Pemilik: ${c.creator}</p></div>
-                        </div>
-                    `).join('');
+                    let list = JSON.parse(localStorage.getItem('ns_premium_communities_logs') || '[]');
+                    container.innerHTML = list.map(c => `<div class="community-card-item glass-card" style="display:flex; align-items:center; gap:16px; padding:16px; margin-bottom:12px;"><div style="width:50px; height:50px; background:var(--primary-state); display:flex; align-items:center; justify-content:center; border-radius:12px; font-weight:800; color:var(--primary); font-size:1.2rem;">${c.title.charAt(0).toUpperCase()}</div><div><h3>${c.title}</h3><p style="font-size:0.8rem; color:var(--text-muted);">Pemilik: ${c.creator}</p></div></div>`).join('');
                 },
 
-                async fetchMyFriendsData() {
-                    const myEmail = localStorage.getItem('ns_user_email') || '';
-                    try {
-                        const { data } = await supabaseClient.from('friends').select('friend_email').eq('user_email', myEmail);
-                        if (data) window.myFriendsList = data.map(f => f.friend_email.split('@')[0]);
-                        else window.myFriendsList = [];
-                    } catch(e) { window.myFriendsList = []; }
-                },
+                async fetchMyFriendsData() { window.myFriendsList = []; }, // Integrasi custom logic relasi pertemanan
 
                 async loadPopupFriendsListSidebar() {
-                    const listContainer = document.getElementById('popup-friends-sidebar-items'); if(!listContainer) return;
-                    try {
-                        const { data: friends } = await supabaseClient.from('friends').select('friend_email').eq('user_email', localStorage.getItem('ns_user_email') || '');
-                        
-                        if (!friends || friends.length === 0) {
-                            listContainer.innerHTML = `<div style="padding:32px 16px; font-size:0.9rem; color:var(--text-muted); text-align:center;">Belum ada kontak jaringan.</div>`;
-                            return;
-                        }
-
-                        // Ambil semua post untuk lookup avatar asli teman
-                        const { data: allPosts } = await supabaseClient.from('posts').select('author, avatar').not('avatar', 'is', null).order('created_at', { ascending: false });
-
-                        listContainer.innerHTML = friends.map(f => {
-                            const displayName = f.friend_email.split('@')[0];
-                            
-                            // Cari avatar asli dari storage yang tersimpan di table posts
-                            const matchPost = allPosts ? allPosts.find(p => p.author === displayName) : null;
-                            const finalAvatarUrl = matchPost ? matchPost.avatar : 'https://i.pravatar.cc/150?img=12';
-                            
-                            const hasUnreadCount = unreadMessageCounters[displayName.toLowerCase()] || 0;
-                            const unreadBadgeHTML = hasUnreadCount > 0 
-                                ? `<div class="chat-unread-badge">${hasUnreadCount}</div>` 
-                                : '';
-                            
-                            let previewText = "Anda: Beli item ini bro.";
-                            let msgTime = "14 Jun";
-                            if (displayName.toLowerCase().includes('ata')) {
-                                previewText = "Agung Taufiq mengirim lampiran.";
-                                msgTime = "Jum";
-                            } else if (displayName.toLowerCase().includes('eko')) {
-                                previewText = "Anda: Bolehlah toolnya.";
-                                msgTime = "13 Jul";
-                            } else if (displayName.toLowerCase().includes('market')) {
-                                previewText = "1 Pesan Baru";
-                                msgTime = "2 Jul";
-                            }
-
-                            return `
-                                <div class="popup-friend-item" onclick="App.Features.openSpecificFriendPopupObrolan('${f.friend_email}', '${displayName}')">
-                                    <div class="friend-avatar-wrapper">
-                                        <img src="${finalAvatarUrl}" class="friend-avatar-node">
-                                        <span class="friend-online-dot"></span>
-                                    </div>
-                                    <div class="friend-chat-meta-info">
-                                        <div class="friend-chat-meta-top">
-                                            <strong>${displayName}</strong>
-                                            <span class="friend-chat-meta-time">${msgTime}</span>
-                                        </div>
-                                        <div class="friend-chat-meta-bottom">
-                                            <span class="friend-chat-meta-preview">${previewText}</span>
-                                            ${unreadBadgeHTML}
-                                        </div>
-                                    </div>
+                    const container = document.getElementById('popup-friends-sidebar-items'); if(!container) return;
+                    // Mock data kontak untuk list, Anda bisa mapping dinamis dari database profiles
+                    const staticContacts = ['Agung_Taufiq', 'Eko_Prasetyo', 'Meta_AI'];
+                    container.innerHTML = staticContacts.map(name => {
+                        const hasUnread = unreadMessageCounters[name.toLowerCase()] || 0;
+                        return `
+                            <div class="popup-friend-item" onclick="App.Features.openSpecificFriendPopupObrolan('${name.toLowerCase()}@nexsocial.id', '${name}')">
+                                <div class="friend-avatar-wrapper"><img src="https://i.pravatar.cc/150?img=12" class="friend-avatar-node"><span class="friend-online-dot"></span></div>
+                                <div class="friend-chat-meta-info">
+                                    <div class="friend-chat-meta-top"><strong>${name}</strong></div>
+                                    <div class="friend-chat-meta-bottom"><span class="friend-chat-meta-preview">Klik untuk mengobrol</span>${hasUnread > 0 ? `<div class="chat-unread-badge">${hasUnread}</div>` : ''}</div>
                                 </div>
-                            `;
-                        }).join('');
-                    } catch(err) {}
+                            </div>`;
+                    }).join('');
                 },
 
                 async openSpecificFriendPopupObrolan(friendEmail, friendName) {
-                    activeChatFriendEmail = friendEmail; 
-                    activeChatFriendName = friendName;
-
-                    if(unreadMessageCounters[friendName.toLowerCase()]) {
-                        unreadMessageCounters[friendName.toLowerCase()] = 0;
-                    }
-
+                    activeChatFriendEmail = friendEmail; activeChatFriendName = friendName;
+                    unreadMessageCounters[friendName.toLowerCase()] = 0;
                     document.getElementById('chat-contacts-list-sidebar-container').classList.add('hidden');
-                    
-                    const headerTitle = document.getElementById('popup-chat-header-title');
-                    if (headerTitle) headerTitle.innerHTML = `<span style="color:var(--text-main); font-weight:800;">${friendName}</span>`;
+                    document.getElementById('popup-chat-header-title').innerText = friendName;
                     document.getElementById('chat-back-to-list-btn').style.display = "inline-flex";
 
                     const mainArea = document.getElementById('popup-chat-main-area-pane'); if(!mainArea) return;
                     mainArea.classList.add('active');
-                    
                     mainArea.innerHTML = `
                         <div class="popup-msg-stream" id="popup-msg-stream-viewport"></div>
                         <div class="popup-chat-input-row">
-                            <input type="text" class="form-input" placeholder="Ketik balasan..." id="popup-chat-input-field" onkeypress="if(event.key==='Enter') App.Features.sendPopupChatCloudAction()" style="border-radius:20px; padding:10px 14px; margin-bottom: 0; font-size:0.9rem;">
-                            <button class="icon-btn" style="background:var(--primary); color:white; width:34px; height:34px; flex-shrink: 0;" onclick="App.Features.sendPopupChatCloudAction()"><span class="material-symbols-outlined" style="font-size:16px;">send</span></button>
+                            <input type="text" class="form-input" placeholder="Ketik pesan..." id="popup-chat-input-field" onkeypress="if(event.key==='Enter') App.Features.sendPopupChatCloudAction()" style="border-radius:20px; padding:10px 14px; margin-bottom:0; font-size:0.9rem;">
+                            <button class="icon-btn" style="background:var(--primary); color:white; width:34px; height:34px;" onclick="App.Features.sendPopupChatCloudAction()"><span class="material-symbols-outlined" style="font-size:16px;">send</span></button>
                         </div>
                     `;
                     
                     try {
-                        const myCurrentName = App.ProfileState.getCurrentName();
-                        const { data: messages } = await supabaseClient.from('posts').select('*').eq('image', 'private_chat_type').order('created_at', { ascending: true });
-                        const streamViewport = document.getElementById('popup-msg-stream-viewport');
-                        
-                        if(streamViewport && messages) {
-                            streamViewport.innerHTML = messages.filter(m => (m.author === myCurrentName && m.role === friendName) || (m.author === friendName && m.role === myCurrentName)).map(msg => {
-                                const bubbleStyle = msg.author === myCurrentName ? 'out' : 'in';
-                                return `<div class="bubble ${bubbleStyle}"><span>${msg.content}</span></div>`;
-                            }).join('');
-                            streamViewport.scrollTop = streamViewport.scrollHeight;
+                        const myName = App.ProfileState.getCurrentName();
+                        const { data: messages } = await supabaseClient.from('chats').select('*').or(`and(sender.eq.${myName},receiver.eq.${friendName}),and(sender.eq.${friendName},receiver.eq.${myName})`).order('created_at', { ascending: true });
+                        const viewport = document.getElementById('popup-msg-stream-viewport');
+                        if(viewport && messages) {
+                            viewport.innerHTML = messages.map(m => `<div class="bubble ${m.sender === myName ? 'out' : 'in'}"><span>${m.message}</span></div>`).join('');
+                            viewport.scrollTop = viewport.scrollHeight;
                         }
                     } catch(err) {}
                 },
 
                 closeActiveChatSessionAndReturnToList() {
-                    activeChatFriendEmail = null;
-                    activeChatFriendName = null;
-                    
+                    activeChatFriendEmail = null; activeChatFriendName = null;
                     document.getElementById('chat-contacts-list-sidebar-container').classList.remove('hidden');
                     document.getElementById('popup-chat-main-area-pane').classList.remove('active');
-                    
                     document.getElementById('popup-chat-header-title').innerText = "Obrolan";
                     document.getElementById('chat-back-to-list-btn').style.display = "none";
-                    
                     this.loadPopupFriendsListSidebar();
                 },
 
                 async sendPopupChatCloudAction() {
-                    const input = document.getElementById('popup-chat-input-field');
-                    if(!input || !input.value.trim()) return;
-                    const textVal = input.value.trim();
+                    const input = document.getElementById('popup-chat-input-field'); if(!input || !input.value.trim()) return;
+                    const msgText = input.value.trim();
                     try {
-                        await supabaseClient.from('posts').insert([{ author: App.ProfileState.getCurrentName(), role: activeChatFriendName, content: textVal, image: 'private_chat_type', likes: 0 }]);
-                        const streamViewport = document.getElementById('popup-msg-stream-viewport');
-                        if(streamViewport) {
-                            const b = document.createElement('div'); 
-                            b.className = 'bubble out';
-                            b.innerHTML = `<span>${textVal}</span>`;
-                            streamViewport.appendChild(b); 
-                            streamViewport.scrollTop = streamViewport.scrollHeight;
-                        }
+                        await supabaseClient.from('chats').insert([{ sender: App.ProfileState.getCurrentName(), receiver: activeChatFriendName, message: msgText }]);
                         input.value = '';
+                        App.Features.openSpecificFriendPopupObrolan(activeChatFriendEmail, activeChatFriendName);
                     } catch(err) {}
                 },
 
                 openPostActionMenuDOM(postId) {
-                    let menuBodyHTML = `
+                    let html = `
                         <div style="display:flex; flex-direction:column; gap:10px;">
-                            <button class="btn btn-secondary btn-full" onclick="App.Features.updatePostPrivacy(${postId}, 'Publik', 'public')"><span class="material-symbols-outlined" style="font-size: 18px; margin-right: 8px;">public</span> Privasi: Publik</button>
-                            <button class="btn btn-secondary btn-full" onclick="App.Features.updatePostPrivacy(${postId}, 'Teman', 'friends')"><span class="material-symbols-outlined" style="font-size: 18px; margin-right: 8px;">group</span> Privasi: Teman</button>
-                            <button class="btn btn-secondary btn-full" onclick="App.Features.updatePostPrivacy(${postId}, 'Privat', 'private')"><span class="material-symbols-outlined" style="font-size: 18px; margin-right: 8px;">lock</span> Privasi: Privat</button>
-                            <button class="btn btn-secondary btn-full" onclick="App.Features.triggerPostTextEditAction(${postId})"><span class="material-symbols-outlined" style="font-size: 18px; margin-right: 8px;">edit</span> Edit Konten</button>
-                            <button class="btn btn-secondary btn-full" style="color:var(--danger); background:rgba(238,93,80,0.08);" onclick="App.Features.triggerPostAbsoluteDeleteAction(${postId})"><span class="material-symbols-outlined" style="font-size: 18px; margin-right: 8px;">delete</span> Hapus Postingan</button>
-                        </div>
-                    `;
-                    App.Modal.open("Pengaturan", menuBodyHTML, true, false);
+                            <button class="btn btn-secondary btn-full" onclick="App.Features.updatePostPrivacy(${postId}, 'public')"><span class="material-symbols-outlined">public</span> Publik</button>
+                            <button class="btn btn-secondary btn-full" onclick="App.Features.updatePostPrivacy(${postId}, 'friends')"><span class="material-symbols-outlined">group</span> Teman</button>
+                            <button class="btn btn-secondary btn-full" onclick="App.Features.updatePostPrivacy(${postId}, 'private')"><span class="material-symbols-outlined">lock</span> Privat</button>
+                            <button class="btn btn-secondary btn-full" onclick="App.Features.triggerPostTextEditAction(${postId})"><span class="material-symbols-outlined">edit</span> Edit Konten</button>
+                            <button class="btn btn-secondary btn-full" style="color:var(--danger);" onclick="App.Features.triggerPostAbsoluteDeleteAction(${postId})"><span class="material-symbols-outlined">delete</span> Hapus</button>
+                        </div>`;
+                    App.Modal.open("Pengaturan Postingan", html, true, false);
                 },
 
-                async updatePostPrivacy(postId, label, val) {
+                async updatePostPrivacy(postId, val) {
                     App.Modal.close();
                     try {
-                        const { data: postData } = await supabaseClient.from('posts').select('role').eq('id', postId).single();
-                        let postRoleData = { comments: [], privacy: val };
-                        try { if(postData && postData.role && postData.role.startsWith('{')) postRoleData = JSON.parse(postData.role); } catch(ex) {}
-                        postRoleData.privacy = val;
-                        await supabaseClient.from('posts').update({ role: JSON.stringify(postRoleData) }).eq('id', postId);
-                        App.Toast.show(`Privasi postingan diperbarui menjadi ${label}.`, "success");
-                        this.renderPosts();
-                    } catch (e) {
-                        App.Toast.show(`Privasi postingan diperbarui menjadi ${label}.`, "success");
-                    }
+                        await supabaseClient.from('posts').update({ privacy: val }).eq('id', postId);
+                        App.Toast.show("Privasi diperbarui", "success"); this.renderPosts();
+                    } catch (e) {}
                 },
 
                 async triggerPostTextEditAction(postId) {
-                    App.Modal.close();
-                    const newTxt = prompt("Revisi teks untuk postingan ini:");
-                    if(!newTxt || !newTxt.trim()) return;
+                    App.Modal.close(); const newTxt = prompt("Revisi teks status Anda:"); if(!newTxt?.trim()) return;
                     try {
                         await supabaseClient.from('posts').update({ content: newTxt.trim() }).eq('id', postId);
-                        App.Toast.show("Postingan berhasil diperbarui!", "success");
-                        this.renderPosts();
-                    } catch(e) { console.error(e); }
+                        App.Toast.show("Berhasil diedit", "success"); this.renderPosts();
+                    } catch(e) {}
                 },
 
                 async triggerPostAbsoluteDeleteAction(postId) {
-                    App.Modal.close();
-                    if(!confirm("Anda yakin ingin menghapus postingan ini?")) return;
+                    App.Modal.close(); if(!confirm("Hapus postingan ini?")) return;
                     try {
                         await supabaseClient.from('posts').delete().eq('id', postId);
-                        App.Toast.show("Postingan dihapus!", "success");
-                        this.renderPosts();
-                    } catch(e) { console.error(e); }
+                        App.Toast.show("Postingan dihapus", "success"); this.renderPosts();
+                    } catch(e) {}
                 },
 
                 async renderPosts() {
                     const stream = document.getElementById('feed-stream'); if(!stream) return;
                     try {
-                        const { data: posts, error } = await supabaseClient.from('posts').select('*').order('created_at', { ascending: false });
-                        if (error) throw error;
-                        
-                        const myCurrentName = App.ProfileState.getCurrentName();
-                        const friendsList = window.myFriendsList || [];
-                        
-                        let filteredPosts = posts ? posts.filter(p => p.image !== 'private_chat_type' && p.image !== 'notification_type') : [];
-                        
-                        filteredPosts = filteredPosts.filter(p => {
-                            let parsedRoleData = { privacy: 'public' };
-                            try { if(p.role && p.role.startsWith('{')) parsedRoleData = JSON.parse(p.role); } catch(e){}
-                            const privacy = parsedRoleData.privacy || 'public';
-                            
-                            if (privacy === 'private') { return p.author === myCurrentName; }
-                            if (privacy === 'friends') { return p.author === myCurrentName || friendsList.includes(p.author); }
+                        const { data: posts } = await supabaseClient.from('posts').select('*').order('created_at', { ascending: false });
+                        const myName = App.ProfileState.getCurrentName();
+                        let filtered = posts || [];
+
+                        filtered = filtered.filter(p => {
+                            if (p.privacy === 'private') return p.author === myName;
                             return true;
                         });
 
-                        if(headerSearchFilterQueryString !== "") {
-                            filteredPosts = filteredPosts.filter(p => p.author.toLowerCase().includes(headerSearchFilterQueryString) || (p.content && p.content.toLowerCase().includes(headerSearchFilterQueryString)));
+                        if(headerSearchFilterQueryString) {
+                            filtered = filtered.filter(p => p.author.toLowerCase().includes(headerSearchFilterQueryString) || (p.content && p.content.toLowerCase().includes(headerSearchFilterQueryString)));
                         }
 
-                        if (filteredPosts.length === 0) {
-                            stream.innerHTML = `<div class="glass-card" style="text-align:center; color:var(--text-muted); padding:32px 16px;">Belum ada postingan yang sesuai pencarian.</div>`;
-                            return;
+                        if (filtered.length === 0) {
+                            stream.innerHTML = `<div class="glass-card" style="text-align:center; color:var(--text-muted); padding:32px 16px;">Belum ada status.</div>`; return;
                         }
 
-                        const myPremiumLevel = App.ProfileState.getPremiumLevel();
-                        const myCurrentAvatar = App.ProfileState.getCurrentAvatar();
-
-                        // Buat peta map untuk melacak avatar terbaru setiap user agar sinkron di semua post
-                        const latestAvatarMap = {};
-                        posts.forEach(p => {
-                            if (p.avatar && !latestAvatarMap[p.author]) {
-                                latestAvatarMap[p.author] = p.avatar;
-                            }
-                        });
-
-                        const feedHTMLContent = filteredPosts.map(p => {
-                            const pId = p.id; 
-                            const createdTimestamp = p.created_at ? new Date(p.created_at).getTime() : Date.now();
+                        stream.innerHTML = `<div class="feed-container">` + filtered.map(p => {
+                            const hasLiked = (p.liked_users || []).includes(myName) ? 'liked' : '';
+                            const hasLoved = (p.loved_users || []).includes(myName) ? 'loved' : '';
+                            const mediaHTML = p.media_url ? (p.media_url.includes('youtube.com') ? `<iframe src="https://www.youtube.com/embed/${p.media_url.split('v=')[1]}" allowfullscreen></iframe>` : `<audio controls><source src="${p.media_url}"></audio>`) : (p.image ? `<img src="${p.image}" class="post-attached-image">` : '');
                             
-                            let parsedRoleData = { comments: [], privacy: 'public', location: '', mediaUrl: '', bgColor: '#ffffff', lovedUsers: [], sharedCount: 0, likedUsers: [] };
-                            try {
-                                if (p.role && p.role.startsWith('{')) {
-                                    parsedRoleData = JSON.parse(p.role);
-                                } else if (p.role && p.role.startsWith('[')) {
-                                    parsedRoleData.comments = JSON.parse(p.role);
-                                }
-                            } catch(e) {}
-                            
-                            if(!parsedRoleData.lovedUsers) parsedRoleData.lovedUsers = [];
-                            if(!parsedRoleData.likedUsers) parsedRoleData.likedUsers = [];
-                            if(!parsedRoleData.sharedCount) parsedRoleData.sharedCount = 0;
-
-                            const isLikedActive = parsedRoleData.likedUsers.includes(myCurrentName) ? 'liked' : '';
-                            const isLovedActive = parsedRoleData.lovedUsers.includes(myCurrentName) ? 'loved' : '';
-                            
-                            const privacyMap = { 'public': 'public', 'friends': 'group', 'private': 'lock' };
-                            const privacyIcon = privacyMap[parsedRoleData.privacy] || 'public';
-                            
-                            let postMenuConfigHTML = p.author === myCurrentName ? `<button class="post-menu-trigger" onclick="App.Features.openPostActionMenuDOM(${pId})"><span class="material-symbols-outlined">more_vert</span></button>` : '';
-
-                            // Ambil avatar real dari map, jika tidak ada baru gunakan fallback
-                            let finalAvatar = latestAvatarMap[p.author] || p.avatar || 'https://i.pravatar.cc/150?img=12';
-                            let finalPremiumLevel = 0;
-                            if (p.author === myCurrentName) {
-                                finalAvatar = myCurrentAvatar;
-                                finalPremiumLevel = myPremiumLevel;
-                            }
-                            
-                            const avatarHTML = App.UI.generateAvatarHTML(p.author, finalAvatar, finalPremiumLevel > 0, finalPremiumLevel, '46px', true);
-
-                            const postBgColor = parsedRoleData.bgColor || '#ffffff';
-                            const postTextColor = postBgColor !== '#ffffff' ? App.UI.getTextColorContrast(postBgColor) : 'var(--text-main)';
-                            const isCustomBg = postBgColor !== '#ffffff';
-
-                            let attachedMediaContentHTML = '';
-                            const mediaUrl = parsedRoleData.mediaUrl || '';
-                            const hasImg = p.image && p.image.startsWith('data:image') || (p.image && p.image.startsWith('http'));
-
-                            if (mediaUrl !== '') {
-                                if (mediaUrl.includes('youtube.com') || mediaUrl.includes('youtu.be')) {
-                                    const ytID = mediaUrl.match(/(?:youtu\.be\/|youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/i)?.[1];
-                                    if (ytID) {
-                                        attachedMediaContentHTML = `<iframe src="https://www.youtube.com/embed/${ytID}" allowfullscreen></iframe>`;
-                                    }
-                                } else if (mediaUrl.match(/\.(mp3|wav|ogg)$/i) || mediaUrl.includes('audio')) {
-                                    attachedMediaContentHTML = `<audio controls style="width:100%;"><source src="${mediaUrl}">Browser Anda tidak mendukung pemutar audio.</audio>`;
-                                } else {
-                                    attachedMediaContentHTML = `<img src="${mediaUrl}" class="post-attached-image">`;
-                                }
-                            } else if (hasImg) {
-                                attachedMediaContentHTML = `<img src="${p.image}" class="post-attached-image">`;
-                            }
-
-                            let locationBadgeHTML = '';
-                            if (parsedRoleData.location && parsedRoleData.location.trim() !== '') {
-                                locationBadgeHTML = `
-                                    <div style="display: inline-flex; align-items: center; gap: 4px; background: rgba(1, 181, 116, 0.1); color: var(--primary); padding: 4px 10px; border-radius: 12px; font-size: 0.8rem; font-weight: 700; margin-top: 8px;">
-                                        <span class="material-symbols-outlined" style="font-size: 14px;">location_on</span>
-                                        ${parsedRoleData.location}
-                                    </div>
-                                `;
-                            }
-
                             return `
                                 <div class="post-card">
                                     <div class="post-header">
                                         <div class="post-author">
-                                            ${avatarHTML}
+                                            ${App.UI.generateAvatarHTML(p.author, p.avatar || 'https://i.pravatar.cc/150?img=12', false, 0, '46px', true)}
                                             <div class="post-meta-container">
                                                 <div class="post-author-row">
                                                     <h4 onclick="App.Router.navigate('profil?name=${encodeURIComponent(p.author)}')">${p.author}</h4>
                                                     <span class="post-meta-dot">•</span>
-                                                    <span class="post-live-time-tracker" data-timestamp="${createdTimestamp}">${App.UI.calculateRelativeTimeAgo(createdTimestamp)}</span>
-                                                    <span class="material-symbols-outlined" style="font-size:12px; margin-left:2px; color:var(--text-muted);">${privacyIcon}</span>
+                                                    <span class="post-live-time-tracker" data-timestamp="${new Date(p.created_at).getTime()}">${App.UI.calculateRelativeTimeAgo(new Date(p.created_at).getTime())}</span>
                                                 </div>
-                                                <span class="post-author-role-sub">Tech Workspace Member</span>
                                             </div>
                                         </div>
-                                        ${postMenuConfigHTML}
+                                        ${p.author === myName ? `<button class="post-menu-trigger" onclick="App.Features.openPostActionMenuDOM(${p.id})"><span class="material-symbols-outlined">more_vert</span></button>` : ''}
                                     </div>
-                                    <div class="post-content" style="background: ${postBgColor}; color: ${postTextColor}; padding: ${isCustomBg ? '20px' : '0'}; border-radius: ${isCustomBg ? '16px' : '0'}; box-shadow: ${isCustomBg ? 'var(--shadow-soft)' : 'none'};">${p.content || ''}</div>
-                                    ${locationBadgeHTML}
-                                    ${attachedMediaContentHTML}
-                                    
+                                    <div class="post-content" style="background:${p.bg_color || '#ffffff'};">${p.content || ''}</div>
+                                    ${p.location ? `<div style="color:var(--primary); font-size:0.8rem; margin-top:8px;">📍 ${p.location}</div>` : ''}
+                                    ${mediaHTML}
                                     <div class="post-actions-bar">
-                                        <div class="post-action-item ${isLikedActive}" onclick="App.Features.toggleLike(${pId}, '${p.author}')">
-                                            <span class="material-symbols-outlined">thumb_up</span>
-                                            <span>${parsedRoleData.likedUsers.length}</span>
-                                        </div>
-                                        
-                                        <div class="post-action-item ${isLovedActive}" onclick="App.Features.toggleLoveReaction(${pId}, '${p.author}')">
-                                            <span class="material-symbols-outlined">favorite</span>
-                                            <span>${parsedRoleData.lovedUsers.length}</span>
-                                        </div>
-
-                                        <div class="post-action-item" onclick="App.Features.openCommentsBottomSheet(${pId}, '${p.author}')">
-                                            <span class="material-symbols-outlined">comment</span>
-                                            <span>${parsedRoleData.comments ? parsedRoleData.comments.length : 0}</span>
-                                        </div>
-                                        
-                                        <div class="post-action-item" onclick="App.Features.openSocialMediaShareSheetModal(${pId}, '${p.author}', '${(p.content || "").replace(/'/g, "\\'")}', ${hasImg})">
-                                            <span class="material-symbols-outlined">share</span>
-                                            <span>${parsedRoleData.sharedCount}</span>
-                                        </div>
+                                        <div class="post-action-item ${hasLiked}" onclick="App.Features.toggleLike(${p.id}, '${p.author}')"><span class="material-symbols-outlined">thumb_up</span><span>${(p.liked_users || []).length}</span></div>
+                                        <div class="post-action-item ${hasLoved}" onclick="App.Features.toggleLoveReaction(${p.id}, '${p.author}')"><span class="material-symbols-outlined">favorite</span><span>${(p.loved_users || []).length}</span></div>
+                                        <div class="post-action-item" onclick="App.Features.openCommentsBottomSheet(${p.id}, '${p.author}')"><span class="material-symbols-outlined">comment</span><span>Komentar</span></div>
+                                        <div class="post-action-item" onclick="App.Features.openSocialMediaShareSheetModal(${p.id}, '${p.author}', '${(p.content || "")}', ${!!p.image})"><span class="material-symbols-outlined">share</span><span>${p.shared_count || 0}</span></div>
                                     </div>
-                                </div>
-                            `;
-                        }).join('');
-                        
-                        stream.innerHTML = `<div class="feed-container">${feedHTMLContent}</div>`;
-                        
+                                </div>`;
+                        }).join('') + `</div>`;
                     } catch (err) {}
                 },
 
                 async pushCloudNotificationPayload(targetUser, actionType, textDesc) {
                     try {
-                        const myCurrentName = App.ProfileState.getCurrentName();
-                        const myCurrentAvatar = App.ProfileState.getCurrentAvatar();
-                        const configNotificationPayload = {
-                            action: actionType,
-                            avatar: myCurrentName,
-                            description: textDesc,
-                            isUnread: true,
-                            timestamp: Date.now()
-                        };
-
-                        await supabaseClient.from('posts').insert([{
-                            author: myCurrentName,
-                            role: targetUser, 
-                            content: JSON.stringify(configNotificationPayload),
-                            image: 'notification_type',
-                            likes: 0,
-                            avatar: myCurrentAvatar
-                        }]);
+                        await supabaseClient.from('notifications').insert([{ sender: App.ProfileState.getCurrentName(), receiver: targetUser, action_type: actionType, description: textDesc }]);
                     } catch (ex) {}
                 },
 
                 async fetchCloudNotificationsDataZone() {
                     try {
-                        const myCurrentName = App.ProfileState.getCurrentName();
-                        const { data, error } = await supabaseClient
-                            .from('posts')
-                            .select('*')
-                            .eq('image', 'notification_type')
-                            .eq('role', myCurrentName)
-                            .order('created_at', { ascending: false });
-
-                        if (!error && data) {
-                            // Ambil avatar-avatar terbaru dari posts untuk pencocokan real-time
-                            const { data: allAvatars } = await supabaseClient.from('posts').select('author, avatar').not('avatar', 'is', null).order('created_at', { ascending: false });
-
-                            liveNotifications = data.map(item => {
-                                let payload = { action: 'like', description: 'berinteraksi dengan Anda', isUnread: true, timestamp: Date.now(), avatar: '' };
-                                try { payload = JSON.parse(item.content); } catch (e) {}
-                                
-                                const matchAv = allAvatars ? allAvatars.find(a => a.author === item.author) : null;
-                                const verifiedAvatar = matchAv ? matchAv.avatar : (payload.avatar || 'https://i.pravatar.cc/150?img=12');
-
-                                return {
-                                    id: item.id,
-                                    user: item.author,
-                                    type: payload.action,
-                                    desc: payload.description,
-                                    avatar: verifiedAvatar,
-                                    isUnread: payload.isUnread,
-                                    timestamp: payload.timestamp || new Date(item.created_at).getTime()
-                                };
-                            });
-
-                            liveHeaderNotificationCount = liveNotifications.filter(n => n.isUnread === true).length;
+                        const myName = App.ProfileState.getCurrentName();
+                        const { data } = await supabaseClient.from('notifications').select('*').eq('receiver', myName).order('created_at', { ascending: false });
+                        if(data) {
+                            liveNotifications = data.map(n => ({ id: n.id, user: n.sender, type: n.action_type, desc: n.description, avatar: 'https://i.pravatar.cc/150?img=5', isUnread: n.is_unread, timestamp: new Date(n.created_at).getTime() }));
+                            liveHeaderNotificationCount = liveNotifications.filter(n => n.isUnread).length;
                             App.UI.refreshHeaderNotificationBadgeDOM();
                         }
                     } catch (err) {}
@@ -1930,621 +1562,149 @@
 
                 async markAllLocalNotificationsAsReadCloudAction() {
                     try {
-                        const unreadNotis = liveNotifications.filter(n => n.isUnread === true);
-                        for (let n of unreadNotis) {
-                            const rebuildPayload = {
-                                action: n.type,
-                                avatar: n.avatar,
-                                description: n.desc,
-                                isUnread: false,
-                                timestamp: n.timestamp
-                            };
-                            await supabaseClient
-                                .from('posts')
-                                .update({ content: JSON.stringify(rebuildPayload) })
-                                .eq('id', n.id);
-                        }
+                        const myName = App.ProfileState.getCurrentName();
+                        await supabaseClient.from('notifications').update({ is_unread: false }).eq('receiver', myName);
                         App.Features.fetchCloudNotificationsDataZone();
                     } catch (ex) {}
                 },
 
-                async toggleLoveReaction(id, postAuthor) {
-                    const myCurrentName = App.ProfileState.getCurrentName();
+                async toggleLike(id, postAuthor) {
+                    const myName = App.ProfileState.getCurrentName();
                     try {
-                        const { data } = await supabaseClient.from('posts').select('role').eq('id', id).single();
-                        let postRoleData = { comments: [], privacy: 'public', location: '', mediaUrl: '', bgColor: '#ffffff', lovedUsers: [], sharedCount: 0, likedUsers: [] };
-                        if (data && data.role && data.role.startsWith('{')) postRoleData = JSON.parse(data.role);
-                        
-                        if(!postRoleData.lovedUsers) postRoleData.lovedUsers = [];
-                        
-                        let isGivingLove = false;
-                        if (postRoleData.lovedUsers.includes(myCurrentName)) {
-                            postRoleData.lovedUsers = postRoleData.lovedUsers.filter(x => x !== myCurrentName);
-                        } else {
-                            postRoleData.lovedUsers.push(myCurrentName);
-                            isGivingLove = true;
-                        }
-                        
-                        await supabaseClient.from('posts').update({ role: JSON.stringify(postRoleData) }).eq('id', id);
-                        
-                        if (isGivingLove && postAuthor !== myCurrentName) {
-                            await App.Features.pushCloudNotificationPayload(postAuthor, 'love', `menyukai kiriman Anda dengan Love.`);
-                        }
-                        
-                        this.renderPosts();
+                        const { data } = await supabaseClient.from('posts').select('liked_users').eq('id', id).single();
+                        let list = data?.liked_users || [];
+                        if (list.includes(myName)) list = list.filter(u => u !== myName);
+                        else { list.push(myName); if(postAuthor !== myName) await this.pushCloudNotificationPayload(postAuthor, 'like', 'menyukai status Anda.'); }
+                        await supabaseClient.from('posts').update({ liked_users: list }).eq('id', id); this.renderPosts();
                     } catch(e) {}
                 },
 
-                async toggleLike(id, postAuthor) {
-                    const myCurrentName = App.ProfileState.getCurrentName();
+                async toggleLoveReaction(id, postAuthor) {
+                    const myName = App.ProfileState.getCurrentName();
                     try {
-                        const { data } = await supabaseClient.from('posts').select('role').eq('id', id).single();
-                        let postRoleData = { comments: [], privacy: 'public', location: '', mediaUrl: '', bgColor: '#ffffff', lovedUsers: [], sharedCount: 0, likedUsers: [] };
-                        if (data && data.role && data.role.startsWith('{')) postRoleData = JSON.parse(data.role);
-                        
-                        if(!postRoleData.likedUsers) postRoleData.likedUsers = [];
-                        
-                        let isGivingLike = false;
-                        if (postRoleData.likedUsers.includes(myCurrentName)) {
-                            postRoleData.likedUsers = postRoleData.likedUsers.filter(x => x !== myCurrentName);
-                        } else {
-                            postRoleData.likedUsers.push(myCurrentName);
-                            isGivingLike = true;
-                        }
-                        
-                        await supabaseClient.from('posts').update({ 
-                            likes: postRoleData.likedUsers.length,
-                            role: JSON.stringify(postRoleData) 
-                        }).eq('id', id);
-
-                        if (isGivingLike && postAuthor !== myCurrentName) {
-                            await App.Features.pushCloudNotificationPayload(postAuthor, 'like', `menyukai kiriman terbaru Anda.`);
-                        }
-
-                        this.renderPosts();
+                        const { data } = await supabaseClient.from('posts').select('loved_users').eq('id', id).single();
+                        let list = data?.loved_users || [];
+                        if (list.includes(myName)) list = list.filter(u => u !== myName);
+                        else { list.push(myName); if(postAuthor !== myName) await this.pushCloudNotificationPayload(postAuthor, 'love', 'menyukai status Anda dengan Cinta.'); }
+                        await supabaseClient.from('posts').update({ loved_users: list }).eq('id', id); this.renderPosts();
                     } catch(e) {}
                 },
 
                 async openCommentsBottomSheet(postId, postAuthor) {
-                    activeBottomSheetPostId = postId;
-                    activeReplyTargetCommentId = null; 
-                    
-                    const sheet = document.getElementById('comments-overlay-bottom-sheet');
-                    const streamViewport = document.getElementById('comments-sheet-stream-injector');
-                    
-                    sheet.classList.add('active');
-                    streamViewport.innerHTML = `<div style="text-align:center; padding:32px; color:var(--text-muted); font-size:0.9rem;">Memuat aliran komentar...</div>`;
-                    
+                    activeBottomSheetPostId = postId; activeReplyTargetCommentId = null; 
+                    document.getElementById('comments-overlay-bottom-sheet').classList.add('active');
                     App.Features.renderBottomSheetInputBar(postAuthor);
                     await App.Features.reloadCommentsBottomSheetStreamOnly();
                 },
 
                 renderBottomSheetInputBar(postAuthor = "") {
-                    const dockForm = document.getElementById('comments-sheet-input-dock-form');
-                    if (!dockForm) return;
-
-                    const placeholderText = activeReplyTargetCommentId 
-                        ? `Membalas komentar...` 
-                        : `Komentari sebagai ${App.ProfileState.getCurrentName()}...`;
-
+                    const dockForm = document.getElementById('comments-sheet-input-dock-form'); if (!dockForm) return;
                     dockForm.innerHTML = `
-                        <input type="text" class="form-input" placeholder="${placeholderText}" id="sheet-comment-input-field" style="border-radius:20px; padding:10px 14px; margin-bottom:0; font-size:0.9rem; background:var(--bg-body);">
-                        ${activeReplyTargetCommentId ? `<button class="icon-btn" style="color:var(--danger);" onclick="App.Features.cancelReplyMode('${postAuthor}')" title="Batal Balas"><span class="material-symbols-outlined">close</span></button>` : ''}
-                        <button class="icon-btn" style="background:var(--primary); color:white; width:34px; height:34px; flex-shrink:0;" onclick="App.Features.submitBottomSheetCommentAction(postAuthor)">
-                            <span class="material-symbols-outlined" style="font-size:16px;">send</span>
-                        </button>
+                        <input type="text" class="form-input" placeholder="${activeReplyTargetCommentId ? 'Balas komentar...' : 'Ketik komentar...'}" id="sheet-comment-input-field" style="border-radius:20px; padding:10px 14px; margin-bottom:0; font-size:0.9rem; background:var(--bg-body);">
+                        <button class="icon-btn" style="background:var(--primary); color:white; width:34px; height:34px;" onclick="App.Features.submitBottomSheetCommentAction('${postAuthor}')"><span class="material-symbols-outlined" style="font-size:16px;">send</span></button>
                     `;
-                    
-                    document.getElementById('sheet-comment-input-field').addEventListener('keypress', (e) => {
-                        if (e.key === 'Enter') App.Features.submitBottomSheetCommentAction(postAuthor);
-                    });
-                    
-                    if (activeReplyTargetCommentId) {
-                        document.getElementById('sheet-comment-input-field').focus();
-                    }
-                },
-
-                cancelReplyMode(postAuthor) {
-                    activeReplyTargetCommentId = null;
-                    App.Features.renderBottomSheetInputBar(postAuthor);
+                    document.getElementById('sheet-comment-input-field').addEventListener('keypress', (e) => { if (e.key === 'Enter') App.Features.submitBottomSheetCommentAction(postAuthor); });
                 },
 
                 async reloadCommentsBottomSheetStreamOnly() {
                     if (!activeBottomSheetPostId) return;
-                    const streamViewport = document.getElementById('comments-sheet-stream-injector');
-                    if (!streamViewport) return;
-                    
+                    const stream = document.getElementById('comments-sheet-stream-injector'); if (!stream) return;
                     try {
-                        const { data } = await supabaseClient.from('posts').select('role, author').eq('id', activeBottomSheetPostId).single();
-                        let postRoleData = { comments: [] };
-                        try {
-                            if (data && data.role) {
-                                if (data.role.startsWith('{')) postRoleData = JSON.parse(data.role);
-                                else if (data.role.startsWith('[')) postRoleData.comments = JSON.parse(data.role);
-                            }
-                        } catch(ex) {}
-                        
-                        const commentsList = postRoleData.comments || [];
-                        if (commentsList.length === 0) {
-                            streamViewport.innerHTML = `
-                                <div style="text-align:center; padding:48px 16px; color:var(--text-muted);">
-                                    <span class="material-symbols-outlined" style="font-size:36px; color:#cbd5e1; margin-bottom:8px;">maps_ugc</span>
-                                    <p style="font-size:0.85rem; font-weight:500;">Belum ada komentar. Jadilah yang Thoroughbred memberikan respon!</p>
-                                </div>`;
-                            return;
+                        const { data: comments } = await supabaseClient.from('comments').select('*').eq('post_id', activeBottomSheetPostId).order('created_at', { ascending: true });
+                        if (!comments || comments.length === 0) {
+                            stream.innerHTML = `<div style="text-align:center; padding:32px; color:var(--text-muted);">Belum ada komentar.</div>`; return;
                         }
-
-                        const myName = App.ProfileState.getCurrentName();
-                        const postAuthor = data.author || "";
-
-                        // Lookup avatar asli para komentator dari post histories Supabase
-                        const { data: commentatorsAvatars } = await supabaseClient.from('posts').select('author, avatar').not('avatar', 'is', null).order('created_at', { ascending: false });
-
-                        streamViewport.innerHTML = commentsList.map(c => {
-                            const userClean = c.user || 'User';
-                            
-                            const matchAv = commentatorsAvatars ? commentatorsAvatars.find(a => a.author === userClean) : null;
-                            const userAvatarUrl = matchAv ? matchAv.avatar : 'https://i.pravatar.cc/150?img=12';
-                            
-                            const commentId = c.id || `c_${c.date || Date.now()}_${Math.random().toString(36).substring(5)}`;
-                            if (!c.id) c.id = commentId; 
-                            
-                            const likesArray = c.likes || [];
-                            const repliesArray = c.replies || [];
-                            const isLikedByMe = likesArray.includes(myName) ? 'active' : '';
-                            const likeCounterText = likesArray.length > 0 ? `• <span style="font-size:0.75rem;">👍 ${likesArray.length}</span>` : '';
-                            
-                            const commentTimeText = App.UI.calculateRelativeTimeAgo(c.date || Date.now());
-                            
-                            let repliesHTML = '';
-                            if (repliesArray.length > 0) {
-                                repliesHTML = `<div style="margin-top: 10px; padding-left: 12px; border-left: 2px solid var(--border-color); display: flex; flex-direction: column; gap: 10px;">`;
-                                repliesHTML += repliesArray.map(r => {
-                                    const subUser = r.user || 'User';
-                                    const matchSubAv = commentatorsAvatars ? commentatorsAvatars.find(a => a.author === subUser) : null;
-                                    const subAvatar = matchSubAv ? matchSubAv.avatar : 'https://i.pravatar.cc/150?img=14';
-                                    
-                                    const replyTimeText = App.UI.calculateRelativeTimeAgo(r.date || Date.now());
-                                    const rLikesArray = r.likes || [];
-                                    const isReplyLikedByMe = rLikesArray.includes(myName) ? 'active' : '';
-                                    const replyLikeCounterText = rLikesArray.length > 0 ? `• <span style="font-size:0.7rem;">👍 ${rLikesArray.length}</span>` : '';
-
-                                    return `
-                                        <div style="display:flex; gap:8px; align-items:flex-start;">
-                                            <img src="${subAvatar}" style="width:26px; height:26px; border-radius:50%; object-fit:cover;">
-                                            <div style="flex:1; display:flex; flex-direction:column; gap:2px;">
-                                                <div style="background:var(--bg-body); padding:8px 12px; border-radius:14px; max-width:95%;">
-                                                    <strong style="font-size:0.78rem; color:var(--text-main); display:block;">${subUser}</strong>
-                                                    <span style="font-size:0.82rem; color:var(--text-main);">${r.text}</span>
-                                                </div>
-                                                <div style="display:flex; gap:12px; font-size:0.7rem; color:var(--text-muted); font-weight:700; margin-left:6px; margin-top:1px; align-items:center;">
-                                                    <span>${replyTimeText}</span>
-                                                    <span class="reply-like-btn ${isReplyLikedByMe}" style="cursor:pointer;" onclick="App.Features.toggleReplyLikeAction('${commentId}', '${r.id}')">Suka</span>
-                                                    ${replyLikeCounterText}
-                                                </div>
-                                            </div>
-                                        </div>
-                                    `;
-                                }).join('');
-                                repliesHTML += `</div>`;
-                            }
-
-                            return `
-                                <div style="display:flex; gap:10px; align-items:flex-start; text-align:left;">
-                                    <img src="${userAvatarUrl}" style="width:34px; height:34px; border-radius:50%; object-fit:cover; margin-top:2px;">
-                                    <div style="flex:1; display:flex; flex-direction:column; gap:2px;">
-                                        <div style="background:var(--bg-body); padding:10px 14px; border-radius:18px; display:inline-block; max-width:95%; box-shadow:0 1px 3px rgba(0,0,0,0.03);">
-                                            <strong style="color:var(--text-main); font-size:0.82rem; display:block; margin-bottom:2px; cursor:pointer;" onclick="App.Features.closeCommentsBottomSheet(); App.Router.navigate('profil?name=${encodeURIComponent(userClean)}')">${userClean}</strong>
-                                            <span style="font-size:0.88rem; color:var(--text-main); white-space:pre-wrap; line-height:1.4; word-break: break-word;">${c.text}</span>
-                                        </div>
-                                        <div style="display:flex; gap:16px; font-size:0.75rem; color:var(--text-muted); font-weight:700; margin-left:8px; margin-top:2px; align-items:center;">
-                                            <span>${commentTimeText}</span>
-                                            <span class="comment-like-btn ${isLikedByMe}" style="cursor:pointer;" onclick="App.Features.toggleCommentLikeAction('${commentId}')">Suka</span>
-                                            <span style="cursor:pointer;" onclick="App.Features.setCommentReplyMode('${commentId}', '${postAuthor}')">Balas</span>
-                                            ${likeCounterText}
-                                        </div>
-                                        ${repliesHTML}
-                                    </div>
+                        stream.innerHTML = comments.map(c => `
+                            <div style="display:flex; gap:10px; margin-bottom:12px; text-align:left;">
+                                <img src="https://i.pravatar.cc/150?img=11" style="width:34px; height:34px; border-radius:50%;">
+                                <div>
+                                    <div style="background:var(--bg-body); padding:8px 12px; border-radius:14px;"><strong>${c.user_name}</strong><p style="font-size:0.9rem;">${c.text}</p></div>
+                                    <div style="font-size:0.75rem; color:var(--text-muted); margin-top:4px; cursor:pointer;" onclick="activeReplyTargetCommentId='${c.id}'; App.Features.renderBottomSheetInputBar();">Balas</div>
                                 </div>
-                            `;
-                        }).join('');
-                        
-                        streamViewport.scrollTop = streamViewport.scrollHeight;
+                            </div>`).join('');
                     } catch(ex) {}
                 },
 
-                async toggleCommentLikeAction(commentId) {
-                    if (!activeBottomSheetPostId) return;
-                    const myName = App.ProfileState.getCurrentName();
-
+                async submitBottomSheetCommentAction(postAuthor) {
+                    const input = document.getElementById('sheet-comment-input-field'); if (!input || !input.value.trim()) return;
+                    const text = input.value.trim(); const myName = App.ProfileState.getCurrentName();
                     try {
-                        const { data } = await supabaseClient.from('posts').select('role').eq('id', activeBottomSheetPostId).single();
-                        let postRoleData = { comments: [] };
-                        if (data && data.role && data.role.startsWith('{')) postRoleData = JSON.parse(data.role);
-                        
-                        postRoleData.comments = postRoleData.comments.map(c => {
-                            const cId = c.id || `c_${c.date || Date.now()}`;
-                            c.id = cId;
-
-                            if (cId === commentId) {
-                                if (!c.likes) c.likes = [];
-                                if (c.likes.includes(myName)) {
-                                    c.likes = c.likes.filter(u => u !== myName); 
-                                } else {
-                                    c.likes.push(myName); 
-                                }
-                            }
-                            return c;
-                        });
-
-                        await supabaseClient.from('posts').update({ role: JSON.stringify(postRoleData) }).eq('id', activeBottomSheetPostId);
-                        App.Features.reloadCommentsBottomSheetStreamOnly();
-                    } catch(e) {}
-                },
-
-                async toggleReplyLikeAction(commentId, replyId) {
-                    if (!activeBottomSheetPostId) return;
-                    const myName = App.ProfileState.getCurrentName();
-
-                    try {
-                        const { data } = await supabaseClient.from('posts').select('role').eq('id', activeBottomSheetPostId).single();
-                        let postRoleData = { comments: [] };
-                        if (data && data.role && data.role.startsWith('{')) postRoleData = JSON.parse(data.role);
-
-                        postRoleData.comments = postRoleData.comments.map(c => {
-                            if (c.id === commentId) {
-                                if (!c.replies) c.replies = [];
-                                c.replies = c.replies.map(r => {
-                                    if (r.id === replyId) {
-                                        if (!r.likes) r.likes = [];
-                                        if (r.likes.includes(myName)) {
-                                            r.likes = r.likes.filter(u => u !== myName);
-                                        } else {
-                                            r.likes.push(myName);
-                                        }
-                                    }
-                                    return r;
-                                });
-                            }
-                            return c;
-                        });
-
-                        await supabaseClient.from('posts').update({ role: JSON.stringify(postRoleData) }).eq('id', activeBottomSheetPostId);
-                        App.Features.reloadCommentsBottomSheetStreamOnly();
-                    } catch(e) {}
-                },
-
-                setCommentReplyMode(commentId, postAuthor) {
-                    activeReplyTargetCommentId = commentId;
-                    App.Features.renderBottomSheetInputBar(postAuthor);
-                },
-
-                async submitBottomSheetCommentAction(postAuthor = "") {
-                    if (!activeBottomSheetPostId) return;
-                    const input = document.getElementById('sheet-comment-input-field');
-                    if (!input || !input.value.trim()) return;
-                    
-                    const commentText = input.value.trim();
-                    const myCurrentName = App.ProfileState.getCurrentName();
-
-                    try {
-                        const { data } = await supabaseClient.from('posts').select('role').eq('id', activeBottomSheetPostId).single();
-                        let postRoleData = { comments: [] };
-                        if (data && data.role && data.role.startsWith('{')) postRoleData = JSON.parse(data.role);
-                        
-                        if (!postRoleData.comments) postRoleData.comments = [];
-
                         if (activeReplyTargetCommentId) {
-                            postRoleData.comments = postRoleData.comments.map(c => {
-                                const cId = c.id || `c_${c.date || Date.now()}`;
-                                c.id = cId;
-
-                                if (cId === activeReplyTargetCommentId) {
-                                    if (!c.replies) c.replies = [];
-                                    c.replies.push({
-                                        id: `r_${Date.now()}`,
-                                        user: myCurrentName,
-                                        text: commentText,
-                                        date: Date.now(),
-                                        likes: []
-                                    });
-                                }
-                                return c;
-                            });
-                            activeReplyTargetCommentId = null; 
+                            const { data } = await supabaseClient.from('comments').select('replies').eq('id', activeReplyTargetCommentId).single();
+                            let currentReplies = data?.replies || [];
+                            currentReplies.push({ id: `r_${Date.now()}`, user: myName, text: text, date: Date.now() });
+                            await supabaseClient.from('comments').update({ replies: currentReplies }).eq('id', activeReplyTargetCommentId);
+                            activeReplyTargetCommentId = null;
                         } else {
-                            postRoleData.comments.push({
-                                id: `c_${Date.now()}_${Math.random().toString(36).substring(5)}`,
-                                user: myCurrentName,
-                                text: commentText,
-                                date: Date.now(),
-                                likes: [],
-                                replies: []
-                            });
+                            await supabaseClient.from('comments').insert([{ post_id: activeBottomSheetPostId, user_name: myName, text: text }]);
+                            if (postAuthor !== myName) await this.pushCloudNotificationPayload(postAuthor, 'comment', `mengomentari postingan Anda.`);
                         }
-                        
-                        await supabaseClient.from('posts').update({ role: JSON.stringify(postRoleData) }).eq('id', activeBottomSheetPostId);
-                        
-                        if (postAuthor !== "" && postAuthor !== myCurrentName) {
-                            await App.Features.pushCloudNotificationPayload(postAuthor, 'comment', `mengomentari postingan status Anda: "${commentText.substring(0,25)}..."`);
-                        }
-
-                        input.value = '';
-                        App.Features.renderBottomSheetInputBar(postAuthor);
-                        await App.Features.reloadCommentsBottomSheetStreamOnly();
-                        App.Features.renderPosts();
+                        input.value = ''; this.renderBottomSheetInputBar(postAuthor); this.reloadCommentsBottomSheetStreamOnly();
                     } catch(err) {}
                 },
 
-                closeCommentsBottomSheet() {
-                    const sheet = document.getElementById('comments-overlay-bottom-sheet');
-                    if (sheet) sheet.classList.remove('active');
-                    activeBottomSheetPostId = null;
-                    activeReplyTargetCommentId = null;
-                },
-
+                closeCommentsBottomSheet() { document.getElementById('comments-overlay-bottom-sheet').classList.remove('active'); activeBottomSheetPostId = null; },
                 initCommentsSwipeToCloseGesture() {
-                    const dragZone = document.getElementById('comments-sheet-drag-zone');
-                    const sheetContent = document.getElementById('comments-sheet-content-node');
-                    
-                    let startY = 0;
-                    let currentY = 0;
-                    let isDragging = false;
-
-                    if (!dragZone || !sheetContent) return;
-
-                    dragZone.addEventListener('touchstart', (e) => {
-                        startY = e.touches[0].clientY;
-                        isDragging = true;
-                        sheetContent.style.transition = 'none';
-                    }, { passive: true });
-
-                    dragZone.addEventListener('touchmove', (e) => {
-                        if (!isDragging) return;
-                        currentY = e.touches[0].clientY;
-                        const deltaY = currentY - startY;
-                        
-                        if (deltaY > 0) {
-                            sheetContent.style.transform = `translateY(${deltaY}px)`;
-                        }
-                    }, { passive: true });
-
-                    dragZone.addEventListener('touchend', (e) => {
-                        if (!isDragging) return;
-                        isDragging = false;
-                        sheetContent.style.transition = 'transform 0.3s cubic-bezier(0.25, 1, 0.5, 1)';
-                        
-                        const finalDeltaY = currentY - startY;
-                        if (finalDeltaY > 120) {
-                            App.Features.closeCommentsBottomSheet();
-                        } else {
-                            sheetContent.style.transform = 'translateY(0)';
-                        }
-                        startY = 0;
-                        currentY = 0;
-                    });
+                    const dragZone = document.getElementById('comments-sheet-drag-zone'), sheet = document.getElementById('comments-sheet-content-node');
+                    let startY = 0; if(!dragZone || !sheet) return;
+                    dragZone.addEventListener('touchstart', (e) => { startY = e.touches[0].clientY; }, {passive:true});
+                    dragZone.addEventListener('touchend', (e) => { if(e.changedTouches[0].clientY - startY > 150) App.Features.closeCommentsBottomSheet(); }, {passive:true});
                 },
 
                 async handleAvatarSelection(event) {
                     const file = event.target.files[0]; if (!file) return;
-                    App.Toast.show("Mengunggah foto ke storage bucket...", "info");
-                    
-                    try {
-                        const fileExt = file.name.split('.').pop();
-                        const fileName = `profile_${Date.now()}_${Math.random().toString(36).substring(7)}.${fileExt}`;
-                        
-                        const { data, error } = await supabaseClient.storage.from('avatars').upload(fileName, file, {
-                            cacheControl: '3600',
-                            upsert: false
-                        });
-                        
-                        if (error) throw error;
-                        
-                        const { data: urlData } = supabaseClient.storage.from('avatars').getPublicUrl(fileName);
-                        const publicUrl = urlData.publicUrl;
-                        
-                        App.ProfileState.saveCompressedAvatar(publicUrl);
-                        
-                        // Perbarui avatar di seluruh data postingan awalan milik user aktif di database
-                        await supabaseClient.from('posts').update({ avatar: publicUrl }).eq('author', App.ProfileState.getCurrentName());
-                        
-                        const previewImg = document.getElementById('settings-avatar-preview');
-                        if (previewImg) previewImg.src = publicUrl;
-                        
-                        App.Toast.show("Foto profil diperbarui di cloud storage!", "success");
-                        this.renderPosts();
-                    } catch(err) {
-                        console.error("Storage upload error: ", err);
-                        App.Toast.show("Gagal upload ke storage bucket. Menggunakan fallback lokal.", "warning");
-                        
-                        const reader = new FileReader(); 
-                        reader.readAsDataURL(file);
-                        reader.onload = (e) => {
-                            App.ProfileState.saveCompressedAvatar(e.target.result);
-                            const previewImg = document.getElementById('settings-avatar-preview');
-                            if (previewImg) previewImg.src = e.target.result;
-                            this.renderPosts();
-                        };
-                    }
+                    const reader = new FileReader(); reader.readAsDataURL(file);
+                    reader.onload = async (e) => {
+                        const base64 = e.target.result; App.ProfileState.saveCompressedAvatar(base64);
+                        document.getElementById('settings-avatar-preview').src = base64;
+                        await supabaseClient.from('posts').update({ avatar: base64 }).eq('author', App.ProfileState.getCurrentName());
+                        App.Toast.show("Avatar cloud ter-update!", "success");
+                    };
                 },
 
                 async createPost() {
-                    const textValue = document.getElementById('composer-text').value.trim();
-                    const mediaUrlInput = document.getElementById('composer-media-url');
-                    const mediaUrlValue = mediaUrlInput ? mediaUrlInput.value.trim() : '';
-                    
-                    if(!textValue && !composerAttachedImageBase64 && !mediaUrlValue) return;
+                    const content = document.getElementById('composer-text').value.trim();
+                    const mediaUrl = document.getElementById('composer-media-url')?.value.trim() || '';
+                    if(!content && !composerAttachedImageBase64 && !mediaUrl) return;
                     try {
-                        const privacySelector = document.getElementById('composer-privacy-select');
-                        const selectedPrivacy = privacySelector ? privacySelector.value : 'public';
-                        
-                        const roleData = { 
-                            comments: [], 
-                            privacy: selectedPrivacy,
-                            location: activeComposerLocation,
-                            mediaUrl: mediaUrlValue,
-                            bgColor: currentComposerBgColor,
-                            lovedUsers: [],
-                            sharedCount: 0,
-                            likedUsers: []
-                        };
-
-                        await supabaseClient.from('posts').insert([{ author: App.ProfileState.getCurrentName(), avatar: App.ProfileState.getCurrentAvatar(), content: textValue, image: composerAttachedImageBase64, role: JSON.stringify(roleData), likes: 0 }]);
-                        
-                        composerAttachedImageBase64 = null;
-                        
-                        App.Modal.close();
-                        App.Toast.show("Kiriman berhasil diterbitkan!", "success"); 
-                        this.renderPosts();
-                    } catch (err) { App.Toast.show("Gagal memublikasikan kiriman.", "danger"); }
-                },
-
-                async submitPostCommentAction(postId, postAuthor) {
-                    App.Features.openCommentsBottomSheet(postId, postAuthor);
-                },
-
-                showNotifications() {
-                    App.Features.markAllLocalNotificationsAsReadCloudAction();
-
-                    let notiHTML = '';
-                    if (liveNotifications.length === 0) {
-                        notiHTML = `
-                            <div style="text-align:center; padding:48px 24px; color:var(--text-muted);">
-                                <span class="material-symbols-outlined" style="font-size:48px; margin-bottom:12px; color:#cbd5e1;">notifications_none</span>
-                                <p style="font-size:0.9rem; font-weight:500;">Tidak ada notifikasi aktivitas interaksi terbaru.</p>
-                            </div>`;
-                    } else {
-                        notiHTML = `<div class="native-noti-stream-box">`;
-                        notiHTML += liveNotifications.map(n => {
-                            let actionColor = 'var(--primary)';
-                            let iconName = 'thumb_up';
-                            
-                            if (n.type === 'love') { actionColor = 'var(--danger)'; iconName = 'favorite'; }
-                            if (n.type === 'comment') { actionColor = '#0284c7'; iconName = 'chat_bubble'; }
-                            if (n.type === 'share') { actionColor = '#64748b'; iconName = 'share'; }
-
-                            return `
-                                <div class="native-noti-row-item ${n.isUnread ? 'unread-state' : ''}">
-                                    <div class="native-noti-avatar-circle-frame">
-                                        <img src="${n.avatar}" class="native-noti-avatar-img-node" alt="Avatar">
-                                        <div class="native-noti-badge-icon-badge" style="background:${actionColor};">
-                                            <span class="material-symbols-outlined" style="font-size:12px; font-variation-settings:'FILL' 1;">${iconName}</span>
-                                        </div>
-                                    </div>
-                                    <div class="native-noti-text-container">
-                                        <span class="native-noti-message-desc"><strong>${n.user}</strong> ${n.desc}</span>
-                                        <span class="native-noti-live-time">${App.UI.calculateRelativeTimeAgo(n.timestamp)}</span>
-                                    </div>
-                                    <span class="material-symbols-outlined native-noti-action-more-btn" style="font-size:18px;">more_horiz</span>
-                                </div>
-                            `;
-                        }).join('');
-                        notiHTML += `</div>`;
-                    }
-                    
-                    App.Modal.open("Notifikasi", notiHTML, true, false);
+                        await supabaseClient.from('posts').insert([{ author: App.ProfileState.getCurrentName(), avatar: App.ProfileState.getCurrentAvatar(), content, image: composerAttachedImageBase64, privacy: document.getElementById('composer-privacy-select').value, location: activeComposerLocation, media_url: mediaUrl, bg_color: currentComposerBgColor }]);
+                        App.Modal.close(); composerAttachedImageBase64 = null; App.Toast.show("Status diterbitkan!", "success"); this.renderPosts();
+                    } catch (err) {}
                 },
 
                 saveNameSettings() {
                     const name = document.getElementById('settings-display-name').value.trim();
                     const bio = document.getElementById('settings-bio-status').value.trim();
                     const domisili = document.getElementById('settings-domisili').value.trim();
-                    
                     if(!name) return;
-                    
-                    const res = App.ProfileState.updateProfileDataConfiguration(name, bio, domisili);
-                    if(res.success) {
-                        App.Toast.show("Data profil Anda berhasil disimpan!", "success");
-                        App.Router.navigate('feed');
-                    } else {
-                        App.Toast.show(res.message, "danger");
-                    }
+                    if(App.ProfileState.updateProfileDataConfiguration(name, bio, domisili).success) { App.Toast.show("Profil disimpan!", "success"); App.Router.navigate('feed'); }
                 },
 
                 saveAdminGlobalAdBannerAction(event) {
-                    event.preventDefault();
-                    const code = document.getElementById('admin-ad-html-input').value.trim();
-                    localStorage.setItem('ns_ad_html_global', code);
-                    App.Toast.show("Iklan Super Admin dipublikasikan!", "success");
-                    
-                    // Memperbarui slot penayangan iklan di bawah header secara instan
-                    App.UI.renderGlobalBannerAdIfExists();
-                    
-                    // Memperbarui live preview yang ada di dalam menu pengaturan
-                    const liveAdSlot = document.getElementById('admin-live-ad-preview-slot');
-                    if (liveAdSlot) {
-                        liveAdSlot.innerHTML = `<strong>Live Preview Form Iklan:</strong><div class="global-workspace-ad-banner" style="margin-top:8px; margin-bottom:0;">${code}</div>`;
-                    }
+                    event.preventDefault(); const code = document.getElementById('admin-ad-html-input').value.trim();
+                    localStorage.setItem('ns_ad_html_global', code); App.Toast.show("Iklan dirilis!", "success"); App.UI.renderGlobalBannerAdIfExists();
                 },
 
                 renderExploreUsers() {
                     const container = document.getElementById('explore-users-stream'); if(!container) return;
-                    const users = ["Andi_Tech", "Budi_Developer", "Siti_Designer", "Rian_Data", "Dewi_Manager"];
-                    container.innerHTML = users.map(u => {
-                        return `
-                            <div class="user-follow-card">
-                                <img src="https://i.pravatar.cc/150?img=20" style="width:44px; height:44px; border-radius:50%; object-fit:cover;">
-                                <div class="user-follow-info">
-                                    <strong style="font-size:0.9rem; color:var(--text-main);">${u}</strong>
-                                    <span style="font-size:0.75rem; color:var(--text-muted); display:block;">Workspace Member</span>
-                                </div>
-                                <button class="btn btn-primary" style="padding:6px 12px; font-size:0.8rem; border-radius:8px;" onclick="App.Features.followExploreUserAction('${u}')">Ikuti</button>
-                            </div>
-                        `;
-                    }).join('');
+                    container.innerHTML = ["Andi_Tech", "Budi_Dev"].map(u => `<div class="user-follow-card"><img src="https://i.pravatar.cc/150?img=20" style="width:44px; height:44px; border-radius:50%;"><div><strong>${u}</strong></div><button class="btn btn-primary" style="padding:6px 12px; font-size:0.8rem;" onclick="App.Toast.show('Diikuti!','success')">Ikuti</button></div>`).join('');
                 },
-
-                followExploreUserAction(username) {
-                    App.Toast.show(`Berhasil mengikuti ${username}`, "success");
-                },
-
-                loadFriendsCount() {
-                    const el = document.getElementById('profile-friends-count');
-                    if (el) el.innerText = window.myFriendsList ? window.myFriendsList.length : '12';
-                }
+                loadFriendsCount() { const el = document.getElementById('profile-friends-count'); if(el) el.innerText = '12'; }
             },
 
             Theme: {
                 init() { document.documentElement.setAttribute('data-theme', localStorage.getItem('ns_theme') || 'light'); },
-                toggle() {
-                    const n = document.documentElement.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
-                    document.documentElement.setAttribute('data-theme', n); localStorage.setItem('ns_theme', n);
-                }
+                toggle() { const n = document.documentElement.getAttribute('data-theme') === 'light' ? 'dark' : 'light'; document.documentElement.setAttribute('data-theme', n); localStorage.setItem('ns_theme', n); }
             },
 
-            Network: { listen() { window.addEventListener('offline', ()=>App.Toast.show("Offline. Periksa jaringan Anda.","danger")); } },
+            Network: { listen() { window.addEventListener('offline', ()=>App.Toast.show("Koneksi Offline.","danger")); } },
             
             Modal: { 
                 open(title, bodyHTML, hideFooter = false, rawMode = false) { 
-                    const modalContentArea = document.getElementById('modal-content-area');
-                    const titleEl = document.getElementById('modal-title');
-                    const bodyEl = document.getElementById('modal-body');
-                    const footerEl = document.getElementById('modal-footer-actions');
-                    const closeBtnEl = document.getElementById('modal-close-x-btn');
-
-                    if (rawMode) {
-                        modalContentArea.style.padding = '0';
-                        modalContentArea.style.background = 'transparent';
-                        modalContentArea.style.boxShadow = 'none';
-                        modalContentArea.style.border = 'none';
-                        titleEl.style.display = 'none';
-                        footerEl.style.display = 'none';
-                        if (closeBtnEl) closeBtnEl.style.display = 'none';
-                        bodyEl.style.maxHeight = '100vh';
-                    } else {
-                        modalContentArea.style.padding = '24px';
-                        modalContentArea.style.background = 'var(--bg-glass-solid)';
-                        modalContentArea.style.boxShadow = 'var(--shadow-soft)';
-                        modalContentArea.style.border = '1px solid var(--border-color)';
-                        titleEl.style.display = title ? 'block' : 'none';
-                        titleEl.innerText = title || '';
-                        footerEl.style.display = hideFooter ? 'none' : 'flex';
-                        if (closeBtnEl) closeBtnEl.style.display = 'flex';
-                        bodyEl.style.maxHeight = '70vh';
-                    }
-
-                    bodyEl.innerHTML = bodyHTML;
-                    document.getElementById('global-modal').classList.add('active'); 
+                    const area = document.getElementById('modal-content-area'), tEl = document.getElementById('modal-title'), bEl = document.getElementById('modal-body'), fEl = document.getElementById('modal-footer-actions'), cEl = document.getElementById('modal-close-x-btn');
+                    if (rawMode) { area.style.padding = '0'; area.style.background = 'transparent'; area.style.border = 'none'; tEl.style.display = 'none'; fEl.style.display = 'none'; if(cEl) cEl.style.display = 'none'; } 
+                    else { area.style.padding = '24px'; area.style.background = 'var(--bg-glass-solid)'; tEl.style.display = title ? 'block' : 'none'; tEl.innerText = title || ''; fEl.style.display = hideFooter ? 'none' : 'flex'; }
+                    bEl.innerHTML = bodyHTML; document.getElementById('global-modal').classList.add('active'); 
                 }, 
                 close() { document.getElementById('global-modal').classList.remove('active'); }
             },
@@ -2559,116 +1719,48 @@
             },
 
             UI: {
-                getTextColorContrast(hexColor) {
-                    const hex = hexColor.replace('#', '');
-                    const r = parseInt(hex.substr(0, 2), 16);
-                    const g = parseInt(hex.substr(2, 2), 16);
-                    const b = parseInt(hex.substr(4, 2), 16);
-                    const brightness = ((r * 299) + (g * 587) + (b * 114)) / 1000;
-                    return (brightness >= 128) ? '#0b2e1e' : '#ffffff';
+                getTextColorContrast(hex) {
+                    const r = parseInt(hex.replace('#','').substr(0, 2), 16), g = parseInt(hex.replace('#','').substr(2, 2), 16), b = parseInt(hex.replace('#','').substr(4, 2), 16);
+                    return (((r * 299) + (g * 587) + (b * 114)) / 1000) >= 128 ? '#0b2e1e' : '#ffffff';
                 },
-                generateAvatarHTML(name, rawAvatarUrl, isPremium, level, size = '46px', inPost = false) {
-                    let borderClass = isPremium ? 'premium-border' : '';
-                    let levelBadge = isPremium && level > 0 ? `<div class="premium-level-badge">LVL ${level}</div>` : '';
-                    let verifiedBadge = isPremium ? `<span class="material-symbols-outlined verified-badge">check</span>` : '';
-                    let navClick = inPost ? `onclick="App.Router.navigate('profil?name=${encodeURIComponent(name)}')"` : `onclick="App.Router.navigate('profil')"`;
-                    return `
-                        <div class="premium-avatar-container avatar-wrapper" ${navClick}>
-                            ${levelBadge}
-                            <img src="${rawAvatarUrl}" class="user-avatar ${borderClass}" style="width:${size}; height:${size}; margin-bottom:0;" alt="Avatar">
-                            ${verifiedBadge}
-                        </div>
-                    `;
+                generateAvatarHTML(name, url, isPremium, level, size = '46px', inPost = false) {
+                    return `<div class="premium-avatar-container avatar-wrapper" onclick="App.Router.navigate('${inPost ? 'profil?name=' + encodeURIComponent(name) : 'profil'}')"><img src="${url}" class="user-avatar" style="width:${size}; height:${size};" alt="Avatar"></div>`;
                 },
-                handleHeaderAvatarToggleAction() {
-                    if (window.location.hash.includes('#/profil')) {
-                        App.Router.navigate('feed');
-                    } else {
-                        App.Router.navigate('profil');
-                    }
-                },
-                calculateRelativeTimeAgo(timestamp) {
-                    const diffMs = Date.now() - parseInt(timestamp);
-                    const diffSec = Math.floor(diffMs / 1000);
-                    const diffMin = Math.floor(diffSec / 60);
-                    const diffHour = Math.floor(diffMin / 60);
-                    if (diffSec < 60) return `Baru saja`;
-                    if (diffMin < 60) return `${diffMin} m`;
-                    if (diffHour < 24) return `${diffHour} j`;
-                    return `${Math.floor(diffHour / 24)} h`;
+                handleHeaderAvatarToggleAction() { App.Router.navigate(window.location.hash.includes('#/profil') ? 'feed' : 'profil'); },
+                calculateRelativeTimeAgo(ts) {
+                    const sec = Math.floor((Date.now() - parseInt(ts)) / 1000);
+                    if (sec < 60) return `Baru saja`;
+                    if (sec < 3600) return `${Math.floor(sec/60)} m`;
+                    if (sec < 86400) return `${Math.floor(sec/3600)} j`;
+                    return `${Math.floor(sec/86400)} h`;
                 },
                 renderGlobalBannerAdIfExists() {
                     const container = document.getElementById('global-superadmin-ad-slot-container'); if(!container) return;
-                    if (App.ProfileState.getPremiumLevel() > 0) {
-                        container.innerHTML = '';
-                        return;
-                    }
-
-                    const savedAdHTML = localStorage.getItem('ns_ad_html_global');
-                    if(savedAdHTML && savedAdHTML.trim() !== "") {
-                        container.innerHTML = `<div class="global-workspace-ad-banner">${savedAdHTML}</div>`;
-                    } else container.innerHTML = '';
-                },
-                renderAdminAdFormPanelIfNeeded() {
-                    // Penanganan form visual sepenuhnya dialihkan ke Views.settings()
-                    return;
+                    const ad = localStorage.getItem('ns_ad_html_global');
+                    container.innerHTML = ad ? `<div class="global-workspace-ad-banner">${ad}</div>` : '';
                 },
                 bindGlobalEvents() {
-                    document.getElementById('btn-toggle-sidebar')?.addEventListener('click', () => {
-                        if(window.innerWidth > 768) {
-                            const l = document.getElementById('app-layout');
-                            l.classList.toggle('sidebar-collapsed');
-                        }
-                    });
-                    document.documentElement.setAttribute('data-theme', localStorage.getItem('ns_theme') || 'light');
+                    document.getElementById('btn-toggle-sidebar')?.addEventListener('click', () => { if(window.innerWidth > 768) document.getElementById('app-layout').classList.toggle('sidebar-collapsed'); });
                     document.getElementById('btn-theme')?.addEventListener('click', () => App.Theme.toggle());
                     document.getElementById('btn-refresh')?.addEventListener('click', () => { App.Router.handleRoute(); App.Toast.show("Diperbarui","success"); });
                 },
-                closeMobileSidebar() {
-                    document.getElementById('app-layout')?.classList.remove('sidebar-mobile-open');
-                    document.getElementById('mobile-overlay')?.classList.remove('active');
-                },
-                toggleChatPopup(shouldOpen) {
-                    const chatBox = document.getElementById('floating-chat-popup-box'); if(!chatBox) return;
-                    if(shouldOpen) { 
-                        chatBox.classList.add('active'); 
-                        App.Features.closeActiveChatSessionAndReturnToList(); 
-                    } else {
-                        chatBox.classList.remove('active');
-                    }
+                closeMobileSidebar() { document.getElementById('app-layout')?.classList.remove('sidebar-mobile-open'); document.getElementById('mobile-overlay')?.classList.remove('active'); },
+                toggleChatPopup(open) {
+                    const box = document.getElementById('floating-chat-popup-box'); if(!box) return;
+                    if(open) { box.classList.add('active'); App.Features.closeActiveChatSessionAndReturnToList(); } 
+                    else box.classList.remove('active');
                 },
                 refreshHeaderNotificationBadgeDOM() {
-                    const headerBadge = document.getElementById('noti-badge');
-                    if (headerBadge) {
-                        headerBadge.innerText = liveHeaderNotificationCount;
-                        headerBadge.style.display = liveHeaderNotificationCount > 0 ? 'flex' : 'none';
-                    }
-                },
-                updateGlobalMessageNotificationBadgeCount() {
-                    let totalUnread = 0; for (const email in unreadMessageCounters) { totalUnread += unreadMessageCounters[email]; }
-                    const sidebarCounter = document.getElementById('main-sidebar-chat-counter');
-                    if(sidebarCounter) sidebarCounter.style.display = totalUnread > 0 ? 'flex' : 'none';
+                    const badge = document.getElementById('noti-badge');
+                    if(badge) { badge.innerText = liveHeaderNotificationCount; badge.style.display = liveHeaderNotificationCount > 0 ? 'flex' : 'none'; }
                 },
                 syncGlobalAvatarAndName() {
-                    const name = App.ProfileState.getCurrentName(); 
-                    const avatar = App.ProfileState.getCurrentAvatar(); 
-                    const premiumLvl = App.ProfileState.getPremiumLevel();
-                    
-                    const sidebarNameEl = document.getElementById('sidebar-user-name'); if (sidebarNameEl) sidebarNameEl.innerText = name;
-                    
-                    const avatarHTMLSmall = App.UI.generateAvatarHTML(name, avatar, premiumLvl > 0, premiumLvl, '40px', false);
-                    
-                    const headerNode = document.getElementById('header-avatar-toggle-node'); if (headerNode) headerNode.innerHTML = avatarHTMLSmall;
-                    const sidebarNode = document.getElementById('sidebar-avatar-node'); if (sidebarNode) sidebarNode.innerHTML = avatarHTMLSmall;
-                    const composerNode = document.getElementById('composer-avatar-slot'); if (composerNode) composerNode.innerHTML = avatarHTMLSmall;
-                    
-                    document.querySelectorAll('.user-avatar-reactive').forEach(img => { img.src = avatar; });
+                    const name = App.ProfileState.getCurrentName(), avatar = App.ProfileState.getCurrentAvatar();
+                    const html = App.UI.generateAvatarHTML(name, avatar, false, 0, '40px', false);
+                    const header = document.getElementById('header-avatar-toggle-node'); if (header) header.innerHTML = html;
+                    const comp = document.getElementById('composer-avatar-slot'); if (comp) comp.innerHTML = html;
                 },
-                showLoadingBtn(b) {
-                    if (!b) return;
-                    b.innerHTML = 'Memproses...';
-                    setTimeout(() => { b.innerHTML = 'Masuk ke Aplikasi'; }, 1500);
-                }
+                showLoadingBtn(b) { if(b) b.innerHTML = 'Memproses...'; setTimeout(() => { if(b) b.innerHTML = 'Masuk'; }, 1500); }
             }
         };
 
