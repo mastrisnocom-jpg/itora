@@ -573,6 +573,21 @@
         @keyframes slideUpFade { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
         @keyframes fadeScale { from { opacity: 0; transform: scale(0.98); } to { opacity: 1; transform: scale(1); } }
 
+        /* PREMIUM NATIVE-LOOK INTERACTION NOTIFICATIONS */
+        .native-noti-stream-box { display: flex; flex-direction: column; background: var(--bg-glass-solid); max-width: 100%; }
+        .native-noti-row-item { display: flex; align-items: center; gap: 14px; padding: 14px 16px; border-bottom: 1px solid rgba(128,128,128,0.08); transition: var(--trans-smooth); cursor: pointer; position: relative; width: 100%; text-align: left; }
+        .native-noti-row-item:hover { background: var(--primary-state); }
+        .native-noti-row-item.unread-state { background: rgba(1, 181, 116, 0.03); }
+        .native-noti-avatar-circle-frame { position: relative; width: 54px; height: 54px; flex-shrink: 0; }
+        .native-noti-avatar-img-node { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; }
+        .native-noti-badge-icon-badge { position: absolute; bottom: -2px; right: -2px; width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 2px solid var(--bg-glass-solid); color: white; }
+        .native-noti-text-container { flex: 1; display: flex; flex-direction: column; gap: 2px; overflow: hidden; }
+        .native-noti-message-desc { font-size: 0.9rem; color: var(--text-main); line-height: 1.4; }
+        .native-noti-message-desc strong { font-weight: 700; color: var(--text-main); }
+        .native-noti-live-time { font-size: 0.78rem; color: var(--text-muted); font-weight: 500; }
+        .native-noti-action-more-btn { color: var(--text-muted); background: transparent; cursor: pointer; padding: 4px; border-radius: 50%; }
+        .native-noti-action-more-btn:hover { background: rgba(0,0,0,0.04); color: var(--text-main); }
+
         /* RESPONSIVE MOBILE PHONES SCREEN */
         @media (max-width: 768px) {
             :root {
@@ -843,7 +858,6 @@
                 this.Features.fetchMyFriendsData(); 
                 this.Features.initCommentsSwipeToCloseGesture();
                 
-                App.UI.refreshHeaderNotificationBadgeDOM();
                 App.UI.renderGlobalBannerAdIfExists();
 
                 unreadMessageCounters = {
@@ -921,7 +935,10 @@
                 subscribePosts() {
                     supabaseClient
                         .channel('schema-db-changes')
-                        .on('postgres_changes', { event: '*', schema: 'public', table: 'posts' }, async () => {
+                        .on('postgres_changes', { event: '*', schema: 'public', table: 'posts' }, async (payload) => {
+                            // Sync dynamic realtime notifications system
+                            App.Features.fetchCloudNotificationsDataZone();
+
                             if (window.location.hash === '#/feed' || window.location.hash === '') App.Features.renderPosts();
                             if (window.location.hash.includes('#/profil?name=')) {
                                 App.Router.handleRoute();
@@ -943,6 +960,7 @@
                             App.ProfileState.getJoinDateText();
                             App.UI.syncGlobalAvatarAndName();
                             App.Auth.showApp();
+                            App.Features.fetchCloudNotificationsDataZone();
                             App.Router.init();
                         } else {
                             localStorage.removeItem('ns_logged_in');
@@ -970,6 +988,7 @@
                         localStorage.setItem('ns_user_email', data.user.email);
                         App.UI.syncGlobalAvatarAndName();
                         this.showApp();
+                        App.Features.fetchCloudNotificationsDataZone();
                         App.Router.init();
                     } catch (error) { 
                         alert("Masuk gagal: " + error.message); 
@@ -1398,7 +1417,7 @@
                     const imageInfoText = hasImage ? " [Gambar Terlampir]" : "";
                     const textToShare = `Lihat ini di Tech Social: "${textContext.substring(0,40)}..."${imageInfoText}`;
                     
-                    App.Features.incrementGlobalShareCounter(postId);
+                    App.Features.incrementGlobalShareCounter(postId, postAuthor);
 
                     if (navigator.share && /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
                         navigator.share({
@@ -1435,7 +1454,7 @@
                     App.Modal.open("Bagikan Konten", modalHTML, true, false);
                 },
 
-                async incrementGlobalShareCounter(postId) {
+                async incrementGlobalShareCounter(postId, postAuthor) {
                     try {
                         const { data } = await supabaseClient.from('posts').select('role').eq('id', postId).single();
                         let postRoleData = { comments: [], privacy: 'public', location: '', mediaUrl: '', bgColor: '#ffffff', lovedUsers: [], sharedCount: 0, likedUsers: [] };
@@ -1443,6 +1462,11 @@
                         
                         postRoleData.sharedCount = (postRoleData.sharedCount || 0) + 1;
                         await supabaseClient.from('posts').update({ role: JSON.stringify(postRoleData) }).eq('id', postId);
+
+                        const myCurrentName = App.ProfileState.getCurrentName();
+                        if (postAuthor !== myCurrentName) {
+                            await App.Features.pushCloudNotificationPayload(postAuthor, 'share', `membagikan postingan status Anda.`);
+                        }
                     } catch(e) {}
                 },
 
@@ -1676,7 +1700,8 @@
                         const myCurrentName = App.ProfileState.getCurrentName();
                         const friendsList = window.myFriendsList || [];
                         
-                        let filteredPosts = posts ? posts.filter(p => p.image !== 'private_chat_type') : [];
+                        // Filter out notification rows and chat types from normal timeline feed streams
+                        let filteredPosts = posts ? posts.filter(p => p.image !== 'private_chat_type' && p.image !== 'notification_type') : [];
                         
                         filteredPosts = filteredPosts.filter(p => {
                             let parsedRoleData = { privacy: 'public' };
@@ -1819,6 +1844,80 @@
                     } catch (err) {}
                 },
 
+                async pushCloudNotificationPayload(targetUser, actionType, textDesc) {
+                    try {
+                        const myCurrentName = App.ProfileState.getCurrentName();
+                        const myCurrentAvatar = App.ProfileState.getCurrentAvatar();
+                        const configNotificationPayload = {
+                            action: actionType,
+                            avatar: myCurrentAvatar,
+                            description: textDesc,
+                            isUnread: true,
+                            timestamp: Date.now()
+                        };
+
+                        await supabaseClient.from('posts').insert([{
+                            author: myCurrentName,
+                            role: targetUser, // targeted receiver user entity placeholder
+                            content: JSON.stringify(configNotificationPayload),
+                            image: 'notification_type',
+                            likes: 0
+                        }]);
+                    } catch (ex) {}
+                },
+
+                async fetchCloudNotificationsDataZone() {
+                    try {
+                        const myCurrentName = App.ProfileState.getCurrentName();
+                        const { data, error } = await supabaseClient
+                            .from('posts')
+                            .select('*')
+                            .eq('image', 'notification_type')
+                            .eq('role', myCurrentName)
+                            .order('created_at', { ascending: false });
+
+                        if (!error && data) {
+                            liveNotifications = data.map(item => {
+                                let payload = { action: 'like', description: 'berinteraksi dengan Anda', isUnread: true, timestamp: Date.now(), avatar: 'https://i.pravatar.cc/150?img=12' };
+                                try { payload = JSON.parse(item.content); } catch (e) {}
+                                return {
+                                    id: item.id,
+                                    user: item.author,
+                                    type: payload.action,
+                                    desc: payload.description,
+                                    avatar: payload.avatar || `https://i.pravatar.cc/150?img=${Math.abs(item.author.hashCode()) % 70 || 12}`,
+                                    isUnread: payload.isUnread,
+                                    timestamp: payload.timestamp || new Date(item.created_at).getTime()
+                                };
+                            });
+
+                            // Calculate total count of target notifications that are unread
+                            liveHeaderNotificationCount = liveNotifications.filter(n => n.isUnread === true).length;
+                            App.UI.refreshHeaderNotificationBadgeDOM();
+                        }
+                    } catch (err) {}
+                },
+
+                async markAllLocalNotificationsAsReadCloudAction() {
+                    try {
+                        const unreadNotis = liveNotifications.filter(n => n.isUnread === true);
+                        for (let n of unreadNotis) {
+                            const rebuildPayload = {
+                                action: n.type,
+                                avatar: n.avatar,
+                                description: n.desc,
+                                isUnread: false,
+                                timestamp: n.timestamp
+                            };
+                            await supabaseClient
+                                .from('posts')
+                                .update({ content: JSON.stringify(rebuildPayload) })
+                                .eq('id', n.id);
+                        }
+                        App.Features.fetchCloudNotificationsDataZone();
+                    } catch (ex) {}
+                },
+
                 async toggleLoveReaction(id, postAuthor) {
                     const myCurrentName = App.ProfileState.getCurrentName();
                     try {
@@ -1828,16 +1927,20 @@
                         
                         if(!postRoleData.lovedUsers) postRoleData.lovedUsers = [];
                         
+                        let isGivingLove = false;
                         if (postRoleData.lovedUsers.includes(myCurrentName)) {
                             postRoleData.lovedUsers = postRoleData.lovedUsers.filter(x => x !== myCurrentName);
                         } else {
                             postRoleData.lovedUsers.push(myCurrentName);
-                            if (postAuthor !== myCurrentName) {
-                                liveNotifications.unshift({ id: Date.now(), icon: 'favorite', user: myCurrentName, type: 'love', desc: `menyukai kiriman Anda dengan Love.`, isUnread: true, timestamp: Date.now() });
-                            }
+                            isGivingLove = true;
                         }
                         
                         await supabaseClient.from('posts').update({ role: JSON.stringify(postRoleData) }).eq('id', id);
+                        
+                        if (isGivingLove && postAuthor !== myCurrentName) {
+                            await App.Features.pushCloudNotificationPayload(postAuthor, 'love', `menyukai kiriman Anda dengan Love.`);
+                        }
+                        
                         this.renderPosts();
                     } catch(e) {}
                 },
@@ -1851,19 +1954,23 @@
                         
                         if(!postRoleData.likedUsers) postRoleData.likedUsers = [];
                         
+                        let isGivingLike = false;
                         if (postRoleData.likedUsers.includes(myCurrentName)) {
                             postRoleData.likedUsers = postRoleData.likedUsers.filter(x => x !== myCurrentName);
                         } else {
                             postRoleData.likedUsers.push(myCurrentName);
-                            if (postAuthor !== myCurrentName) {
-                                liveNotifications.unshift({ id: Date.now(), icon: 'thumb_up', user: myCurrentName, type: 'like', desc: `menyukai kiriman terbaru Anda.`, isUnread: true, timestamp: Date.now() });
-                            }
+                            isGivingLike = true;
                         }
                         
                         await supabaseClient.from('posts').update({ 
                             likes: postRoleData.likedUsers.length,
                             role: JSON.stringify(postRoleData) 
                         }).eq('id', id);
+
+                        if (isGivingLike && postAuthor !== myCurrentName) {
+                            await App.Features.pushCloudNotificationPayload(postAuthor, 'like', `menyukai kiriman terbaru Anda.`);
+                        }
+
                         this.renderPosts();
                     } catch(e) {}
                 },
@@ -1878,11 +1985,11 @@
                     sheet.classList.add('active');
                     streamViewport.innerHTML = `<div style="text-align:center; padding:32px; color:var(--text-muted); font-size:0.9rem;">Memuat aliran komentar...</div>`;
                     
-                    App.Features.renderBottomSheetInputBar();
+                    App.Features.renderBottomSheetInputBar(postAuthor);
                     await App.Features.reloadCommentsBottomSheetStreamOnly();
                 },
 
-                renderBottomSheetInputBar() {
+                renderBottomSheetInputBar(postAuthor = "") {
                     const dockForm = document.getElementById('comments-sheet-input-dock-form');
                     if (!dockForm) return;
 
@@ -1892,14 +1999,14 @@
 
                     dockForm.innerHTML = `
                         <input type="text" class="form-input" placeholder="${placeholderText}" id="sheet-comment-input-field" style="border-radius:20px; padding:10px 14px; margin-bottom:0; font-size:0.9rem; background:var(--bg-body);">
-                        ${activeReplyTargetCommentId ? `<button class="icon-btn" style="color:var(--danger);" onclick="App.Features.cancelReplyMode()" title="Batal Balas"><span class="material-symbols-outlined">close</span></button>` : ''}
-                        <button class="icon-btn" style="background:var(--primary); color:white; width:34px; height:34px; flex-shrink:0;" onclick="App.Features.submitBottomSheetCommentAction()">
+                        ${activeReplyTargetCommentId ? `<button class="icon-btn" style="color:var(--danger);" onclick="App.Features.cancelReplyMode('${postAuthor}')" title="Batal Balas"><span class="material-symbols-outlined">close</span></button>` : ''}
+                        <button class="icon-btn" style="background:var(--primary); color:white; width:34px; height:34px; flex-shrink:0;" onclick="App.Features.submitBottomSheetCommentAction('${postAuthor}')">
                             <span class="material-symbols-outlined" style="font-size:16px;">send</span>
                         </button>
                     `;
                     
                     document.getElementById('sheet-comment-input-field').addEventListener('keypress', (e) => {
-                        if (e.key === 'Enter') App.Features.submitBottomSheetCommentAction();
+                        if (e.key === 'Enter') App.Features.submitBottomSheetCommentAction(postAuthor);
                     });
                     
                     if (activeReplyTargetCommentId) {
@@ -1907,9 +2014,9 @@
                     }
                 },
 
-                cancelReplyMode() {
+                cancelReplyMode(postAuthor) {
                     activeReplyTargetCommentId = null;
-                    App.Features.renderBottomSheetInputBar();
+                    App.Features.renderBottomSheetInputBar(postAuthor);
                 },
 
                 async reloadCommentsBottomSheetStreamOnly() {
@@ -1918,7 +2025,7 @@
                     if (!streamViewport) return;
                     
                     try {
-                        const { data } = await supabaseClient.from('posts').select('role').eq('id', activeBottomSheetPostId).single();
+                        const { data } = await supabaseClient.from('posts').select('role, author').eq('id', activeBottomSheetPostId).single();
                         let postRoleData = { comments: [] };
                         try {
                             if (data && data.role) {
@@ -1938,6 +2045,7 @@
                         }
 
                         const myName = App.ProfileState.getCurrentName();
+                        const postAuthor = data.author || "";
 
                         streamViewport.innerHTML = commentsList.map(c => {
                             const userClean = c.user || 'User';
@@ -1997,7 +2105,7 @@
                                         <div style="display:flex; gap:16px; font-size:0.75rem; color:var(--text-muted); font-weight:700; margin-left:8px; margin-top:2px; align-items:center;">
                                             <span>${commentTimeText}</span>
                                             <span class="comment-like-btn ${isLikedByMe}" style="cursor:pointer;" onclick="App.Features.toggleCommentLikeAction('${commentId}')">Suka</span>
-                                            <span style="cursor:pointer;" onclick="App.Features.setCommentReplyMode('${commentId}')">Balas</span>
+                                            <span style="cursor:pointer;" onclick="App.Features.setCommentReplyMode('${commentId}', '${postAuthor}')">Balas</span>
                                             ${likeCounterText}
                                         </div>
                                         ${repliesHTML}
@@ -2071,12 +2179,12 @@
                     } catch(e) {}
                 },
 
-                setCommentReplyMode(commentId) {
+                setCommentReplyMode(commentId, postAuthor) {
                     activeReplyTargetCommentId = commentId;
-                    App.Features.renderBottomSheetInputBar();
+                    App.Features.renderBottomSheetInputBar(postAuthor);
                 },
 
-                async submitBottomSheetCommentAction() {
+                async submitBottomSheetCommentAction(postAuthor = "") {
                     if (!activeBottomSheetPostId) return;
                     const input = document.getElementById('sheet-comment-input-field');
                     if (!input || !input.value.trim()) return;
@@ -2122,8 +2230,12 @@
                         
                         await supabaseClient.from('posts').update({ role: JSON.stringify(postRoleData) }).eq('id', activeBottomSheetPostId);
                         
+                        if (postAuthor !== "" && postAuthor !== myCurrentName) {
+                            await App.Features.pushCloudNotificationPayload(postAuthor, 'comment', `mengomentari postingan status Anda: "${commentText.substring(0,25)}..."`);
+                        }
+
                         input.value = '';
-                        App.Features.renderBottomSheetInputBar();
+                        App.Features.renderBottomSheetInputBar(postAuthor);
                         await App.Features.reloadCommentsBottomSheetStreamOnly();
                         App.Features.renderPosts();
                     } catch(err) {}
@@ -2256,18 +2368,45 @@
                 },
 
                 showNotifications() {
-                    let notiHTML = liveNotifications.length === 0 
-                        ? `<div style="text-align:center; padding:24px; color:var(--text-muted);">Tidak ada notifikasi baru.</div>`
-                        : liveNotifications.map(n => `
-                            <div style="display:flex; gap:12px; padding:12px; border-bottom:1px solid var(--border-color); align-items:center;">
-                                <span class="material-symbols-outlined" style="color:var(--primary);">${n.icon}</span>
-                                <div style="font-size:0.9rem;"><strong>${n.user}</strong> ${n.desc}</div>
-                            </div>
-                        `).join('');
+                    App.Features.markAllLocalNotificationsAsReadCloudAction();
+
+                    let notiHTML = '';
+                    if (liveNotifications.length === 0) {
+                        notiHTML = `
+                            <div style="text-align:center; padding:48px 24px; color:var(--text-muted);">
+                                <span class="material-symbols-outlined" style="font-size:48px; margin-bottom:12px; color:#cbd5e1;">notifications_none</span>
+                                <p style="font-size:0.9rem; font-weight:500;">Tidak ada notifikasi aktivitas interaksi terbaru.</p>
+                            </div>`;
+                    } else {
+                        notiHTML = `<div class="native-noti-stream-box">`;
+                        notiHTML += liveNotifications.map(n => {
+                            let actionColor = 'var(--primary)';
+                            let iconName = 'thumb_up';
+                            
+                            if (n.type === 'love') { actionColor = 'var(--danger)'; iconName = 'favorite'; }
+                            if (n.type === 'comment') { actionColor = '#0284c7'; iconName = 'chat_bubble'; }
+                            if (n.type === 'share') { actionColor = '#64748b'; iconName = 'share'; }
+
+                            return `
+                                <div class="native-noti-row-item ${n.isUnread ? 'unread-state' : ''}">
+                                    <div class="native-noti-avatar-circle-frame">
+                                        <img src="${n.avatar}" class="native-noti-avatar-img-node" alt="Avatar">
+                                        <div class="native-noti-badge-icon-badge" style="background:${actionColor};">
+                                            <span class="material-symbols-outlined" style="font-size:12px; font-variation-settings:'FILL' 1;">${iconName}</span>
+                                        </div>
+                                    </div>
+                                    <div class="native-noti-text-container">
+                                        <span class="native-noti-message-desc"><strong>${n.user}</strong> ${n.desc}</span>
+                                        <span class="native-noti-live-time">${App.UI.calculateRelativeTimeAgo(n.timestamp)}</span>
+                                    </div>
+                                    <span class="material-symbols-outlined native-noti-action-more-btn" style="font-size:18px;">more_horiz</span>
+                                </div>
+                            `;
+                        }).join('');
+                        notiHTML += `</div>`;
+                    }
                     
                     App.Modal.open("Notifikasi", notiHTML, true, false);
-                    liveHeaderNotificationCount = 0;
-                    App.UI.refreshHeaderNotificationBadgeDOM();
                 },
 
                 saveNameSettings() {
