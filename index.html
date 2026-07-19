@@ -1455,11 +1455,11 @@
                     if (postAuthor === myName) {
                         html = `
                             <div style="display:flex; flex-direction:column; gap:10px;">
-                                <button class="btn btn-secondary btn-full" onclick="App.Features.updatePostPrivacy(${postId}, 'public')"><span class="material-symbols-outlined">public</span> Publik</button>
-                                <button class="btn btn-secondary btn-full" onclick="App.Features.updatePostPrivacy(${postId}, 'friends')"><span class="material-symbols-outlined">group</span> Teman</button>
-                                <button class="btn btn-secondary btn-full" onclick="App.Features.updatePostPrivacy(${postId}, 'private')"><span class="material-symbols-outlined">lock</span> Privat</button>
+                                <button class="btn btn-secondary btn-full" onclick="App.Features.updatePostPrivacy(${postId}, 'public')"><span class="material-symbols-outlined">public</span> Privasi: Publik</button>
+                                <button class="btn btn-secondary btn-full" onclick="App.Features.updatePostPrivacy(${postId}, 'friends')"><span class="material-symbols-outlined">group</span> Privasi: Teman</button>
+                                <button class="btn btn-secondary btn-full" onclick="App.Features.updatePostPrivacy(${postId}, 'private')"><span class="material-symbols-outlined">lock</span> Privasi: Privat</button>
                                 <button class="btn btn-secondary btn-full" onclick="App.Features.triggerPostTextEditAction(${postId})"><span class="material-symbols-outlined">edit</span> Edit Konten</button>
-                                <button class="btn btn-secondary btn-full" style="color:var(--danger);" onclick="App.Features.triggerPostAbsoluteDeleteAction(${postId})"><span class="material-symbols-outlined">delete</span> Hapus</button>
+                                <button class="btn btn-secondary btn-full" style="color:var(--danger);" onclick="App.Features.triggerPostAbsoluteDeleteAction(${postId})"><span class="material-symbols-outlined">delete</span> Hapus Postingan</button>
                             </div>`;
                     } else {
                         html = `
@@ -1481,33 +1481,68 @@
                 },
 
                 async triggerPostTextEditAction(postId) {
-                    App.Modal.close(); const newTxt = prompt("Revisi teks status Anda:"); if(!newTxt?.trim()) return;
+                    App.Modal.close(); 
                     try {
-                        await supabaseClient.from('posts').update({ content: newTxt.trim() }).eq('id', Number(postId));
-                        App.Toast.show("Berhasil diedit", "success"); this.renderPosts();
-                    } catch(e) {}
+                        // 1. Ambil teks konten postingan yang aktif saat ini dari database
+                        const { data: post, error } = await supabaseClient.from('posts').select('content').eq('id', Number(postId)).single();
+                        if (error || !post) return;
+
+                        // 2. Desain form edit kustom yang sepenuhnya terintegrasi dengan variabel warna Tema aplikasi
+                        const editFormHTML = `
+                            <div style="text-align: left; background: var(--bg-glass-solid); display: flex; flex-direction: column; gap: 16px;">
+                                <p style="color: var(--text-muted); font-size: 0.88rem; font-weight: 500;">Modifikasi narasi atau status kiriman Anda secara realtime.</p>
+                                <div class="form-group" style="margin-bottom: 0;">
+                                    <textarea id="custom-edit-textarea-field" class="form-input" style="min-height: 150px; padding-top: 16px; resize: none; line-height: 1.5; border-radius: var(--radius-md);" required>${post.content || ''}</textarea>
+                                </div>
+                                <div style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 8px;">
+                                    <button class="btn btn-secondary" onclick="App.Modal.close()">Batal</button>
+                                    <button class="btn btn-primary" onclick="App.Features.submitCustomEditedContentCloudAction(${postId})">Simpan Perubahan</button>
+                                </div>
+                            </div>
+                        `;
+
+                        // 3. Buka form edit menggunakan sistem Pop-Up Modal Premium aplikasi
+                        App.Modal.open("Edit Konten Status", editFormHTML, true, false);
+                    } catch(err) {
+                        App.Toast.show("Gagal memuat konten pos", "danger");
+                    }
+                },
+
+                async submitCustomEditedContentCloudAction(postId) {
+                    const editedTextValue = document.getElementById('custom-edit-textarea-field')?.value.trim();
+                    if (!editedTextValue) {
+                        App.Toast.show("Konten teks status tidak boleh kosong!", "danger");
+                        return;
+                    }
+
+                    try {
+                        const { error } = await supabaseClient.from('posts').update({ content: editedTextValue }).eq('id', Number(postId));
+                        if (error) throw error;
+
+                        App.Modal.close();
+                        App.Toast.show("Konten status Anda berhasil diperbarui!", "success");
+                        this.renderPosts();
+                    } catch(err) {
+                        App.Toast.show("Gagal memperbarui status ke server", "danger");
+                    }
                 },
 
                 async triggerPostAbsoluteDeleteAction(postId) {
                     App.Modal.close(); 
                     if(!confirm("Anda yakin ingin menghapus postingan ini secara permanen? Semua komentar dan like di dalamnya juga akan terhapus otomatis.")) return;
                     try {
-                        // 1. Bersihkan komentar relasional di Supabase secara aman sebelum menghapus post utama
                         await supabaseClient.from('comments').delete().eq('post_id', Number(postId));
                         
-                        // 2. Jalankan eksekusi hapus baris postingan utama
                         const { error } = await supabaseClient.from('posts').delete().eq('id', Number(postId));
                         if (error) throw error;
                         
                         App.Toast.show("Postingan berhasil dihapus dari server", "success"); 
                         
-                        // 3. Hapus kartu status langsung dari layar DOM secara instan tanpa menunggu reload delay database
                         const targetCardNode = document.getElementById(`post-element-node-${postId}`);
                         if (targetCardNode) {
                             targetCardNode.remove();
                         }
                         
-                        // 4. Force hard reset cache local view list
                         setTimeout(() => { App.Features.renderPosts(); }, 200);
                     } catch(e) {
                         App.Toast.show("Gagal menghapus. Periksa izin hak milik RLS Anda.", "danger");
@@ -1539,7 +1574,6 @@
                         stream.innerHTML = `<div class="feed-container">` + filtered.map(p => {
                             const postComments = allComments.filter(c => c.post_id === p.id);
                             
-                            // Akumulasi Total Komentar Safely
                             let totalCommentsCount = postComments.length;
                             postComments.forEach(c => {
                                 if (c.replies && Array.isArray(c.replies)) {
@@ -1547,7 +1581,6 @@
                                 }
                             });
 
-                            // Akumulasi Total Likes Safely
                             let postLikesArray = p.liked_users || [];
                             let accumulatedLikesCount = postLikesArray.length;
                             
