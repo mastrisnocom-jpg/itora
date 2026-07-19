@@ -81,7 +81,6 @@
         .app-header { grid-area: header; background: var(--bg-glass); backdrop-filter: blur(10px); border-bottom: 1px solid var(--border-color); padding: 0 32px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 999; }
         .header-left, .header-right { display: flex; align-items: center; gap: 16px; }
         
-        /* FITUR 5: PENCARIAN LIVE HOVER/FOCUS MEMANJANG */
         .search-box { position: relative; width: 200px; display: flex; align-items: center; transition: var(--trans-smooth); }
         .search-box:hover, .search-box:focus-within { width: 320px; }
         .search-box input { width: 100%; background: var(--bg-body); border: 1px solid var(--border-color); padding: 12px 20px 12px 46px; border-radius: var(--radius-round); color: var(--text-main); transition: var(--trans-smooth); font-size: 0.9rem; }
@@ -178,7 +177,7 @@
         .post-card audio { display: block; margin: 12px auto; width: 100%; max-width: 500px; }
 
         /* ==========================================================================
-           2B. BARU: OVERLAY BOTTOM SHEET KOMENTAR (ALA FACEBOOK NATIVE MOBILE)
+           2B. OVERLAY BOTTOM SHEET KOMENTAR (ALA FACEBOOK NATIVE MOBILE)
            ========================================================================== */
         .comments-bottom-sheet {
             position: fixed;
@@ -213,7 +212,6 @@
         .comments-bottom-sheet.active .comments-sheet-content {
             transform: translateY(0);
         }
-        /* Handle Geser / Drag */
         .comments-sheet-drag-handle-area {
             width: 100%;
             padding: 10px 0;
@@ -259,6 +257,11 @@
             display: flex;
             gap: 12px;
             align-items: center;
+        }
+
+        /* Styles tambahan untuk tombol suka aktif dan balasan */
+        .comment-like-btn.active {
+            color: var(--primary) !important;
         }
 
         /* ==========================================================================
@@ -376,60 +379,46 @@
         .minimal-composer-gallery-icon { color: var(--text-muted); font-size: 28px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: var(--trans-smooth); }
         .minimal-composer-gallery-icon:hover { color: var(--primary); }
 
-        .toast-container { position: fixed; top: 24px; right: 24px; z-index: 4000; display: flex; flex-direction: column; gap: 12px; }
-        .toast { background: var(--bg-glass-solid); border-left: 6px solid var(--primary); box-shadow: var(--shadow-soft); padding: 16px 24px; border-radius: var(--radius-md); display: flex; align-items: center; gap: 12px; font-weight: 600; animation: slideInRight 0.4s cubic-bezier(0.25, 1, 0.5, 1); }
-
         /* ==========================================================================
            7. KHUSUS MOBILE (HP) RESPONSIVE DESIGN - OPTIMIZED
            ========================================================================== */
         @media (max-width: 768px) {
-            /* Layout Adjustments */
             #app-layout { grid-template-areas: "header" "content"; grid-template-columns: 1fr; grid-template-rows: 60px 1fr; }
             .app-sidebar { display: flex; transform: translateX(-100%); width: 280px; z-index: 2005; position: fixed; top: 0; left: 0; bottom: 0; }
             #app-layout.sidebar-mobile-open .app-sidebar { transform: translateX(0); }
             
-            /* Header Fixes */
             .app-header { padding: 0 16px; height: 60px; }
             .search-box { width: 100%; max-width: 140px; }
             .search-box:hover, .search-box:focus-within { width: 180px; }
-            .search-box input { padding: 8px 12px 8px 36px; font-size: 16px; height: 38px; } /* font-size 16px prevents iOS zoom */
+            .search-box input { padding: 8px 12px 8px 36px; font-size: 16px; height: 38px; }
             
-            /* Ruang bernafas ekstra untuk area bawah (Bottom Nav & Safe Area) */
             .app-content { padding: 12px; padding-bottom: calc(var(--bottom-nav-height) + env(safe-area-inset-bottom) + 20px); }
             
-            /* Bottom Navigation - Mendukung Safe Area iOS */
             .bottom-nav { display: flex !important; position: fixed; bottom: 0; left: 0; right: 0; height: calc(var(--bottom-nav-height) + env(safe-area-inset-bottom)); padding-bottom: env(safe-area-inset-bottom); background: var(--bg-glass); backdrop-filter: blur(10px); border-top: 1px solid var(--border-color); z-index: 1500; justify-content: space-around; align-items: center; box-shadow: 0 -4px 20px rgba(0,0,0,0.03); }
             .bn-item { display: flex; flex-direction: column; align-items: center; gap: 4px; color: var(--text-muted); flex: 1; cursor: pointer; padding-top: 8px; }
             .bn-item.active { color: var(--primary); font-weight: 700; }
             
-            /* Mengubah Modal Biasa menjadi Bottom Sheet (Laci dari bawah) */
             .modal-overlay { align-items: flex-end; }
             .modal-content { width: 100%; max-width: 100%; border-radius: 24px 24px 0 0; transform: translateY(100%); padding-bottom: calc(env(safe-area-inset-bottom) + 24px); max-height: 85vh; margin: 0; }
             .modal-overlay.active .modal-content { transform: translateY(0); }
             
-            /* Memaksimalkan Composer Layar Penuh di HP */
             .pic-composer-card { min-height: 80vh; border-radius: 0; }
             .modal-overlay.active .modal-content:has(.pic-composer-card) { max-height: 90vh; border-radius: 24px 24px 0 0; }
             
-            /* Profile Detail Adjustments */
             .profile-stats { gap: 12px; justify-content: space-around; width: 100%; }
             .profile-avatar-large { width: 100px; height: 100px; }
             
-            /* Penyesuaian Feed Container dan Post Card */
             .feed-container { margin-left: 0; margin-right: 0; }
             .post-card { padding: 16px 12px; border-radius: var(--radius-lg); margin-bottom: 16px; border: 1px solid rgba(0,0,0,0.06); box-shadow: 0 4px 12px rgba(0,0,0,0.02); }
             
-            /* Action Bar Postingan di-fit agar rapi */
             .post-actions-bar { gap: 4px; justify-content: space-between; margin-top: 12px; }
             .post-action-item { font-size: 0.75rem; gap: 4px; padding: 8px 4px; }
             .post-action-item .material-symbols-outlined { font-size: 18px; }
             
-            /* Floating Chat di HP menjadi Layar Penuh */
             .floating-chat-widget { width: 100vw; height: 100vh; right: 0; bottom: 0; border-radius: 0; transform: translateX(100%); z-index: 4000; }
             .floating-chat-widget.active { transform: translateX(0); }
-            .popup-chat-header { padding-top: calc(env(safe-area-inset-top) + 14px); } /* iPhone Notch support */
+            .popup-chat-header { padding-top: calc(env(safe-area-inset-top) + 14px); }
             
-            /* Tata Letak Tambahan */
             .pic-composer-dock-grid { grid-template-columns: repeat(2, 1fr); }
             .share-grid-sheet { grid-template-columns: repeat(3, 1fr); }
             .minimal-composer-bar { padding: 12px; border-radius: var(--radius-md); margin-bottom: 16px; }
@@ -500,7 +489,7 @@
                     <span class="badge" id="noti-badge">0</span>
                 </button>
                 
-                <div id="header-avatar-toggle-node"></div> <!-- Injected by JS -->
+                <div id="header-avatar-toggle-node"></div>
             </div>
         </header>
 
@@ -511,7 +500,7 @@
             </div>
             <ul class="sidebar-menu" id="sidebar-menu-list"></ul>
             <div class="sidebar-profile" onclick="App.Router.navigate('profil')">
-                <div id="sidebar-avatar-node"></div> <!-- Injected by JS -->
+                <div id="sidebar-avatar-node"></div>
                 <div class="sidebar-profile-info">
                     <span class="sp-name" id="sidebar-user-name">User</span>
                     <span class="sp-role" id="sidebar-user-role-label">Tech Workspace Member</span>
@@ -553,7 +542,6 @@
     <div class="comments-bottom-sheet" id="comments-overlay-bottom-sheet">
         <div class="comments-sheet-backdrop" onclick="App.Features.closeCommentsBottomSheet()"></div>
         <div class="comments-sheet-content" id="comments-sheet-content-node">
-            <!-- Handle gesture bar untuk slide tutup ke bawah -->
             <div class="comments-sheet-drag-handle-area" id="comments-sheet-drag-zone">
                 <div class="comments-sheet-drag-handle"></div>
             </div>
@@ -563,9 +551,7 @@
                     <span class="material-symbols-outlined" style="font-size:20px;">close</span>
                 </button>
             </div>
-            <!-- Zona Render Stream Aliran Komentar -->
             <div class="comments-sheet-stream" id="comments-sheet-stream-injector"></div>
-            <!-- Form Input Bottom Bar Mandiri Tetap -->
             <div class="comments-sheet-input-row" id="comments-sheet-input-dock-form"></div>
         </div>
     </div>
@@ -604,8 +590,8 @@
         let currentComposerBgColor = "#ffffff";
         let activeComposerLocation = "";
         
-        // Tracking ID postingan aktif yang sedang dibuka lembar komentarnya
         let activeBottomSheetPostId = null;
+        let activeReplyTargetCommentId = null; // Menyimpan ID komentar yang sedang dibalas
 
         const App = {
             init() {
@@ -616,7 +602,7 @@
                 this.Auth.checkCurrentSession();
                 this.Realtime.subscribePosts();
                 this.Features.fetchMyFriendsData(); 
-                this.Features.initCommentsSwipeToCloseGesture(); // Inisialisasi pelacak geser jari tutup komentar
+                this.Features.initCommentsSwipeToCloseGesture();
                 
                 App.UI.refreshHeaderNotificationBadgeDOM();
                 App.UI.renderGlobalBannerAdIfExists();
@@ -696,7 +682,6 @@
                             if (window.location.hash.includes('#/profil?name=')) {
                                 App.Router.handleRoute();
                             }
-                            // Realtime sinkronisasi live stream lembar bottom sheet jika postingan terkait menerima komentar baru
                             if (activeBottomSheetPostId) App.Features.reloadCommentsBottomSheetStreamOnly();
                         })
                         .subscribe();
@@ -918,7 +903,7 @@
                                 ${levelBadge}
                             </div>
                             
-                            <h2>${targetName}</h2>
+                            <h2>${targetName} ${isSuperAdmin ? '<span style="font-size:0.75rem; background:var(--primary); color:white; padding:2px 8px; border-radius:10px; margin-left:6px; vertical-align:middle;">SUPER ADMIN</span>' : ''}</h2>
                             <p style="color: var(--text-muted); font-size: 0.82rem; margin-top: 8px; margin-bottom: 8px; font-weight:700;">Bergabung sejak: ${joinDate}</p>
                             <p style="color: var(--primary); font-weight: 600; margin-bottom: 4px;">${targetBio}</p>
                             <p style="color: var(--text-muted); font-size: 0.85rem; font-weight: 500; margin-bottom: 16px; display:flex; align-items:center; justify-content:center; gap:4px;">
@@ -1472,7 +1457,6 @@
                                             <span>Love</span>
                                         </div>
 
-                                        <!-- MODIFIKASI: Mengalihkan pembukaan klik komen langsung memicu Bottom Sheet Native Slide -->
                                         <div class="post-action-item" onclick="App.Features.openCommentsBottomSheet(${pId}, '${p.author}')">
                                             <span class="material-symbols-outlined">comment</span>
                                             <span>${parsedRoleData.comments ? parsedRoleData.comments.length : 0} Komen</span>
@@ -1492,9 +1476,9 @@
                     } catch (err) {}
                 },
 
-                /* FITUR BARU: MANAJEMEN PEMBUKAAN & RENDER BOTTOM SHEET OVERLAY KOMENTAR MOBILE NATIVE STYLE */
                 async openCommentsBottomSheet(postId, postAuthor) {
                     activeBottomSheetPostId = postId;
+                    activeReplyTargetCommentId = null; // Reset target balasan tiap kali membuka sheet baru
                     
                     const sheet = document.getElementById('comments-overlay-bottom-sheet');
                     const streamViewport = document.getElementById('comments-sheet-stream-injector');
@@ -1503,23 +1487,42 @@
                     sheet.classList.add('active');
                     streamViewport.innerHTML = `<div style="text-align:center; padding:32px; color:var(--text-muted); font-size:0.9rem;">Memuat aliran komentar...</div>`;
                     
-                    // Render struktur form input bar yang statis di bagian bawah lembar
+                    App.Features.renderBottomSheetInputBar();
+                    await App.Features.reloadCommentsBottomSheetStreamOnly();
+                },
+
+                /* Render atau kembalikan tampilan input bar di bagian bawah lembar sheet */
+                renderBottomSheetInputBar() {
+                    const dockForm = document.getElementById('comments-sheet-input-dock-form');
+                    if (!dockForm) return;
+
+                    const placeholderText = activeReplyTargetCommentId 
+                        ? `Membalas komentar...` 
+                        : `Komentari sebagai ${App.ProfileState.getCurrentName()}...`;
+
                     dockForm.innerHTML = `
-                        <input type="text" class="form-input" placeholder="Komentari sebagai ${App.ProfileState.getCurrentName()}..." id="sheet-comment-input-field" style="border-radius:20px; padding:10px 14px; margin-bottom:0; font-size:0.9rem; background:var(--bg-body);">
-                        <button class="icon-btn" style="background:var(--primary); color:white; width:36px; height:34px; flex-shrink:0;" onclick="App.Features.submitBottomSheetCommentAction('${postAuthor}')">
+                        <input type="text" class="form-input" placeholder="${placeholderText}" id="sheet-comment-input-field" style="border-radius:20px; padding:10px 14px; margin-bottom:0; font-size:0.9rem; background:var(--bg-body);">
+                        ${activeReplyTargetCommentId ? `<button class="icon-btn" style="color:var(--danger);" onclick="App.Features.cancelReplyMode()" title="Batal Balas"><span class="material-symbols-outlined">close</span></button>` : ''}
+                        <button class="icon-btn" style="background:var(--primary); color:white; width:36px; height:34px; flex-shrink:0;" onclick="App.Features.submitBottomSheetCommentAction()">
                             <span class="material-symbols-outlined" style="font-size:16px;">send</span>
                         </button>
                     `;
                     
-                    // Tambahkan listener enter key kustom ke input bottom sheet
                     document.getElementById('sheet-comment-input-field').addEventListener('keypress', (e) => {
-                        if (e.key === 'Enter') App.Features.submitBottomSheetCommentAction(postAuthor);
+                        if (e.key === 'Enter') App.Features.submitBottomSheetCommentAction();
                     });
-
-                    // Muat streams data riwayat percakapan dari Supabase
-                    await App.Features.reloadCommentsBottomSheetStreamOnly();
+                    
+                    if (activeReplyTargetCommentId) {
+                        document.getElementById('sheet-comment-input-field').focus();
+                    }
                 },
 
+                cancelReplyMode() {
+                    activeReplyTargetCommentId = null;
+                    App.Features.renderBottomSheetInputBar();
+                },
+
+                /* FITUR SUKA & BALAS KOMEN: Memuat struktur data baru yang dinamis untuk di-render di dalam list */
                 async reloadCommentsBottomSheetStreamOnly() {
                     if (!activeBottomSheetPostId) return;
                     const streamViewport = document.getElementById('comments-sheet-stream-injector');
@@ -1545,11 +1548,41 @@
                             return;
                         }
 
-                        // Menggunakan struktur layout percakapan gelembung menyerupai screenshot FB/IG kustom mobile
+                        const myName = App.ProfileState.getCurrentName();
+
                         streamViewport.innerHTML = commentsList.map(c => {
                             const userClean = c.user || 'User';
                             const userAvatarUrl = `https://i.pravatar.cc/150?img=${Math.abs(userClean.hashCode()) % 70 || 12}`;
                             
+                            // Normalisasi parameter Suka (Likes) & Balasan (Replies) internal data JSON
+                            const commentId = c.id || `c_${c.date || Date.now()}_${Math.random().toString(36).substring(5)}`;
+                            if (!c.id) c.id = commentId; // Auto patch jika data lama belum punya ID kustom
+                            
+                            const likesArray = c.likes || [];
+                            const repliesArray = c.replies || [];
+                            const isLikedByMe = likesArray.includes(myName) ? 'active' : '';
+                            const likeCounterText = likesArray.length > 0 ? `• <span>👍 ${likesArray.length}</span>` : '';
+                            
+                            // Render list balasan (sub-komentar) jika ada di dalam data objek
+                            let repliesHTML = '';
+                            if (repliesArray.length > 0) {
+                                repliesHTML = `<div style="margin-top: 10px; padding-left: 12px; border-left: 2px solid var(--border-color); display: flex; flex-direction: column; gap: 10px;">`;
+                                repliesHTML += repliesArray.map(r => {
+                                    const subUser = r.user || 'User';
+                                    const subAvatar = `https://i.pravatar.cc/150?img=${Math.abs(subUser.hashCode()) % 70 || 14}`;
+                                    return `
+                                        <div style="display:flex; gap:8px; align-items:flex-start;">
+                                            <img src="${subAvatar}" style="width:26px; height:26px; border-radius:50%; object-fit:cover;">
+                                            <div style="background:var(--bg-body); padding:8px 12px; border-radius:14px; max-width:90%;">
+                                                <strong style="font-size:0.78rem; color:var(--text-main); display:block;">${subUser}</strong>
+                                                <span style="font-size:0.82rem; color:var(--text-main);">${r.text}</span>
+                                            </div>
+                                        </div>
+                                    `;
+                                }).join('');
+                                repliesHTML += `</div>`;
+                            }
+
                             return `
                                 <div style="display:flex; gap:10px; align-items:flex-start; text-align:left;">
                                     <img src="${userAvatarUrl}" style="width:34px; height:34px; border-radius:50%; object-fit:cover; margin-top:2px;">
@@ -1560,20 +1593,57 @@
                                         </div>
                                         <div style="display:flex; gap:16px; font-size:0.75rem; color:var(--text-muted); font-weight:700; margin-left:8px; margin-top:2px; align-items:center;">
                                             <span>Baru saja</span>
-                                            <span style="cursor:pointer;">Suka</span>
-                                            <span style="cursor:pointer;">Balas</span>
+                                            <span class="comment-like-btn ${isLikedByMe}" style="cursor:pointer;" onclick="App.Features.toggleCommentLikeAction('${commentId}')">Suka</span>
+                                            <span style="cursor:pointer;" onclick="App.Features.setCommentReplyMode('${commentId}')">Balas</span>
+                                            ${likeCounterText}
                                         </div>
+                                        ${repliesHTML}
                                     </div>
                                 </div>
                             `;
                         }).join('');
                         
-                        // Auto-scroll scrollbar langsung ke dasar komentar terbawah
-                        streamViewport.scrollTop = streamViewport.scrollHeight;
                     } catch(err) {}
                 },
 
-                async submitBottomSheetCommentAction(postAuthor) {
+                /* Logika pemicu klik aksi Suka Komentar */
+                async toggleCommentLikeAction(commentId) {
+                    if (!activeBottomSheetPostId) return;
+                    const myName = App.ProfileState.getCurrentName();
+
+                    try {
+                        const { data } = await supabaseClient.from('posts').select('role').eq('id', activeBottomSheetPostId).single();
+                        let postRoleData = { comments: [] };
+                        if (data && data.role && data.role.startsWith('{')) postRoleData = JSON.parse(data.role);
+                        
+                        // Cari objek id komentar target internal array JSON
+                        postRoleData.comments = postRoleData.comments.map(c => {
+                            // Map patching jika ID belum ter-generate
+                            const cId = c.id || `c_${c.date || Date.now()}`;
+                            c.id = cId;
+
+                            if (cId === commentId) {
+                                if (!c.likes) c.likes = [];
+                                if (c.likes.includes(myName)) {
+                                    c.likes = c.likes.filter(u => u !== myName); // Unlike
+                                } else {
+                                    c.likes.push(myName); // Like
+                                }
+                            }
+                            return c;
+                        });
+
+                        await supabaseClient.from('posts').update({ role: JSON.stringify(postRoleData) }).eq('id', activeBottomSheetPostId);
+                        App.Features.reloadCommentsBottomSheetStreamOnly();
+                    } catch(e) {}
+                },
+
+                setCommentReplyMode(commentId) {
+                    activeReplyTargetCommentId = commentId;
+                    App.Features.renderBottomSheetInputBar();
+                },
+
+                async submitBottomSheetCommentAction() {
                     if (!activeBottomSheetPostId) return;
                     const input = document.getElementById('sheet-comment-input-field');
                     if (!input || !input.value.trim()) return;
@@ -1583,27 +1653,47 @@
 
                     try {
                         const { data } = await supabaseClient.from('posts').select('role').eq('id', activeBottomSheetPostId).single();
-                        let postRoleData = { comments: [], privacy: 'public', location: '', mediaUrl: '', bgColor: '#ffffff' };
-                        try {
-                            if (data && data.role) {
-                                if (data.role.startsWith('{')) postRoleData = JSON.parse(data.role);
-                                else if (data.role.startsWith('[')) postRoleData.comments = JSON.parse(data.role);
-                            }
-                        } catch(ex) {}
+                        let postRoleData = { comments: [] };
+                        if (data && data.role && data.role.startsWith('{')) postRoleData = JSON.parse(data.role);
                         
                         if (!postRoleData.comments) postRoleData.comments = [];
-                        postRoleData.comments.push({ user: myCurrentName, text: commentText, date: Date.now() });
-                        
-                        // Push pembaruan array objek kustom ke kolom role Supabase
-                        await supabaseClient.from('posts').update({ role: JSON.stringify(postRoleData) }).eq('id', activeBottomSheetPostId);
-                        
-                        if (postAuthor !== myCurrentName) {
-                            liveNotifications.unshift({ id: Date.now(), icon: 'chat_bubble', user: myCurrentName, type: 'comment', desc: `telah mengomentari kiriman Anda: "${commentText.substring(0, 15)}..."`, isUnread: true, timestamp: Date.now() });
+
+                        if (activeReplyTargetCommentId) {
+                            // KONDISI A: INPUT ADALAH SUB-BALASAN KOMENTAR
+                            postRoleData.comments = postRoleData.comments.map(c => {
+                                const cId = c.id || `c_${c.date || Date.now()}`;
+                                c.id = cId;
+
+                                if (cId === activeReplyTargetCommentId) {
+                                    if (!c.replies) c.replies = [];
+                                    c.replies.push({
+                                        id: `r_${Date.now()}`,
+                                        user: myCurrentName,
+                                        text: commentText,
+                                        date: Date.now()
+                                    });
+                                }
+                                return c;
+                            });
+                            activeReplyTargetCommentId = null; // Keluar dari mode balas
+                        } else {
+                            // KONDISI B: INPUT ADALAH KOMENTAR UTAMA BARU
+                            postRoleData.comments.push({
+                                id: `c_${Date.now()}_${Math.random().toString(36).substring(5)}`,
+                                user: myCurrentName,
+                                text: commentText,
+                                date: Date.now(),
+                                likes: [],
+                                replies: []
+                            });
                         }
                         
+                        await supabaseClient.from('posts').update({ role: JSON.stringify(postRoleData) }).eq('id', activeBottomSheetPostId);
+                        
                         input.value = '';
+                        App.Features.renderBottomSheetInputBar();
                         await App.Features.reloadCommentsBottomSheetStreamOnly();
-                        App.Features.renderPosts(); // Refresh hitungan counter komen di feed utama dibelakang layar
+                        App.Features.renderPosts();
                     } catch(err) {}
                 },
 
@@ -1611,9 +1701,9 @@
                     const sheet = document.getElementById('comments-overlay-bottom-sheet');
                     if (sheet) sheet.classList.remove('active');
                     activeBottomSheetPostId = null;
+                    activeReplyTargetCommentId = null;
                 },
 
-                /* CODES BARU: HANDLING TOUCH SWIPE GESTURE DETECTOR UNTUK SLIDE DRAWER KE BAWAH HINGGA MENUTUP */
                 initCommentsSwipeToCloseGesture() {
                     const dragZone = document.getElementById('comments-sheet-drag-zone');
                     const sheetContent = document.getElementById('comments-sheet-content-node');
@@ -1624,38 +1714,31 @@
 
                     if (!dragZone || !sheetContent) return;
 
-                    // Touch Start Event
                     dragZone.addEventListener('touchstart', (e) => {
                         startY = e.touches[0].clientY;
                         isDragging = true;
-                        sheetContent.style.transition = 'none'; // Matikan animasi transisi CSS agar geseran jari responsif instan
+                        sheetContent.style.transition = 'none';
                     }, { passive: true });
 
-                    // Touch Move Event
                     dragZone.addEventListener('touchmove', (e) => {
                         if (!isDragging) return;
                         currentY = e.touches[0].clientY;
                         const deltaY = currentY - startY;
                         
-                        // Jari ditarik ke bawah (Arah menutup)
                         if (deltaY > 0) {
                             sheetContent.style.transform = `translateY(${deltaY}px)`;
                         }
                     }, { passive: true });
 
-                    // Touch End Event
                     dragZone.addEventListener('touchend', (e) => {
                         if (!isDragging) return;
                         isDragging = false;
                         sheetContent.style.transition = 'transform 0.3s cubic-bezier(0.25, 1, 0.5, 1)';
                         
                         const finalDeltaY = currentY - startY;
-                        
-                        // Batas ambang batas (threshold) penutupan jika ditarik lebih dari 120 piksel ke bawah
                         if (finalDeltaY > 120) {
                             App.Features.closeCommentsBottomSheet();
                         } else {
-                            // Kembalikan ke posisi semula di atas jika tarikan jari tanggung / tidak melewati batas
                             sheetContent.style.transform = 'translateY(0)';
                         }
                         startY = 0;
@@ -1778,7 +1861,6 @@
                 },
 
                 togglePostCommentsVisibility(postId) {
-                    // Dipertahankan sebagai fungsi penyeimbang agar tidak merusak dependensi
                     App.Features.openCommentsBottomSheet(postId, '');
                 },
                 
@@ -1834,7 +1916,6 @@
                 },
 
                 async submitPostCommentAction(postId, postAuthor) {
-                    // Mengarahkan logika penyeimbang bawaan ke sistem modular bottom sheet baru
                     App.Features.openCommentsBottomSheet(postId, postAuthor);
                 }
             },
