@@ -372,7 +372,7 @@
         .stat-lbl { font-size: 0.75rem; color: var(--text-muted); font-weight: 600; }
 
         /* ==========================================================================
-           REVISED CHAT DESIGN: FULL SCREEN LIST -> CLICK -> SLIDE CHAT FORM
+           FLOATING CHAT WIDGET SYSTEM (WHATSAPP/MESSENGER LOOK)
            ========================================================================== */
         .floating-chat-widget { 
             position: fixed; 
@@ -597,10 +597,13 @@
             .minimal-composer-bar { padding: 12px 16px; margin-bottom: 16px; border-radius: var(--radius-lg); }
             .minimal-composer-input-mock { padding: 10px 16px; font-size: 0.95rem; }
             
+            /* FIX: Chat mode handphone tetap di bawah header (tidak full screen) */
             .floating-chat-widget {
                 width: 100vw;
-                height: 100vh;
-                bottom: 0; right: 0;
+                height: calc(100vh - var(--header-height));
+                top: var(--header-height); 
+                bottom: 0; 
+                right: 0;
                 border-radius: 0;
                 z-index: 6000;
                 max-width: 100vw;
@@ -699,11 +702,10 @@
         </main>
     </div>
 
-    <!-- REVISED FLOATING CHAT POP-UP -->
+    <!-- FLOATING CHAT POP-UP -->
     <div class="floating-chat-widget" id="floating-chat-popup-box">
         <div class="popup-chat-header">
             <div style="display:flex; align-items:center; gap:10px;">
-                <!-- Back Button for active chat session form -->
                 <button class="icon-btn" id="chat-back-to-list-btn" style="display: none; width:28px; height:28px; color:var(--text-main);" onclick="App.Features.closeActiveChatSessionAndReturnToList()">
                     <span class="material-symbols-outlined">arrow_back</span>
                 </button>
@@ -813,7 +815,6 @@
                 App.UI.refreshHeaderNotificationBadgeDOM();
                 App.UI.renderGlobalBannerAdIfExists();
 
-                // Dummy data untuk mensimulasikan indikator 'Pesan Baru' di mockup gambar Anda
                 unreadMessageCounters = {
                     'insight_ata': 1,
                     'marketplace': 1
@@ -1241,6 +1242,7 @@
                     };
                 },
 
+                // FIX: Menjadikan form modal pembuatan status bisa diklik dengan aman tanpa penumpukan rawMode layout
                 openComposerModalPopupForm() {
                     const currentName = App.ProfileState.getCurrentName();
                     const premiumLevel = App.ProfileState.getPremiumLevel();
@@ -1273,27 +1275,26 @@
                             </div>
                             
                             <div class="pic-composer-body" style="padding: 8px 16px;">
-                                <textarea class="pic-composer-textarea" id="composer-text" placeholder="Apa yang Anda pikirkan?" oninput="document.getElementById('pic-submit-btn').classList.add('ready')" style="border-radius: 8px; padding: 8px; width: 100%;"></textarea>
+                                <textarea class="pic-composer-textarea" id="composer-text" placeholder="Apa yang Anda pikirkan?" oninput="document.getElementById('pic-submit-btn').classList.add('ready')" style="border: 1px solid var(--border-color); border-radius: 8px; padding: 12px; width: 100%; min-height: 120px; background: var(--bg-body);"></textarea>
                                 <div id="composer-upload-preview-area" class="pic-composer-preview-box">
                                     ${composerAttachedImageBase64 ? `<img src="${composerAttachedImageBase64}">` : ''}
                                 </div>
                             </div>
 
                             <div class="composer-dynamic-input-zone" id="composer-location-zone">
-                                <div style="display: flex; gap: 8px; align-items: center; width: 100%;">
+                                <div style="display: flex; gap: 8px; align-items: center; width: 100%; padding: 0 16px;">
                                     <span class="material-symbols-outlined" style="color: var(--primary);">location_on</span>
                                     <input type="text" id="composer-location-input" placeholder="Ketik nama lokasi..." style="background: var(--bg-body); padding: 10px 14px; border-radius: 20px; font-size: 0.9rem; width: 100%; border: 1px solid var(--border-color);" oninput="activeComposerLocation = this.value">
                                 </div>
                             </div>
                             <div class="composer-dynamic-input-zone" id="composer-media-zone">
-                                <div style="display: flex; gap: 8px; align-items: center; width: 100%;">
+                                <div style="display: flex; gap: 8px; align-items: center; width: 100%; padding: 0 16px;">
                                     <span class="material-symbols-outlined" style="color: var(--primary);">link</span>
                                     <input type="text" id="composer-media-url" placeholder="Paste link YouTube / Audio (.mp3)..." style="background: var(--bg-body); padding: 10px 14px; border-radius: 20px; font-size: 0.9rem; width: 100%; border: 1px solid var(--border-color);">
                                 </div>
                             </div>
                             
                             <div class="pic-composer-dock-grid">
-                                <div class="pic-composer-dock-grid">
                                 <div class="pic-dock-icon-only-item" onclick="document.getElementById('composer-modal-inner-img-input').click()" title="Galeri">
                                     <span class="material-symbols-outlined">image</span>
                                 </div>
@@ -1312,7 +1313,7 @@
                         </div>
                     `;
                     
-                    App.Modal.open(null, popupFormHTML, true, true);
+                    App.Modal.open("Status Baru", popupFormHTML, true, false);
                 },
 
                 closeComposerAndClearCache() {
@@ -1461,12 +1462,10 @@
                     } catch(e) { window.myFriendsList = []; }
                 },
 
-                // 1. MEKANISME UTAMA: Render Daftar Kontak Penuh (Selebar Layar Widget)
                 async loadPopupFriendsListSidebar() {
                     const listContainer = document.getElementById('popup-friends-sidebar-items'); if(!listContainer) return;
-                    const myEmail = localStorage.getItem('ns_user_email') || '';
                     try {
-                        const { data: friends } = await supabaseClient.from('friends').select('friend_email').eq('user_email', myEmail);
+                        const { data: friends } = await supabaseClient.from('friends').select('friend_email').eq('user_email', localStorage.getItem('ns_user_email') || '');
                         
                         if (!friends || friends.length === 0) {
                             listContainer.innerHTML = `<div style="padding:32px 16px; font-size:0.9rem; color:var(--text-muted); text-align:center;">Belum ada kontak jaringan.</div>`;
@@ -1477,13 +1476,11 @@
                             const displayName = f.friend_email.split('@')[0];
                             const nameHash = displayName ? String(displayName).hashCode() : 0;
                             
-                            // Ambil status counter notifikasi unread jika tersedia
                             const hasUnreadCount = unreadMessageCounters[displayName.toLowerCase()] || 0;
                             const unreadBadgeHTML = hasUnreadCount > 0 
                                 ? `<div class="chat-unread-badge">${hasUnreadCount}</div>` 
                                 : '';
                             
-                            // Konten mockup statis agar persis dengan screenshot chat Anda
                             let previewText = "Anda: Beli item ini bro.";
                             let msgTime = "14 Jun";
                             if (displayName.toLowerCase().includes('ata')) {
@@ -1519,26 +1516,22 @@
                     } catch(err) {}
                 },
 
-                // 2. MEKANISME UTAMA: Klik Kontak -> Geser dan Munculkan Form Obrolan Berpilar
                 async openSpecificFriendPopupObrolan(friendEmail, friendName) {
                     activeChatFriendEmail = friendEmail; 
                     activeChatFriendName = friendName;
 
-                    // Hapus counter notifikasi lokal saat obrolan dibuka
                     if(unreadMessageCounters[friendName.toLowerCase()]) {
                         unreadMessageCounters[friendName.toLowerCase()] = 0;
                     }
 
-                    // Terapkan translasi geser (Sembunyikan Sidebar List)
                     document.getElementById('chat-contacts-list-sidebar-container').classList.add('hidden');
                     
-                    // Ganti Header Title & Tampilkan Tombol Kembali
                     const headerTitle = document.getElementById('popup-chat-header-title');
                     if (headerTitle) headerTitle.innerHTML = `<span style="color:var(--text-main); font-weight:800;">${friendName}</span>`;
                     document.getElementById('chat-back-to-list-btn').style.display = "inline-flex";
 
                     const mainArea = document.getElementById('popup-chat-main-area-pane'); if(!mainArea) return;
-                    mainArea.classList.add('active'); // Slide-in Form obrolan
+                    mainArea.classList.add('active');
                     
                     mainArea.innerHTML = `
                         <div class="popup-msg-stream" id="popup-msg-stream-viewport"></div>
@@ -1554,7 +1547,6 @@
                         const streamViewport = document.getElementById('popup-msg-stream-viewport');
                         
                         if(streamViewport && messages) {
-                            // Render Bubble Berpilar: Kanan (.out) jika Anda pengirim, Kiri (.in) jika teman pengirim
                             streamViewport.innerHTML = messages.filter(m => (m.author === myCurrentName && m.role === friendName) || (m.author === friendName && m.role === myCurrentName)).map(msg => {
                                 const bubbleStyle = msg.author === myCurrentName ? 'out' : 'in';
                                 return `<div class="bubble ${bubbleStyle}"><span>${msg.content}</span></div>`;
@@ -1564,20 +1556,16 @@
                     } catch(err) {}
                 },
 
-                // 3. MEKANISME UTAMA: Tombol Kembali -> Reset Status Geser Viewport
                 closeActiveChatSessionAndReturnToList() {
                     activeChatFriendEmail = null;
                     activeChatFriendName = null;
                     
-                    // Tampilkan kembali daftar kontak
                     document.getElementById('chat-contacts-list-sidebar-container').classList.remove('hidden');
                     document.getElementById('popup-chat-main-area-pane').classList.remove('active');
                     
-                    // Reset Atribut Header
                     document.getElementById('popup-chat-header-title').innerText = "Obrolan";
                     document.getElementById('chat-back-to-list-btn').style.display = "none";
                     
-                    // Refresh data list untuk memperbarui status badge unread
                     this.loadPopupFriendsListSidebar();
                 },
 
@@ -1590,7 +1578,7 @@
                         const streamViewport = document.getElementById('popup-msg-stream-viewport');
                         if(streamViewport) {
                             const b = document.createElement('div'); 
-                            b.className = 'bubble out'; // Selalu taruh di Kanan (out) setelah Anda ketik & kirim
+                            b.className = 'bubble out';
                             b.innerHTML = `<span>${textVal}</span>`;
                             streamViewport.appendChild(b); 
                             streamViewport.scrollTop = streamViewport.scrollHeight;
