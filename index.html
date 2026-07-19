@@ -821,12 +821,18 @@
                     try {
                         const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
                         if (error) throw error;
+                        if (!data.user) throw new Error("Pengguna tidak ditemukan");
+                        
                         localStorage.setItem('ns_logged_in', 'true');
                         localStorage.setItem('ns_user_email', data.user.email);
                         App.UI.syncGlobalAvatarAndName();
                         this.showApp();
                         App.Router.init();
-                    } catch (error) { alert("Masuk gagal: " + error.message); }
+                    } catch (error) { 
+                        alert("Masuk gagal: " + error.message); 
+                        const btn = e.target.querySelector('button');
+                        if(btn) btn.innerHTML = 'Masuk ke Aplikasi';
+                    }
                 },
                 async signup(e) {
                     if (e && e.preventDefault) e.preventDefault();
@@ -1824,7 +1830,7 @@
                     try {
                         const { data } = await supabaseClient.from('posts').select('role').eq('id', activeBottomSheetPostId).single();
                         let postRoleData = { comments: [] };
-                        if (data && data.role && data.role.startsWith('{')) postRoleData = JSON.parse(data.role);
+                        if (data && data.role && data.role.startsWith('{')) postRoleData = JSON.parse(postRoleData);
                         
                         if (!postRoleData.comments) postRoleData.comments = [];
 
@@ -2121,7 +2127,7 @@
                 generateAvatarHTML(name, rawAvatarUrl, isPremium, level, size = '46px', inPost = false) {
                     let borderClass = isPremium ? 'premium-border' : '';
                     let levelBadge = isPremium && level > 0 ? `<div class="premium-level-badge">LVL ${level}</div>` : '';
-                    let verifiedBadge = isPremium ? `<span class="material-symbols-outlined verified-badge">check</span>' : '';
+                    let verifiedBadge = isPremium ? `<span class="material-symbols-outlined verified-badge">check</span>` : '';
                     let navClick = inPost ? `onclick="App.Router.navigate('profil?name=${encodeURIComponent(name)}')"` : `onclick="App.Router.navigate('profil')"`;
                     return `
                         <div class="premium-avatar-container avatar-wrapper" ${navClick}>
