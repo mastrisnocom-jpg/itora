@@ -1503,7 +1503,8 @@
                     const stream = document.getElementById('feed-stream'); if(!stream) return;
                     try {
                         const { data: posts } = await supabaseClient.from('posts').select('*').order('created_at', { ascending: false });
-                        const { data: allComments } = await supabaseClient.from('comments').select('*');
+                        const { data: commentsData } = await supabaseClient.from('comments').select('*');
+                        const allComments = commentsData || [];
                         const myName = App.ProfileState.getCurrentName();
                         let filtered = posts || [];
 
@@ -1521,9 +1522,9 @@
                         }
 
                         stream.innerHTML = `<div class="feed-container">` + filtered.map(p => {
-                            const postComments = allComments ? allComments.filter(c => c.post_id === p.id) : [];
+                            const postComments = allComments.filter(c => c.post_id === p.id);
                             
-                            // 1. Akumulasi Total Komentar: Komentar Utama + Semua Sub-komentar (Replies)
+                            // Akumulasi Total Komentar Safely
                             let totalCommentsCount = postComments.length;
                             postComments.forEach(c => {
                                 if (c.replies && Array.isArray(c.replies)) {
@@ -1531,7 +1532,7 @@
                                 }
                             });
 
-                            // 2. Akumulasi Total Likes: Like Utama + Like Semua Komentar + Like Semua Sub-komentar
+                            // Akumulasi Total Likes Safely
                             let postLikesArray = p.liked_users || [];
                             let accumulatedLikesCount = postLikesArray.length;
                             
@@ -1668,7 +1669,6 @@
                             const isCommentLiked = (c.likes || []).includes(myName) ? 'active' : '';
                             const commentLikesCount = (c.likes || []).length;
                             
-                            // Sembunyikan ikon jempol jika likes utama komentar bernilai 0
                             const commentLikeBadgeHTML = commentLikesCount > 0 
                                 ? `👍 ${commentLikesCount} Suka` 
                                 : `Suka`;
@@ -1679,7 +1679,6 @@
                                 const isReplyLiked = (r.likes || []).includes(myName) ? 'active' : '';
                                 const replyLikesCount = (r.likes || []).length;
                                 
-                                // Sembunyikan ikon jempol jika likes sub-komentar bernilai 0
                                 const replyLikeBadgeHTML = replyLikesCount > 0 
                                     ? `👍 ${replyLikesCount} Suka` 
                                     : `Suka`;
