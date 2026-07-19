@@ -97,7 +97,7 @@
         /* SIDEBAR & NAV */
         .menu-item-wrapper { position: relative; width: 100%; }
         
-        /* PREMIUM AVATAR STYLES - REVISED FOR PERFECT MOBILE ALIGNMENT */
+        /* PREMIUM AVATAR STYLES */
         .premium-avatar-container { position: relative; display: inline-flex; cursor: pointer; align-items: center; justify-content: center; padding: 4px; margin-top: 2px; }
         .premium-border { border: 2px solid #10B981 !important; }
         .premium-level-badge { position: absolute; top: -3px; left: 50%; transform: translateX(-50%); background: #10B981; color: white; font-size: 0.55rem; font-weight: 900; padding: 1px 5px; border-radius: 6px; border: 1.5px solid var(--bg-glass-solid); z-index: 3; white-space: nowrap; line-height: 1; }
@@ -135,9 +135,7 @@
         .form-label { position: absolute; left: 16px; top: 50%; transform: translateY(-50%); color: var(--text-muted); pointer-events: none; transition: var(--trans-smooth); font-weight: 500; }
         .form-input:focus ~ .form-label, .form-input:not(:placeholder-shown) ~ .form-label { top: 12px; font-size: 0.75rem; color: var(--primary); font-weight: 700; }
 
-        /* ==========================================================================
-           2. SISTEM FEED CONTAINER EDGE-TO-EDGE
-           ========================================================================== */
+        /* FEED CONTAINER */
         .feed-container { margin-left: -32px; margin-right: -32px; background: transparent; max-width: calc(100% + 64px); }
         .post-card { padding: 24px 32px; position: relative; border-radius: 0; border: none; border-bottom: 1px solid rgba(128, 128, 128, 0.15); background: var(--bg-glass-solid); margin-bottom: 12px; box-shadow: none; max-width: 100%; box-sizing: border-box; overflow-x: hidden; }
         
@@ -173,9 +171,7 @@
         .post-card iframe { display: block; margin: 12px auto; width: 100%; max-width: 100%; height: 240px; border-radius: 12px; border: none; }
         .post-card audio { display: block; margin: 12px auto; width: 100%; max-width: 100%; }
 
-        /* ==========================================================================
-           2B. OVERLAY BOTTOM SHEET KOMENTAR (ALA FACEBOOK NATIVE MOBILE)
-           ========================================================================== */
+        /* OVERLAY BOTTOM SHEET KOMENTAR */
         .comments-bottom-sheet {
             position: fixed;
             top: 0; left: 0; right: 0; bottom: 0;
@@ -268,9 +264,7 @@
             color: var(--primary) !important;
         }
 
-        /* ==========================================================================
-           4. KOMPONEN POP UP COMPOSER (IKON MINIMALIS & INPUT SLIDE)
-           ========================================================================== */
+        /* COMPOSER CARD */
         .pic-composer-card { display: flex; flex-direction: column; width: 100%; background: var(--bg-glass-solid); min-height: 100%; text-align: left; position: relative; max-width: 100%; }
         .pic-composer-header { display: flex; align-items: center; justify-content: space-between; padding: 16px; border-bottom: 1px solid rgba(0,0,0,0.05); }
         .pic-composer-close { font-size: 26px; color: var(--text-main); cursor: pointer; border: none; background: transparent; }
@@ -308,9 +302,7 @@
         .pic-dock-icon-only-item .material-symbols-outlined { font-size: 24px; color: var(--text-main); }
         .pic-dock-icon-only-item.active .material-symbols-outlined { color: var(--primary); }
 
-        /* ==========================================================================
-           5. MULTI SHARE SHEET CSS
-           ========================================================================== */
+        /* MULTI SHARE SHEET CSS */
         .share-grid-sheet { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; padding: 12px 0; text-align: center; max-width: 100%; }
         .share-item-node { display: flex; flex-direction: column; align-items: center; gap: 8px; cursor: pointer; transition: var(--trans-smooth); }
         .share-item-node:hover { transform: translateY(-3px); }
@@ -326,9 +318,7 @@
         .avatar-preview-circle { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; padding: 2px; }
         .avatar-upload-label { position: absolute; bottom: 0; right: 0; width: 32px; height: 32px; border-radius: 50%; background: var(--primary); color: white; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: var(--shadow-float); }
 
-        /* ==========================================================================
-           9. FIX: MINIMAL COMPOSER BAR SEBELUM DIKLIK (SEJAJAR HORIZONTAL)
-           ========================================================================== */
+        /* MINIMAL COMPOSER BAR */
         .minimal-composer-bar { 
             display: flex; 
             align-items: center; 
@@ -381,24 +371,152 @@
         .stat-val { font-weight: 800; font-size: 1.1rem; color: var(--text-main); }
         .stat-lbl { font-size: 0.75rem; color: var(--text-muted); font-weight: 600; }
 
-        /* FLOATING CHAT WIDGET SYSTEM */
-        .floating-chat-widget { position: fixed; bottom: 85px; right: 20px; width: 360px; height: 480px; background: var(--bg-glass-solid); border: 1px solid var(--border-color); border-radius: var(--radius-xl); box-shadow: var(--shadow-soft); display: none; flex-direction: column; overflow: hidden; z-index: 1002; transition: var(--trans-smooth); max-width: calc(100% - 40px); }
+        /* ==========================================================================
+           REVISED: FLOATING CHAT WIDGET SYSTEM (WHATSAPP/MESSENGER NATIVE LOOK)
+           ========================================================================== */
+        .floating-chat-widget { 
+            position: fixed; 
+            bottom: 85px; 
+            right: 20px; 
+            width: 420px; 
+            height: 600px; 
+            background: var(--bg-glass-solid); 
+            border: 1px solid var(--border-color); 
+            border-radius: var(--radius-xl); 
+            box-shadow: 0 12px 40px rgba(0,0,0,0.12); 
+            display: none; 
+            flex-direction: column; 
+            overflow: hidden; 
+            z-index: 1002; 
+            transition: var(--trans-smooth); 
+            max-width: calc(100% - 40px); 
+        }
         .floating-chat-widget.active { display: flex; }
-        .popup-chat-header { background: var(--primary); color: white; padding: 14px 16px; display: flex; align-items: center; justify-content: space-between; }
+        
+        .popup-chat-header { 
+            background: var(--bg-glass-solid); 
+            color: var(--text-main); 
+            padding: 18px 20px; 
+            display: flex; 
+            align-items: center; 
+            justify-content: space-between;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
         .popup-chat-body-container { display: flex; flex: 1; overflow: hidden; max-width: 100%; }
-        .popup-friends-list { width: 70px; border-right: 1px solid var(--border-color); background: var(--bg-body); overflow-y: auto; display: flex; flex-direction: column; align-items: center; padding: 10px 0; gap: 12px; flex-shrink: 0; }
-        .popup-friend-item { position: relative; cursor: pointer; }
-        .friend-avatar-node { width: 44px; height: 44px; border-radius: 50%; object-fit: cover; border: 2px solid transparent; }
-        .popup-friend-item:hover .friend-avatar-node { border-color: var(--primary); }
-        .friend-online-dot { position: absolute; bottom: 2px; right: 2px; width: 10px; height: 10px; background: #10B981; border-radius: 50%; border: 2px solid var(--bg-body); }
-        .popup-chat-main-area { flex: 1; display: flex; flex-direction: column; overflow: hidden; background: var(--bg-glass-solid); max-width: calc(100% - 70px); }
-        .popup-msg-stream { flex: 1; overflow-y: auto; padding: 12px; display: flex; flex-direction: column; gap: 8px; }
-        .popup-chat-input-row { padding: 10px; border-top: 1px solid var(--border-color); display: flex; gap: 8px; align-items: center; max-width: 100%; box-sizing: border-box; }
-        .bubble { max-width: 85%; padding: 8px 14px; border-radius: 16px; font-size: 0.88rem; line-height: 1.4; margin-bottom: 2px; word-break: break-word; }
-        .bubble.in { background: var(--bg-body); align-self: flex-start; border-bottom-left-radius: 4px; }
-        .bubble.out { background: var(--primary); color: white; align-self: flex-end; border-bottom-right-radius: 4px; }
+        
+        /* Left bar revamped into vertical dynamic contact list */
+        .popup-friends-list { 
+            width: 180px; 
+            border-right: 1px solid var(--border-color); 
+            background: var(--bg-glass-solid); 
+            overflow-y: auto; 
+            display: flex; 
+            flex-direction: column; 
+            padding: 8px 0; 
+            gap: 2px; 
+            flex-shrink: 0; 
+        }
+        
+        /* Search Box inside Chat Sidebar */
+        .chat-sidebar-search {
+            padding: 8px 12px;
+            border-bottom: 1px solid var(--border-color);
+            background: var(--bg-glass-solid);
+        }
+        .chat-sidebar-search input {
+            width: 100%;
+            padding: 8px 12px;
+            background: var(--bg-body);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            font-size: 0.8rem;
+            color: var(--text-main);
+        }
 
-        /* GLOBAL ROBUST MODAL SYSTEM */
+        .popup-friend-item { 
+            position: relative; 
+            cursor: pointer; 
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px;
+            transition: var(--trans-smooth);
+            border-bottom: 1px solid rgba(0,0,0,0.02);
+        }
+        .popup-friend-item:hover, .popup-friend-item.active { 
+            background: var(--primary-state);
+        }
+        
+        .friend-avatar-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+        .friend-avatar-node { 
+            width: 44px; 
+            height: 44px; 
+            border-radius: 50%; 
+            object-fit: cover; 
+            border: 1px solid var(--border-color); 
+        }
+        .friend-online-dot { 
+            position: absolute; 
+            bottom: 1px; 
+            right: 1px; 
+            width: 12px; 
+            height: 12px; 
+            background: #10B981; 
+            border-radius: 50%; 
+            border: 2px solid var(--bg-glass-solid); 
+        }
+        
+        .friend-chat-meta-info {
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            text-align: left;
+            flex: 1;
+        }
+        .friend-chat-meta-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+        }
+        .friend-chat-meta-info strong {
+            font-size: 0.88rem;
+            font-weight: 700;
+            color: var(--text-main);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .friend-chat-meta-time {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+        .friend-chat-meta-preview {
+            font-size: 0.76rem;
+            color: var(--text-muted);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            margin-top: 2px;
+        }
+
+        .popup-chat-main-area { flex: 1; display: flex; flex-direction: column; overflow: hidden; background: var(--bg-body); max-width: calc(100% - 180px); }
+        .popup-msg-stream { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 8px; }
+        .popup-chat-input-row { padding: 12px 16px; border-top: 1px solid var(--border-color); display: flex; gap: 8px; align-items: center; max-width: 100%; box-sizing: border-box; background: var(--bg-glass-solid); }
+        
+        .bubble { max-width: 85%; padding: 10px 16px; border-radius: 18px; font-size: 0.9rem; line-height: 1.4; margin-bottom: 2px; word-break: break-word; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
+        .bubble.in { background: var(--bg-glass-solid); color: var(--text-main); align-self: flex-start; border-top-left-radius: 4px; }
+        .bubble.out { background: var(--primary); color: white; align-self: flex-end; border-top-right-radius: 4px; }
+
+        /* GLOBAL MODAL SYSTEM */
         .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(5,20,11,0.5); backdrop-filter: blur(4px); z-index: 4000; display: none; align-items: center; justify-content: center; padding: 20px; transition: var(--trans-smooth); }
         .modal-overlay.active { display: flex; }
         .modal-content { background: var(--bg-glass-solid); border: 1px solid var(--border-color); border-radius: var(--radius-xl); padding: 24px; width: 100%; max-width: 500px; position: relative; box-shadow: var(--shadow-soft); max-height: 90vh; overflow-y: auto; box-sizing: border-box; }
@@ -413,9 +531,7 @@
         @keyframes slideUpFade { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
         @keyframes fadeScale { from { opacity: 0; transform: scale(0.98); } to { opacity: 1; transform: scale(1); } }
 
-        /* ==========================================================================
-           10. MEDIA QUERIES DATA - MOBILE PHONE SCREEN OPTIMIZATION
-           ========================================================================== */
+        /* RESPONSIVE MOBILE PHONES SCREEN */
         @media (max-width: 768px) {
             :root {
                 --header-height: 120px;
@@ -505,6 +621,12 @@
                 border-radius: 0;
                 z-index: 6000;
                 max-width: 100vw;
+            }
+            .popup-chat-main-area {
+                max-width: calc(100% - 140px);
+            }
+            .popup-friends-list {
+                width: 140px;
             }
             .modal-content {
                 width: 100%;
@@ -598,7 +720,6 @@
                 </div>
             </div>
             
-            <!-- Injected Navigation Menus under Search and Controls inside Mobile view header -->
             <div class="header-mobile-menu-bar" id="header-mobile-injected-tabs"></div>
         </header>
 
@@ -617,29 +738,34 @@
         </main>
     </div>
 
-    <!-- FLOATING CHAT POP-UP LAYOUT -->
+    <!-- REVISED FLOATING CHAT POP-UP -->
     <div class="floating-chat-widget" id="floating-chat-popup-box">
         <div class="popup-chat-header">
-            <div style="display:flex; align-items:center; gap:8px;">
-                <span class="material-symbols-outlined">chat_bubble</span>
-                <strong style="font-size:0.95rem; font-weight:800;" id="popup-chat-header-title">Pesan Cloud Pribadi</strong>
+            <div style="display:flex; align-items:center; gap:10px;">
+                <span class="material-symbols-outlined" style="color: var(--primary);">chat_bubble</span>
+                <strong style="font-size:1.05rem; font-weight:800;" id="popup-chat-header-title">Obrolan</strong>
             </div>
-            <button class="icon-btn" style="color:white; width:28px; height:28px;" onclick="App.UI.toggleChatPopup(false)">
+            <button class="icon-btn" style="color:var(--text-main); width:28px; height:28px;" onclick="App.UI.toggleChatPopup(false)">
                 <span class="material-symbols-outlined" style="font-size:20px;">close</span>
             </button>
         </div>
         <div class="popup-chat-body-container">
-            <div class="popup-friends-list" id="popup-friends-sidebar-items"></div>
+            <div style="display: flex; flex-direction: column; background: var(--bg-glass-solid);">
+                <div class="chat-sidebar-search">
+                    <input type="text" placeholder="Tanya Meta AI atau Cari">
+                </div>
+                <div class="popup-friends-list" id="popup-friends-sidebar-items"></div>
+            </div>
             <div class="popup-chat-main-area" id="popup-chat-main-area-pane">
-                <div style="flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; color:var(--text-muted); font-size:0.8rem; padding:12px; text-align:center;">
-                    <span class="material-symbols-outlined" style="font-size:32px; color:var(--primary); margin-bottom:6px;">arrow_back</span>
+                <div style="flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; color:var(--text-muted); font-size:0.85rem; padding:12px; text-align:center;">
+                    <span class="material-symbols-outlined" style="font-size:42px; color:var(--primary); margin-bottom:12px;">arrow_back</span>
                     Pilih kontak teman di sidebar kiri untuk memuat obrolan.
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- NATIVE-LIKE MOBILE COMMENTS OVERLAY BOTTOM SHEET -->
+    <!-- BOTTOM SHEET KOMENTAR -->
     <div class="comments-bottom-sheet" id="comments-overlay-bottom-sheet">
         <div class="comments-sheet-backdrop" onclick="App.Features.closeCommentsBottomSheet()"></div>
         <div class="comments-sheet-content" id="comments-sheet-content-node">
@@ -657,7 +783,7 @@
         </div>
     </div>
 
-    <!-- ROBUST MODAL SYSTEM (ANTI BUG) -->
+    <!-- GLOBAL MODAL SYSTEM -->
     <div class="modal-overlay" id="global-modal">
         <div class="modal-content" id="modal-content-area">
             <button class="modal-close-x" id="modal-close-x-btn" onclick="App.Modal.close()">
@@ -673,7 +799,6 @@
     </div>
     <div class="toast-container" id="toast-container"></div>
 
-    <!-- Hidden input file global pada level root body untuk mendeteksi klik file picker langsung -->
     <input type="file" id="global-composer-direct-file-input" accept="image/*" style="display:none;" onchange="App.Features.handleGlobalDirectFileSelection(event)">
 
     <!-- JavaScript Application Script -->
@@ -696,6 +821,16 @@
         
         let activeBottomSheetPostId = null;
         let activeReplyTargetCommentId = null;
+
+        String.prototype.hashCode = function() {
+            let hash = 0;
+            if (this.length === 0) return hash;
+            for (let i = 0; i < this.length; i++) {
+                hash = ((hash << 5) - hash) + this.charCodeAt(i);
+                hash |= 0;
+            }
+            return hash;
+        };
 
         const App = {
             init() {
@@ -980,14 +1115,16 @@
                         targetAvatar = App.ProfileState.getCurrentAvatar();
                     } else {
                         try {
+                            const targetHash = targetName ? String(targetName).hashCode() : 0;
                             const { data } = await supabaseClient.from('posts').select('avatar').eq('author', targetName).not('avatar', 'is', null).order('created_at', { ascending: false }).limit(1);
                             if (data && data.length > 0 && data[0].avatar) {
                                 targetAvatar = data[0].avatar;
                             } else {
-                                targetAvatar = `https://i.pravatar.cc/150?img=${Math.abs(targetName.hashCode()) % 70 || 22}`;
+                                targetAvatar = `https://i.pravatar.cc/150?img=${Math.abs(targetHash) % 70 || 22}`;
                             }
                         } catch (err) {
-                            targetAvatar = `https://i.pravatar.cc/150?img=${Math.abs(targetName.hashCode()) % 70 || 22}`;
+                            const targetHash = targetName ? String(targetName).hashCode() : 0;
+                            targetAvatar = `https://i.pravatar.cc/150?img=${Math.abs(targetHash) % 70 || 22}`;
                         }
                     }
                     
@@ -1316,7 +1453,7 @@
                             <button class="btn btn-primary btn-full" onclick="App.Features.processPremiumCommunityPaymentAction()">Konfirmasi & Buat</button>
                         </div>
                     `;
-                    App.Modal.open("Bagikan Konten", invoiceHTML, true, false);
+                    App.Modal.open("Buat Komunitas", invoiceHTML, true, false);
                 },
 
                 processPremiumCommunityPaymentAction() {
@@ -1355,9 +1492,32 @@
                     const myEmail = localStorage.getItem('ns_user_email') || '';
                     try {
                         const { data: friends } = await supabaseClient.from('friends').select('friend_email').eq('user_email', myEmail);
+                        
+                        if (!friends || friends.length === 0) {
+                            listContainer.innerHTML = `<div style="padding:16px; font-size:0.8rem; color:var(--text-muted); text-align:center;">Belum ada kontak.</div>`;
+                            return;
+                        }
+
                         listContainer.innerHTML = friends.map(f => {
                             const displayName = f.friend_email.split('@')[0];
-                            return `<div class="popup-friend-item" onclick="App.Features.openSpecificFriendPopupObrolan('${f.friend_email}', '${displayName}')"><img src="https://i.pravatar.cc/150?img=${Math.abs(displayName.hashCode()) % 70 || 11}" class="friend-avatar-node"><span class="friend-online-dot"></span></div>`;
+                            const nameHash = displayName ? String(displayName).hashCode() : 0;
+                            const isActive = activeChatFriendName === displayName ? 'active' : '';
+                            
+                            return `
+                                <div class="popup-friend-item ${isActive}" onclick="App.Features.openSpecificFriendPopupObrolan('${f.friend_email}', '${displayName}')">
+                                    <div class="friend-avatar-wrapper">
+                                        <img src="https://i.pravatar.cc/150?img=${Math.abs(nameHash) % 70 || 11}" class="friend-avatar-node">
+                                        <span class="friend-online-dot"></span>
+                                    </div>
+                                    <div class="friend-chat-meta-info">
+                                        <div class="friend-chat-meta-top">
+                                            <strong>${displayName}</strong>
+                                            <span class="friend-chat-meta-time">13 Jul</span>
+                                        </div>
+                                        <span class="friend-chat-meta-preview">Bolehlah toolnya...</span>
+                                    </div>
+                                </div>
+                            `;
                         }).join('');
                     } catch(err) {}
                 },
@@ -1365,7 +1525,10 @@
                 async openSpecificFriendPopupObrolan(friendEmail, friendName) {
                     activeChatFriendEmail = friendEmail; activeChatFriendName = friendName;
                     const headerTitle = document.getElementById('popup-chat-header-title');
-                    if (headerTitle) headerTitle.innerHTML = `Obrolan: <span>${friendName}</span>`;
+                    if (headerTitle) headerTitle.innerHTML = `Obrolan: <span style="color:var(--primary); font-weight:800;">${friendName}</span>`;
+                    
+                    // Re-render daftar teman untuk memperbarui kelas aktif (.active)
+                    App.Features.loadPopupFriendsListSidebar();
 
                     const mainArea = document.getElementById('popup-chat-main-area-pane'); if(!mainArea) return;
                     mainArea.innerHTML = `
@@ -1512,7 +1675,8 @@
                             
                             let postMenuConfigHTML = p.author === myCurrentName ? `<button class="post-menu-trigger" onclick="App.Features.openPostActionMenuDOM(${pId})"><span class="material-symbols-outlined">more_vert</span></button>` : '';
 
-                            let finalAvatar = p.avatar || `https://i.pravatar.cc/150?img=${Math.abs(p.author.hashCode())%70||12}`;
+                            const authorHash = p.author ? String(p.author).hashCode() : 0;
+                            let finalAvatar = p.avatar || `https://i.pravatar.cc/150?img=${Math.abs(authorHash)%70||12}`;
                             let finalPremiumLevel = 0;
                             if (p.author === myCurrentName) {
                                 finalAvatar = myCurrentAvatar;
@@ -1725,7 +1889,8 @@
 
                         streamViewport.innerHTML = commentsList.map(c => {
                             const userClean = c.user || 'User';
-                            const userAvatarUrl = `https://i.pravatar.cc/150?img=${Math.abs(userClean.hashCode()) % 70 || 12}`;
+                            const userHash = userClean ? String(userClean).hashCode() : 0;
+                            const userAvatarUrl = `https://i.pravatar.cc/150?img=${Math.abs(userHash) % 70 || 12}`;
                             
                             const commentId = c.id || `c_${c.date || Date.now()}_${Math.random().toString(36).substring(5)}`;
                             if (!c.id) c.id = commentId; 
@@ -1742,7 +1907,8 @@
                                 repliesHTML = `<div style="margin-top: 10px; padding-left: 12px; border-left: 2px solid var(--border-color); display: flex; flex-direction: column; gap: 10px;">`;
                                 repliesHTML += repliesArray.map(r => {
                                     const subUser = r.user || 'User';
-                                    const subAvatar = `https://i.pravatar.cc/150?img=${Math.abs(subUser.hashCode()) % 70 || 14}`;
+                                    const subHash = subUser ? String(subUser).hashCode() : 0;
+                                    const subAvatar = `https://i.pravatar.cc/150?img=${Math.abs(subHash) % 70 || 14}`;
                                     const replyTimeText = App.UI.calculateRelativeTimeAgo(r.date || Date.now());
                                     const rLikesArray = r.likes || [];
                                     const isReplyLikedByMe = rLikesArray.includes(myName) ? 'active' : '';
@@ -2079,16 +2245,19 @@
                 renderExploreUsers() {
                     const container = document.getElementById('explore-users-stream'); if(!container) return;
                     const users = ["Andi_Tech", "Budi_Developer", "Siti_Designer", "Rian_Data", "Dewi_Manager"];
-                    container.innerHTML = users.map(u => `
-                        <div class="user-follow-card">
-                            <img src="https://i.pravatar.cc/150?img=${Math.abs(u.hashCode()) % 70 || 15}" style="width:44px; height:44px; border-radius:50%; object-fit:cover;">
-                            <div class="user-follow-info">
-                                <strong style="font-size:0.9rem; color:var(--text-main);">${u}</strong>
-                                <span style="font-size:0.75rem; color:var(--text-muted); display:block;">Workspace Member</span>
+                    container.innerHTML = users.map(u => {
+                        const userHash = u ? String(u).hashCode() : 0;
+                        return `
+                            <div class="user-follow-card">
+                                <img src="https://i.pravatar.cc/150?img=${Math.abs(userHash) % 70 || 15}" style="width:44px; height:44px; border-radius:50%; object-fit:cover;">
+                                <div class="user-follow-info">
+                                    <strong style="font-size:0.9rem; color:var(--text-main);">${u}</strong>
+                                    <span style="font-size:0.75rem; color:var(--text-muted); display:block;">Workspace Member</span>
+                                </div>
+                                <button class="btn btn-primary" style="padding:6px 12px; font-size:0.8rem; border-radius:8px;" onclick="App.Features.followExploreUserAction('${u}')">Ikuti</button>
                             </div>
-                            <button class="btn btn-primary" style="padding:6px 12px; font-size:0.8rem; border-radius:8px;" onclick="App.Features.followExploreUserAction('${u}')">Ikuti</button>
-                        </div>
-                    `).join('');
+                        `;
+                    }).join('');
                 },
 
                 followExploreUserAction(username) {
@@ -2208,7 +2377,6 @@
                 },
                 bindGlobalEvents() {
                     document.getElementById('btn-toggle-sidebar')?.addEventListener('click', () => {
-                        // Disabled clicking the side drawer completely on mobile viewport as requested
                         if(window.innerWidth > 768) {
                             const l = document.getElementById('app-layout');
                             l.classList.toggle('sidebar-collapsed');
@@ -2259,12 +2427,6 @@
                     setTimeout(() => { b.innerHTML = 'Masuk ke Aplikasi'; }, 1500);
                 }
             }
-        };
-
-        String.prototype.hashCode = function() {
-            let hash = 0; if (this.length === 0) return hash;
-            for (let i = 0; i < this.length; i++) { hash = ((hash << 5) - hash) + this.charCodeAt(i); hash |= 0; }
-            return hash;
         };
 
         document.addEventListener('DOMContentLoaded', () => App.init());
