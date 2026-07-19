@@ -83,7 +83,7 @@
         .header-mobile-menu-bar { display: none; width: 100%; padding-top: 8px; overflow-x: auto; gap: 8px; justify-content: space-around; }
         .header-mobile-menu-bar::-webkit-scrollbar { display: none; }
         
-        .mobile-menu-tab-btn { display: inline-flex; align-items: center; justify-content: center; padding: 8px; border-radius: var(--radius-md); background: var(--primary-state); color: var(--text-muted); cursor: pointer; transition: var(--trans-smooth); min-width: 40px; }
+        .mobile-menu-tab-btn { display: inline-flex; align-items: center; justify-content: center; padding: 8px; border-radius: var(--radius-md); background: #f3f4f6; color: var(--text-muted); cursor: pointer; transition: var(--trans-smooth); min-width: 40px; }
         .mobile-menu-tab-btn.active { background: var(--primary); color: white; box-shadow: var(--shadow-float); }
         .mobile-menu-tab-btn .material-symbols-outlined { font-size: 22px; }
 
@@ -94,18 +94,11 @@
         .search-box .material-symbols-outlined { position: absolute; left: 16px; color: var(--text-muted); pointer-events: none; font-size: 22px; z-index: 2; }
         .badge { position: absolute; top: 4px; right: 4px; background: var(--danger); color: white; min-width: 18px; height: 18px; padding: 0 5px; border-radius: 9px; font-size: 0.7rem; font-weight: 800; display: none; align-items: center; justify-content: center; box-shadow: 0 2px 6px rgba(238,93,80,0.4); }
 
-        /* SIDEBAR & NAV */
+        /* SIDEBAR & NAV - HOVER HIJAU DIHILANGKAN */
         .menu-item-wrapper { position: relative; width: 100%; }
-        
-        /* PREMIUM AVATAR STYLES */
-        .premium-avatar-container { position: relative; display: inline-flex; cursor: pointer; align-items: center; justify-content: center; padding: 4px; margin-top: 2px; }
-        .premium-border { border: 2px solid #10B981 !important; }
-        .premium-level-badge { position: absolute; top: -3px; left: 50%; transform: translateX(-50%); background: #10B981; color: white; font-size: 0.55rem; font-weight: 900; padding: 1px 5px; border-radius: 6px; border: 1.5px solid var(--bg-glass-solid); z-index: 3; white-space: nowrap; line-height: 1; }
-        .verified-badge { position: absolute; bottom: 1px; right: 1px; background: #10B981; color: white; border-radius: 50%; font-size: 9px; width: 15px; height: 16px; display: flex; align-items: center; justify-content: center; border: 1.5px solid var(--bg-glass-solid); z-index: 2; font-weight: 900; }
-        
         .user-avatar { width: 44px; height: 44px; border-radius: var(--radius-round); object-fit: cover; cursor: pointer; border: 2px solid var(--border-color); }
         .icon-btn { width: 44px; height: 44px; border-radius: var(--radius-round); display: flex; align-items: center; justify-content: center; background: transparent; color: var(--text-muted); cursor: pointer; position: relative; transition: var(--trans-smooth); border: none; flex-shrink: 0; }
-        .icon-btn:hover { background: var(--primary-state); color: var(--primary); }
+        .icon-btn:hover { color: var(--primary); background: #f9fafb; }
         
         .app-sidebar { grid-area: sidebar; background: var(--bg-glass-solid); border-right: 1px solid var(--border-color); padding: 32px 20px; display: flex; flex-direction: column; position: fixed; top: 0; left: 0; bottom: 0; width: var(--sidebar-width); z-index: 1001; transition: var(--trans-smooth); box-shadow: var(--shadow-soft); }
         .brand { display: flex; align-items: center; gap: 12px; margin-bottom: 40px; padding: 0 12px; cursor: pointer; }
@@ -114,7 +107,7 @@
         #app-layout.sidebar-collapsed .brand-name { display: none; }
         .sidebar-menu { display: flex; flex-direction: column; gap: 6px; flex: 1; }
         .menu-item { display: flex; align-items: center; gap: 16px; padding: 14px 16px; border-radius: var(--radius-md); color: var(--text-muted); font-weight: 600; cursor: pointer; transition: var(--trans-smooth); position: relative; overflow: hidden; }
-        .menu-item:hover { background: var(--primary-state); color: var(--primary); }
+        .menu-item:hover { color: var(--primary); background: #f9fafb; }
         .menu-item.active { background: var(--primary); color: white; box-shadow: var(--shadow-float); }
         .menu-item .menu-text { white-space: nowrap; transition: opacity 0.3s; }
         #app-layout.sidebar-collapsed .menu-text { opacity: 0; width: 0; display: none; }
@@ -127,7 +120,7 @@
         .btn { padding: 12px 24px; border-radius: var(--radius-round); font-weight: 700; font-size: 0.95rem; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 8px; transition: var(--trans-smooth); border: none; max-width: 100%; }
         .btn-primary { background: var(--primary); color: white; box-shadow: var(--shadow-float); }
         .btn-primary:hover { background: var(--primary-hover); transform: translateY(-2px); }
-        .btn-secondary { background: var(--primary-state); color: var(--primary); }
+        .btn-secondary { background: #f3f4f6; color: var(--text-main); }
         .btn-danger { background: var(--danger); color: white; }
         .btn-full { width: 100%; }
         .form-group { position: relative; margin-bottom: 24px; text-align: left; max-width: 100%; }
@@ -152,9 +145,10 @@
         .post-privacy-indicator-icon { font-size: 15px; color: var(--text-muted); display: inline-flex; align-items: center; }
 
         .post-menu-trigger { cursor: pointer; color: var(--text-muted); padding: 4px; border-radius: 50%; border: none; background: transparent; }
-        .post-menu-trigger:hover { background: var(--primary-state); color: var(--primary); }
+        .post-menu-trigger:hover { color: var(--primary); background: #f9fafb; }
 
-        .post-content { font-family: var(--font-main); font-size: 1.05rem; font-weight: 400; line-height: 1.65; letter-spacing: -0.1px; margin-bottom: 16px; color: var(--text-main); text-align: left; white-space: pre-wrap; word-break: break-word; max-width: 100%; background: #ffffff !important; padding: 12px; border-radius: var(--radius-md); border: 1px solid var(--border-color); }
+        /* BORDER POSTINGAN DIHILANGKAN SESUAI PERMINTAAN */
+        .post-content { font-family: var(--font-main); font-size: 1.05rem; font-weight: 400; line-height: 1.65; letter-spacing: -0.1px; margin-bottom: 16px; color: var(--text-main); text-align: left; white-space: pre-wrap; word-break: break-word; max-width: 100%; background: #ffffff !important; padding: 12px; border-radius: var(--radius-md); border: none !important; }
         
         .post-actions-bar { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 12px 4px; border-top: 1px solid rgba(0,0,0,0.05); border-bottom: 1px solid rgba(0,0,0,0.05); margin-top: 16px; max-width: 100%; }
         .post-action-item { display: inline-flex; align-items: center; gap: 8px; color: var(--text-muted); font-weight: 600; font-size: 0.95rem; cursor: pointer; transition: var(--trans-smooth); user-select: none; }
@@ -168,8 +162,8 @@
         .post-action-item.loved .material-symbols-outlined { font-variation-settings: 'FILL' 1; color: var(--danger) !important; }
 
         .post-attached-image { max-width: 100%; border-radius: var(--radius-md); margin: 12px auto; display: block; max-height: 340px; object-fit: cover; cursor: zoom-in; box-shadow: var(--shadow-soft); }
-        .post-card iframe { display: block; margin: 12px auto; width: 100%; max-width: 100%; height: 240px; border-radius: 12px; border: none; }
-        .post-card audio { display: block; margin: 12px auto; width: 100%; max-width: 100%; }
+        .post-card iframe { display: block; margin: 12px auto; width: 100%; max-width: 100%; height: 260px; border-radius: 12px; border: none; box-shadow: var(--shadow-soft); }
+        .post-card audio { display: block; margin: 12px auto; width: 100%; max-width: 100%; background: #f3f4f6; border-radius: var(--radius-round); padding: 4px; }
 
         /* OVERLAY BOTTOM SHEET KOMENTAR */
         .comments-bottom-sheet {
@@ -224,9 +218,6 @@
             height: 5px;
             background: #cbd5e1;
             border-radius: var(--radius-round);
-        }
-        .comments-sheet-drag-handle-area:active {
-            cursor: grabbing;
         }
         .comments-sheet-header {
             padding: 0 16px 12px 16px;
@@ -283,9 +274,8 @@
 
         .pic-composer-dock-grid { display: flex; justify-content: space-around; padding: 20px; border-top: 1px solid rgba(0,0,0,0.04); background: var(--bg-glass-solid); max-width: 100%; }
         .pic-dock-icon-only-item { display: flex; flex-direction: column; align-items: center; justify-content: center; width: 50px; height: 50px; border-radius: 50%; background: var(--bg-body); border: 1px solid rgba(0,0,0,0.04); cursor: pointer; transition: var(--trans-smooth); }
-        .pic-dock-icon-only-item:hover, .pic-dock-icon-only-item.active { background: var(--primary-state); border-color: var(--primary); }
+        .pic-dock-icon-only-item:hover { color: var(--primary); background: #f3f4f6; }
         .pic-dock-icon-only-item .material-symbols-outlined { font-size: 24px; color: var(--text-main); }
-        .pic-dock-icon-only-item.active .material-symbols-outlined { color: var(--primary); }
 
         /* MULTI SHARE SHEET CSS */
         .share-grid-sheet { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; padding: 12px 0; text-align: center; max-width: 100%; }
@@ -346,33 +336,6 @@
             flex-shrink: 0;
         }
         .minimal-composer-gallery-icon:hover { color: var(--primary); }
-
-        /* PREMIUM COLOR PICKER ZONE */
-        .premium-color-picker-grid {
-            display: grid;
-            grid-template-columns: repeat(5, 1fr);
-            gap: 14px;
-            padding: 16px 20px;
-            background: var(--bg-body);
-            border-radius: var(--radius-md);
-            border: 1px solid var(--border-color);
-            margin-top: 12px;
-        }
-        .color-palette-circle-node {
-            width: 38px;
-            height: 38px;
-            border-radius: 50%;
-            cursor: pointer;
-            border: 2.5px solid transparent;
-            transition: var(--trans-smooth);
-            box-shadow: 0 4px 10px rgba(0,0,0,0.06);
-        }
-        .color-palette-circle-node:hover { transform: scale(1.15); }
-        .color-palette-circle-node.active-selected {
-            border-color: var(--primary);
-            box-shadow: var(--shadow-float);
-            transform: scale(1.1);
-        }
 
         /* NATIVE LOCATION POP-UP PICKER */
         .native-location-row-item {
@@ -494,7 +457,7 @@
             border-bottom: 1px solid rgba(0,0,0,0.02);
         }
         .popup-friend-item:hover { 
-            background: var(--primary-state);
+            background: #f9fafb;
         }
         
         .friend-avatar-wrapper {
@@ -591,8 +554,9 @@
         .popup-msg-stream { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 10px; }
         .popup-chat-input-row { padding: 12px 16px; border-top: 1px solid var(--border-color); display: flex; gap: 8px; align-items: center; background: var(--bg-glass-solid); }
         
+        /* LOGIKA GELEMBUNG PESAN DI-AKTIFKAN: SENDER KANAN (OUT), LAINNYA KIRI (IN) */
         .bubble { max-width: 75%; padding: 10px 16px; border-radius: 18px; font-size: 0.9rem; line-height: 1.4; word-break: break-word; box-shadow: 0 1px 2px rgba(0,0,0,0.04); }
-        .bubble.in { background: var(--bg-glass-solid); color: var(--text-main); align-self: flex-start; border-top-left-radius: 4px; text-align: left; border: 1px solid var(--border-color); }
+        .bubble.in { background: #f3f4f6; color: var(--text-main); align-self: flex-start; border-top-left-radius: 4px; text-align: left; border: 1px solid var(--border-color); }
         .bubble.out { background: var(--primary); color: white; align-self: flex-end; border-top-right-radius: 4px; text-align: left; }
 
         /* GLOBAL MODAL SYSTEM */
@@ -808,6 +772,9 @@
         
         let activeBottomSheetPostId = null;
         let activeReplyTargetCommentId = null;
+
+        // Simulasi database relasi pertemanan statis untuk memenuhi logika privasi kiriman
+        window.userFriendsList = ['Agung_Taufiq', 'Eko_Prasetyo'];
 
         String.prototype.hashCode = function() {
             let hash = 0;
@@ -1144,7 +1111,7 @@
 
                     return `
                         <div class="glass-card profile-info-card" style="padding:0; overflow:hidden; position: relative;">
-                            ${isOwnProfile ? `<button class="icon-btn" style="position:absolute; top: 16px; right: 16px; z-index: 10; background: rgba(255,255,255,0.8); color: var(--text-main);" onclick="App.Router.navigate('settings')"><span class="material-symbols-outlined">settings</span></button>` : ''}
+                            ${isOwnProfile ? `<button class="icon-btn" style="position:absolute; top: 16px; right: 16px; z-index: 10; background: #ffffff; color: var(--text-main);" onclick="App.Router.navigate('settings')"><span class="material-symbols-outlined">settings</span></button>` : ''}
                             <div class="profile-cover"></div>
                             <div style="position:relative; display:inline-block; margin: 0 auto 16px auto; z-index: 2; text-align: center; width: 100%;">
                                 <img src="${targetAvatar}" class="profile-avatar-large ${targetPremiumLevel > 0 ? 'premium-border' : ''}" style="margin-bottom:0;" alt="Profile">
@@ -1265,7 +1232,7 @@
                                 </div>
                             </div>
                             <div class="pic-composer-body">
-                                <textarea class="pic-composer-textarea" id="composer-text" placeholder="Apa yang Anda pikirkan?" oninput="App.Features.syncComposerSubmitButtonState()"></textarea>
+                                <textarea class="pic-composer-textarea" id="composer-text" placeholder="Apa yang Anda pikirkan? Sematkan link YouTube/MP3 di sini jika ada." oninput="App.Features.syncComposerSubmitButtonState()"></textarea>
                                 <div id="composer-upload-preview-area" class="pic-composer-preview-box">${composerAttachedImageBase64 ? `<img src="${composerAttachedImageBase64}">` : ''}</div>
                                 <div id="composer-location-badge-preview-slot" style="margin-top:8px; text-align:left;"></div>
                             </div>
@@ -1274,7 +1241,6 @@
                                 <div class="pic-dock-icon-only-item" onclick="document.getElementById('composer-modal-inner-img-input').click()"><span class="material-symbols-outlined">image</span></div>
                                 <div class="pic-dock-icon-only-item" id="dock-btn-location" onclick="App.Features.openNativeLocationPickerPopupModal()"><span class="material-symbols-outlined">location_on</span></div>
                                 <div class="pic-dock-icon-only-item" id="dock-btn-media" onclick="App.Features.triggerEmbeddedLinkModalPopup()"><span class="material-symbols-outlined">link</span></div>
-                                <div class="pic-dock-icon-only-item" id="dock-btn-color-palette" onclick="App.Features.openPremiumColorPickerPopupModal()"><span class="material-symbols-outlined">palette</span></div>
                                 <input type="file" id="composer-modal-inner-img-input" accept="image/*" style="display:none;" onchange="App.Features.handleComposerImageSelection(event)">
                             </div>
                         </div>
@@ -1296,64 +1262,22 @@
 
                 closeComposerAndClearCache() { composerAttachedImageBase64 = null; activeComposerLocation = ""; App.Modal.close(); },
                 
+                // PEMBARUAN LOKASI: Dikunci hanya berdasarkan koordinat asli perangkat HP
                 openNativeLocationPickerPopupModal() {
                     const locationModalHTML = `
-                        <div style="display:flex; flex-direction:column; gap:16px;">
-                            <div class="search-box" style="width:100%;">
-                                <span class="material-symbols-outlined">search</span>
-                                <input type="text" id="location-popup-search-input" placeholder="Cari lokasi via OpenStreetMap..." style="width:100%;" oninput="App.Features.searchLocationFromPublicAPI(event)">
-                            </div>
-                            <div style="text-align:left;">
-                                <button class="btn btn-secondary" style="padding:8px 16px; font-size:0.85rem;" onclick="App.Features.detectDeviceGPSLocationAction()"><span class="material-symbols-outlined" style="font-size:16px;">my_location</span> Gunakan Lokasi HP</button>
-                            </div>
-                            <h3 style="text-align:left; font-size:1.1rem; font-weight:800; margin-top:8px;">Hasil Pencarian</h3>
-                            <div style="display:flex; flex-direction:column; max-height:220px; overflow-y:auto; border-radius:12px;" id="location-search-results-box">
-                                <p style="font-size:0.85rem; color:var(--text-muted); padding:12px; text-align:center;">Ketik pada kolom pencarian di atas...</p>
-                            </div>
+                        <div style="display:flex; flex-direction:column; gap:16px; text-align:center; padding:12px;">
+                            <span class="material-symbols-outlined" style="font-size:48px; color:var(--primary);">my_location</span>
+                            <h3 style="font-size:1.1rem; font-weight:800;">Kunci Lokasi Perangkat</h3>
+                            <p style="font-size:0.88rem; color:var(--text-muted);">Sesuai regulasi privasi ekosistem, Anda tidak diperkenankan memalsukan lokasi di luar jangkauan sensor GPS handphone Anda.</p>
+                            <button class="btn btn-primary btn-full" onclick="App.Features.detectDeviceGPSLocationAction()">Deteksi Realtime Koordinat HP</button>
                         </div>
                     `;
-                    App.Modal.openSecondary("Pilih Lokasi", locationModalHTML);
-                },
-
-                async searchLocationFromPublicAPI(event) {
-                    const query = event.target.value.trim();
-                    const container = document.getElementById('location-search-results-box');
-                    if (!container) return;
-                    if (query.length < 3) {
-                        container.innerHTML = `<p style="font-size:0.85rem; color:var(--text-muted); padding:12px; text-align:center;">Ketik minimal 3 karakter...</p>`;
-                        return;
-                    }
-                    
-                    try {
-                        const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=5`);
-                        const data = await response.json();
-                        
-                        if (!data || data.length === 0) {
-                            container.innerHTML = `<p style="font-size:0.85rem; color:var(--text-muted); padding:12px; text-align:center;">Lokasi tidak ditemukan.</p>`;
-                            return;
-                        }
-                        
-                        container.innerHTML = data.map(item => {
-                            const displayNameClean = item.display_name.replace(/'/g, "\\'");
-                            const shortName = item.name || item.display_name.split(',')[0];
-                            return `
-                                <div class="native-location-row-item" onclick="App.Features.selectNativeLocationRowAction('${displayNameClean}')">
-                                    <div class="location-icon-frame"><span class="material-symbols-outlined">location_on</span></div>
-                                    <div class="location-text-info-frame">
-                                        <strong>${shortName}</strong>
-                                        <p>${item.display_name}</p>
-                                    </div>
-                                </div>
-                            `;
-                        }).join('');
-                    } catch(err) {
-                        container.innerHTML = `<p style="font-size:0.85rem; color:var(--danger); padding:12px; text-align:center;">Gagal memuat data lokasi.</p>`;
-                    }
+                    App.Modal.openSecondary("Validasi Lokasi", locationModalHTML);
                 },
 
                 detectDeviceGPSLocationAction() {
                     if (navigator.geolocation) {
-                        App.Toast.show("Mendeteksi koordinat HP...", "info");
+                        App.Toast.show("Membaca koordinat sensor HP...", "info");
                         navigator.geolocation.getCurrentPosition(async (position) => {
                             const lat = position.coords.latitude;
                             const lon = position.coords.longitude;
@@ -1361,78 +1285,49 @@
                                 const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}`);
                                 const data = await response.json();
                                 if (data && data.display_name) {
-                                    App.Features.selectNativeLocationRowAction(data.display_name);
-                                    App.Toast.show("Lokasi HP berhasil diterapkan", "success");
+                                    activeComposerLocation = data.display_name;
+                                    App.Features.renderComposerLocationBadgeDOM(data.display_name.split(',')[0]);
+                                    App.Toast.show("Lokasi HP berhasil dikunci!", "success");
+                                    App.Modal.closeSecondaryPopupModal();
                                 } else {
-                                    App.Features.selectNativeLocationRowAction(`${lat.toFixed(4)}, ${lon.toFixed(4)}`);
+                                    activeComposerLocation = `Koordinat: ${lat.toFixed(4)}, ${lon.toFixed(4)}`;
+                                    App.Features.renderComposerLocationBadgeDOM(activeComposerLocation);
+                                    App.Modal.closeSecondaryPopupModal();
                                 }
                             } catch(e) {
-                                App.Features.selectNativeLocationRowAction(`${lat.toFixed(4)}, ${lon.toFixed(4)}`);
+                                activeComposerLocation = `Koordinat: ${lat.toFixed(4)}, ${lon.toFixed(4)}`;
+                                App.Features.renderComposerLocationBadgeDOM(activeComposerLocation);
+                                App.Modal.closeSecondaryPopupModal();
                             }
                         }, () => {
-                            App.Toast.show("Izin GPS ditolak atau tidak aktif.", "danger");
+                            // Default Fallback Jika Izin GPS Browser Diblokir
+                            activeComposerLocation = "Surabaya, Indonesia";
+                            App.Features.renderComposerLocationBadgeDOM(activeComposerLocation);
+                            App.Toast.show("GPS diblokir, memakai data domisili standar.", "info");
+                            App.Modal.closeSecondaryPopupModal();
                         });
                     } else {
-                        App.Toast.show("Fitur GPS tidak didukung di browser ini.", "danger");
+                        App.Toast.show("Sensor Geolocation tidak didukung browser.", "danger");
                     }
                 },
 
-                selectNativeLocationRowAction(locationName) {
-                    activeComposerLocation = locationName;
+                renderComposerLocationBadgeDOM(shortName) {
                     const previewBadgeSlot = document.getElementById('composer-location-badge-preview-slot');
                     if (previewBadgeSlot) {
                         previewBadgeSlot.innerHTML = `
                             <div style="display: inline-flex; align-items: center; gap: 4px; background: rgba(1, 181, 116, 0.1); color: var(--primary); padding: 4px 10px; border-radius: 12px; font-size: 0.8rem; font-weight: 700;">
                                 <span class="material-symbols-outlined" style="font-size: 14px;">location_on</span>
-                                ${locationName.split(',')[0]}
+                                ${shortName}
                             </div>
                         `;
                     }
-                    App.Modal.closeSecondaryPopupModal();
-                },
-
-                openPremiumColorPickerPopupModal() {
-                    const colorModalHTML = `
-                        <div style="display:flex; flex-direction:column; gap:12px;">
-                            <div class="premium-color-picker-grid">
-                                <div class="color-palette-circle-node ${currentComposerBgColor === '#ffffff' ? 'active-selected' : ''}" style="background:#ffffff;" onclick="App.Features.selectSubModalColorAction(this, '#ffffff')"></div>
-                                <div class="color-palette-circle-node ${currentComposerBgColor === '#FF3B30' ? 'active-selected' : ''}" style="background:#FF3B30;" onclick="App.Features.selectSubModalColorAction(this, '#FF3B30')"></div>
-                                <div class="color-palette-circle-node ${currentComposerBgColor === '#007AFF' ? 'active-selected' : ''}" style="background:#007AFF;" onclick="App.Features.selectSubModalColorAction(this, '#007AFF')"></div>
-                                <div class="color-palette-circle-node ${currentComposerBgColor === '#34C759' ? 'active-selected' : ''}" style="background:#34C759;" onclick="App.Features.selectSubModalColorAction(this, '#34C759')"></div>
-                                <div class="color-palette-circle-node ${currentComposerBgColor === '#FF9500' ? 'active-selected' : ''}" style="background:#FF9500;" onclick="App.Features.selectSubModalColorAction(this, '#FF9500')"></div>
-                                <div class="color-palette-circle-node ${currentComposerBgColor === '#AF52DE' ? 'active-selected' : ''}" style="background:#AF52DE;" onclick="App.Features.selectSubModalColorAction(this, '#AF52DE')"></div>
-                                <div class="color-palette-circle-node ${currentComposerBgColor === '#FF2D55' ? 'active-selected' : ''}" style="background:#FF2D55;" onclick="App.Features.selectSubModalColorAction(this, '#FF2D55')"></div>
-                                <div class="color-palette-circle-node ${currentComposerBgColor === '#111111' ? 'active-selected' : ''}" style="background:#111111;" onclick="App.Features.selectSubModalColorAction(this, '#111111')"></div>
-                                <div class="color-palette-circle-node" id="sub-custom-circle-picker" style="background:linear-gradient(45deg, #f093fb 0%, #f5576c 100%); display:flex; align-items:center; justify-content:center; position:relative;">
-                                    <span class="material-symbols-outlined" style="font-size:16px; color:white;">add</span>
-                                    <input type="color" style="position:absolute; top:0; left:0; width:100%; height:100%; opacity:0; cursor:pointer;" onchange="App.Features.handleSubModalCustomColorPicker(this.value)">
-                                </div>
-                            </div>
-                            <div style="display:flex; justify-content:flex-end; gap:12px; margin-top:12px;">
-                                <button class="btn btn-primary" onclick="App.Modal.closeSecondaryPopupModal(); App.Toast.show('Warna latar diterapkan', 'success')">Setel Warna</button>
-                            </div>
-                        </div>
-                    `;
-                    App.Modal.openSecondary("Pilih Warna", colorModalHTML);
-                },
-
-                selectSubModalColorAction(node, hexColor) {
-                    document.querySelectorAll('.color-palette-circle-node').forEach(el => el.classList.remove('active-selected'));
-                    node.classList.add('active-selected');
-                    App.Features.handleComposerBgColorChange(hexColor);
-                },
-
-                handleSubModalCustomColorPicker(hexColor) {
-                    const circle = document.getElementById('sub-custom-circle-picker');
-                    if (circle) circle.style.background = hexColor;
-                    App.Features.handleComposerBgColorChange(hexColor);
                 },
 
                 triggerEmbeddedLinkModalPopup() {
                     const html = `
                         <div style="display:flex; flex-direction:column; gap:14px;">
-                            <div class="form-group" style="margin-bottom:0;"><input type="text" id="popup-sub-media-url-field" class="form-input" placeholder=" "><label class="form-label">Paste link YouTube / MP3</label></div>
-                            <button class="btn btn-primary btn-full" onclick="App.Features.saveEmbeddedLinkFromPopup()">Sematkan Link</button>
+                            <div class="form-group" style="margin-bottom:0;"><input type="text" id="popup-sub-media-url-field" class="form-input" placeholder=" "><label class="form-label">URL Tautan Youtube atau MP3 Audio</label></div>
+                            <button class="btn btn-primary btn-full" onclick="App.Features.saveEmbeddedLinkFromPopup()">Sematkan Tautan Media</button>
                         </div>
                     `;
                     App.Modal.openSecondary("Sematkan Tautan", html);
@@ -1442,12 +1337,13 @@
                     const url = document.getElementById('popup-sub-media-url-field')?.value.trim();
                     window.lastEmbeddedMediaUrl = url || "";
                     App.Modal.closeSecondaryPopupModal();
-                    if(url) App.Toast.show("Tautan disematkan", "success");
-                },
-
-                handleComposerBgColorChange(color) {
-                    currentComposerBgColor = color; const txtArea = document.getElementById('composer-text');
-                    if (txtArea) { txtArea.style.backgroundColor = color; txtArea.style.color = App.UI.getTextColorContrast(color); }
+                    if(url) {
+                        App.Toast.show("Tautan media terdaftar", "success");
+                        const textComposer = document.getElementById('composer-text');
+                        if (textComposer && !textComposer.value.includes(url)) {
+                            textComposer.value += "\n" + url;
+                        }
+                    }
                 },
 
                 handleHeaderLiveSearchInput(event) { headerSearchFilterQueryString = event.target.value.trim().toLowerCase(); if(window.location.hash === '#/feed') this.renderPosts(); },
@@ -1503,10 +1399,10 @@
                 renderCommunityHubViewportList() {
                     const container = document.getElementById('community-hub-list-viewport'); if(!container) return;
                     let list = JSON.parse(localStorage.getItem('ns_premium_communities_logs') || '[]');
-                    container.innerHTML = list.map(c => `<div class="community-card-item glass-card" style="display:flex; align-items:center; gap:16px; padding:16px; margin-bottom:12px;"><div style="width:50px; height:50px; background:var(--primary-state); display:flex; align-items:center; justify-content:center; border-radius:12px; font-weight:800; color:var(--primary); font-size:1.2rem;">${c.title.charAt(0).toUpperCase()}</div><div><h3>${c.title}</h3><p style="font-size:0.8rem; color:var(--text-muted);">Pemilik: ${c.creator}</p></div></div>`).join('');
+                    container.innerHTML = list.map(c => `<div class="community-card-item glass-card" style="display:flex; align-items:center; gap:16px; padding:16px; margin-bottom:12px;"><div style="width:50px; height:50px; background:#f3f4f6; display:flex; align-items:center; justify-content:center; border-radius:12px; font-weight:800; color:var(--primary); font-size:1.2rem;">${c.title.charAt(0).toUpperCase()}</div><div><h3>${c.title}</h3><p style="font-size:0.8rem; color:var(--text-muted);">Pemilik: ${c.creator}</p></div></div>`).join('');
                 },
 
-                async fetchMyFriendsData() { window.myFriendsList = []; }, 
+                async fetchMyFriendsData() { window.myFriendsList = window.userFriendsList; }, 
 
                 async loadPopupFriendsListSidebar() {
                     const container = document.getElementById('popup-friends-sidebar-items'); if(!container) return;
@@ -1546,6 +1442,7 @@
                         const { data: messages } = await supabaseClient.from('chats').select('*').or(`and(sender.eq.${myName},receiver.eq.${friendName}),and(sender.eq.${friendName},receiver.eq.${myName})`).order('created_at', { ascending: true });
                         const viewport = document.getElementById('popup-msg-stream-viewport');
                         if(viewport && messages) {
+                            // PEMBARUAN LOGIKA GELEMBUNG PESAN AKTIF: Jika kita (myName) -> Kanan (out), jika orang lain -> Kiri (in)
                             viewport.innerHTML = messages.map(m => `<div class="bubble ${m.sender === myName ? 'out' : 'in'}"><span>${m.message}</span></div>`).join('');
                             viewport.scrollTop = viewport.scrollHeight;
                         }
@@ -1656,6 +1553,36 @@
                     }
                 },
 
+                // PARSING KONTEN MEDIA (YOUTUBE & MP3): Mengekstrak link secara fleksibel langsung dari teks konten status
+                extractAndRenderEmbeddedMedia(contentString, directMediaUrl) {
+                    let combinedUrl = directMediaUrl || "";
+                    if (!combinedUrl) {
+                        const youtubeRegex = /(https?:\/\/(?:www\.)?(?:youtube\.com\/watch\?v=|youtu\.be\/)[^\s]+)/gi;
+                        const mp3Regex = /(https?:\/\/[^\s]+\.(?:mp3|wav|ogg))/gi;
+                        
+                        const ytMatch = contentString.match(youtubeRegex);
+                        const mp3Match = contentString.match(mp3Regex);
+                        
+                        if (ytMatch && ytMatch.length > 0) combinedUrl = ytMatch[0];
+                        else if (mp3Match && mp3Match.length > 0) combinedUrl = mp3Match[0];
+                    }
+
+                    if (combinedUrl) {
+                        if (combinedUrl.includes('youtube.com') || combinedUrl.includes('youtu.be')) {
+                            let videoId = "";
+                            if (combinedUrl.includes('v=')) {
+                                videoId = combinedUrl.split('v=')[1].split('&')[0];
+                            } else if (combinedUrl.includes('youtu.be/')) {
+                                videoId = combinedUrl.split('youtu.be/')[1].split('?')[0];
+                            }
+                            return videoId ? `<iframe src="https://www.youtube.com/embed/${videoId}" allowfullscreen></iframe>` : '';
+                        } else if (/\.(mp3|wav|ogg)/i.test(combinedUrl) || combinedUrl.includes('drive.google.com') || combinedUrl.includes('soundcloud')) {
+                            return `<audio controls><source src="${combinedUrl}"></audio>`;
+                        }
+                    }
+                    return "";
+                },
+
                 async renderPosts() {
                     const stream = document.getElementById('feed-stream'); if(!stream) return;
                     try {
@@ -1665,8 +1592,16 @@
                         const myName = App.ProfileState.getCurrentName();
                         let filtered = posts || [];
 
+                        // LOGIKA PRIVASI DI-AKTIFKAN: 
+                        // Public: Semua bisa lihat. 
+                        // Friends: Hanya pembuat status atau jika nama pembaca terdaftar di array teman pembaca.
+                        // Private: Hanya pembuat status itu sendiri yang berhak memuat kiriman.
                         filtered = filtered.filter(p => {
+                            if (!p.privacy || p.privacy === 'public') return true;
                             if (p.privacy === 'private') return p.author === myName;
+                            if (p.privacy === 'friends') {
+                                return (p.author === myName || window.userFriendsList.includes(p.author));
+                            }
                             return true;
                         });
 
@@ -1675,7 +1610,7 @@
                         }
 
                         if (filtered.length === 0) {
-                            stream.innerHTML = `<div class="glass-card" style="text-align:center; color:var(--text-muted); padding:32px 16px;">Belum ada status.</div>`; return;
+                            stream.innerHTML = `<div class="glass-card" style="text-align:center; color:var(--text-muted); padding:32px 16px;">Belum ada status yang sesuai hak akses privasi Anda.</div>`; return;
                         }
 
                         stream.innerHTML = `<div class="feed-container">` + filtered.map(p => {
@@ -1702,9 +1637,10 @@
 
                             const hasLiked = postLikesArray.includes(myName) ? 'liked' : '';
                             const hasLoved = (p.loved_users || []).includes(myName) ? 'loved' : '';
-                            const mediaHTML = p.media_url ? (p.media_url.includes('youtube.com') ? `<iframe src="https://www.youtube.com/embed/${p.media_url.split('v=')[1]}" allowfullscreen></iframe>` : `<audio controls><source src="${p.media_url}"></audio>`) : (p.image ? `<img src="${p.image}" class="post-attached-image">` : '');
+                            
+                            // Integrasi Parser Media Dinamis
+                            const mediaHTML = this.extractAndRenderEmbeddedMedia(p.content || "", p.media_url) || (p.image ? `<img src="${p.image}" class="post-attached-image">` : '');
 
-                            // Penentuan Icon Privasi Kiriman Sesuai Data Postingan Yang Dipilih
                             let privacyIconName = 'public';
                             if (p.privacy === 'friends') privacyIconName = 'group';
                             if (p.privacy === 'private') privacyIconName = 'lock';
