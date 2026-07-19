@@ -386,59 +386,45 @@
         .avatar-upload-label { position: absolute; bottom: 0; right: 0; width: 32px; height: 32px; border-radius: 50%; background: var(--primary); color: white; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: var(--shadow-float); }
 
         /* ==========================================================================
-           7. KHUSUS MOBILE (HP) RESPONSIVE DESIGN - OPTIMIZED
+           9. FIX: MINIMAL COMPOSER BAR SEBELUM DIKLIK (SEJAJAR HORIZONTAL)
            ========================================================================== */
-        @media (max-width: 768px) {
-            /* Layout Adjustments */
-            #app-layout { grid-template-areas: "header" "content"; grid-template-columns: 1fr; grid-template-rows: 60px 1fr; }
-            .app-sidebar { display: flex; transform: translateX(-100%); width: 280px; z-index: 2005; position: fixed; top: 0; left: 0; bottom: 0; }
-            #app-layout.sidebar-mobile-open .app-sidebar { transform: translateX(0); }
-            
-            /* Header Fixes */
-            .app-header { padding: 0 16px; height: 60px; }
-            .search-box { width: 100%; max-width: 140px; }
-            .search-box:hover, .search-box:focus-within { width: 180px; }
-            .search-box input { padding: 8px 12px 8px 36px; font-size: 16px; height: 38px; } /* font-size 16px prevents iOS zoom */
-            
-            /* Ruang bernafas ekstra untuk area bawah (Bottom Nav & Safe Area) */
-            .app-content { padding: 12px; padding-bottom: calc(var(--bottom-nav-height) + env(safe-area-inset-bottom) + 20px); }
-            
-            /* Bottom Navigation - Mendukung Safe Area iOS */
-            .bottom-nav { display: flex !important; position: fixed; bottom: 0; left: 0; right: 0; height: calc(var(--bottom-nav-height) + env(safe-area-inset-bottom)); padding-bottom: env(safe-area-inset-bottom); background: var(--bg-glass); backdrop-filter: blur(10px); border-top: 1px solid var(--border-color); z-index: 1500; justify-content: space-around; align-items: center; box-shadow: 0 -4px 20px rgba(0,0,0,0.03); }
-            .bn-item { display: flex; flex-direction: column; align-items: center; gap: 4px; color: var(--text-muted); flex: 1; cursor: pointer; padding-top: 8px; }
-            .bn-item.active { color: var(--primary); font-weight: 700; }
-            
-            /* Mengubah Modal Biasa menjadi Bottom Sheet (Laci dari bawah) */
-            .modal-overlay { align-items: flex-end; }
-            .modal-content { width: 100%; max-width: 100%; border-radius: 24px 24px 0 0; transform: translateY(100%); padding-bottom: calc(env(safe-area-inset-bottom) + 24px); max-height: 85vh; margin: 0; }
-            .modal-overlay.active .modal-content { transform: translateY(0); }
-            
-            /* Memaksimalkan Composer Layar Penuh di HP */
-            .pic-composer-card { min-height: 80vh; border-radius: 0; }
-            .modal-overlay.active .modal-content:has(.pic-composer-card) { max-height: 90vh; border-radius: 24px 24px 0 0; }
-            
-            /* Profile Detail Adjustments */
-            .profile-stats { gap: 12px; justify-content: space-around; width: 100%; }
-            .profile-avatar-large { width: 100px; height: 100px; }
-            
-            /* Penyesuaian Feed Container dan Post Card */
-            .feed-container { margin-left: 0; margin-right: 0; }
-            .post-card { padding: 16px 12px; border-radius: var(--radius-lg); margin-bottom: 16px; border: 1px solid rgba(0,0,0,0.06); box-shadow: 0 4px 12px rgba(0,0,0,0.02); }
-            
-            /* Action Bar Postingan di-fit agar rapi */
-            .post-actions-bar { gap: 4px; justify-content: space-between; margin-top: 12px; }
-            .post-action-item { font-size: 0.75rem; gap: 4px; padding: 8px 4px; }
-            .post-action-item .material-symbols-outlined { font-size: 18px; }
-            
-            /* Floating Chat di HP menjadi Layar Penuh */
-            .floating-chat-widget { width: 100vw; height: 100vh; right: 0; bottom: 0; border-radius: 0; transform: translateX(100%); z-index: 4000; }
-            .floating-chat-widget.active { transform: translateX(0); }
-            .popup-chat-header { padding-top: calc(env(safe-area-inset-top) + 14px); } /* iPhone Notch support */
-            
-            .share-grid-sheet { grid-template-columns: repeat(3, 1fr); }
-            .minimal-composer-bar { padding: 12px; border-radius: var(--radius-md); margin-bottom: 16px; }
-            .auth-card { padding: 24px; border-radius: var(--radius-lg); }
+        .minimal-composer-bar { 
+            display: flex; 
+            align-items: center; 
+            gap: 14px; 
+            background: var(--bg-glass-solid); 
+            border: 1px solid var(--border-color); 
+            padding: 16px 24px; 
+            border-radius: var(--radius-xl); 
+            box-shadow: var(--shadow-soft); 
+            margin-bottom: 28px; 
+            transition: var(--trans-smooth); 
         }
+        .minimal-composer-input-mock { 
+            flex: 1; 
+            border: 1px solid rgba(135, 143, 166, 0.3); 
+            padding: 12px 24px; 
+            border-radius: var(--radius-round); 
+            color: var(--text-muted); 
+            font-size: 1.05rem; 
+            font-weight: 500; 
+            text-align: left; 
+            background: var(--bg-body); 
+            cursor: pointer; 
+            transition: var(--trans-smooth); 
+        }
+        .minimal-composer-input-mock:hover { background: rgba(135, 143, 166, 0.1); }
+        .minimal-composer-gallery-icon { 
+            color: var(--text-muted); 
+            font-size: 28px; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            cursor: pointer; 
+            transition: var(--trans-smooth); 
+            user-select: none;
+        }
+        .minimal-composer-gallery-icon:hover { color: var(--primary); }
     </style>
 </head>
 <body>
@@ -586,6 +572,9 @@
         </div>
     </div>
     <div class="toast-container" id="toast-container"></div>
+
+    <!-- Hidden input file global pada level root body untuk mendeteksi klik file picker langsung -->
+    <input type="file" id="global-composer-direct-file-input" accept="image/*" style="display:none;" onchange="App.Features.handleGlobalDirectFileSelection(event)">
 
     <!-- JavaScript Application Script -->
     <script>
@@ -841,12 +830,13 @@
             },
 
             Views: {
+                /* FIX LAYOUT: Mengembalikan struktur boks mock horizontal rapi & presisi sebelum diklik */
                 feed() {
                     return `
                         <div class="minimal-composer-bar">
-                            <div id="composer-avatar-slot"></div> <!-- Di-render via JS -->
+                            <div id="composer-avatar-slot"></div>
                             <div class="minimal-composer-input-mock" onclick="App.Features.openComposerModalPopupForm()">Apa yang Anda pikirkan?</div>
-                            <span class="material-symbols-outlined minimal-composer-gallery-icon" onclick="App.Features.openComposerModalPopupForm()">image</span>
+                            <span class="material-symbols-outlined minimal-composer-gallery-icon" onclick="document.getElementById('global-composer-direct-file-input').click()">image</span>
                         </div>
                         <div id="feed-stream"></div>
                     `;
@@ -1014,20 +1004,37 @@
             },
 
             Features: {
-                /* REVISI FITUR: SEKARANG MENGGUNAKAN ELEMEN INPUT YANG MENYATU DI DALAM STRUKTUR BLOK HIERARKI UTAMA */
+                /* FITUR BARU: Menangani klik langsung ikon galeri di luar modal, membaca file, lalu membuka komposer draf otomatis */
+                handleGlobalDirectFileSelection(event) {
+                    const file = event.target.files[0]; if (!file) return;
+                    const reader = new FileReader(); reader.readAsDataURL(file);
+                    reader.onload = function (e) {
+                        composerAttachedImageBase64 = e.target.result;
+                        App.Features.openComposerModalPopupForm();
+                        
+                        // Suntikkan gambar yang terpilih langsung ke boks preview modal
+                        const previewArea = document.getElementById('composer-upload-preview-area');
+                        if(previewArea) previewArea.innerHTML = `<img src="${composerAttachedImageBase64}">`;
+                        const submitBtn = document.getElementById('pic-submit-btn');
+                        if(submitBtn) submitBtn.classList.add('ready');
+                        
+                        // Reset input file utama agar bisa dipilih ulang kembali
+                        event.target.value = '';
+                    };
+                },
+
                 openComposerModalPopupForm() {
                     const currentName = App.ProfileState.getCurrentName();
                     const premiumLevel = App.ProfileState.getPremiumLevel();
                     const avatarHTML = App.UI.generateAvatarHTML(currentName, App.ProfileState.getCurrentAvatar(), premiumLevel > 0, premiumLevel, '52px', false);
                     
-                    composerAttachedImageBase64 = null;
                     currentComposerBgColor = "#ffffff";
                     activeComposerLocation = "";
 
                     const popupFormHTML = `
                         <div class="pic-composer-card">
                             <div class="pic-composer-header">
-                                <button class="pic-composer-close" onclick="App.Modal.close()"><span class="material-symbols-outlined">close</span></button>
+                                <button class="pic-composer-close" onclick="App.Features.closeComposerAndClearCache()"><span class="material-symbols-outlined">close</span></button>
                                 <span class="pic-composer-title">Postingan baru</span>
                                 <button class="pic-composer-next-btn" id="pic-submit-btn" onclick="App.Features.createPost()">Kirim</button>
                             </div>
@@ -1049,10 +1056,11 @@
                             
                             <div class="pic-composer-body" style="padding: 8px 16px;">
                                 <textarea class="pic-composer-textarea" id="composer-text" placeholder="Apa yang Anda pikirkan?" oninput="document.getElementById('pic-submit-btn').classList.add('ready')" style="border-radius: 8px; padding: 8px;"></textarea>
-                                <div id="composer-upload-preview-area" class="pic-composer-preview-box"></div>
+                                <div id="composer-upload-preview-area" class="pic-composer-preview-box">
+                                    ${composerAttachedImageBase64 ? `<img src="${composerAttachedImageBase64}">` : ''}
+                                </div>
                             </div>
 
-                            <!-- INPUT LOKASI & MEDIA YANG BERADA DI DALAM KARTU UTAMA -->
                             <div class="composer-dynamic-input-zone" id="composer-location-zone">
                                 <div style="display: flex; gap: 8px; align-items: center; width: 100%;">
                                     <span class="material-symbols-outlined" style="color: var(--primary);">location_on</span>
@@ -1067,7 +1075,7 @@
                             </div>
                             
                             <div class="pic-composer-dock-grid">
-                                <div class="pic-dock-icon-only-item" onclick="document.getElementById('composer-img-input').click()" title="Galeri">
+                                <div class="pic-dock-icon-only-item" onclick="document.getElementById('composer-modal-inner-img-input').click()" title="Galeri">
                                     <span class="material-symbols-outlined">image</span>
                                 </div>
                                 <div class="pic-dock-icon-only-item" id="dock-btn-location" onclick="App.Features.toggleComposerInputRow('location')" title="Tambah Lokasi">
@@ -1080,12 +1088,17 @@
                                     <span class="material-symbols-outlined">palette</span>
                                     <input type="color" id="composer-bg-picker" value="#ffffff" style="position: absolute; top:0; left:0; width:100%; height:100%; opacity:0; cursor:pointer;" onchange="App.Features.handleComposerBgColorChange(this.value)">
                                 </div>
-                                <input type="file" id="composer-img-input" accept="image/*" style="display:none;" onchange="App.Features.handleComposerImageSelection(event)">
+                                <input type="file" id="composer-modal-inner-img-input" accept="image/*" style="display:none;" onchange="App.Features.handleComposerImageSelection(event)">
                             </div>
                         </div>
                     `;
                     
                     App.Modal.open(null, popupFormHTML, true, true);
+                },
+
+                closeComposerAndClearCache() {
+                    composerAttachedImageBase64 = null;
+                    App.Modal.close();
                 },
 
                 toggleComposerInputRow(type) {
@@ -1883,6 +1896,10 @@
                         };
 
                         await supabaseClient.from('posts').insert([{ author: App.ProfileState.getCurrentName(), avatar: App.ProfileState.getCurrentAvatar(), content: textValue, image: composerAttachedImageBase64, role: JSON.stringify(roleData), likes: 0 }]);
+                        
+                        // Bersihkan draf file biner sisa unggahan agar tidak menumpuk saat input berikutnya dibuka kembali
+                        composerAttachedImageBase64 = null;
+                        
                         App.Modal.close();
                         App.Toast.show("Kiriman berhasil diterbitkan!", "success"); 
                         this.renderPosts();
