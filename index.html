@@ -816,7 +816,7 @@
     <!-- JavaScript Application Script -->
     <script>
         const SUPABASE_URL = 'https://waaufoxlimqtesmmjhyw.supabase.co';
-        const SUPABASE_KEY = 'sb_publishable_X6icNByv3YFbekorwJ6kSw_SX0XUFM8'; // Pastikan Key ini memiliki hak akses RLS ke tabel baru
+        const SUPABASE_KEY = 'sb_publishable_X6icNByv3YFbekorwJ6kSw_SX0XUFM8'; 
         const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
         let liveNotifications = [];
@@ -930,7 +930,6 @@
 
             Realtime: {
                 subscribeRealtimeChannels() {
-                    // Monitor Perubahan Status/Posts
                     supabaseClient
                         .channel('realtime-posts')
                         .on('postgres_changes', { event: '*', schema: 'public', table: 'posts' }, async () => {
@@ -939,16 +938,13 @@
                         })
                         .subscribe();
 
-                    // Monitor Perubahan Sistem Komentar
                     supabaseClient
                         .channel('realtime-comments')
                         .on('postgres_changes', { event: '*', schema: 'public', table: 'comments' }, async () => {
                             if (activeBottomSheetPostId) App.Features.reloadCommentsBottomSheetStreamOnly();
-                            App.Features.renderPosts();
                         })
                         .subscribe();
 
-                    // Monitor Perubahan Obrolan / Chat
                     supabaseClient
                         .channel('realtime-chats')
                         .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'chats' }, async (payload) => {
@@ -962,7 +958,6 @@
                         })
                         .subscribe();
 
-                    // Monitor Perubahan Notifikasi Cloud
                     supabaseClient
                         .channel('realtime-notifications')
                         .on('postgres_changes', { event: '*', schema: 'public', table: 'notifications' }, async () => {
@@ -1026,7 +1021,7 @@
                     App.UI.showLoadingBtn(e.target.querySelector('button'));
                     try {
                         await supabaseClient.auth.signUp({ email, password });
-                        alert("Pendaftaran Sukses! Silakan langsung masuk dengan akun tersebut.");
+                        alert("Pendaftaran Sukses! Silakan langsung masuk.");
                         this.toggleView('login');
                     } catch (error) { alert("Pendaftaran gagal: " + error.message); }
                 },
@@ -1047,7 +1042,6 @@
                 }
             },
 
-            // ROUTER SYSTEM
             Router: {
                 init() {
                     window.addEventListener('hashchange', () => this.handleRoute());
@@ -1166,7 +1160,6 @@
                     const targetBio = isOwnProfile ? App.ProfileState.getCurrentRoleBioStatus() : 'Tech Workspace Professional Member';
                     const targetDomisili = isOwnProfile ? App.ProfileState.getCurrentDomisili() : 'Surabaya, Indonesia';
                     const joinDate = isOwnProfile ? App.ProfileState.getJoinDateText() : '18 Juli 2026';
-                    
                     const myEmail = (localStorage.getItem('ns_user_email') || '').toLowerCase();
                     const isSuperAdmin = (isOwnProfile && myEmail === 'mastrisnocom@gmail.com');
                     const targetPremiumLevel = isOwnProfile ? App.ProfileState.getPremiumLevel() : 0;
@@ -1386,11 +1379,10 @@
                     container.innerHTML = list.map(c => `<div class="community-card-item glass-card" style="display:flex; align-items:center; gap:16px; padding:16px; margin-bottom:12px;"><div style="width:50px; height:50px; background:var(--primary-state); display:flex; align-items:center; justify-content:center; border-radius:12px; font-weight:800; color:var(--primary); font-size:1.2rem;">${c.title.charAt(0).toUpperCase()}</div><div><h3>${c.title}</h3><p style="font-size:0.8rem; color:var(--text-muted);">Pemilik: ${c.creator}</p></div></div>`).join('');
                 },
 
-                async fetchMyFriendsData() { window.myFriendsList = []; }, // Integrasi custom logic relasi pertemanan
+                async fetchMyFriendsData() { window.myFriendsList = []; }, 
 
                 async loadPopupFriendsListSidebar() {
                     const container = document.getElementById('popup-friends-sidebar-items'); if(!container) return;
-                    // Mock data kontak untuk list, Anda bisa mapping dinamis dari database profiles
                     const staticContacts = ['Agung_Taufiq', 'Eko_Prasetyo', 'Meta_AI'];
                     container.innerHTML = staticContacts.map(name => {
                         const hasUnread = unreadMessageCounters[name.toLowerCase()] || 0;
@@ -1573,9 +1565,14 @@
                     try {
                         const { data } = await supabaseClient.from('posts').select('liked_users').eq('id', id).single();
                         let list = data?.liked_users || [];
-                        if (list.includes(myName)) list = list.filter(u => u !== myName);
-                        else { list.push(myName); if(postAuthor !== myName) await this.pushCloudNotificationPayload(postAuthor, 'like', 'menyukai status Anda.'); }
-                        await supabaseClient.from('posts').update({ liked_users: list }).eq('id', id); this.renderPosts();
+                        if (list.includes(myName)) {
+                            list = list.filter(u => u !== myName);
+                        } else {
+                            list.push(myName); 
+                            if(postAuthor !== myName) await this.pushCloudNotificationPayload(postAuthor, 'like', 'menyukai status Anda.'); 
+                        }
+                        await supabaseClient.from('posts').update({ liked_users: list }).eq('id', id); 
+                        this.renderPosts();
                     } catch(e) {}
                 },
 
@@ -1584,9 +1581,14 @@
                     try {
                         const { data } = await supabaseClient.from('posts').select('loved_users').eq('id', id).single();
                         let list = data?.loved_users || [];
-                        if (list.includes(myName)) list = list.filter(u => u !== myName);
-                        else { list.push(myName); if(postAuthor !== myName) await this.pushCloudNotificationPayload(postAuthor, 'love', 'menyukai status Anda dengan Cinta.'); }
-                        await supabaseClient.from('posts').update({ loved_users: list }).eq('id', id); this.renderPosts();
+                        if (list.includes(myName)) {
+                            list = list.filter(u => u !== myName);
+                        } else {
+                            list.push(myName); 
+                            if(postAuthor !== myName) await this.pushCloudNotificationPayload(postAuthor, 'love', 'menyukai status Anda dengan Cinta.'); 
+                        }
+                        await supabaseClient.from('posts').update({ loved_users: list }).eq('id', id); 
+                        this.renderPosts();
                     } catch(e) {}
                 },
 
@@ -1616,12 +1618,19 @@
                         }
                         stream.innerHTML = comments.map(c => `
                             <div style="display:flex; gap:10px; margin-bottom:12px; text-align:left;">
-                                <img src="https://i.pravatar.cc/150?img=11" style="width:34px; height:34px; border-radius:50%;">
+                                <img src="https://i.pravatar.cc/150?img=11" style="width:34px; height:34px; border-radius:50%; object-fit:cover;">
                                 <div>
-                                    <div style="background:var(--bg-body); padding:8px 12px; border-radius:14px;"><strong>${c.user_name}</strong><p style="font-size:0.9rem;">${c.text}</p></div>
-                                    <div style="font-size:0.75rem; color:var(--text-muted); margin-top:4px; cursor:pointer;" onclick="activeReplyTargetCommentId='${c.id}'; App.Features.renderBottomSheetInputBar();">Balas</div>
+                                    <div style="background:var(--bg-body); padding:8px 12px; border-radius:14px;">
+                                        <strong>${c.user_name}</strong>
+                                        <p style="font-size:0.9rem; margin-top:2px;">${c.text}</p>
+                                    </div>
+                                    <div style="font-size:0.75rem; color:var(--text-muted); margin-top:4px; margin-left:6px; cursor:pointer; font-weight:700;" 
+                                         onclick="activeReplyTargetCommentId='${c.id}'; App.Features.renderBottomSheetInputBar();">
+                                         Balas
+                                    </div>
                                 </div>
                             </div>`).join('');
+                        stream.scrollTop = stream.scrollHeight;
                     } catch(ex) {}
                 },
 
@@ -1639,7 +1648,9 @@
                             await supabaseClient.from('comments').insert([{ post_id: activeBottomSheetPostId, user_name: myName, text: text }]);
                             if (postAuthor !== myName) await this.pushCloudNotificationPayload(postAuthor, 'comment', `mengomentari postingan Anda.`);
                         }
-                        input.value = ''; this.renderBottomSheetInputBar(postAuthor); this.reloadCommentsBottomSheetStreamOnly();
+                        input.value = ''; 
+                        this.renderBottomSheetInputBar(postAuthor); 
+                        this.reloadCommentsBottomSheetStreamOnly();
                     } catch(err) {}
                 },
 
@@ -1724,7 +1735,7 @@
                     return (((r * 299) + (g * 587) + (b * 114)) / 1000) >= 128 ? '#0b2e1e' : '#ffffff';
                 },
                 generateAvatarHTML(name, url, isPremium, level, size = '46px', inPost = false) {
-                    return `<div class="premium-avatar-container avatar-wrapper" onclick="App.Router.navigate('${inPost ? 'profil?name=' + encodeURIComponent(name) : 'profil'}')"><img src="${url}" class="user-avatar" style="width:${size}; height:${size};" alt="Avatar"></div>`;
+                    return `<div class="premium-avatar-container avatar-wrapper" onclick="App.Router.navigate('${inPost ? 'profil?name=' + encodeURIComponent(name) : 'profil'}')"><img src="${url}" class="user-avatar" style="width:${size}; height:${size}; object-fit:cover;" alt="Avatar"></div>`;
                 },
                 handleHeaderAvatarToggleAction() { App.Router.navigate(window.location.hash.includes('#/profil') ? 'feed' : 'profil'); },
                 calculateRelativeTimeAgo(ts) {
