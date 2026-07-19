@@ -975,7 +975,7 @@
                         if (error) throw error;
                         if(data?.session) {
                             localStorage.setItem('ns_logged_in', 'true');
-                            localStorage.setItem('ns_user_id', data.session.user.id); // Simpan ID UUID internal secara global
+                            localStorage.setItem('ns_user_id', data.session.user.id); 
                             localStorage.setItem('ns_user_email', data.session.user.email);
                             App.ProfileState.getJoinDateText();
                             App.UI.syncGlobalAvatarAndName();
@@ -1505,9 +1505,10 @@
                         const targetCardNode = document.getElementById(`post-element-node-${postId}`);
                         if (targetCardNode) {
                             targetCardNode.remove();
-                        } else {
-                            this.renderPosts();
                         }
+                        
+                        // 4. Force hard reset cache local view list
+                        setTimeout(() => { App.Features.renderPosts(); }, 200);
                     } catch(e) {
                         App.Toast.show("Gagal menghapus. Periksa izin hak milik RLS Anda.", "danger");
                     }
@@ -1808,9 +1809,9 @@
                     const mediaUrl = document.getElementById('composer-media-url')?.value.trim() || '';
                     if(!content && !composerAttachedImageBase64 && !mediaUrl) return;
                     try {
-                        const myUuidId = localStorage.getItem('ns_user_id'); // Ambil UUID internal yang tersimpan saat login
+                        const myUuidId = localStorage.getItem('ns_user_id'); 
                         await supabaseClient.from('posts').insert([{ 
-                            user_id: myUuidId, // Ikat postingan baru secara presisi dengan UUID akun login Anda
+                            user_id: myUuidId, 
                             author: App.ProfileState.getCurrentName(), 
                             avatar: App.ProfileState.getCurrentAvatar(), 
                             content, 
