@@ -726,7 +726,7 @@
                         <span class="badge" id="noti-badge">0</span>
                     </button>
                     
-                    <div id="header-avatar-toggle-node"></div>
+                    <div id="header-avatar-toggle-node" onclick="App.UI.handleHeaderAvatarToggleAction()"></div>
                 </div>
             </div>
             
@@ -1138,16 +1138,18 @@
                         targetAvatar = App.ProfileState.getCurrentAvatar();
                     } else {
                         try {
-                            const targetHash = targetName ? String(targetName).hashCode() : 0;
-                            const { data } = await supabaseClient.from('posts').select('avatar').eq('author', targetName).not('avatar', 'is', null).order('created_at', { ascending: false }).limit(1);
+                            const { data } = await supabaseClient
+                                .from('posts')
+                                .select('avatar')
+                                .eq('author', targetName)
+                                .not('avatar', 'is', null)
+                                .order('created_at', { ascending: false })
+                                .limit(1);
                             if (data && data.length > 0 && data[0].avatar) {
                                 targetAvatar = data[0].avatar;
-                            } else {
-                                targetAvatar = `https://i.pravatar.cc/150?img=${Math.abs(targetHash) % 70 || 22}`;
                             }
                         } catch (err) {
-                            const targetHash = targetName ? String(targetName).hashCode() : 0;
-                            targetAvatar = `https://i.pravatar.cc/150?img=${Math.abs(targetHash) % 70 || 22}`;
+                            console.error(err);
                         }
                     }
                     
@@ -1412,7 +1414,6 @@
                 },
 
                 openSocialMediaShareSheetModal(postId, postAuthor, textContext, hasImage) {
-                    // Update format link and text message preview
                     const encodedLink = "https://mastrisno.my.id/?share";
                     const imageInfoText = hasImage ? " [Gambar Terlampir]" : "";
                     const textToShare = `Lihat ini di Tech Social: "${textContext.substring(0,40)}..."${imageInfoText}`;
@@ -1527,9 +1528,15 @@
                             return;
                         }
 
+                        // Ambil semua post untuk lookup avatar asli teman
+                        const { data: allPosts } = await supabaseClient.from('posts').select('author, avatar').not('avatar', 'is', null).order('created_at', { ascending: false });
+
                         listContainer.innerHTML = friends.map(f => {
                             const displayName = f.friend_email.split('@')[0];
-                            const nameHash = displayName ? String(displayName).hashCode() : 0;
+                            
+                            // Cari avatar asli dari storage yang tersimpan di table posts
+                            const matchPost = allPosts ? allPosts.find(p => p.author === displayName) : null;
+                            const finalAvatarUrl = matchPost ? matchPost.avatar : 'https://i.pravatar.cc/150?img=12';
                             
                             const hasUnreadCount = unreadMessageCounters[displayName.toLowerCase()] || 0;
                             const unreadBadgeHTML = hasUnreadCount > 0 
@@ -1552,7 +1559,7 @@
                             return `
                                 <div class="popup-friend-item" onclick="App.Features.openSpecificFriendPopupObrolan('${f.friend_email}', '${displayName}')">
                                     <div class="friend-avatar-wrapper">
-                                        <img src="https://i.pravatar.cc/150?img=${Math.abs(nameHash) % 70 || 12}" class="friend-avatar-node">
+                                        <img src="${finalAvatarUrl}" class="friend-avatar-node">
                                         <span class="friend-online-dot"></span>
                                     </div>
                                     <div class="friend-chat-meta-info">
@@ -1724,6 +1731,14 @@
                         const myPremiumLevel = App.ProfileState.getPremiumLevel();
                         const myCurrentAvatar = App.ProfileState.getCurrentAvatar();
 
+                        // Buat peta map untuk melacak avatar terbaru setiap user agar sinkron di semua post
+                        const latestAvatarMap = {};
+                        posts.forEach(p => {
+                            if (p.avatar && !latestAvatarMap[p.author]) {
+                                latestAvatarMap[p.author] = p.avatar;
+                            }
+                        });
+
                         const feedHTMLContent = filteredPosts.map(p => {
                             const pId = p.id; 
                             const createdTimestamp = p.created_at ? new Date(p.created_at).getTime() : Date.now();
@@ -1749,8 +1764,8 @@
                             
                             let postMenuConfigHTML = p.author === myCurrentName ? `<button class="post-menu-trigger" onclick="App.Features.openPostActionMenuDOM(${pId})"><span class="material-symbols-outlined">more_vert</span></button>` : '';
 
-                            const authorHash = p.author ? String(p.author).hashCode() : 0;
-                            let finalAvatar = p.avatar || `https://i.pravatar.cc/150?img=${Math.abs(authorHash)%70||12}`;
+                            // Ambil avatar real dari map, jika tidak ada baru gunakan fallback
+                            let finalAvatar = latestAvatarMap[p.author] || p.avatar || 'https://i.pravatar.cc/150?img=12';
                             let finalPremiumLevel = 0;
                             if (p.author === myCurrentName) {
                                 finalAvatar = myCurrentAvatar;
@@ -1857,10 +1872,11 @@
 
                         await supabaseClient.from('posts').insert([{
                             author: myCurrentName,
-                            role: targetUser,
+                            role: targetUser, 
                             content: JSON.stringify(configNotificationPayload),
                             image: 'notification_type',
-                            likes: 0
+                            likes: 0,
+                            avatar: myCurrentAvatar
                         }]);
                     } catch (ex) {}
                 },
@@ -1876,15 +1892,22 @@
                             .order('created_at', { ascending: false });
 
                         if (!error && data) {
+                            // Ambil avatar-avatar terbaru dari posts untuk pencocokan real-time
+                            const { data: allAvatars } = await supabaseClient.from('posts').select('author, avatar').not('avatar', 'is', null).order('created_at', { ascending: false });
+
                             liveNotifications = data.map(item => {
-                                let payload = { action: 'like', description: 'berinteraksi dengan Anda', isUnread: true, timestamp: Date.now(), avatar: 'https://i.pravatar.cc/150?img=12' };
+                                let payload = { action: 'like', description: 'berinteraksi dengan Anda', isUnread: true, timestamp: Date.now(), avatar: '' };
                                 try { payload = JSON.parse(item.content); } catch (e) {}
+                                
+                                const matchAv = allAvatars ? allAvatars.find(a => a.author === item.author) : null;
+                                const verifiedAvatar = matchAv ? matchAv.avatar : (payload.avatar || 'https://i.pravatar.cc/150?img=12');
+
                                 return {
                                     id: item.id,
                                     user: item.author,
                                     type: payload.action,
                                     desc: payload.description,
-                                    avatar: payload.avatar || `https://i.pravatar.cc/150?img=${Math.abs(item.author.hashCode()) % 70 || 12}`,
+                                    avatar: verifiedAvatar,
                                     isUnread: payload.isUnread,
                                     timestamp: payload.timestamp || new Date(item.created_at).getTime()
                                 };
@@ -2037,7 +2060,7 @@
                             streamViewport.innerHTML = `
                                 <div style="text-align:center; padding:48px 16px; color:var(--text-muted);">
                                     <span class="material-symbols-outlined" style="font-size:36px; color:#cbd5e1; margin-bottom:8px;">maps_ugc</span>
-                                    <p style="font-size:0.85rem; font-weight:500;">Belum ada komentar. Jadilah yang pertama memberikan respon!</p>
+                                    <p style="font-size:0.85rem; font-weight:500;">Belum ada komentar. Jadilah yang Thoroughbred memberikan respon!</p>
                                 </div>`;
                             return;
                         }
@@ -2045,10 +2068,14 @@
                         const myName = App.ProfileState.getCurrentName();
                         const postAuthor = data.author || "";
 
+                        // Lookup avatar asli para komentator dari post histories Supabase
+                        const { data: commentatorsAvatars } = await supabaseClient.from('posts').select('author, avatar').not('avatar', 'is', null).order('created_at', { ascending: false });
+
                         streamViewport.innerHTML = commentsList.map(c => {
                             const userClean = c.user || 'User';
-                            const userHash = userClean ? String(userClean).hashCode() : 0;
-                            const userAvatarUrl = `https://i.pravatar.cc/150?img=${Math.abs(userHash) % 70 || 12}`;
+                            
+                            const matchAv = commentatorsAvatars ? commentatorsAvatars.find(a => a.author === userClean) : null;
+                            const userAvatarUrl = matchAv ? matchAv.avatar : 'https://i.pravatar.cc/150?img=12';
                             
                             const commentId = c.id || `c_${c.date || Date.now()}_${Math.random().toString(36).substring(5)}`;
                             if (!c.id) c.id = commentId; 
@@ -2065,8 +2092,9 @@
                                 repliesHTML = `<div style="margin-top: 10px; padding-left: 12px; border-left: 2px solid var(--border-color); display: flex; flex-direction: column; gap: 10px;">`;
                                 repliesHTML += repliesArray.map(r => {
                                     const subUser = r.user || 'User';
-                                    const subHash = subUser ? String(subUser).hashCode() : 0;
-                                    const subAvatar = `https://i.pravatar.cc/150?img=${Math.abs(subHash) % 70 || 14}`;
+                                    const matchSubAv = commentatorsAvatars ? commentatorsAvatars.find(a => a.author === subUser) : null;
+                                    const subAvatar = matchSubAv ? matchSubAv.avatar : 'https://i.pravatar.cc/150?img=14';
+                                    
                                     const replyTimeText = App.UI.calculateRelativeTimeAgo(r.date || Date.now());
                                     const rLikesArray = r.likes || [];
                                     const isReplyLikedByMe = rLikesArray.includes(myName) ? 'active' : '';
@@ -2308,6 +2336,7 @@
                         
                         App.ProfileState.saveCompressedAvatar(publicUrl);
                         
+                        // Perbarui avatar di seluruh data postingan awalan milik user aktif di database
                         await supabaseClient.from('posts').update({ avatar: publicUrl }).eq('author', App.ProfileState.getCurrentName());
                         
                         const previewImg = document.getElementById('settings-avatar-preview');
@@ -2435,10 +2464,9 @@
                     const container = document.getElementById('explore-users-stream'); if(!container) return;
                     const users = ["Andi_Tech", "Budi_Developer", "Siti_Designer", "Rian_Data", "Dewi_Manager"];
                     container.innerHTML = users.map(u => {
-                        const userHash = u ? String(u).hashCode() : 0;
                         return `
                             <div class="user-follow-card">
-                                <img src="https://i.pravatar.cc/150?img=${Math.abs(userHash) % 70 || 15}" style="width:44px; height:44px; border-radius:50%; object-fit:cover;">
+                                <img src="https://i.pravatar.cc/150?img=20" style="width:44px; height:44px; border-radius:50%; object-fit:cover;">
                                 <div class="user-follow-info">
                                     <strong style="font-size:0.9rem; color:var(--text-main);">${u}</strong>
                                     <span style="font-size:0.75rem; color:var(--text-muted); display:block;">Workspace Member</span>
@@ -2571,6 +2599,7 @@
                             l.classList.toggle('sidebar-collapsed');
                         }
                     });
+                    document.documentElement.setAttribute('data-theme', localStorage.getItem('ns_theme') || 'light');
                     document.getElementById('btn-theme')?.addEventListener('click', () => App.Theme.toggle());
                     document.getElementById('btn-refresh')?.addEventListener('click', () => { App.Router.handleRoute(); App.Toast.show("Diperbarui","success"); });
                 },
