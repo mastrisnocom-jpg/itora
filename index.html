@@ -1503,7 +1503,7 @@
                     const stream = document.getElementById('feed-stream'); if(!stream) return;
                     try {
                         const { data: posts } = await supabaseClient.from('posts').select('*').order('created_at', { ascending: false });
-                        const { data: allComments } = await supabaseClient.from('comments').select('post_id');
+                        const { data: allComments } = await supabaseClient.from('comments').select('*');
                         const myName = App.ProfileState.getCurrentName();
                         let filtered = posts || [];
 
@@ -1521,13 +1521,32 @@
                         }
 
                         stream.innerHTML = `<div class="feed-container">` + filtered.map(p => {
-                            const likedList = p.liked_users || [];
-                            const lovedList = p.loved_users || [];
-                            const hasLiked = likedList.includes(myName) ? 'liked' : '';
-                            const hasLoved = lovedList.includes(myName) ? 'loved' : '';
-                            const mediaHTML = p.media_url ? (p.media_url.includes('youtube.com') ? `<iframe src="https://www.youtube.com/embed/${p.media_url.split('v=')[1]}" allowfullscreen></iframe>` : `<audio controls><source src="${p.media_url}"></audio>`) : (p.image ? `<img src="${p.image}" class="post-attached-image">` : '');
+                            const postComments = allComments ? allComments.filter(c => c.post_id === p.id) : [];
                             
-                            const commentCount = allComments ? allComments.filter(c => c.post_id === p.id).length : 0;
+                            // 1. Akumulasi Total Komentar: Komentar Utama + Semua Sub-komentar (Replies)
+                            let totalCommentsCount = postComments.length;
+                            postComments.forEach(c => {
+                                if (c.replies && Array.isArray(c.replies)) {
+                                    totalCommentsCount += c.replies.length;
+                                }
+                            });
+
+                            // 2. Akumulasi Total Likes: Like Utama + Like Semua Komentar + Like Semua Sub-komentar
+                            let postLikesArray = p.liked_users || [];
+                            let accumulatedLikesCount = postLikesArray.length;
+                            
+                            postComments.forEach(c => {
+                                accumulatedLikesCount += (c.likes || []).length;
+                                if (c.replies && Array.isArray(c.replies)) {
+                                    c.replies.forEach(r => {
+                                        accumulatedLikesCount += (r.likes || []).length;
+                                    });
+                                }
+                            });
+
+                            const hasLiked = postLikesArray.includes(myName) ? 'liked' : '';
+                            const hasLoved = (p.loved_users || []).includes(myName) ? 'loved' : '';
+                            const mediaHTML = p.media_url ? (p.media_url.includes('youtube.com') ? `<iframe src="https://www.youtube.com/embed/${p.media_url.split('v=')[1]}" allowfullscreen></iframe>` : `<audio controls><source src="${p.media_url}"></audio>`) : (p.image ? `<img src="${p.image}" class="post-attached-image">` : '');
 
                             return `
                                 <div class="post-card">
@@ -1548,9 +1567,9 @@
                                     ${p.location ? `<div style="color:var(--primary); font-size:0.8rem; margin-top:8px;">📍 ${p.location}</div>` : ''}
                                     ${mediaHTML}
                                     <div class="post-actions-bar">
-                                        <div class="post-action-item ${hasLiked}" onclick="App.Features.toggleLike(${p.id}, '${p.author}')"><span class="material-symbols-outlined">thumb_up</span><span> ${likedList.length}</span></div>
-                                        <div class="post-action-item ${hasLoved}" onclick="App.Features.toggleLoveReaction(${p.id}, '${p.author}')"><span class="material-symbols-outlined">favorite</span><span> ${lovedList.length}</span></div>
-                                        <div class="post-action-item" onclick="App.Features.openCommentsBottomSheet(${p.id}, '${p.author}')"><span class="material-symbols-outlined">comment</span><span> Komentar (${commentCount})</span></div>
+                                        <div class="post-action-item ${hasLiked}" onclick="App.Features.toggleLike(${p.id}, '${p.author}')"><span class="material-symbols-outlined">thumb_up</span><span> ${accumulatedLikesCount}</span></div>
+                                        <div class="post-action-item ${hasLoved}" onclick="App.Features.toggleLoveReaction(${p.id}, '${p.author}')"><span class="material-symbols-outlined">favorite</span><span> ${(p.loved_users || []).length}</span></div>
+                                        <div class="post-action-item" onclick="App.Features.openCommentsBottomSheet(${p.id}, '${p.author}')"><span class="material-symbols-outlined">comment</span><span> Komentar (${totalCommentsCount})</span></div>
                                         <div class="post-action-item" onclick="App.Features.openSocialMediaShareSheetModal(${p.id}, '${p.author}', '${(p.content || "").replace(/'/g, "\\'")}', ${!!p.image})"><span class="material-symbols-outlined">share</span><span> ${p.shared_count || 0}</span></div>
                                     </div>
                                 </div>`;
@@ -1647,10 +1666,24 @@
                         }
                         stream.innerHTML = comments.map(c => {
                             const isCommentLiked = (c.likes || []).includes(myName) ? 'active' : '';
+                            const commentLikesCount = (c.likes || []).length;
+                            
+                            // Sembunyikan ikon jempol jika likes utama komentar bernilai 0
+                            const commentLikeBadgeHTML = commentLikesCount > 0 
+                                ? `👍 ${commentLikesCount} Suka` 
+                                : `Suka`;
+
                             const subRepliesList = c.replies || [];
                             
                             let nestedRepliesHTML = subRepliesList.map(r => {
                                 const isReplyLiked = (r.likes || []).includes(myName) ? 'active' : '';
+                                const replyLikesCount = (r.likes || []).length;
+                                
+                                // Sembunyikan ikon jempol jika likes sub-komentar bernilai 0
+                                const replyLikeBadgeHTML = replyLikesCount > 0 
+                                    ? `👍 ${replyLikesCount} Suka` 
+                                    : `Suka`;
+
                                 return `
                                     <div style="display:flex; gap:8px; align-items:flex-start; margin-top:8px; padding-left:12px; border-left:2px solid var(--border-color);">
                                         <img src="https://i.pravatar.cc/150?img=13" style="width:26px; height:26px; border-radius:50%; object-fit:cover;">
@@ -1660,7 +1693,7 @@
                                                 <p style="font-size:0.85rem; margin-top:2px;">${r.text}</p>
                                             </div>
                                             <div style="display:flex; gap:12px; font-size:0.7rem; color:var(--text-muted); margin-top:3px; font-weight:700;">
-                                                <span class="reply-like-btn ${isReplyLiked}" style="cursor:pointer;color:var(--primary);" onclick="App.Features.toggleReplyLikeAction('${c.id}', '${r.id}')">👍 ${(r.likes || []).length} Suka</span>
+                                                <span class="reply-like-btn ${isReplyLiked}" style="cursor:pointer;color:var(--primary);" onclick="App.Features.toggleReplyLikeAction('${c.id}', '${r.id}')">${replyLikeBadgeHTML}</span>
                                                 <span style="cursor:pointer;" onclick="activeReplyTargetCommentId='${c.id}'; App.Features.renderBottomSheetInputBar();">Balas</span>
                                             </div>
                                         </div>
@@ -1677,7 +1710,7 @@
                                             <p style="font-size:0.9rem; margin-top:2px;">${c.text}</p>
                                         </div>
                                         <div style="font-size:0.75rem; color:var(--text-muted); margin-top:4px; margin-left:6px; display:flex; gap:12px; font-weight:700;">
-                                            <span class="comment-like-btn ${isCommentLiked}" style="cursor:pointer;color:var(--primary);" onclick="App.Features.toggleCommentLikeAction('${c.id}')">👍 ${(c.likes || []).length} Suka</span>
+                                            <span class="comment-like-btn ${isCommentLiked}" style="cursor:pointer;color:var(--primary);" onclick="App.Features.toggleCommentLikeAction('${c.id}')">${commentLikeBadgeHTML}</span>
                                             <span style="cursor:pointer;" onclick="activeReplyTargetCommentId='${c.id}'; App.Features.renderBottomSheetInputBar();">Balas</span>
                                         </div>
                                     </div>
