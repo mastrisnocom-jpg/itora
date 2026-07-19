@@ -743,9 +743,7 @@
 
         <!-- MAIN VIEWPORT -->
         <main class="app-content">
-            <!-- PANEL PASANG IKLAN SUPER ADMIN & LIVE PREVIEW SLOT DI BAWAH HEADER -->
-            <div id="admin-ad-placement-zone"></div>
-            
+            <!-- SLOT PENAYANGAN IKLAN GLOBAL TETAP DI SINI (DI BAWAH HEADER) -->
             <div id="global-superadmin-ad-slot-container"></div>
             <div id="app-viewport"></div>
         </main>
@@ -1218,6 +1216,10 @@
                     const premiumLevel = App.ProfileState.getPremiumLevel();
                     const borderClass = premiumLevel > 0 ? 'premium-border' : '';
 
+                    const myEmail = (localStorage.getItem('ns_user_email') || '').toLowerCase();
+                    const isSuperAdmin = (myEmail === 'mastrisnocom@gmail.com');
+                    const savedAdHTML = localStorage.getItem('ns_ad_html_global') || '';
+
                     return `
                         <div class="glass-card" style="max-width: 650px; margin: 0 auto; position: relative;">
                             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; border-bottom: 1px solid var(--border-color); padding-bottom: 12px;">
@@ -1229,6 +1231,24 @@
                                     <span class="material-symbols-outlined">close</span>
                                 </button>
                             </div>
+                            
+                            <!-- FORM PENGATURAN IKLAN DI DALAM SETTINGS -->
+                            ${isSuperAdmin ? `
+                                <div class="glass-card" style="border: 1px solid var(--primary); text-align: left; margin-bottom: 24px; background: var(--bg-body);">
+                                    <h3 style="margin-bottom: 12px; color: var(--primary); display: flex; align-items: center; gap: 6px;">
+                                        <span class="material-symbols-outlined">campaign</span>Panel Pasang Iklan Super Admin
+                                    </h3>
+                                    <form id="global-admin-ad-form" onsubmit="App.Features.saveAdminGlobalAdBannerAction(event)">
+                                        <div class="form-group" style="margin-bottom: 14px;">
+                                            <textarea class="form-input" id="admin-ad-html-input" placeholder=" " required style="min-height: 100px;">${savedAdHTML}</textarea>
+                                            <label class="form-label">Kode Iklan HTML/JS</label>
+                                        </div>
+                                        <button type="submit" class="btn btn-primary btn-full">Publikasikan Banner Iklan</button>
+                                    </form>
+                                    ${savedAdHTML ? `<div id="admin-live-ad-preview-slot" style="margin-top:20px; border-top:1px dashed var(--border-color); padding-top:15px;"><strong>Live Preview Form Iklan:</strong><div class="global-workspace-ad-banner" style="margin-top:8px; margin-bottom:0;">${savedAdHTML}</div></div>` : ''}
+                                </div>
+                            ` : ''}
+
                             <div class="avatar-edit-container">
                                 <div class="avatar-preview-wrapper" style="width: 110px; height: 110px;">
                                     <img src="${currentAvatar}" id="settings-avatar-preview" class="avatar-preview-circle ${borderClass}" alt="Preview">
@@ -1853,7 +1873,7 @@
                         const myCurrentAvatar = App.ProfileState.getCurrentAvatar();
                         const configNotificationPayload = {
                             action: actionType,
-                            avatar: myCurrentAvatar,
+                            avatar: myCurrentName,
                             description: textDesc,
                             isUnread: true,
                             timestamp: Date.now()
@@ -2010,7 +2030,7 @@
                     dockForm.innerHTML = `
                         <input type="text" class="form-input" placeholder="${placeholderText}" id="sheet-comment-input-field" style="border-radius:20px; padding:10px 14px; margin-bottom:0; font-size:0.9rem; background:var(--bg-body);">
                         ${activeReplyTargetCommentId ? `<button class="icon-btn" style="color:var(--danger);" onclick="App.Features.cancelReplyMode('${postAuthor}')" title="Batal Balas"><span class="material-symbols-outlined">close</span></button>` : ''}
-                        <button class="icon-btn" style="background:var(--primary); color:white; width:34px; height:34px; flex-shrink:0;" onclick="App.Features.submitBottomSheetCommentAction('${postAuthor}')">
+                        <button class="icon-btn" style="background:var(--primary); color:white; width:34px; height:34px; flex-shrink:0;" onclick="App.Features.submitBottomSheetCommentAction(postAuthor)">
                             <span class="material-symbols-outlined" style="font-size:16px;">send</span>
                         </button>
                     `;
@@ -2447,9 +2467,14 @@
                     localStorage.setItem('ns_ad_html_global', code);
                     App.Toast.show("Iklan Super Admin dipublikasikan!", "success");
                     
-                    // REVISI: Perbarui kedua elemen agar live preview langsung tampil
+                    // Memperbarui slot penayangan iklan di bawah header secara instan
                     App.UI.renderGlobalBannerAdIfExists();
-                    App.UI.renderAdminAdFormPanelIfNeeded();
+                    
+                    // Memperbarui live preview yang ada di dalam menu pengaturan
+                    const liveAdSlot = document.getElementById('admin-live-ad-preview-slot');
+                    if (liveAdSlot) {
+                        liveAdSlot.innerHTML = `<strong>Live Preview Form Iklan:</strong><div class="global-workspace-ad-banner" style="margin-top:8px; margin-bottom:0;">${code}</div>`;
+                    }
                 },
 
                 renderExploreUsers() {
@@ -2585,32 +2610,8 @@
                     } else container.innerHTML = '';
                 },
                 renderAdminAdFormPanelIfNeeded() {
-                    const placementZone = document.getElementById('admin-ad-placement-zone');
-                    if (!placementZone) return;
-
-                    const myEmail = (localStorage.getItem('ns_user_email') || '').toLowerCase();
-                    const isSuperAdmin = (myEmail === 'mastrisnocom@gmail.com');
-
-                    if (isSuperAdmin) {
-                        const savedAdHTML = localStorage.getItem('ns_ad_html_global') || '';
-                        
-                        // REVISI: Menyediakan slot visual live preview iklan aktif tepat di bawah form agar ter-render
-                        placementZone.innerHTML = `
-                            <div class="glass-card" style="border: 1px solid var(--primary); text-align: left; margin-bottom: 24px;">
-                                <h3 style="margin-bottom: 12px; color: var(--primary);">Panel Pasang Iklan Super Admin</h3>
-                                <form id="global-admin-ad-form" onsubmit="App.Features.saveAdminGlobalAdBannerAction(event)">
-                                    <div class="form-group" style="margin-bottom: 14px;">
-                                        <textarea class="form-input" id="admin-ad-html-input" placeholder=" " required style="min-height: 100px;">${savedAdHTML}</textarea>
-                                        <label class="form-label">Kode Iklan HTML/JS</label>
-                                    </div>
-                                    <button type="submit" class="btn btn-primary btn-full">Publikasikan Banner Iklan</button>
-                                </form>
-                                ${savedAdHTML ? `<div id="admin-live-ad-preview-slot" style="margin-top:20px; border-top:1px dashed var(--border-color); padding-top:15px;"><strong>Live Preview Iklan Aktif:</strong><div class="global-workspace-ad-banner" style="margin-top:8px; margin-bottom:0;">${savedAdHTML}</div></div>` : ''}
-                            </div>
-                        `;
-                    } else {
-                        placementZone.innerHTML = '';
-                    }
+                    // Penanganan form visual sepenuhnya dialihkan ke Views.settings()
+                    return;
                 },
                 bindGlobalEvents() {
                     document.getElementById('btn-toggle-sidebar')?.addEventListener('click', () => {
