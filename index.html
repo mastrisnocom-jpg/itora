@@ -154,7 +154,8 @@
         .post-menu-trigger { cursor: pointer; color: var(--text-muted); padding: 4px; border-radius: 50%; border: none; background: transparent; }
         .post-menu-trigger:hover { background: var(--primary-state); color: var(--primary); }
 
-        .post-content { font-family: var(--font-main); font-size: 1.05rem; font-weight: 400; line-height: 1.65; letter-spacing: -0.1px; margin-bottom: 16px; color: var(--text-main); text-align: left; white-space: pre-wrap; word-break: break-word; max-width: 100%; }
+        /* BACKGROUND DIUBAH MENJADI PUTIH BERSIH SESUAI PERMINTAAN */
+        .post-content { font-family: var(--font-main); font-size: 1.05rem; font-weight: 400; line-height: 1.65; letter-spacing: -0.1px; margin-bottom: 16px; color: var(--text-main); text-align: left; white-space: pre-wrap; word-break: break-word; max-width: 100%; background: #ffffff !important; padding: 12px; border-radius: var(--radius-md); }
         
         .post-actions-bar { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 12px 4px; border-top: 1px solid rgba(0,0,0,0.05); border-bottom: 1px solid rgba(0,0,0,0.05); margin-top: 16px; max-width: 100%; }
         .post-action-item { display: inline-flex; align-items: center; gap: 8px; color: var(--text-muted); font-weight: 600; font-size: 0.95rem; cursor: pointer; transition: var(--trans-smooth); user-select: none; }
@@ -278,7 +279,8 @@
         .pic-composer-username { font-size: 1.05rem; font-weight: 800; color: var(--text-main); }
         
         .pic-composer-body { flex: 1; padding: 0 20px; display: flex; flex-direction: column; max-width: 100%; }
-        .pic-composer-textarea { width: 100%; border: 1px solid rgba(1, 181, 116, 0.1); border-radius: var(--radius-md); background: var(--bg-body); color: var(--text-main); font-size: 1.05rem; padding: 16px; min-height: 140px; font-family: var(--font-main); line-height: 1.5; box-sizing: border-box; resize: none; transition: var(--trans-smooth); }
+        /* TEXTAREA COMPOSER DEFAULT BACKGROUND DIUBAH MENJADI PUTIH BERSIH */
+        .pic-composer-textarea { width: 100%; border: 1px solid rgba(1, 181, 116, 0.1); border-radius: var(--radius-md); background: #ffffff !important; color: var(--text-main); font-size: 1.05rem; padding: 16px; min-height: 140px; font-family: var(--font-main); line-height: 1.5; box-sizing: border-box; resize: none; transition: var(--trans-smooth); }
         .pic-composer-textarea:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 4px var(--primary-state); }
         .pic-composer-preview-box { margin-top: 12px; border-radius: 12px; overflow: hidden; max-height: 140px; text-align: center; }
         .pic-composer-preview-box img { max-height: 130px; object-fit: cover; border: 2px solid var(--primary); border-radius: 8px; margin: 0 auto; display: block; max-width: 100%; }
@@ -603,7 +605,7 @@
         .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(5,20,11,0.5); backdrop-filter: blur(4px); z-index: 4000; display: none; align-items: center; justify-content: center; padding: 20px; transition: var(--trans-smooth); }
         .modal-overlay.active { display: flex; }
         .modal-content { background: var(--bg-glass-solid); border: 1px solid var(--border-color); border-radius: var(--radius-xl); padding: 24px; width: 100%; max-width: 500px; position: relative; box-shadow: var(--shadow-soft); max-height: 90vh; overflow-y: auto; box-sizing: border-box; }
-        .modal-close-x { position: absolute; top: 16px; right: 16px; cursor: pointer; background: transparent; color: var(--text-muted); z-index: 10; }
+        .modal-close-x { position: absolute; top: 16px; right: 16px; cursor: pointer; background: transparent; color: var(--text-muted); z-index: 10; border: none; display: flex; align-items: center; justify-content: center; }
         
         /* TOAST & ANIMATIONS */
         .toast-container { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); z-index: 9999; display: flex; flex-direction: column; gap: 10px; pointer-events: none; width: calc(100% - 40px); max-width: 350px; }
@@ -1091,7 +1093,7 @@
                             sideHTML += `<li class="menu-item-wrapper"><a class="menu-item ripple-btn" onclick="App.UI.toggleChatPopup(true)"><span class="material-symbols-outlined">${m.icon}</span><span class="menu-text">${m.label}</span></a></li>`;
                             topInjectedHTML += `<div class="mobile-menu-tab-btn" onclick="App.UI.toggleChatPopup(true)" title="${m.label}"><span class="material-symbols-outlined">${m.icon}</span></div>`;
                         } else {
-                            sideHTML += `<li><a class="menu-item ripple-btn" data-route="${m.id}" onclick="App.Router.navigate('${m.id}')"><span class="material-symbols-outlined">${m.icon}</span><span class="menu-text">${m.label}</span></a></li>`;
+                            sideHTML += `<li><a class="menu-item option-node-link ripple-btn" data-route="${m.id}" onclick="App.Router.navigate('${m.id}')"><span class="material-symbols-outlined">${m.icon}</span><span class="menu-text">${m.label}</span></a></li>`;
                             topInjectedHTML += `<div class="mobile-menu-tab-btn" data-route="${m.id}" onclick="App.Router.navigate('${m.id}')" title="${m.label}"><span class="material-symbols-outlined">${m.icon}</span></div>`;
                         }
                     });
@@ -1260,8 +1262,12 @@
                     currentComposerBgColor = "#ffffff"; activeComposerLocation = "";
 
                     const popupFormHTML = `
-                        <div class="pic-composer-card">
-                            <div class="pic-composer-header">
+                        <div class="pic-composer-card" style="position: relative;">
+                            <!-- CARA 1 CLOSE: Tombol X Pojok Kanan Atas Diaktifkan Kembali -->
+                            <button onclick="App.Features.closeComposerAndClearCache()" style="position: absolute; top: 16px; right: 16px; background: transparent; border: none; cursor: pointer; color: var(--text-main); z-index: 10;">
+                                <span class="material-symbols-outlined" style="font-size:24px;">close</span>
+                            </button>
+                            <div class="pic-composer-header" style="padding-right: 48px;">
                                 <button class="pic-composer-close" onclick="App.Features.closeComposerAndClearCache()"><span class="material-symbols-outlined">close</span></button>
                                 <span class="pic-composer-title">Postingan baru</span>
                                 <button class="pic-composer-next-btn" id="pic-submit-btn" onclick="App.Features.createPost()">Kirim</button>
@@ -1312,7 +1318,6 @@
 
                 closeComposerAndClearCache() { composerAttachedImageBase64 = null; activeComposerLocation = ""; App.Modal.close(); },
                 
-                // POP-UP PEMILIH LOKASI PREMIUM SESUAI GAMBAR BARU
                 openNativeLocationPickerPopupModal() {
                     const locationModalHTML = `
                         <div style="display:flex; flex-direction:column; gap:16px;">
@@ -1366,7 +1371,6 @@
                     App.Modal.closeSecondaryPopupModal();
                 },
 
-                // POP-UP PEMILIH WARNA PREMIUM SEBAGAI SUB-MODAL
                 openPremiumColorPickerPopupModal() {
                     const colorModalHTML = `
                         <div style="display:flex; flex-direction:column; gap:12px;">
@@ -1704,7 +1708,7 @@
                                         </div>
                                         <button class="post-menu-trigger" onclick="App.Features.openPostActionMenuDOM(${p.id}, '${p.author}')"><span class="material-symbols-outlined">more_vert</span></button>
                                     </div>
-                                    <div class="post-content" style="background:${p.bg_color || '#ffffff'};">${p.content || ''}</div>
+                                    <div class="post-content">${p.content || ''}</div>
                                     ${p.location ? `<div style="color:var(--primary); font-size:0.8rem; margin-top:8px;">📍 ${p.location}</div>` : ''}
                                     ${mediaHTML}
                                     <div class="post-actions-bar">
@@ -1986,7 +1990,7 @@
                 open(title, bodyHTML, hideFooter = false, rawMode = false) { 
                     const area = document.getElementById('modal-content-area'), tEl = document.getElementById('modal-title'), bEl = document.getElementById('modal-body'), fEl = document.getElementById('modal-footer-actions'), cEl = document.getElementById('modal-close-x-btn');
                     if (rawMode) { area.style.padding = '0'; area.style.background = 'transparent'; area.style.border = 'none'; tEl.style.display = 'none'; fEl.style.display = 'none'; if(cEl) cEl.style.display = 'none'; } 
-                    else { area.style.padding = '24px'; area.style.background = 'var(--bg-glass-solid)'; tEl.style.display = title ? 'block' : 'none'; tEl.innerText = title || ''; fEl.style.display = hideFooter ? 'none' : 'flex'; }
+                    else { area.style.padding = '24px'; area.style.background = 'var(--bg-glass-solid)'; tEl.style.display = title ? 'block' : 'none'; tEl.innerText = title || ''; fEl.style.display = hideFooter ? 'none' : 'flex'; if(cEl) cEl.style.display = 'flex'; }
                     bEl.innerHTML = bodyHTML; document.getElementById('global-modal').classList.add('active'); 
                 },
                 openSecondary(title, innerHTML) {
@@ -1994,9 +1998,20 @@
                     secondaryOverlay.id = 'premium-secondary-modal-overlay';
                     secondaryOverlay.style = 'position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.4); backdrop-filter:blur(6px); z-index:4500; display:flex; align-items:center; justify-content:center; padding:20px;';
                     
+                    // CARA 2 CLOSE: Klik area hitam luar untuk keluar
+                    secondaryOverlay.addEventListener('click', (e) => {
+                        if(e.target.id === 'premium-secondary-modal-overlay') {
+                            App.Modal.closeSecondaryPopupModal();
+                        }
+                    });
+
+                    // CARA 1 CLOSE: Menambahkan Tombol X Kanan Atas yang Sesuai Tema
                     secondaryOverlay.innerHTML = `
-                        <div class="glass-card" style="width:100%; max-width:440px; margin:0; position:relative; padding:24px; animation:fadeScale 0.3s ease;">
-                            <h2 style="margin-bottom:16px; font-size:1.2rem; font-weight:800; text-align:left; color:var(--text-main);">${title}</h2>
+                        <div class="glass-card" style="width:100%; max-width:440px; margin:0; position:relative; padding:24px; animation:fadeScale 0.3s ease; background: var(--bg-glass-solid); border: 1px solid var(--border-color);">
+                            <button onclick="App.Modal.closeSecondaryPopupModal()" style="position:absolute; top:16px; right:16px; cursor:pointer; background:transparent; color:var(--text-muted); border:none; display:flex; align-items:center; justify-content:center;">
+                                <span class="material-symbols-outlined" style="font-size: 20px;">close</span>
+                            </button>
+                            <h2 style="margin-bottom:16px; font-size:1.2rem; font-weight:800; text-align:left; color:var(--text-main); padding-right:24px;">${title}</h2>
                             <div>${innerHTML}</div>
                         </div>
                     `;
@@ -2046,6 +2061,29 @@
                     document.getElementById('btn-toggle-sidebar')?.addEventListener('click', () => { if(window.innerWidth > 768) document.getElementById('app-layout').classList.toggle('sidebar-collapsed'); });
                     document.getElementById('btn-theme')?.addEventListener('click', () => App.Theme.toggle());
                     document.getElementById('btn-refresh')?.addEventListener('click', () => { App.Router.handleRoute(); App.Toast.show("Diperbarui","success"); });
+                    
+                    // CARA 2 CLOSE: Klik area luar untuk penutupan Global Modal Sistem
+                    document.getElementById('global-modal')?.addEventListener('click', (e) => {
+                        if (e.target.id === 'global-modal') {
+                            if (document.getElementById('composer-text')) {
+                                App.Features.closeComposerAndClearCache();
+                            } else {
+                                App.Modal.close();
+                            }
+                        }
+                    });
+
+                    // CARA 2 CLOSE: Klik area luar untuk penutupan Floating Chat Box Melayang
+                    document.addEventListener('click', (e) => {
+                        const box = document.getElementById('floating-chat-popup-box');
+                        if (box && box.classList.contains('active')) {
+                            const isClickInside = box.contains(e.target);
+                            const isTrigger = e.target.closest('[onclick*="toggleChatPopup"]') || e.target.closest('.mobile-menu-tab-btn');
+                            if (!isClickInside && !isTrigger) {
+                                App.UI.toggleChatPopup(false);
+                            }
+                        }
+                    });
                 },
                 closeMobileSidebar() { document.getElementById('app-layout')?.classList.remove('sidebar-mobile-open'); document.getElementById('mobile-overlay')?.classList.remove('active'); },
                 toggleChatPopup(open) {
