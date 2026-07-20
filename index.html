@@ -198,7 +198,7 @@
         .post-action-item.loved .material-symbols-outlined { font-variation-settings: 'FILL' 1; color: var(--danger) !important; }
 
         .post-attached-image { max-width: 100%; border-radius: var(--radius-md); margin: 12px 0; display: block; max-height: 380px; object-fit: cover; cursor: zoom-in; border: 1px solid var(--border-color); }
-        .post-card iframe { display: block; margin: 12px 0; width: 100%; max-width: 100%; height: 240px; border-radius: 12px; border: 1px solid var(--border-color); }
+        .post-card iframe { display: block; margin: 12px 0; width: 100%; max-width: 100%; height: 260px; border-radius: 12px; border: 1px solid var(--border-color); }
         .post-card audio { display: block; margin: 12px 0; width: 100%; max-width: 100%; background: #f0f2f5; border-radius: var(--radius-round); padding: 8px; }
 
         /* BOTTOM SHEET KOMENTAR */
@@ -259,10 +259,10 @@
         .pic-composer-preview-box img { max-height: 130px; object-fit: cover; border: 2px solid var(--primary); border-radius: 8px; margin: 0 auto; display: block; max-width: 100%; }
         .pic-composer-preview-box iframe { width: 100%; height: 200px; border-radius: 12px; border: 1px solid var(--border-color); }
 
-        .pic-composer-dock-grid { display: flex; justify-content: space-around; padding: 20px; border-top: 1px solid var(--border-color); background: #ffffff; max-width: 100%; }
-        .pic-dock-icon-only-item { display: flex; flex-direction: column; align-items: center; justify-content: center; width: 50px; height: 50px; border-radius: 50%; background: #f0f2f5; border: 1px solid var(--border-color); cursor: pointer; transition: var(--trans-smooth); }
+        .pic-composer-dock-grid { display: flex; justify-content: space-around; padding: 16px; border-top: 1px solid var(--border-color); background: #ffffff; max-width: 100%; flex-wrap: wrap; gap: 8px; }
+        .pic-dock-icon-only-item { display: flex; flex-direction: column; align-items: center; justify-content: center; width: 46px; height: 46px; border-radius: 50%; background: #f0f2f5; border: 1px solid var(--border-color); cursor: pointer; transition: var(--trans-smooth); }
         .pic-dock-icon-only-item:hover { color: var(--primary); background: #e4e6eb; }
-        .pic-dock-icon-only-item .material-symbols-outlined { font-size: 24px; color: var(--text-main); }
+        .pic-dock-icon-only-item .material-symbols-outlined { font-size: 22px; color: var(--text-main); }
 
         /* MULTI SHARE SHEET CSS */
         .share-grid-sheet { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; padding: 12px 0; text-align: center; max-width: 100%; }
@@ -279,12 +279,14 @@
         .avatar-preview-circle { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; padding: 2px; }
         .avatar-upload-label { position: absolute; bottom: 0; right: 0; width: 32px; height: 32px; border-radius: 50%; background: var(--primary); color: white; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: var(--shadow-float); }
 
-        /* MINIMAL COMPOSER BAR */
-        .minimal-composer-bar { display: flex; align-items: center; gap: 14px; background: #ffffff; border: 1px solid var(--border-color); padding: 16px 24px; border-radius: var(--radius-xl); box-shadow: var(--shadow-soft); margin-bottom: 28px; transition: var(--trans-smooth); max-width: 100%; box-sizing: border-box; }
-        .minimal-composer-input-mock { flex: 1; border: 1px solid var(--border-color); padding: 12px 24px; border-radius: var(--radius-round); color: var(--text-muted); font-size: 1.05rem; font-weight: 500; text-align: left; background: #f0f2f5; cursor: pointer; transition: var(--trans-smooth); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        /* MINIMAL COMPOSER BAR & MEDIA ACTIONS */
+        .minimal-composer-bar { display: flex; flex-direction: column; background: #ffffff; border: 1px solid var(--border-color); padding: 16px 20px; border-radius: var(--radius-xl); box-shadow: var(--shadow-soft); margin-bottom: 28px; transition: var(--trans-smooth); max-width: 100%; box-sizing: border-box; gap: 12px; }
+        .minimal-composer-top-row { display: flex; align-items: center; gap: 14px; width: 100%; }
+        .minimal-composer-input-mock { flex: 1; border: 1px solid var(--border-color); padding: 12px 20px; border-radius: var(--radius-round); color: var(--text-muted); font-size: 1rem; font-weight: 500; text-align: left; background: #f0f2f5; cursor: pointer; transition: var(--trans-smooth); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .minimal-composer-input-mock:hover { background: #e4e6eb; }
-        .minimal-composer-gallery-icon { color: var(--text-muted); font-size: 28px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: var(--trans-smooth); user-select: none; flex-shrink: 0; }
-        .minimal-composer-gallery-icon:hover { color: var(--primary); }
+        .minimal-composer-quick-actions { display: flex; align-items: center; justify-content: space-around; border-top: 1px solid var(--border-color); padding-top: 10px; width: 100%; }
+        .composer-quick-btn { display: inline-flex; align-items: center; gap: 6px; color: var(--text-muted); font-size: 0.82rem; font-weight: 700; cursor: pointer; padding: 6px 12px; border-radius: var(--radius-md); transition: var(--trans-smooth); }
+        .composer-quick-btn:hover { background: #f0f2f5; color: var(--primary); }
 
         /* FLOATING CHAT WIDGET SYSTEM */
         .floating-chat-widget { position: fixed; top: var(--header-height); bottom: 20px; right: 20px; width: 420px; background: #ffffff; border: 1px solid var(--border-color); border-radius: var(--radius-xl); box-shadow: 0 12px 40px rgba(0,0,0,0.15); display: none; flex-direction: column; overflow: hidden; z-index: 1002; transition: var(--trans-smooth); max-width: calc(100% - 40px); }
@@ -587,30 +589,51 @@
         };
 
         window.userFriendsList = [];
+        window.registeredUsersList = []; // CACHE USER YANG TERDAFTAR DI SUPABASE
 
         function escapeJSString(str) {
             return String(str || '').replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/"/g, '&quot;');
         }
 
-        // MENTION DENGAN OTOMATIS MENUTUP BOTTOM SHEET KOMENTAR KETIKA DIKLIK
+        // MEMUAT SELURUH USER TERDAFTAR DARI DATABASE SUPABASE UNTUK VALIDASI MENTION
+        async function fetchRegisteredUsersListFromSupabase() {
+            try {
+                const { data } = await supabaseClient.from('profiles').select('display_name');
+                if (data) {
+                    window.registeredUsersList = data.map(u => u.display_name).filter(Boolean);
+                }
+            } catch(e) {
+                window.registeredUsersList = [];
+            }
+        }
+
+        // MENTION HANYA AKTIF JIKA USER TERDAFTAR DI DATABASE SUPABASE
         function parseMentionsToClickableLinks(text) {
             if (!text) return "";
             return text.replace(/@([a-zA-Z0-9_]+)/g, function(match, username) {
                 const safeUser = escapeJSString(username);
-                return `<span class="user-mention-link" onclick="App.Features.closeCommentsBottomSheet(); App.Router.navigate('profil?name=${encodeURIComponent(safeUser)}')">@${username}</span>`;
+                const isRegistered = window.registeredUsersList && window.registeredUsersList.some(u => u.toLowerCase() === username.toLowerCase());
+                
+                if (isRegistered) {
+                    return `<span class="user-mention-link" onclick="App.Features.closeCommentsBottomSheet(); App.Router.navigate('profil?name=${encodeURIComponent(safeUser)}')">@${username}</span>`;
+                }
+                return `@${username}`;
             });
         }
 
-        // DETEKSI DAN KIRIM NOTIFIKASI OTOMATIS KEPADA USER YANG DI-MENTION
+        // DETEKSI DAN KIRIM NOTIFIKASI OTOMATIS KEPADA USER TERDAFTAR YANG DI-MENTION
         async function detectAndNotifyMentions(textContext, actionType = 'mention') {
             if (!textContext) return;
             const matches = textContext.match(/@([a-zA-Z0-9_]+)/g);
             if (matches && matches.length > 0) {
                 const myName = App.ProfileState.getCurrentName();
                 const uniqueMentionedUsers = [...new Set(matches.map(m => m.replace('@', '')))];
+                
                 for (const targetUser of uniqueMentionedUsers) {
-                    if (targetUser !== myName) {
-                        await App.Features.pushCloudNotificationPayload(targetUser, 'mention', `menyebut (@mention) Anda dalam sebuah kiriman.`);
+                    const isRegistered = window.registeredUsersList && window.registeredUsersList.some(u => u.toLowerCase() === targetUser.toLowerCase());
+                    if (isRegistered && targetUser.toLowerCase() !== myName.toLowerCase()) {
+                        const matchedProfile = window.registeredUsersList.find(u => u.toLowerCase() === targetUser.toLowerCase());
+                        await App.Features.pushCloudNotificationPayload(matchedProfile || targetUser, 'mention', `menyebut (@mention) Anda dalam sebuah kiriman.`);
                     }
                 }
             }
@@ -623,6 +646,7 @@
                 this.UI.bindGlobalEvents();
                 this.Navigation.render();
                 await this.Auth.checkCurrentSession();
+                await fetchRegisteredUsersListFromSupabase();
                 this.Realtime.subscribeRealtimeChannels();
                 this.Features.fetchMyFriendsData(); 
                 this.Features.initCommentsSwipeToCloseGesture();
@@ -743,6 +767,7 @@
                         config.count += 1;
                         localStorage.setItem('ns_edit_limit_log', JSON.stringify(config));
                         
+                        await fetchRegisteredUsersListFromSupabase();
                         await this.syncUserProfileFromSupabase();
                         return { success: true };
                     } catch(err) {
@@ -779,6 +804,7 @@
                     supabaseClient
                         .channel('realtime-profiles')
                         .on('postgres_changes', { event: '*', schema: 'public', table: 'profiles' }, async () => {
+                            await fetchRegisteredUsersListFromSupabase();
                             await App.ProfileState.syncUserProfileFromSupabase();
                             if (window.location.hash.includes('#/profil')) App.Router.handleRoute();
                         })
@@ -995,10 +1021,23 @@
             Views: {
                 feed() {
                     return `
+                        <!-- COMPOSER BAR BARU DENGAN TOMBOL BERBAGI LINK YOUTUBE DAN FACEBOOK -->
                         <div class="minimal-composer-bar">
-                            <div id="composer-avatar-slot"></div>
-                            <div class="minimal-composer-input-mock" onclick="App.Features.openComposerModalPopupForm()">Apa yang Anda pikirkan?</div>
-                            <span class="material-symbols-outlined minimal-composer-gallery-icon" onclick="document.getElementById('global-composer-direct-file-input').click()">image</span>
+                            <div class="minimal-composer-top-row">
+                                <div id="composer-avatar-slot"></div>
+                                <div class="minimal-composer-input-mock" onclick="App.Features.openComposerModalPopupForm()">Apa yang Anda pikirkan?</div>
+                            </div>
+                            <div class="minimal-composer-quick-actions">
+                                <div class="composer-quick-btn" onclick="document.getElementById('global-composer-direct-file-input').click()">
+                                    <span class="material-symbols-outlined" style="color:#10B981;">photo_library</span> Foto
+                                </div>
+                                <div class="composer-quick-btn" onclick="App.Features.triggerEmbeddedLinkModalPopup('youtube')">
+                                    <span class="material-symbols-outlined" style="color:#FF0000;">play_circle</span> YouTube
+                                </div>
+                                <div class="composer-quick-btn" onclick="App.Features.triggerEmbeddedLinkModalPopup('facebook')">
+                                    <span class="material-symbols-outlined" style="color:#1877F2;">smart_display</span> FB Video
+                                </div>
+                            </div>
                         </div>
                         <div id="feed-stream"></div>
                     `;
@@ -1104,11 +1143,23 @@
 
                         <!-- FORM MEMBUAT STATUS DARI PROFILE -->
                         <div class="minimal-composer-bar" style="margin-bottom: 20px;">
-                            <div class="avatar-wrapper">
-                                <img src="${App.ProfileState.getCurrentAvatar()}" class="user-avatar" style="width:40px; height:40px; object-fit:cover;">
+                            <div class="minimal-composer-top-row">
+                                <div class="avatar-wrapper">
+                                    <img src="${App.ProfileState.getCurrentAvatar()}" class="user-avatar" style="width:40px; height:40px; object-fit:cover;">
+                                </div>
+                                <div class="minimal-composer-input-mock" onclick="App.Features.openComposerModalPopupForm()">Buat postingan di profil ini...</div>
                             </div>
-                            <div class="minimal-composer-input-mock" onclick="App.Features.openComposerModalPopupForm()">Buat postingan di profil ini...</div>
-                            <span class="material-symbols-outlined minimal-composer-gallery-icon" onclick="document.getElementById('global-composer-direct-file-input').click()">image</span>
+                            <div class="minimal-composer-quick-actions">
+                                <div class="composer-quick-btn" onclick="document.getElementById('global-composer-direct-file-input').click()">
+                                    <span class="material-symbols-outlined" style="color:#10B981;">photo_library</span> Foto
+                                </div>
+                                <div class="composer-quick-btn" onclick="App.Features.triggerEmbeddedLinkModalPopup('youtube')">
+                                    <span class="material-symbols-outlined" style="color:#FF0000;">play_circle</span> YouTube
+                                </div>
+                                <div class="composer-quick-btn" onclick="App.Features.triggerEmbeddedLinkModalPopup('facebook')">
+                                    <span class="material-symbols-outlined" style="color:#1877F2;">smart_display</span> FB Video
+                                </div>
+                            </div>
                         </div>
 
                         <!-- FEED HISTORI POSTINGAN USER & MENTION -->
@@ -1391,15 +1442,17 @@
                                 </div>
                             </div>
                             <div class="pic-composer-body">
-                                <textarea class="pic-composer-textarea" id="composer-text" placeholder="Apa yang Anda pikirkan? Sisipkan tautan YouTube atau file musik .mp3 langsung di sini jika ada." oninput="App.Features.handleComposerLiveTextChange()"></textarea>
+                                <textarea class="pic-composer-textarea" id="composer-text" placeholder="Apa yang Anda pikirkan? Tempel link YouTube, Facebook Video, atau MP3 di sini." oninput="App.Features.handleComposerLiveTextChange()"></textarea>
                                 <div id="composer-upload-preview-area" class="pic-composer-preview-box"></div>
                                 <div id="composer-location-badge-preview-slot" style="margin-top:8px; text-align:left;"></div>
                             </div>
                             
                             <div class="pic-composer-dock-grid">
-                                <div class="pic-dock-icon-only-item" onclick="document.getElementById('global-composer-direct-file-input').click()"><span class="material-symbols-outlined">image</span></div>
-                                <div class="pic-dock-icon-only-item" id="dock-btn-location" onclick="App.Features.openNativeLocationPickerPopupModal()"><span class="material-symbols-outlined">location_on</span></div>
-                                <div class="pic-dock-icon-only-item" id="dock-btn-media" onclick="App.Features.triggerEmbeddedLinkModalPopup()"><span class="material-symbols-outlined">link</span></div>
+                                <div class="pic-dock-icon-only-item" onclick="document.getElementById('global-composer-direct-file-input').click()" title="Gambar"><span class="material-symbols-outlined" style="color:#10B981;">photo_library</span></div>
+                                <div class="pic-dock-icon-only-item" onclick="App.Features.triggerEmbeddedLinkModalPopup('youtube')" title="Sematkan YouTube"><span class="material-symbols-outlined" style="color:#FF0000;">play_circle</span></div>
+                                <div class="pic-dock-icon-only-item" onclick="App.Features.triggerEmbeddedLinkModalPopup('facebook')" title="Sematkan FB Video"><span class="material-symbols-outlined" style="color:#1877F2;">smart_display</span></div>
+                                <div class="pic-dock-icon-only-item" id="dock-btn-location" onclick="App.Features.openNativeLocationPickerPopupModal()" title="Lokasi"><span class="material-symbols-outlined" style="color:#EA4335;">location_on</span></div>
+                                <div class="pic-dock-icon-only-item" id="dock-btn-media" onclick="App.Features.triggerEmbeddedLinkModalPopup('all')" title="Link Media"><span class="material-symbols-outlined">link</span></div>
                             </div>
                         </div>
                     `;
@@ -1407,7 +1460,7 @@
                     App.Features.syncComposerSubmitButtonState();
                 },
 
-                // HANDLER OTOMATIS DETEKSI LINK YOUTUBE / MP3 DENGAN PREVIEW VIDEO LANGSUNG DI FORM POST
+                // HANDLER OTOMATIS DETEKSI LINK YOUTUBE / FB VIDEO / MP3 DENGAN PREVIEW LANGSUNG
                 handleComposerLiveTextChange() {
                     this.syncComposerSubmitButtonState();
                     const txt = document.getElementById('composer-text')?.value || '';
@@ -1495,14 +1548,31 @@
                     }
                 },
 
-                triggerEmbeddedLinkModalPopup() {
+                triggerEmbeddedLinkModalPopup(type = 'all') {
+                    let title = "Sematkan Link Media";
+                    let label = "Sematkan URL Link Youtube / FB Video / File MP3";
+                    let placeholder = "https://...";
+
+                    if (type === 'youtube') {
+                        title = "Sematkan Video YouTube";
+                        label = "Masukkan Tautan Video YouTube";
+                        placeholder = "https://www.youtube.com/watch?v=... atau https://youtu.be/...";
+                    } else if (type === 'facebook') {
+                        title = "Sematkan Video Facebook";
+                        label = "Masukkan Tautan Video Facebook";
+                        placeholder = "https://www.facebook.com/.../videos/...";
+                    }
+
                     const html = `
                         <div style="display:flex; flex-direction:column; gap:14px;">
-                            <div class="form-group" style="margin-bottom:0;"><input type="text" id="popup-sub-media-url-field" class="form-input" placeholder=" "><label class="form-label">Sematkan URL Link Youtube / File MP3</label></div>
+                            <div class="form-group" style="margin-bottom:0;">
+                                <input type="text" id="popup-sub-media-url-field" class="form-input" placeholder="${placeholder}">
+                                <label class="form-label">${label}</label>
+                            </div>
                             <button class="btn btn-primary btn-full" onclick="App.Features.saveEmbeddedLinkFromPopup()">Sematkan ke Postingan</button>
                         </div>
                     `;
-                    App.Modal.openSecondary("Sematkan Media", html);
+                    App.Modal.openSecondary(title, html);
                 },
 
                 saveEmbeddedLinkFromPopup() {
@@ -1907,19 +1977,22 @@
                     }
                 },
 
-                // EKSTRAKSI EMBEDDED MEDIA DENGAN PLAYER BERSIH & TANPA WATERMARK
+                // EKSTRAKSI EMBEDDED MEDIA UNTUK YOUTUBE, FACEBOOK VIDEO, DAN FILE MP3
                 extractAndRenderEmbeddedMedia(contentString, directMediaUrl) {
                     let textToCheck = contentString || "";
                     let combinedUrl = directMediaUrl || "";
                     
                     if (!combinedUrl) {
                         const youtubeRegex = /(https?:\/\/(?:www\.)?(?:youtube\.com\/watch\?v=|youtu\.be\/)[^\s]+)/gi;
+                        const facebookRegex = /(https?:\/\/(?:www\.)?(?:facebook\.com\/[^\s]+\/videos\/[^\s]+|facebook\.com\/watch[^\s]*|fb\.watch\/[^\s]+))/gi;
                         const mp3Regex = /(https?:\/\/[^\s]+\.(?:mp3|wav|ogg))/gi;
                         
                         const ytMatch = textToCheck.match(youtubeRegex);
+                        const fbMatch = textToCheck.match(facebookRegex);
                         const mp3Match = textToCheck.match(mp3Regex);
                         
                         if (ytMatch && ytMatch.length > 0) combinedUrl = ytMatch[0];
+                        else if (fbMatch && fbMatch.length > 0) combinedUrl = fbMatch[0];
                         else if (mp3Match && mp3Match.length > 0) combinedUrl = mp3Match[0];
                     }
 
@@ -1932,6 +2005,9 @@
                                 videoId = combinedUrl.split('youtu.be/')[1].split('?')[0];
                             }
                             return videoId ? `<iframe src="https://www.youtube.com/embed/${videoId}?modestbranding=1&rel=0&showinfo=0" allowfullscreen></iframe>` : '';
+                        } else if (combinedUrl.includes('facebook.com') || combinedUrl.includes('fb.watch')) {
+                            const fbEmbedUrl = `https://www.facebook.com/plugins/video.php?href=${encodeURIComponent(combinedUrl)}&show_text=false&width=500`;
+                            return `<iframe src="${fbEmbedUrl}" style="border:none;overflow:hidden" scrolling="no" frameborder="0" allowfullscreen="true" allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"></iframe>`;
                         } else if (/\.(mp3|wav|ogg)/i.test(combinedUrl)) {
                             return `<audio controls style="width:100%;"><source src="${combinedUrl}"></audio>`;
                         }
@@ -1939,13 +2015,14 @@
                     return "";
                 },
 
-                // PEMBERSIH UNTUK MEMASTIKAN LINK YOUTUBE/MP3 SAMA SEKALI TIDAK MUNCUL DI TEKS STATUS
+                // PEMBERSIH KONTEN AGAR LINK MEDIA TIDAK TAMPIL GANDA DI TEKS STATUS
                 cleanTextContentForDisplay(rawText) {
                     if (!rawText) return "";
                     const youtubeRegex = /(https?:\/\/(?:www\.)?(?:youtube\.com\/watch\?v=|youtu\.be\/)[^\s]+)/gi;
+                    const facebookRegex = /(https?:\/\/(?:www\.)?(?:facebook\.com\/[^\s]+\/videos\/[^\s]+|facebook\.com\/watch[^\s]*|fb\.watch\/[^\s]+))/gi;
                     const mp3Regex = /(https?:\/\/[^\s]+\.(?:mp3|wav|ogg))/gi;
                     
-                    let cleaned = rawText.replace(youtubeRegex, '').replace(mp3Regex, '').trim();
+                    let cleaned = rawText.replace(youtubeRegex, '').replace(facebookRegex, '').replace(mp3Regex, '').trim();
                     return parseMentionsToClickableLinks(cleaned);
                 },
 
