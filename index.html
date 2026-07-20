@@ -1439,6 +1439,7 @@
                     await App.Features.fetchChatMessagesAndRenderStream();
                 },
 
+                // MEMPERBAIKI MASALAH CHAT HILANG SENDIRI BERAPA DETIK
                 async fetchChatMessagesAndRenderStream() {
                     const viewport = document.getElementById('popup-msg-stream-viewport');
                     if (!viewport || !activeChatFriendName) return;
@@ -1454,21 +1455,21 @@
                         if (error) throw error;
 
                         if (!messages || messages.length === 0) {
-                            viewport.innerHTML = `
-                                <div style="flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; color:var(--text-muted); font-size:0.85rem; padding:20px; text-align:center;">
-                                    <span class="material-symbols-outlined" style="font-size:36px; color:var(--primary); margin-bottom:8px;">mark_chat_unread</span>
-                                    Belum ada pesan dengan <strong>${activeChatFriendName}</strong>.<br>Mulai obrolan sekarang!
-                                </div>`;
+                            if (!viewport.querySelector('.bubble')) {
+                                viewport.innerHTML = `
+                                    <div style="flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; color:var(--text-muted); font-size:0.85rem; padding:20px; text-align:center;">
+                                        <span class="material-symbols-outlined" style="font-size:36px; color:var(--primary); margin-bottom:8px;">mark_chat_unread</span>
+                                        Belum ada pesan dengan <strong>${activeChatFriendName}</strong>.<br>Mulai obrolan sekarang!
+                                    </div>`;
+                            }
                             return;
                         }
 
+                        // Mengubah HTML hanya bila data pesan Supabase benar-benar tersedia
                         viewport.innerHTML = messages.map(m => `<div class="bubble ${m.sender === myName ? 'out' : 'in'}"><span>${m.message}</span></div>`).join('');
                         viewport.scrollTop = viewport.scrollHeight;
                     } catch(err) {
-                        viewport.innerHTML = `
-                            <div style="flex:1; display:flex; align-items:center; justify-content:center; color:var(--text-muted); font-size:0.85rem; padding:20px; text-align:center;">
-                                Belum ada riwayat pesan tersimpan.
-                            </div>`;
+                        // Jangan hapus tampilan lokal jika terjadi error query sementara
                     }
                 },
 
@@ -1504,7 +1505,10 @@
 
                     try {
                         await supabaseClient.from('chats').insert([{ sender: myName, receiver: activeChatFriendName, message: msgText }]);
-                        await App.Features.fetchChatMessagesAndRenderStream();
+                        // Tunda pembacaan ulang sebentar untuk memberi waktu Supabase menulis data secara permanen
+                        setTimeout(async () => {
+                            await App.Features.fetchChatMessagesAndRenderStream();
+                        }, 500);
                     } catch(err) {}
                 },
 
