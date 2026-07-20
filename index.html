@@ -483,6 +483,7 @@
 
         <!-- MAIN VIEWPORT -->
         <main class="app-content">
+            <!-- SLOT BANNER IKLAN TAMPIL UNTUK SEMUA USER -->
             <div id="global-superadmin-ad-slot-container"></div>
             <div id="app-viewport"></div>
         </main>
@@ -788,6 +789,7 @@
                         .on('postgres_changes', { event: '*', schema: 'public', table: 'comments' }, async () => {
                             if (activeBottomSheetPostId) App.Features.reloadCommentsBottomSheetStreamOnly();
                             App.Features.renderPosts();
+                            if (window.location.hash.includes('#/profil')) App.Router.handleRoute();
                         })
                         .subscribe();
 
@@ -1089,7 +1091,7 @@
                                 <div class="stat-item" style="text-align:center;"><span class="stat-val" id="profile-followers-count" style="display:block; font-weight:800; font-size:1.2rem; color:#050505;">...</span><span class="stat-lbl" style="font-size:0.8rem; color:var(--text-muted);">Pengikut</span></div>
                                 <div class="stat-item" style="text-align:center;"><span class="stat-val" id="profile-posts-count" style="display:block; font-weight:800; font-size:1.2rem; color:#050505;">...</span><span class="stat-lbl" style="font-size:0.8rem; color:var(--text-muted);">Postingan</span></div>
                             </div>
-                            <div style="padding: 0 24px 32px 24px; display:flex; justify-content:center; gap:12px; max-width:100%;">
+                            <div style="padding: 0 24px 24px 24px; display:flex; justify-content:center; gap:12px; max-width:100%;">
                                 ${!isOwnProfile ? `
                                     <button class="btn ripple-btn ${isFollowing ? 'btn-secondary' : 'btn-primary'}" style="${isFollowing ? 'color:#65676b; background:#f0f2f5;' : ''}" onclick="App.Features.toggleFollowInFollowFromProfileDOM('${escapeJSString(targetName)}', this)">
                                         <span class="material-symbols-outlined" style="font-size:18px;">${isFollowing ? 'done' : 'add'}</span> 
@@ -1099,6 +1101,21 @@
                                 ` : ''}
                             </div>
                         </div>
+
+                        <!-- FORM MEMBUAT STATUS DARI PROFILE -->
+                        <div class="minimal-composer-bar" style="margin-bottom: 20px;">
+                            <div class="avatar-wrapper">
+                                <img src="${App.ProfileState.getCurrentAvatar()}" class="user-avatar" style="width:40px; height:40px; object-fit:cover;">
+                            </div>
+                            <div class="minimal-composer-input-mock" onclick="App.Features.openComposerModalPopupForm()">Buat postingan di profil ini...</div>
+                            <span class="material-symbols-outlined minimal-composer-gallery-icon" onclick="document.getElementById('global-composer-direct-file-input').click()">image</span>
+                        </div>
+
+                        <!-- FEED HISTORI POSTINGAN USER & MENTION -->
+                        <div style="margin-bottom: 12px; font-weight: 800; font-size: 1.1rem; color: var(--text-main); text-align: left; padding: 0 4px;">
+                            Postingan & Mention ${targetName}
+                        </div>
+                        <div id="profile-posts-stream"></div>
                     `;
                 },
                 settings() {
@@ -1163,7 +1180,10 @@
                 explore() { App.Features.renderExploreUsers(); },
                 notifications() { App.Features.renderNotificationsView(); App.Features.markAllLocalNotificationsAsReadCloudAction(); },
                 groups() { App.Features.renderCommunityHubViewportList(); },
-                profil(targetName = null) { App.Features.loadProfileStatsFromSupabase(targetName); },
+                profil(targetName = null) { 
+                    App.Features.loadProfileStatsFromSupabase(targetName); 
+                    App.Features.renderProfilePosts(targetName);
+                },
                 settings() {}
             },
 
@@ -1203,6 +1223,90 @@
                     } catch(e) {
                         if (postsEl) postsEl.innerText = '0';
                     }
+                },
+
+                // RENDER HISTORI POSTINGAN USER SENDIRI DAN POSTINGAN YANG DI-MENTION
+                async renderProfilePosts(targetName = null) {
+                    const stream = document.getElementById('profile-posts-stream');
+                    if (!stream) return;
+                    const profileUser = targetName || App.ProfileState.getCurrentName();
+                    const myName = App.ProfileState.getCurrentName();
+
+                    try {
+                        const { data: posts } = await supabaseClient
+                            .from('posts')
+                            .select('*')
+                            .order('created_at', { ascending: false });
+
+                        const { data: commentsData } = await supabaseClient.from('comments').select('*');
+                        const allComments = commentsData || [];
+
+                        let filtered = (posts || []).filter(p => {
+                            const isAuthor = p.author === profileUser;
+                            const isMentioned = p.content && p.content.toLowerCase().includes(`@${profileUser.toLowerCase()}`);
+                            return isAuthor || isMentioned;
+                        });
+
+                        if (filtered.length === 0) {
+                            stream.innerHTML = `<div class="glass-card" style="text-align:center; color:var(--text-muted); padding:32px 16px; border:none; background:transparent;">Belum ada riwayat postingan atau mention untuk ${profileUser}.</div>`;
+                            return;
+                        }
+
+                        stream.innerHTML = `<div class="feed-container">` + filtered.map(p => {
+                            const postComments = allComments.filter(c => c.post_id === p.id);
+                            
+                            let totalCommentsCount = postComments.length;
+                            postComments.forEach(c => {
+                                if (c.replies && Array.isArray(c.replies)) {
+                                    totalCommentsCount += c.replies.length;
+                                }
+                            });
+
+                            let postLikesArray = p.liked_users || [];
+                            let accumulatedLikesCount = postLikesArray.length;
+
+                            const hasLiked = postLikesArray.includes(myName) ? 'liked' : '';
+                            const hasLoved = (p.loved_users || []).includes(myName) ? 'loved' : '';
+                            
+                            const mediaHTML = this.extractAndRenderEmbeddedMedia(p.content || "", p.media_url) || (p.image ? `<img src="${p.image}" class="post-attached-image">` : '');
+                            const postAvatar = (p.avatar && p.avatar !== 'null' && p.avatar !== 'undefined') ? p.avatar : DEFAULT_AVATAR_IMAGE;
+
+                            const safeAuthor = escapeJSString(p.author);
+
+                            const privacyType = p.privacy || 'public';
+                            const privacyIcon = privacyType === 'private' ? 'lock' : (privacyType === 'friends' ? 'group' : 'public');
+                            const privacyTitle = privacyType === 'private' ? 'Privat' : (privacyType === 'friends' ? 'Teman' : 'Publik');
+
+                            const formattedPostText = this.cleanTextContentForDisplay(p.content || '');
+
+                            return `
+                                <div class="post-card" id="post-element-node-${p.id}">
+                                    <div class="post-header">
+                                        <div class="post-author">
+                                            <img src="${postAvatar}" class="post-avatar" onclick="App.Router.navigate('profil?name=${encodeURIComponent(p.author)}')">
+                                            <div class="post-meta-container">
+                                                <div class="post-author-row">
+                                                    <h4 onclick="App.Router.navigate('profil?name=${encodeURIComponent(p.author)}')">${p.author}</h4>
+                                                    <span class="post-meta-dot">•</span>
+                                                    <span class="post-live-time-tracker" data-timestamp="${new Date(p.created_at).getTime()}">${App.UI.calculateRelativeTimeAgo(new Date(p.created_at).getTime())}</span>
+                                                    <span class="post-meta-dot">•</span>
+                                                    <span class="material-symbols-outlined" style="font-size:14px; color:var(--text-muted); vertical-align:middle;" title="${privacyTitle}">${privacyIcon}</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <button class="post-menu-trigger" onclick="App.Features.openPostActionMenuDOM(${p.id}, '${safeAuthor}')"><span class="material-symbols-outlined">more_vert</span></button>
+                                    </div>
+                                    <div class="post-content">${formattedPostText}</div>
+                                    ${mediaHTML}
+                                    <div class="post-actions-bar">
+                                        <div class="post-action-item ${hasLiked}" id="like-btn-node-${p.id}" onclick="App.Features.toggleLike(${p.id}, '${safeAuthor}')"><span class="material-symbols-outlined">thumb_up</span><span id="like-count-node-${p.id}"> ${accumulatedLikesCount}</span></div>
+                                        <div class="post-action-item ${hasLoved}" id="love-btn-node-${p.id}" onclick="App.Features.toggleLoveReaction(${p.id}, '${safeAuthor}')"><span class="material-symbols-outlined">favorite</span><span id="love-count-node-${p.id}"> ${(p.loved_users || []).length}</span></div>
+                                        <div class="post-action-item" onclick="App.Features.openCommentsBottomSheet(${p.id}, '${safeAuthor}')"><span class="material-symbols-outlined">comment</span><span id="comment-count-node-${p.id}"> Komentar (${totalCommentsCount})</span></div>
+                                        <div class="post-action-item" onclick="App.Features.openSocialMediaShareSheetModal(${p.id}, '${safeAuthor}', '${(p.content || "").replace(/'/g, "\\'")}', ${!!p.image})"><span class="material-symbols-outlined">share</span><span> ${p.shared_count || 0}</span></div>
+                                    </div>
+                                </div>`;
+                        }).join('') + `</div>`;
+                    } catch(e) {}
                 },
 
                 openGeminiApiKeyModalForm() {
@@ -1303,7 +1407,7 @@
                     App.Features.syncComposerSubmitButtonState();
                 },
 
-                // HANDLER OTIK DETEKSI LINK YOUTUBE / MP3 DENGAN PREVIEW VIDEO LANGSUNG DI FORM POST
+                // HANDLER OTOMATIS DETEKSI LINK YOUTUBE / MP3 DENGAN PREVIEW VIDEO LANGSUNG DI FORM POST
                 handleComposerLiveTextChange() {
                     this.syncComposerSubmitButtonState();
                     const txt = document.getElementById('composer-text')?.value || '';
@@ -1952,6 +2056,7 @@
                             await App.Features.pushCloudNotificationPayload(postAuthor, 'like', 'menyukai postingan Anda.');
                         }
                         this.renderPosts();
+                        if (window.location.hash.includes('#/profil')) App.Router.handleRoute();
                     } catch(e) {}
                 },
 
@@ -1972,6 +2077,7 @@
                             await App.Features.pushCloudNotificationPayload(postAuthor, 'love', 'memberikan reaksi cinta pada postingan Anda.');
                         }
                         this.renderPosts();
+                        if (window.location.hash.includes('#/profil')) App.Router.handleRoute();
                     } catch(e) {}
                 },
 
@@ -2162,7 +2268,7 @@
                         return;
                     }
 
-                    // Ambil cache profil sender agar foto profil asli muncul di notifikasi
+                    // Ambil data profil pengirim notifikasi agar foto profil asli muncul
                     const { data: profiles } = await supabaseClient.from('profiles').select('display_name, avatar_url');
                     const profileMap = {};
                     if (profiles) {
@@ -2185,8 +2291,8 @@
                         
                         const senderAvatar = profileMap[n.sender] || DEFAULT_AVATAR_IMAGE;
                         const safeSender = escapeJSString(n.sender);
-                        
-                        // Menentukan tujuan navigasi saat teks deskripsi diklik
+
+                        // Klik pada teks deskripsi akan mengarahkan ke postingan (Feed)
                         const clickTarget = (n.action_type === 'follow') 
                             ? `App.Router.navigate('profil?name=${encodeURIComponent(n.sender)}')` 
                             : `App.Router.navigate('feed')`;
@@ -2409,7 +2515,12 @@
                         activeComposerLocation = "";
                         App.Modal.closeAllModalsSystem();
                         App.Toast.show("Status berhasil diterbitkan!", "success"); 
-                        this.renderPosts();
+                        
+                        if (window.location.hash.includes('#/profil')) {
+                            App.Router.handleRoute();
+                        } else {
+                            this.renderPosts();
+                        }
                     } catch (err) {
                         App.Toast.show("Gagal membuat postingan.", "danger");
                         if (submitBtn) submitBtn.innerText = "Kirim";
