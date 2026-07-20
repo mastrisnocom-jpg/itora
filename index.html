@@ -544,8 +544,8 @@
         const SUPABASE_KEY = 'sb_publishable_1MQZs2Z7yOjywmGpYOk_Uw_Y9wZ7CXk'; 
         const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-        // DEFAULT AVATAR SVG DATA URI (STABIL 100% TANPA DEPENDENSI LINK LUAR)
-        const DEFAULT_AVATAR_IMAGE = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%231877F2"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 4c1.93 0 3.5 1.57 3.5 3.5S13.93 13 12 13s-3.5-1.57-3.5-3.5S10.07 6 12 6zm0 14c-2.03 0-3.8-.85-5.05-2.2.03-1.68 3.37-2.6 5.05-2.6s5.02.92 5.05 2.6C15.8 19.15 14.03 20 12 20z"/></svg>';
+        // DEFAULT AVATAR BASE64 SVG (AMAN DARI SYNTAX ERROR TANDA PETIK DOM)
+        const DEFAULT_AVATAR_IMAGE = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0iIzE4NzdGMiI+PHBhdGggZD0iTTEyIDJDNi40OCAyIDIgNi40OCAyIDEyczQuNDggMTAgMTAgMTAgMTAtNC40OCAxMC0xMFMxNy41MiAyIDEyIDJ6bTAgNGMxLjkzIDAgMy41IDEuNTcgMy41IDMuNVMxMy45MyAxMyAxMiAxM3MtMy41LTEuNTctMy41LTMuNVMxMC4wNyA2IDEyIDZ6bTAgMTRjLTIuMDMgMC0zLjguODUtNS4wNS0yLjIuMDMtMS42OCAzLjM3LTIuNiA1LjA1LTIuNnM1LjAyLjkyIDUuMDUgMi42QzE1LjggMTkuMTUgMTQuMDMgMjAgMTIgMjB6Ii8+PC9zdmc+';
 
         let liveNotifications = [];
         let activeChatFriendEmail = localStorage.getItem('ns_active_chat_email') || null;
@@ -563,7 +563,7 @@
         let activeReplyTargetCommentId = null;
         let activeReplyTargetUser = null;
 
-        // Cache lokal data profil Supabase di memori runtime (bukan localStorage)
+        // Cache lokal data profil Supabase di memori runtime
         window.mySupabaseProfileCache = {
             avatar_url: DEFAULT_AVATAR_IMAGE,
             display_name: '',
@@ -618,7 +618,6 @@
                             .maybeSingle();
 
                         if (!profile) {
-                            // Buat entri profil default di Supabase jika belum ada
                             const defaultDisplayName = (userEmail || 'User').split('@')[0];
                             const { data: newProfile } = await supabaseClient
                                 .from('profiles')
@@ -1008,7 +1007,6 @@
                         targetDomisili = App.ProfileState.getCurrentDomisili();
                     } else {
                         try {
-                            // Ambil data profil pengguna lain dari Supabase profiles
                             const { data: profile } = await supabaseClient
                                 .from('profiles')
                                 .select('avatar_url, bio_status, domisili')
@@ -1020,7 +1018,6 @@
                                 if (profile.bio_status) targetBio = profile.bio_status;
                                 if (profile.domisili) targetDomisili = profile.domisili;
                             } else {
-                                // Fallback cari avatar dari tabel posts
                                 const { data: pData } = await supabaseClient.from('posts').select('avatar').eq('author', targetName).not('avatar', 'is', null).order('created_at', { ascending: false }).limit(1);
                                 if (pData && pData.length > 0 && pData[0].avatar) targetAvatar = pData[0].avatar;
                             }
@@ -1456,7 +1453,6 @@
 
                     try {
                         if(activeChatFriendName !== 'Mastrisno_AI') {
-                            // Ambil avatar teman secara presisi dari database Supabase profiles
                             const { data: fProfile } = await supabaseClient.from('profiles').select('avatar_url').eq('display_name', activeChatFriendName).maybeSingle();
                             if (fProfile && fProfile.avatar_url) {
                                 friendAvatar = fProfile.avatar_url;
@@ -2092,7 +2088,6 @@
                     const myName = App.ProfileState.getCurrentName();
                     
                     try {
-                        // Ambil daftar pengguna resmi dari tabel Supabase profiles
                         const { data: usersProfileData } = await supabaseClient.from('profiles').select('display_name, avatar_url');
                         let uniqueUsersMap = {};
                         
@@ -2174,7 +2169,6 @@
                     dragZone.addEventListener('touchend', (e) => { if(e.changedTouches[0].clientY - startY > 150) App.Features.closeCommentsBottomSheet(); }, {passive:true});
                 },
 
-                // UNGGAN FOTO PROFIL & SIMPAN KE SUPABASE PROFILES + POSTS
                 async handleAvatarSelection(event) {
                     const file = event.target.files[0]; if (!file) return;
                     App.Toast.show("Mengunggah foto profil ke Supabase...", "info");
@@ -2197,13 +2191,11 @@
 
                         const publicAvatarUrl = urlData.publicUrl;
 
-                        // Simpan URL avatar baru ke Supabase Database (Tabel Profiles)
                         await App.ProfileState.saveAvatarUrlToSupabase(publicAvatarUrl);
                         
                         const imgPreview = document.getElementById('settings-avatar-preview');
                         if (imgPreview) imgPreview.src = publicAvatarUrl;
                         
-                        // Perbarui avatar di postingan milik sendiri secara realtime
                         await supabaseClient.from('posts').update({ avatar: publicAvatarUrl }).eq('author', App.ProfileState.getCurrentName());
                         
                         App.Toast.show("Foto profil berhasil disimpan ke Supabase!", "success");
