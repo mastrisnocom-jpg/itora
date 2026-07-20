@@ -327,8 +327,8 @@
         .chat-time-stamp { font-size: 0.65rem; color: #8a8d91; margin-top: 2px; padding: 0 4px; display: flex; align-items: center; gap: 6px; }
         .bubble.out + .chat-time-stamp { justify-content: flex-end; }
 
-        .bubble-action-btn { font-size: 0.75rem; color: var(--text-muted); cursor: pointer; border: none; background: transparent; padding: 0; opacity: 0.7; transition: var(--trans-smooth); }
-        .bubble-action-btn:hover { opacity: 1; color: var(--primary); }
+        .bubble-action-btn { background: none; border: none; font-size: 0.65rem; color: var(--text-muted); cursor: pointer; padding: 0; }
+        .bubble-action-btn:hover { text-decoration: underline; }
         .bubble-action-btn.delete:hover { color: var(--danger); }
 
         /* GLOBAL MODAL SYSTEM */
@@ -449,7 +449,7 @@
                         <span class="badge" id="noti-badge">0</span>
                     </button>
                     
-                    <!-- 2. ICON AVATAR PROFIL POJOK KANAN ATAS (KLIK SANGAT PRESISI UNTUK MASUK PROFIL) -->
+                    <!-- 2. ICON AVATAR PROFIL POJOK KANAN ATAS -->
                     <div id="header-avatar-toggle-node" onclick="App.Router.navigate('profil')" style="cursor:pointer;"></div>
                 </div>
             </div>
@@ -482,7 +482,10 @@
                 </button>
                 <strong style="font-size:1.05rem; font-weight:800; color:#000;" id="popup-chat-header-title">Obrolan</strong>
             </div>
-            <div id="chat-header-actions-slot" style="display:none;">
+            <div id="chat-header-actions-slot" style="display:none; display:flex; gap:6px;">
+                <button class="icon-btn" id="btn-manage-ai-key" style="display:none; width:28px; height:28px; color:var(--primary);" title="Atur API Key Gemini" onclick="App.Features.openGeminiApiKeyModalForm()">
+                    <span class="material-symbols-outlined" style="font-size:18px;">key</span>
+                </button>
                 <button class="icon-btn" style="width:28px; height:28px; color:var(--danger);" title="Hapus Riwayat Obrolan" onclick="App.Features.triggerDeleteChatHistoryAction()">
                     <span class="material-symbols-outlined" style="font-size:18px;">delete</span>
                 </button>
@@ -946,11 +949,11 @@
                             <div class="profile-stats" style="background:#f0f2f5; border:1px solid var(--border-color); border-radius:16px; margin: 0 24px 24px 24px; display:flex; justify-content:space-around; padding:16px;">
                                 <div class="stat-item" style="text-align:center;"><span class="stat-val" id="profile-friends-count" style="display:block; font-weight:800; font-size:1.2rem; color:#050505;">0</span><span class="stat-lbl" style="font-size:0.8rem; color:var(--text-muted);">Mengikuti</span></div>
                                 <div class="stat-item" style="text-align:center;"><span class="stat-val" style="display:block; font-weight:800; font-size:1.2rem; color:#050505;">${isOwnProfile ? '2.5K' : '1.4K'}</span><span class="stat-lbl" style="font-size:0.8rem; color:var(--text-muted);">Pengikut</span></div>
-                                <div class="stat-item" style="text-align:center;"><span class="stat-val" style="display:block; font-weight:800; font-size:1.2rem; color:#050505;">${isOwnProfile ? '84' : '31'}</span><span class="stat-lbl" style="font-size:0.8rem; color:var(--text-muted);">Postingan</span></div>
+                                <div class="stat-item" style="text-align:center;"><span class="stat-val" style="display:block; font-weight:800; font-size:1.2rem; color:#050505;">84</span><span class="stat-lbl" style="font-size:0.8rem; color:var(--text-muted);">Postingan</span></div>
                             </div>
                             <div style="padding: 0 24px 32px 24px; display:flex; justify-content:center; gap:12px; max-width:100%;">
                                 ${!isOwnProfile ? `
-                                    <button class="btn ripple-btn ${isFollowing ? 'btn-secondary' : 'btn-primary'}" style="${isFollowing ? 'color:#65676b; background:#f0f2f5;' : ''}" onclick="App.Features.toggleFollowInExploreFromProfileDOM('${escapeJSString(targetName)}', this)">
+                                    <button class="btn ripple-btn ${isFollowing ? 'btn-secondary' : 'btn-primary'}" style="${isFollowing ? 'color:#65676b; background:#f0f2f5;' : ''}" onclick="App.Features.toggleFollowInFollowFromProfileDOM('${escapeJSString(targetName)}', this)">
                                         <span class="material-symbols-outlined" style="font-size:18px;">${isFollowing ? 'done' : 'add'}</span> 
                                         <span>${isFollowing ? 'Mengikuti' : 'Ikuti'}</span>
                                     </button>
@@ -968,6 +971,7 @@
                     const myEmail = (localStorage.getItem('ns_user_email') || '').toLowerCase();
                     const isSuperAdmin = (myEmail === 'mastrisnocom@gmail.com');
                     const savedAdHTML = localStorage.getItem('ns_ad_html_global') || '';
+                    const savedGeminiApiKey = localStorage.getItem('ns_gemini_api_key') || '';
 
                     return `
                         <div class="glass-card" style="max-width: 650px; margin: 0 auto; position: relative; border:none; background:#ffffff;">
@@ -975,6 +979,17 @@
                                 <h2 style="display: flex; align-items: center; gap: 8px; margin: 0; font-weight:800; color:#050505;"><span class="material-symbols-outlined" style="font-size: 28px; color: var(--primary);">settings</span><span>Pengaturan Akun</span></h2>
                             </div>
                             
+                            <!-- INTEGRASI INTEGRATED FORM API KEY GEMINI AI -->
+                            <div class="glass-card" style="border: 1px solid var(--primary); text-align: left; margin-bottom: 24px; background: #ffffff;">
+                                <h3 style="margin-bottom: 12px; color: var(--primary); display: flex; align-items: center; gap: 6px;"><span class="material-symbols-outlined">smart_toy</span>Konfigurasi Gemini API Key (Mastrisno AI)</h3>
+                                <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 14px;">Masukkan Google Gemini API Key Anda agar fitur kecerdasan buatan Mastrisno AI dapat aktif secara penuh.</p>
+                                <div class="form-group" style="margin-bottom: 14px;">
+                                    <input type="password" class="form-input" id="settings-gemini-api-key-field" placeholder=" " value="${savedGeminiApiKey}">
+                                    <label class="form-label">Gemini API Key</label>
+                                </div>
+                                <button class="btn btn-primary btn-full" onclick="App.Features.saveGeminiApiKeyAction()">Simpan API Key Gemini</button>
+                            </div>
+
                             ${isSuperAdmin ? `
                                 <div class="glass-card" style="border: 1px solid var(--primary); text-align: left; margin-bottom: 24px; background: #ffffff;">
                                     <h3 style="margin-bottom: 12px; color: var(--primary); display: flex; align-items: center; gap: 6px;"><span class="material-symbols-outlined">campaign</span>Panel Pasang Iklan Super Admin</h3>
@@ -1016,6 +1031,48 @@
             },
 
             Features: {
+                // FUNGSI MANAJEMEN FORM API KEY GEMINI OLEH PENGGUNA
+                openGeminiApiKeyModalForm() {
+                    const currentKey = localStorage.getItem('ns_gemini_api_key') || '';
+                    const html = `
+                        <div style="display:flex; flex-direction:column; gap:16px; text-align:left;">
+                            <p style="font-size:0.88rem; color:var(--text-muted); line-height:1.5;">
+                                Untuk menggunakan <strong>Mastrisno AI 🤖</strong>, Anda harus menyertakan <strong>Google Gemini API Key</strong> Anda sendiri.
+                            </p>
+                            <div class="form-group" style="margin-bottom:0;">
+                                <input type="password" id="modal-gemini-key-input-field" class="form-input" placeholder=" " value="${currentKey}">
+                                <label class="form-label">Gemini API Key</label>
+                            </div>
+                            <div style="display:flex; justify-content:space-between; align-items:center;">
+                                <a href="https://aistudio.google.com/app/apikey" target="_blank" style="font-size:0.8rem; color:var(--primary); font-weight:700; text-decoration:underline;">Dapatkan API Key Gratis</a>
+                                <button class="btn btn-primary" onclick="App.Features.saveGeminiApiKeyFromModalAction()">Simpan API Key</button>
+                            </div>
+                        </div>
+                    `;
+                    App.Modal.open("API Key Mastrisno AI", html, true, false);
+                },
+
+                saveGeminiApiKeyFromModalAction() {
+                    const inputKey = document.getElementById('modal-gemini-key-input-field')?.value.trim();
+                    if(!inputKey) {
+                        App.Toast.show("API Key tidak boleh kosong!", "danger");
+                        return;
+                    }
+                    localStorage.setItem('ns_gemini_api_key', inputKey);
+                    App.Modal.close();
+                    App.Toast.show("API Key Gemini berhasil disimpan!", "success");
+                },
+
+                saveGeminiApiKeyAction() {
+                    const keyVal = document.getElementById('settings-gemini-api-key-field')?.value.trim();
+                    if(!keyVal) {
+                        App.Toast.show("Harap masukkan API Key Gemini yang valid", "danger");
+                        return;
+                    }
+                    localStorage.setItem('ns_gemini_api_key', keyVal);
+                    App.Toast.show("API Key Gemini disimpan!", "success");
+                },
+
                 handleGlobalDirectFileSelection(event) {
                     const file = event.target.files[0]; if (!file) return;
                     composerSelectedFile = file;
@@ -1232,12 +1289,12 @@
                     const container = document.getElementById('popup-friends-sidebar-items'); if(!container) return;
                     await App.Features.fetchMyFriendsData();
                     
-                    let dynamicContacts = window.userFriendsList.length > 0 ? ['Meta_AI', ...window.userFriendsList] : ['Meta_AI', 'Agung_Taufiq'];
+                    let dynamicContacts = window.userFriendsList.length > 0 ? ['Mastrisno_AI', ...window.userFriendsList] : ['Mastrisno_AI', 'Agung_Taufiq'];
                     
                     container.innerHTML = dynamicContacts.map(name => {
                         const hasUnread = unreadMessageCounters[name.toLowerCase()] || 0;
                         const safeName = escapeJSString(name);
-                        const isAI = (name === 'Meta_AI');
+                        const isAI = (name === 'Mastrisno_AI');
                         return `
                             <div class="popup-friend-item" onclick="App.Features.openSpecificFriendPopupObrolan('${safeName.toLowerCase()}@nexsocial.id', '${safeName}')">
                                 <div class="friend-avatar-wrapper">
@@ -1245,7 +1302,7 @@
                                     <span class="friend-online-dot"></span>
                                 </div>
                                 <div class="friend-chat-meta-info">
-                                    <div class="friend-chat-meta-top"><strong>${name} ${isAI ? '🤖' : ''}</strong></div>
+                                    <div class="friend-chat-meta-top"><strong>${name === 'Mastrisno_AI' ? 'Mastrisno AI' : name} ${isAI ? '🤖' : ''}</strong></div>
                                     <div class="friend-chat-meta-bottom"><span class="friend-chat-meta-preview">${isAI ? 'Asisten AI Pintar' : 'Klik untuk mengobrol'}</span>${hasUnread > 0 ? `<div class="chat-unread-badge">${hasUnread}</div>` : ''}</div>
                                 </div>
                             </div>`;
@@ -1263,11 +1320,14 @@
                     App.Navigation.updateChatBadgeDOM();
 
                     document.getElementById('chat-contacts-list-sidebar-container').classList.add('hidden');
-                    document.getElementById('popup-chat-header-title').innerText = friendName + (friendName === 'Meta_AI' ? ' 🤖' : '');
+                    document.getElementById('popup-chat-header-title').innerText = (friendName === 'Mastrisno_AI' ? 'Mastrisno AI 🤖' : friendName);
                     document.getElementById('chat-back-to-list-btn').style.display = "inline-flex";
                     
                     const actionSlot = document.getElementById('chat-header-actions-slot');
-                    if(actionSlot) actionSlot.style.display = "block";
+                    if(actionSlot) actionSlot.style.display = "flex";
+
+                    const keyBtn = document.getElementById('btn-manage-ai-key');
+                    if(keyBtn) keyBtn.style.display = (friendName === 'Mastrisno_AI') ? 'inline-flex' : 'none';
 
                     const mainArea = document.getElementById('popup-chat-main-area-pane'); if(!mainArea) return;
                     mainArea.classList.add('active');
@@ -1291,10 +1351,10 @@
                     
                     const myName = App.ProfileState.getCurrentName();
                     const myAvatar = App.ProfileState.getCurrentAvatar();
-                    let friendAvatar = (activeChatFriendName === 'Meta_AI') ? 'https://cdn-icons-png.flaticon.com/512/8943/8943377.png' : DEFAULT_AVATAR_IMAGE;
+                    let friendAvatar = (activeChatFriendName === 'Mastrisno_AI') ? 'https://cdn-icons-png.flaticon.com/512/8943/8943377.png' : DEFAULT_AVATAR_IMAGE;
 
                     try {
-                        if(activeChatFriendName !== 'Meta_AI') {
+                        if(activeChatFriendName !== 'Mastrisno_AI') {
                             const { data: friendPosts } = await supabaseClient.from('posts').select('avatar').eq('author', activeChatFriendName).not('avatar', 'is', null).limit(1);
                             if (friendPosts && friendPosts.length > 0 && friendPosts[0].avatar) {
                                 friendAvatar = friendPosts[0].avatar;
@@ -1313,7 +1373,7 @@
                             viewport.innerHTML = `
                                 <div style="flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; color:var(--text-muted); font-size:0.85rem; padding:20px; text-align:center;">
                                     <span class="material-symbols-outlined" style="font-size:36px; color:var(--primary); margin-bottom:8px;">chat</span>
-                                    Belum ada pesan dengan <strong>${activeChatFriendName}</strong>.<br>Mulai obrolan sekarang!
+                                    Belum ada pesan dengan <strong>${activeChatFriendName === 'Mastrisno_AI' ? 'Mastrisno AI' : activeChatFriendName}</strong>.<br>Mulai obrolan sekarang!
                                 </div>`;
                             return;
                         }
@@ -1346,6 +1406,65 @@
                     } catch(err) {}
                 },
 
+                // KONEKSI REALTIME DENGAN MASTRISNO AI (PERSYARATAN BYOK API KEY GEMINI OLEH USER)
+                async sendPopupChatCloudAction() {
+                    const input = document.getElementById('popup-chat-input-field'); 
+                    if (!input || !input.value.trim() || !activeChatFriendName) return;
+                    
+                    const msgText = input.value.trim();
+                    const myName = App.ProfileState.getCurrentName();
+                    
+                    // CEK API KEY GEMINI JIKA CHAT DENGAN MASTRISNO_AI
+                    if(activeChatFriendName === 'Mastrisno_AI') {
+                        const userApiKey = localStorage.getItem('ns_gemini_api_key');
+                        if(!userApiKey) {
+                            App.Features.openGeminiApiKeyModalForm();
+                            return;
+                        }
+                    }
+
+                    input.value = '';
+
+                    try {
+                        await supabaseClient.from('chats').insert([{ sender: myName, receiver: activeChatFriendName, message: msgText }]);
+                        await App.Features.fetchChatMessagesAndRenderStream();
+
+                        // JIKA CHAT DENGAN MASTRISNO_AI: PANGGIL GEMINI API DENGAN KEY PENGGUNA
+                        if(activeChatFriendName === 'Mastrisno_AI') {
+                            const userApiKey = localStorage.getItem('ns_gemini_api_key');
+                            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${userApiKey}`;
+                            
+                            try {
+                                const response = await fetch(url, {
+                                    method: 'POST',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify({
+                                        contents: [{
+                                            parts: [{ text: `Nama Anda adalah Mastrisno AI, asisten pintar bawaan ekosistem Tech Social. Jawab pertanyaan pengguna berikut ini secara ramah, profesional, dan membantu:\n\n${msgText}` }]
+                                        }]
+                                    })
+                                });
+
+                                const data = await response.json();
+                                let replyAI = "Maaf, Mastrisno AI tidak dapat merespons. Periksa kembali validitas API Key Gemini Anda.";
+                                
+                                if (data && data.candidates && data.candidates[0]?.content?.parts[0]?.text) {
+                                    replyAI = data.candidates[0].content.parts[0].text;
+                                } else if (data.error) {
+                                    replyAI = `Error API Gemini: ${data.error.message || 'Key tidak valid'}`;
+                                }
+
+                                await supabaseClient.from('chats').insert([{ sender: 'Mastrisno_AI', receiver: myName, message: replyAI }]);
+                                await App.Features.fetchChatMessagesAndRenderStream();
+                            } catch (aiErr) {
+                                const errReply = "Maaf, terjadi kesalahan koneksi saat menghubungi Mastrisno AI (Gemini API).";
+                                await supabaseClient.from('chats').insert([{ sender: 'Mastrisno_AI', receiver: myName, message: errReply }]);
+                                await App.Features.fetchChatMessagesAndRenderStream();
+                            }
+                        }
+                    } catch(err) {}
+                },
+
                 async editSingleChatMessageAction(messageId, currentText) {
                     const newText = prompt("Edit pesan obrolan Anda:", currentText);
                     if (newText === null || !newText.trim() || newText.trim() === currentText) return;
@@ -1373,7 +1492,7 @@
 
                 async triggerDeleteChatHistoryAction() {
                     if (!activeChatFriendName) return;
-                    if (!confirm(`Hapus seluruh riwayat percakapan dengan ${activeChatFriendName}?`)) return;
+                    if (!confirm(`Hapus seluruh riwayat percakapan dengan ${activeChatFriendName === 'Mastrisno_AI' ? 'Mastrisno AI' : activeChatFriendName}?`)) return;
                     
                     const myName = App.ProfileState.getCurrentName();
                     try {
@@ -1404,36 +1523,6 @@
                     if(actionSlot) actionSlot.style.display = "none";
 
                     this.loadPopupFriendsListSidebar();
-                },
-
-                async sendPopupChatCloudAction() {
-                    const input = document.getElementById('popup-chat-input-field'); 
-                    if (!input || !input.value.trim() || !activeChatFriendName) return;
-                    
-                    const msgText = input.value.trim();
-                    const myName = App.ProfileState.getCurrentName();
-                    
-                    input.value = '';
-
-                    try {
-                        await supabaseClient.from('chats').insert([{ sender: myName, receiver: activeChatFriendName, message: msgText }]);
-                        await App.Features.fetchChatMessagesAndRenderStream();
-
-                        // RESPONS AUTOMATIS DARI META AI BOT
-                        if(activeChatFriendName === 'Meta_AI') {
-                            setTimeout(async () => {
-                                const aiResponses = [
-                                    "Halo! Saya Meta AI. Ada yang bisa saya bantu hari ini?",
-                                    "Terima kasih atas pesannya! Ada topik menarik yang ingin Anda diskusikan?",
-                                    "Pertanyaan bagus! Saya selalu siap membantu pengerjaan tugas dan workspace Anda.",
-                                    "Halo "+myName+"! Senang bisa menyapa Anda di aplikasi Tech Social."
-                                ];
-                                const replyAI = aiResponses[Math.floor(Math.random() * aiResponses.length)];
-                                await supabaseClient.from('chats').insert([{ sender: 'Meta_AI', receiver: myName, message: replyAI }]);
-                                await App.Features.fetchChatMessagesAndRenderStream();
-                            }, 1000);
-                        }
-                    } catch(err) {}
                 },
 
                 openPostActionMenuDOM(postId, postAuthor) {
@@ -1577,8 +1666,8 @@
                             return true;
                         });
 
-                        if(headerSearchFilterQueryString) {
-                            filtered = filtered.filter(p => p.author.toLowerCase().includes(headerSearchFilterQueryString) || (p.content && p.content.toLowerCase().includes(headerSearchFilterQueryString)));
+                        if (headerSearchFilterQueryString) {
+                            filtered = filtered.filter(p => (p.content || '').toLowerCase().includes(headerSearchFilterQueryString) || (p.author || '').toLowerCase().includes(headerSearchFilterQueryString));
                         }
 
                         if (filtered.length === 0) {
@@ -1634,246 +1723,91 @@
                     } catch (err) {}
                 },
 
-                async pushCloudNotificationPayload(targetUser, actionType, textDesc) {
-                    if(!targetUser || targetUser === App.ProfileState.getCurrentName()) return;
-                    try {
-                        await supabaseClient.from('notifications').insert([{ 
-                            sender: App.ProfileState.getCurrentName(), 
-                            receiver: targetUser, 
-                            action_type: actionType, 
-                            description: textDesc,
-                            is_unread: true
-                        }]);
-                    } catch (ex) {}
-                },
-
-                async fetchCloudNotificationsDataZone() {
-                    try {
-                        const myName = App.ProfileState.getCurrentName();
-                        const { data } = await supabaseClient.from('notifications').select('*').eq('receiver', myName).order('created_at', { ascending: false });
-                        if(data) {
-                            liveNotifications = data.map(n => ({ 
-                                id: n.id, 
-                                user: n.sender, 
-                                type: n.action_type, 
-                                desc: n.description, 
-                                isUnread: n.is_unread, 
-                                timestamp: new Date(n.created_at).getTime() 
-                            }));
-                            liveHeaderNotificationCount = liveNotifications.filter(n => n.isUnread).length;
-                            App.UI.refreshHeaderNotificationBadgeDOM();
-                        }
-                    } catch (err) {}
-                },
-
-                async renderNotificationsView() {
-                    const viewport = document.getElementById('notifications-viewport-list');
-                    if(!viewport) return;
-                    
-                    if(liveNotifications.length === 0) {
-                        viewport.innerHTML = `<div class="glass-card" style="text-align:center; padding:32px; color:var(--text-muted); border:none;">Belum ada notifikasi.</div>`;
-                        return;
-                    }
-
-                    viewport.innerHTML = liveNotifications.map(n => {
-                        let iconName = 'notifications';
-                        let badgeClass = 'noti-badge-like';
-                        let actionText = n.desc;
-
-                        if (n.type === 'like') { iconName = 'thumb_up'; badgeClass = 'noti-badge-like'; }
-                        else if (n.type === 'love') { iconName = 'favorite'; badgeClass = 'noti-badge-love'; }
-                        else if (n.type === 'comment') { iconName = 'chat_bubble'; badgeClass = 'noti-badge-comment'; }
-                        else if (n.type === 'sub_comment') { iconName = 'reply'; badgeClass = 'noti-badge-sub_comment'; }
-                        else if (n.type === 'like_sub_comment') { iconName = 'thumb_up'; badgeClass = 'noti-badge-like_sub_comment'; }
-                        else if (n.type === 'follow') { iconName = 'person_add'; badgeClass = 'noti-badge-follow'; }
-
-                        const timeAgo = App.UI.calculateRelativeTimeAgo(n.timestamp);
-
-                        return `
-                            <div class="noti-item-card ${n.isUnread ? 'unread' : ''}" onclick="App.Router.navigate('profil?name=${encodeURIComponent(n.user)}')">
-                                <div class="noti-avatar-box">
-                                    <img src="https://i.pravatar.cc/150?u=${encodeURIComponent(n.user)}" alt="${n.user}">
-                                    <div class="noti-badge-icon ${badgeClass}">
-                                        <span class="material-symbols-outlined" style="font-size:13px;">${iconName}</span>
-                                    </div>
-                                </div>
-                                <div class="noti-content-text">
-                                    <strong>${n.user}</strong> ${actionText}
-                                    <div class="noti-time-text">${timeAgo}</div>
-                                </div>
-                                ${n.isUnread ? '<div class="noti-unread-dot"></div>' : ''}
-                            </div>
-                        `;
-                    }).join('');
-                },
-
-                async markAllLocalNotificationsAsReadCloudAction() {
-                    try {
-                        const myName = App.ProfileState.getCurrentName();
-                        await supabaseClient.from('notifications').update({ is_unread: false }).eq('receiver', myName);
-                        liveNotifications.forEach(n => n.isUnread = false);
-                        liveHeaderNotificationCount = 0;
-                        App.UI.refreshHeaderNotificationBadgeDOM();
-                    } catch (ex) {}
-                },
-
-                async toggleLike(id, postAuthor) {
+                async toggleLike(postId, postAuthor) {
                     const myName = App.ProfileState.getCurrentName();
-                    const btnNode = document.getElementById(`like-btn-node-${id}`);
-                    const countNode = document.getElementById(`like-count-node-${id}`);
-                    
-                    let isLikedNow = false;
-                    if (btnNode) {
-                        isLikedNow = btnNode.classList.toggle('liked');
-                        if (countNode) {
-                            let curr = parseInt(countNode.innerText.trim()) || 0;
-                            countNode.innerText = ` ${isLikedNow ? curr + 1 : Math.max(0, curr - 1)}`;
-                        }
-                    }
-
                     try {
-                        const { data } = await supabaseClient.from('posts').select('liked_users').eq('id', Number(id)).single();
-                        let list = (data && Array.isArray(data.liked_users)) ? data.liked_users : [];
-                        
-                        if (list.includes(myName)) {
-                            list = list.filter(u => u !== myName);
+                        const { data: post } = await supabaseClient.from('posts').select('liked_users').eq('id', Number(postId)).single();
+                        let currentLikes = post?.liked_users || [];
+                        let isAdding = false;
+                        if (currentLikes.includes(myName)) {
+                            currentLikes = currentLikes.filter(u => u !== myName);
                         } else {
-                            list.push(myName); 
-                            await this.pushCloudNotificationPayload(postAuthor, 'like', 'menyukai postingan Anda.'); 
+                            currentLikes.push(myName);
+                            isAdding = true;
                         }
-                        
-                        await supabaseClient.from('posts').update({ liked_users: list }).eq('id', Number(id)); 
+                        await supabaseClient.from('posts').update({ liked_users: currentLikes }).eq('id', Number(postId));
+                        if (isAdding && postAuthor !== myName) {
+                            await App.Features.pushCloudNotificationPayload(postAuthor, 'like', 'menyukai postingan Anda.');
+                        }
+                        this.renderPosts();
                     } catch(e) {}
                 },
 
-                async toggleLoveReaction(id, postAuthor) {
+                async toggleLoveReaction(postId, postAuthor) {
                     const myName = App.ProfileState.getCurrentName();
-                    const btnNode = document.getElementById(`love-btn-node-${id}`);
-                    const countNode = document.getElementById(`love-count-node-${id}`);
-                    
-                    let isLovedNow = false;
-                    if (btnNode) {
-                        isLovedNow = btnNode.classList.toggle('loved');
-                        if (countNode) {
-                            let curr = parseInt(countNode.innerText.trim()) || 0;
-                            countNode.innerText = ` ${isLovedNow ? curr + 1 : Math.max(0, curr - 1)}`;
-                        }
-                    }
-
                     try {
-                        const { data } = await supabaseClient.from('posts').select('loved_users').eq('id', Number(id)).single();
-                        let list = (data && Array.isArray(data.loved_users)) ? data.loved_users : [];
-                        
-                        if (list.includes(myName)) {
-                            list = list.filter(u => u !== myName);
+                        const { data: post } = await supabaseClient.from('posts').select('loved_users').eq('id', Number(postId)).single();
+                        let currentLoves = post?.loved_users || [];
+                        let isAdding = false;
+                        if (currentLoves.includes(myName)) {
+                            currentLoves = currentLoves.filter(u => u !== myName);
                         } else {
-                            list.push(myName); 
-                            await this.pushCloudNotificationPayload(postAuthor, 'love', 'menyukai postingan Anda dengan Love.'); 
+                            currentLoves.push(myName);
+                            isAdding = true;
                         }
-                        
-                        await supabaseClient.from('posts').update({ loved_users: list }).eq('id', Number(id)); 
+                        await supabaseClient.from('posts').update({ loved_users: currentLoves }).eq('id', Number(postId));
+                        if (isAdding && postAuthor !== myName) {
+                            await App.Features.pushCloudNotificationPayload(postAuthor, 'love', 'memberikan reaksi cinta pada postingan Anda.');
+                        }
+                        this.renderPosts();
                     } catch(e) {}
                 },
 
-                async renderExploreUsers() {
-                    const container = document.getElementById('explore-users-stream'); if(!container) return;
+                async toggleCommentLikeAction(commentId, commentAuthor) {
+                    const myName = App.ProfileState.getCurrentName();
                     try {
-                        const myName = App.ProfileState.getCurrentName();
-                        const { data: postsData } = await supabaseClient.from('posts').select('author, avatar').not('author', 'eq', myName);
-                        
-                        if (!postsData || postsData.length === 0) {
-                            container.innerHTML = `<p style="padding:16px; color:var(--text-muted); font-size:0.9rem;">Belum ada pengguna lain yang mendaftar.</p>`;
-                            return;
+                        const { data: comment } = await supabaseClient.from('comments').select('likes').eq('id', commentId).single();
+                        let currentLikes = comment?.likes || [];
+                        let isAdding = false;
+                        if (currentLikes.includes(myName)) {
+                            currentLikes = currentLikes.filter(u => u !== myName);
+                        } else {
+                            currentLikes.push(myName);
+                            isAdding = true;
                         }
+                        await supabaseClient.from('comments').update({ likes: currentLikes }).eq('id', commentId);
+                        if (isAdding && commentAuthor !== myName) {
+                            await App.Features.pushCloudNotificationPayload(commentAuthor, 'like_sub_comment', 'menyukai komentar Anda.');
+                        }
+                        this.reloadCommentsBottomSheetStreamOnly();
+                    } catch(e) {}
+                },
 
-                        const uniqueUsersMap = {};
-                        postsData.forEach(item => {
-                            if(!uniqueUsersMap[item.author]) {
-                                uniqueUsersMap[item.author] = item.avatar || DEFAULT_AVATAR_IMAGE;
+                async toggleReplyLikeAction(commentId, replyId, replyAuthor) {
+                    const myName = App.ProfileState.getCurrentName();
+                    try {
+                        const { data: comment } = await supabaseClient.from('comments').select('replies').eq('id', commentId).single();
+                        let replies = comment?.replies || [];
+                        let isAdding = false;
+                        replies = replies.map(r => {
+                            if (r.id === replyId) {
+                                let likes = r.likes || [];
+                                if (likes.includes(myName)) {
+                                    likes = likes.filter(u => u !== myName);
+                                } else {
+                                    likes.push(myName);
+                                    isAdding = true;
+                                }
+                                return { ...r, likes: likes };
                             }
+                            return r;
                         });
-
-                        await App.Features.fetchMyFriendsData();
-
-                        container.innerHTML = Object.keys(uniqueUsersMap).map(username => {
-                            const isFollowed = window.userFriendsList.includes(username);
-                            const safeName = escapeJSString(username);
-                            return `
-                                <div class="user-follow-card" style="border:none;">
-                                    <img src="${uniqueUsersMap[username]}" style="width:44px; height:44px; border-radius:50%; object-fit:cover;">
-                                    <div style="flex:1;">
-                                        <strong style="font-size:0.95rem; cursor:pointer; color:var(--text-main);" onclick="App.Router.navigate('profil?name=${encodeURIComponent(username)}')">${username}</strong>
-                                    </div>
-                                    <button class="btn ripple-btn" 
-                                            style="padding:6px 16px; font-size:0.82rem; border-radius:12px; font-weight:700; ${isFollowed ? 'background:#f0f2f5; color:#65676b;' : 'background:var(--primary); color:white;'}" 
-                                            onclick="App.Features.toggleFollowInExploreFromExploreDOM('${safeName}', this)">
-                                        ${isFollowed ? 'Mengikuti' : 'Ikuti'}
-                                    </button>
-                                </div>
-                            `;
-                        }).join('');
-                    } catch (err) {
-                        container.innerHTML = `<p style="padding:16px; color:var(--danger); font-size:0.9rem;">Gagal memuat database pengguna.</p>`;
-                    }
-                },
-
-                async toggleFollowInExploreFromExploreDOM(targetUsername, buttonNode) {
-                    const myName = App.ProfileState.getCurrentName();
-                    const isFollowed = window.userFriendsList.includes(targetUsername);
-
-                    if (isFollowed) {
-                        try {
-                            const { error } = await supabaseClient.from('follows').delete().eq('follower', myName).eq('following', targetUsername);
-                            if(!error) {
-                                buttonNode.innerText = 'Ikuti';
-                                buttonNode.style.background = 'var(--primary)';
-                                buttonNode.style.color = 'white';
-                                App.Toast.show("Batal mengikuti " + targetUsername, "info");
-                            }
-                        } catch(e){}
-                    } else {
-                        try {
-                            const { error } = await supabaseClient.from('follows').insert([{ follower: myName, following: targetUsername }]);
-                            if(!error) {
-                                buttonNode.innerText = 'Mengikuti';
-                                buttonNode.style.background = '#f0f2f5';
-                                buttonNode.style.color = '#65676b';
-                                App.Toast.show("Sekarang mengikuti " + targetUsername, "success");
-                                await App.Features.pushCloudNotificationPayload(targetUsername, 'follow', `mengikuti Anda.`);
-                            }
-                        } catch(e){}
-                    }
-                    await App.Features.fetchMyFriendsData();
-                },
-
-                async toggleFollowInFollowFromProfileDOM(targetUsername, buttonNode) {
-                    const myName = App.ProfileState.getCurrentName();
-                    const isFollowed = window.userFriendsList.includes(targetUsername);
-
-                    if (isFollowed) {
-                        try {
-                            const { error } = await supabaseClient.from('follows').delete().eq('follower', myName).eq('following', targetUsername);
-                            if(!error) {
-                                buttonNode.innerHTML = `<span class="material-symbols-outlined" style="font-size:18px;">add</span><span>Ikuti</span>`;
-                                buttonNode.className = "btn btn-primary ripple-btn";
-                                buttonNode.style.background = "var(--primary)";
-                                buttonNode.style.color = "white";
-                            }
-                        } catch(e){}
-                    } else {
-                        try {
-                            const { error } = await supabaseClient.from('follows').insert([{ follower: myName, following: targetUsername }]);
-                            if(!error) {
-                                buttonNode.innerHTML = `<span class="material-symbols-outlined" style="font-size:18px;">done</span><span>Mengikuti</span>`;
-                                buttonNode.className = "btn btn-secondary ripple-btn";
-                                buttonNode.style.background = "#f0f2f5";
-                                buttonNode.style.color = "#65676b";
-                                await App.Features.pushCloudNotificationPayload(targetUsername, 'follow', `mengikuti Anda.`);
-                            }
-                        } catch(e){}
-                    }
-                    await App.Features.fetchMyFriendsData();
-                    App.Features.loadFriendsCount();
+                        await supabaseClient.from('comments').update({ replies: replies }).eq('id', commentId);
+                        if (isAdding && replyAuthor !== myName) {
+                            await App.Features.pushCloudNotificationPayload(replyAuthor, 'like_sub_comment', 'menyukai balasan komentar Anda.');
+                        }
+                        this.reloadCommentsBottomSheetStreamOnly();
+                    } catch(e) {}
                 },
 
                 openCommentsBottomSheet(postId, postAuthor) {
@@ -1955,45 +1889,6 @@
                     } catch(ex) {}
                 },
 
-                async toggleCommentLikeAction(commentId, commentAuthor) {
-                    const myName = App.ProfileState.getCurrentName();
-                    try {
-                        const { data } = await supabaseClient.from('comments').select('likes').eq('id', commentId).single();
-                        let list = data?.likes || [];
-                        if (list.includes(myName)) {
-                            list = list.filter(u => u !== myName);
-                        } else {
-                            list.push(myName);
-                            await this.pushCloudNotificationPayload(commentAuthor, 'like', 'menyukai komentar Anda.');
-                        }
-                        await supabaseClient.from('comments').update({ likes: list }).eq('id', commentId);
-                        this.reloadCommentsBottomSheetStreamOnly();
-                    } catch(e) {}
-                },
-
-                async toggleReplyLikeAction(commentId, replyId, replyAuthor) {
-                    const myName = App.ProfileState.getCurrentName();
-                    try {
-                        const { data } = await supabaseClient.from('comments').select('replies').eq('id', commentId).single();
-                        let replies = data?.replies || [];
-                        replies = replies.map(r => {
-                            if (r.id === replyId) {
-                                let rLikes = r.likes || [];
-                                if (rLikes.includes(myName)) {
-                                    rLikes = rLikes.filter(u => u !== myName);
-                                } else {
-                                    rLikes.push(myName);
-                                    this.pushCloudNotificationPayload(replyAuthor, 'like_sub_comment', 'menyukai balasan komentar Anda.');
-                                }
-                                r.likes = rLikes;
-                            }
-                            return r;
-                        });
-                        await supabaseClient.from('comments').update({ replies: replies }).eq('id', commentId);
-                        this.reloadCommentsBottomSheetStreamOnly();
-                    } catch(e) {}
-                },
-
                 async submitBottomSheetCommentAction(postAuthor) {
                     const input = document.getElementById('sheet-comment-input-field'); if (!input || !input.value.trim()) return;
                     let text = input.value.trim(); const myName = App.ProfileState.getCurrentName();
@@ -2014,6 +1909,154 @@
                         }
                         input.value = ''; this.renderBottomSheetInputBar(postAuthor); this.reloadCommentsBottomSheetStreamOnly();
                     } catch(err) {}
+                },
+
+                async pushCloudNotificationPayload(targetUser, actionType, textDesc) {
+                    if(!targetUser || targetUser === App.ProfileState.getCurrentName()) return;
+                    try {
+                        await supabaseClient.from('notifications').insert([{ 
+                            sender: App.ProfileState.getCurrentName(), 
+                            receiver: targetUser, 
+                            action_type: actionType, 
+                            description: textDesc,
+                            is_unread: true
+                        }]);
+                    } catch (ex) {}
+                },
+
+                async fetchCloudNotificationsDataZone() {
+                    const myName = App.ProfileState.getCurrentName();
+                    try {
+                        const { data } = await supabaseClient
+                            .from('notifications')
+                            .select('*')
+                            .eq('receiver', myName)
+                            .order('created_at', { ascending: false });
+                        
+                        liveNotifications = data || [];
+                        liveHeaderNotificationCount = liveNotifications.filter(n => n.is_unread).length;
+                        App.UI.refreshHeaderNotificationBadgeDOM();
+                    } catch(e) {}
+                },
+
+                async renderNotificationsView() {
+                    const viewport = document.getElementById('notifications-viewport-list'); if(!viewport) return;
+                    await this.fetchCloudNotificationsDataZone();
+                    
+                    if (liveNotifications.length === 0) {
+                        viewport.innerHTML = `<div style="text-align:center; padding:32px; color:var(--text-muted);">Belum ada notifikasi.</div>`;
+                        return;
+                    }
+
+                    viewport.innerHTML = liveNotifications.map(n => {
+                        const iconClass = n.action_type === 'like' ? 'thumb_up noti-badge-like' : 
+                                          n.action_type === 'love' ? 'favorite noti-badge-love' : 
+                                          n.action_type === 'comment' ? 'comment noti-badge-comment' : 
+                                          n.action_type === 'follow' ? 'person_add noti-badge-follow' : 'notifications noti-badge-like';
+                        const isUnread = n.is_unread ? 'unread' : '';
+                        const timeStr = n.created_at ? App.UI.calculateRelativeTimeAgo(new Date(n.created_at).getTime()) : 'Baru saja';
+
+                        return `
+                            <div class="noti-item-card ${isUnread}">
+                                <div class="noti-avatar-box">
+                                    <img src="${DEFAULT_AVATAR_IMAGE}">
+                                    <div class="noti-badge-icon ${iconClass.split(' ')[1]}">
+                                        <span class="material-symbols-outlined" style="font-size:12px;">${iconClass.split(' ')[0]}</span>
+                                    </div>
+                                </div>
+                                <div class="noti-content-text">
+                                    <strong>${n.sender}</strong> ${n.description}
+                                    <div class="noti-time-text">${timeStr}</div>
+                                </div>
+                                ${n.is_unread ? '<div class="noti-unread-dot"></div>' : ''}
+                            </div>
+                        `;
+                    }).join('');
+                },
+
+                async markAllLocalNotificationsAsReadCloudAction() {
+                    const myName = App.ProfileState.getCurrentName();
+                    try {
+                        await supabaseClient.from('notifications').update({ is_unread: false }).eq('receiver', myName);
+                        liveHeaderNotificationCount = 0;
+                        App.UI.refreshHeaderNotificationBadgeDOM();
+                    } catch(e) {}
+                },
+
+                async renderExploreUsers() {
+                    const container = document.getElementById('explore-users-stream'); if(!container) return;
+                    const myName = App.ProfileState.getCurrentName();
+                    
+                    try {
+                        const { data: users } = await supabaseClient.from('posts').select('author, avatar');
+                        let uniqueUsersMap = {};
+                        if (users) {
+                            users.forEach(u => {
+                                if (u.author && u.author !== myName && !uniqueUsersMap[u.author]) {
+                                    uniqueUsersMap[u.author] = u.avatar || DEFAULT_AVATAR_IMAGE;
+                                }
+                            });
+                        }
+                        
+                        if (!uniqueUsersMap['Agung_Taufiq'] && myName !== 'Agung_Taufiq') {
+                            uniqueUsersMap['Agung_Taufiq'] = DEFAULT_AVATAR_IMAGE;
+                        }
+
+                        const userKeys = Object.keys(uniqueUsersMap);
+                        if (userKeys.length === 0) {
+                            container.innerHTML = `<div style="grid-column: 1/-1; text-align:center; color:var(--text-muted); padding:20px;">Belum ada anggota lain yang terdaftar.</div>`;
+                            return;
+                        }
+
+                        container.innerHTML = userKeys.map(name => {
+                            const isFollowing = window.userFriendsList.includes(name);
+                            const safeName = escapeJSString(name);
+                            return `
+                                <div class="user-follow-card">
+                                    <img src="${uniqueUsersMap[name]}" style="width:46px; height:46px; border-radius:50%; object-fit:cover;" onclick="App.Router.navigate('profil?name=${encodeURIComponent(name)}')">
+                                    <div style="flex:1; overflow:hidden;">
+                                        <strong style="display:block; text-overflow:ellipsis; overflow:hidden; white-space:nowrap; cursor:pointer;" onclick="App.Router.navigate('profil?name=${encodeURIComponent(name)}')">${name}</strong>
+                                        <span style="font-size:0.75rem; color:var(--text-muted);">Anggota Aktif</span>
+                                    </div>
+                                    <button class="btn ${isFollowing ? 'btn-secondary' : 'btn-primary'}" style="padding:6px 12px; font-size:0.8rem;" onclick="App.Features.toggleFollowInFollowFromProfileDOM('${safeName}', this)">
+                                        ${isFollowing ? 'Mengikuti' : 'Ikuti'}
+                                    </button>
+                                </div>
+                            `;
+                        }).join('');
+                    } catch(e) {}
+                },
+
+                async toggleFollowInFollowFromProfileDOM(targetUser, btnElement) {
+                    const myName = App.ProfileState.getCurrentName();
+                    try {
+                        const isFollowing = window.userFriendsList.includes(targetUser);
+                        if (isFollowing) {
+                            await supabaseClient.from('follows').delete().eq('follower', myName).eq('following', targetUser);
+                            window.userFriendsList = window.userFriendsList.filter(u => u !== targetUser);
+                            App.Toast.show(`Berhenti mengikuti ${targetUser}`, "info");
+                        } else {
+                            await supabaseClient.from('follows').insert([{ follower: myName, following: targetUser }]);
+                            window.userFriendsList.push(targetUser);
+                            await this.pushCloudNotificationPayload(targetUser, 'follow', 'mulai mengikuti Anda.');
+                            App.Toast.show(`Sekarang mengikuti ${targetUser}`, "success");
+                        }
+                        
+                        await App.Features.fetchMyFriendsData();
+                        App.Features.loadFriendsCount();
+
+                        if (btnElement) {
+                            const nowFollowing = window.userFriendsList.includes(targetUser);
+                            btnElement.className = `btn ${nowFollowing ? 'btn-secondary' : 'btn-primary'}`;
+                            btnElement.innerHTML = nowFollowing ? 
+                                '<span class="material-symbols-outlined" style="font-size:18px;">done</span><span>Mengikuti</span>' : 
+                                '<span class="material-symbols-outlined" style="font-size:18px;">add</span><span>Ikuti</span>';
+                        }
+                        
+                        if (window.location.hash === '#/explore') App.Features.renderExploreUsers();
+                    } catch(e) {
+                        App.Toast.show("Gagal memproses permintaan ikuti.", "danger");
+                    }
                 },
 
                 closeCommentsBottomSheet() { document.getElementById('comments-overlay-bottom-sheet').classList.remove('active'); activeBottomSheetPostId = null; },
@@ -2205,6 +2248,7 @@
                 },
                 bindGlobalEvents() {
                     document.getElementById('btn-toggle-sidebar')?.addEventListener('click', () => { if(window.innerWidth > 768) document.getElementById('app-layout').classList.toggle('sidebar-collapsed'); });
+                    document.getElementById('btn-theme')?.addEventListener('click', () => App.Theme.toggle());
                     document.getElementById('btn-refresh')?.addEventListener('click', () => { App.Router.handleRoute(); App.Toast.show("Diperbarui","success"); });
                     
                     document.getElementById('global-modal')?.addEventListener('click', (e) => {
