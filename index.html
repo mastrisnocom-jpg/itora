@@ -336,7 +336,7 @@
         }
         .minimal-composer-gallery-icon:hover { color: var(--primary); }
 
-        /* FLOATING CHAT WIDGET SYSTEM */
+        /* FLOATING CHAT WIDGET SYSTEM WITH AVATAR & TIMESTAMP SUPPORT */
         .floating-chat-widget { 
             position: fixed; 
             top: var(--header-height);
@@ -516,19 +516,30 @@
             z-index: 6;
         }
         
-        .popup-msg-stream { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 10px; min-height: 0; }
+        .popup-msg-stream { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 12px; min-height: 0; }
         .popup-chat-input-row { padding: 12px 16px; padding-bottom: max(12px, env(safe-area-inset-bottom)); border-top: 1px solid var(--border-color); display: flex; gap: 8px; align-items: center; background: var(--bg-glass-solid); flex-shrink: 0; }
         
-        .bubble-wrapper { display: flex; flex-direction: column; gap: 2px; max-width: 75%; position: relative; }
-        .bubble-wrapper.out { align-self: flex-end; align-items: flex-end; }
-        .bubble-wrapper.in { align-self: flex-start; align-items: flex-start; }
+        /* CHAT BUBBLE DENGAN FOTO PROFIL & WAKTU REALTIME */
+        .chat-row-item { display: flex; align-items: flex-end; gap: 8px; width: 100%; margin-bottom: 2px; }
+        .chat-row-item.out { justify-content: flex-end; }
+        .chat-row-item.in { justify-content: flex-start; }
 
-        .bubble { padding: 10px 16px; border-radius: 18px; font-size: 0.9rem; line-height: 1.4; word-break: break-word; box-shadow: 0 1px 2px rgba(0,0,0,0.04); position: relative; }
-        .bubble.in { background: #f1f5f9; color: var(--text-main); border-top-left-radius: 4px; text-align: left; border: 1px solid var(--border-color); }
-        .bubble.out { background: var(--primary); color: white; border-top-right-radius: 4px; text-align: left; }
+        .chat-avatar-mini { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; flex-shrink: 0; border: 1px solid var(--border-color); }
 
-        .bubble-action-btn { font-size: 0.7rem; color: var(--text-muted); cursor: pointer; border: none; background: transparent; padding: 2px 4px; opacity: 0.6; transition: var(--trans-smooth); }
-        .bubble-action-btn:hover { opacity: 1; color: var(--danger); }
+        .bubble-wrapper { display: flex; flex-direction: column; gap: 2px; max-width: 70%; position: relative; }
+        .bubble-wrapper.out { align-items: flex-end; }
+        .bubble-wrapper.in { align-items: flex-start; }
+
+        .bubble { padding: 10px 14px; border-radius: 18px; font-size: 0.9rem; line-height: 1.4; word-break: break-word; box-shadow: 0 1px 2px rgba(0,0,0,0.04); position: relative; }
+        .bubble.in { background: #f1f5f9; color: var(--text-main); border-bottom-left-radius: 4px; text-align: left; border: 1px solid var(--border-color); }
+        .bubble.out { background: var(--primary); color: white; border-bottom-right-radius: 4px; text-align: left; }
+
+        .chat-time-stamp { font-size: 0.65rem; color: #94a3b8; margin-top: 2px; padding: 0 4px; display: flex; align-items: center; gap: 6px; }
+        .bubble.out + .chat-time-stamp { justify-content: flex-end; }
+
+        .bubble-action-btn { font-size: 0.75rem; color: var(--text-muted); cursor: pointer; border: none; background: transparent; padding: 0; opacity: 0.7; transition: var(--trans-smooth); }
+        .bubble-action-btn:hover { opacity: 1; color: var(--primary); }
+        .bubble-action-btn.delete:hover { color: var(--danger); }
 
         /* GLOBAL MODAL SYSTEM */
         .modal-overlay { position: fixed; top: var(--header-height); left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.4); backdrop-filter: blur(4px); z-index: 4000; display: none; align-items: center; justify-content: center; padding: 20px; transition: var(--trans-smooth); }
@@ -543,7 +554,7 @@
         @keyframes slideDownFade { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
         @keyframes fadeScale { from { opacity: 0; transform: scale(0.98); } to { opacity: 1; transform: scale(1); } }
 
-        /* RESPONSIVE MOBILE PHONES SCREEN & PERBAIKAN POPUP CHAT */
+        /* RESPONSIVE MOBILE PHONES SCREEN */
         @media (max-width: 768px) {
             :root {
                 --header-height: 120px;
@@ -1465,12 +1476,22 @@
                     await App.Features.fetchChatMessagesAndRenderStream();
                 },
 
+                // MEMUAT CHAT DENGAN FOTO PROFIL SENDER + JAM REALTIME + TOMBOL EDIT & HAPUS
                 async fetchChatMessagesAndRenderStream() {
                     const viewport = document.getElementById('popup-msg-stream-viewport');
                     if (!viewport || !activeChatFriendName) return;
                     
                     const myName = App.ProfileState.getCurrentName();
+                    const myAvatar = App.ProfileState.getCurrentAvatar();
+                    let friendAvatar = 'https://i.pravatar.cc/150?img=12';
+
                     try {
+                        // Coba ambil avatar teman dari postingan terakhir
+                        const { data: friendPosts } = await supabaseClient.from('posts').select('avatar').eq('author', activeChatFriendName).not('avatar', 'is', null).limit(1);
+                        if (friendPosts && friendPosts.length > 0 && friendPosts[0].avatar) {
+                            friendAvatar = friendPosts[0].avatar;
+                        }
+
                         const { data: messages, error } = await supabaseClient
                             .from('chats')
                             .select('*')
@@ -1490,12 +1511,25 @@
 
                         viewport.innerHTML = messages.map(m => {
                             const isOut = m.sender === myName;
+                            const timeStr = m.created_at ? new Date(m.created_at).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) : 'Baru saja';
+                            const safeMsg = escapeJSString(m.message);
+
                             return `
-                                <div class="bubble-wrapper ${isOut ? 'out' : 'in'}">
-                                    <div class="bubble ${isOut ? 'out' : 'in'}">
-                                        <span>${m.message}</span>
+                                <div class="chat-row-item ${isOut ? 'out' : 'in'}">
+                                    ${!isOut ? `<img src="${friendAvatar}" class="chat-avatar-mini" alt="${m.sender}">` : ''}
+                                    <div class="bubble-wrapper ${isOut ? 'out' : 'in'}">
+                                        <div class="bubble ${isOut ? 'out' : 'in'}">
+                                            <span>${m.message}</span>
+                                        </div>
+                                        <div class="chat-time-stamp">
+                                            <span>${timeStr}</span>
+                                            ${isOut ? `
+                                                • <button class="bubble-action-btn" onclick="App.Features.editSingleChatMessageAction(${m.id}, '${safeMsg}')">Edit</button>
+                                                • <button class="bubble-action-btn delete" onclick="App.Features.deleteSingleChatMessageAction(${m.id})">Hapus</button>
+                                            ` : ''}
+                                        </div>
                                     </div>
-                                    ${isOut ? `<button class="bubble-action-btn" onclick="App.Features.deleteSingleChatMessageAction(${m.id})">Hapus</button>` : ''}
+                                    ${isOut ? `<img src="${myAvatar}" class="chat-avatar-mini" alt="${myName}">` : ''}
                                 </div>
                             `;
                         }).join('');
@@ -1508,6 +1542,21 @@
                                     Ruang obrolan siap. Ketik pesan Anda di bawah!
                                 </div>`;
                         }
+                    }
+                },
+
+                // FITUR EDIT PESAN CHAT REALTME
+                async editSingleChatMessageAction(messageId, currentText) {
+                    const newText = prompt("Edit pesan obrolan Anda:", currentText);
+                    if (newText === null || !newText.trim() || newText.trim() === currentText) return;
+                    
+                    try {
+                        const { error } = await supabaseClient.from('chats').update({ message: newText.trim() }).eq('id', messageId);
+                        if (error) throw error;
+                        App.Toast.show("Pesan berhasil diperbarui!", "success");
+                        await App.Features.fetchChatMessagesAndRenderStream();
+                    } catch(err) {
+                        App.Toast.show("Gagal mengedit pesan", "danger");
                     }
                 },
 
@@ -1566,23 +1615,9 @@
                     
                     input.value = '';
 
-                    const viewport = document.getElementById('popup-msg-stream-viewport');
-                    if (viewport) {
-                        const emptyPlaceholder = viewport.querySelector('div[style*="flex:1"]');
-                        if (emptyPlaceholder) emptyPlaceholder.remove();
-
-                        const tempWrapper = document.createElement('div');
-                        tempWrapper.className = 'bubble-wrapper out';
-                        tempWrapper.innerHTML = `<div class="bubble out"><span>${msgText}</span></div>`;
-                        viewport.appendChild(tempWrapper);
-                        viewport.scrollTop = viewport.scrollHeight;
-                    }
-
                     try {
                         await supabaseClient.from('chats').insert([{ sender: myName, receiver: activeChatFriendName, message: msgText }]);
-                        setTimeout(async () => {
-                            await App.Features.fetchChatMessagesAndRenderStream();
-                        }, 500);
+                        await App.Features.fetchChatMessagesAndRenderStream();
                     } catch(err) {}
                 },
 
