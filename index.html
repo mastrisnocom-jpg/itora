@@ -279,14 +279,29 @@
         .avatar-preview-circle { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; padding: 2px; }
         .avatar-upload-label { position: absolute; bottom: 0; right: 0; width: 32px; height: 32px; border-radius: 50%; background: var(--primary); color: white; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: var(--shadow-float); }
 
-        /* MINIMAL COMPOSER BAR & MEDIA ACTIONS */
-        .minimal-composer-bar { display: flex; flex-direction: column; background: #ffffff; border: 1px solid var(--border-color); padding: 16px 20px; border-radius: var(--radius-xl); box-shadow: var(--shadow-soft); margin-bottom: 28px; transition: var(--trans-smooth); max-width: 100%; box-sizing: border-box; gap: 12px; }
-        .minimal-composer-top-row { display: flex; align-items: center; gap: 14px; width: 100%; }
-        .minimal-composer-input-mock { flex: 1; border: 1px solid var(--border-color); padding: 12px 20px; border-radius: var(--radius-round); color: var(--text-muted); font-size: 1rem; font-weight: 500; text-align: left; background: #f0f2f5; cursor: pointer; transition: var(--trans-smooth); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .minimal-composer-input-mock:hover { background: #e4e6eb; }
-        .minimal-composer-quick-actions { display: flex; align-items: center; justify-content: space-around; border-top: 1px solid var(--border-color); padding-top: 10px; width: 100%; }
-        .composer-quick-btn { display: inline-flex; align-items: center; gap: 6px; color: var(--text-muted); font-size: 0.82rem; font-weight: 700; cursor: pointer; padding: 6px 12px; border-radius: var(--radius-md); transition: var(--trans-smooth); }
-        .composer-quick-btn:hover { background: #f0f2f5; color: var(--primary); }
+        /* FB-STYLE MINIMAL COMPOSER BAR (SAMA DENGAN DOKUMEN FOTO) */
+        .fb-composer-box { display: flex; align-items: center; gap: 12px; background: #ffffff; border: 1px solid var(--border-color); padding: 12px 16px; border-radius: var(--radius-xl); box-shadow: var(--shadow-soft); margin-bottom: 16px; width: 100%; box-sizing: border-box; }
+        .fb-composer-input { flex: 1; border: 1px solid var(--border-color); padding: 10px 18px; border-radius: var(--radius-round); color: var(--text-muted); font-size: 0.95rem; font-weight: 500; background: #ffffff; cursor: pointer; transition: var(--trans-smooth); }
+        .fb-composer-input:hover { background: #f0f2f5; }
+        .fb-composer-gallery-icon { color: #10B981; font-size: 28px; cursor: pointer; display: flex; align-items: center; justify-content: center; user-select: none; }
+
+        /* STORIES CAROUSEL SYSTEM (FACEBOOK / FB LITE STYLE) */
+        .stories-container { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 8px; margin-bottom: 24px; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
+        .stories-container::-webkit-scrollbar { display: none; }
+        
+        .story-card { position: relative; min-width: 110px; width: 110px; height: 185px; border-radius: 16px; overflow: hidden; background: #f0f2f5; flex-shrink: 0; cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,0.08); transition: var(--trans-smooth); border: 1px solid var(--border-color); }
+        .story-card:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.12); }
+        
+        .story-card-bg { width: 100%; height: 100%; object-fit: cover; display: block; }
+        
+        .story-create-card { background: #ffffff; display: flex; flex-direction: column; justify-content: space-between; }
+        .story-create-img-top { width: 100%; height: 125px; object-fit: cover; }
+        .story-create-plus-wrapper { position: absolute; top: 110px; left: 50%; transform: translateX(-50%); width: 32px; height: 32px; background: var(--primary); border: 3px solid #ffffff; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; box-shadow: var(--shadow-float); z-index: 3; }
+        .story-create-label { font-size: 0.76rem; font-weight: 800; color: var(--text-main); text-align: center; margin-bottom: 8px; padding: 0 4px; }
+
+        .story-user-avatar-ring { position: absolute; top: 10px; left: 10px; width: 34px; height: 34px; border-radius: 50%; border: 3px solid var(--primary); padding: 1px; background: #ffffff; object-fit: cover; z-index: 2; box-shadow: 0 2px 6px rgba(0,0,0,0.2); }
+        .story-user-name { position: absolute; bottom: 10px; left: 8px; right: 8px; font-size: 0.78rem; font-weight: 800; color: #ffffff; text-shadow: 0 1px 4px rgba(0,0,0,0.9); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; z-index: 2; }
+        .story-gradient-overlay { position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: linear-gradient(180deg, rgba(0,0,0,0.25) 0%, rgba(0,0,0,0) 40%, rgba(0,0,0,0.7) 100%); pointer-events: none; }
 
         /* FLOATING CHAT WIDGET SYSTEM */
         .floating-chat-widget { position: fixed; top: var(--header-height); bottom: 20px; right: 20px; width: 420px; background: #ffffff; border: 1px solid var(--border-color); border-radius: var(--radius-xl); box-shadow: 0 12px 40px rgba(0,0,0,0.15); display: none; flex-direction: column; overflow: hidden; z-index: 1002; transition: var(--trans-smooth); max-width: calc(100% - 40px); }
@@ -1020,25 +1035,51 @@
 
             Views: {
                 feed() {
+                    const myAvatar = App.ProfileState.getCurrentAvatar();
                     return `
-                        <!-- COMPOSER BAR BARU DENGAN TOMBOL BERBAGI LINK YOUTUBE DAN FACEBOOK -->
-                        <div class="minimal-composer-bar">
-                            <div class="minimal-composer-top-row">
-                                <div id="composer-avatar-slot"></div>
-                                <div class="minimal-composer-input-mock" onclick="App.Features.openComposerModalPopupForm()">Apa yang Anda pikirkan?</div>
+                        <!-- COMPOSER BAR PERSIS SEPERTI GAMBAR (FB STYLE) -->
+                        <div class="fb-composer-box">
+                            <div id="composer-avatar-slot">
+                                <img src="${myAvatar}" class="user-avatar" style="width:40px; height:40px; object-fit:cover;" onclick="App.Router.navigate('profil')">
                             </div>
-                            <div class="minimal-composer-quick-actions">
-                                <div class="composer-quick-btn" onclick="document.getElementById('global-composer-direct-file-input').click()">
-                                    <span class="material-symbols-outlined" style="color:#10B981;">photo_library</span> Foto
+                            <div class="fb-composer-input" onclick="App.Features.openComposerModalPopupForm()">Apa yang Anda pikirkan?</div>
+                            <span class="material-symbols-outlined fb-composer-gallery-icon" onclick="document.getElementById('global-composer-direct-file-input').click()">image</span>
+                        </div>
+
+                        <!-- CAROUSEL CERITA (STORIES PERSIS FOTO CONTOH) -->
+                        <div class="stories-container" id="stories-carousel-stream">
+                            <!-- KARTU 1: BUAT CERITA -->
+                            <div class="story-card story-create-card" onclick="document.getElementById('global-composer-direct-file-input').click()">
+                                <img src="${myAvatar}" class="story-create-img-top" alt="Buat cerita">
+                                <div class="story-create-plus-wrapper">
+                                    <span class="material-symbols-outlined" style="font-size:20px;">add</span>
                                 </div>
-                                <div class="composer-quick-btn" onclick="App.Features.triggerEmbeddedLinkModalPopup('youtube')">
-                                    <span class="material-symbols-outlined" style="color:#FF0000;">play_circle</span> YouTube
-                                </div>
-                                <div class="composer-quick-btn" onclick="App.Features.triggerEmbeddedLinkModalPopup('facebook')">
-                                    <span class="material-symbols-outlined" style="color:#1877F2;">smart_display</span> FB Video
-                                </div>
+                                <div class="story-create-label">Buat cerita</div>
+                            </div>
+
+                            <!-- KARTU CERITA DUMMY / TEMAN -->
+                            <div class="story-card" onclick="App.Toast.show('Melihat cerita Wanti Jie', 'info')">
+                                <img src="https://images.unsplash.com/photo-1517841905240-472988babdf9?w=300&q=80" class="story-card-bg" alt="Cerita Wanti Jie">
+                                <div class="story-gradient-overlay"></div>
+                                <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&q=80" class="story-user-avatar-ring" alt="Wanti Jie">
+                                <span class="story-user-name">Wanti Jie</span>
+                            </div>
+
+                            <div class="story-card" onclick="App.Toast.show('Melihat cerita R Marizkha', 'info')">
+                                <img src="https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=300&q=80" class="story-card-bg" alt="Cerita R Marizkha">
+                                <div class="story-gradient-overlay"></div>
+                                <img src="https://images.unsplash.com/photo-1517841905240-472988babdf9?w=100&q=80" class="story-user-avatar-ring" alt="R Marizkha">
+                                <span class="story-user-name">R Marizkha</span>
+                            </div>
+
+                            <div class="story-card" onclick="App.Toast.show('Melihat cerita Alfa', 'info')">
+                                <img src="https://images.unsplash.com/photo-1501785888041-af3ef285b470?w=300&q=80" class="story-card-bg" alt="Cerita Alfa">
+                                <div class="story-gradient-overlay"></div>
+                                <img src="https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?w=100&q=80" class="story-user-avatar-ring" alt="Alfa">
+                                <span class="story-user-name">Alfa</span>
                             </div>
                         </div>
+
                         <div id="feed-stream"></div>
                     `;
                 },
@@ -1141,25 +1182,11 @@
                             </div>
                         </div>
 
-                        <!-- FORM MEMBUAT STATUS DARI PROFILE -->
-                        <div class="minimal-composer-bar" style="margin-bottom: 20px;">
-                            <div class="minimal-composer-top-row">
-                                <div class="avatar-wrapper">
-                                    <img src="${App.ProfileState.getCurrentAvatar()}" class="user-avatar" style="width:40px; height:40px; object-fit:cover;">
-                                </div>
-                                <div class="minimal-composer-input-mock" onclick="App.Features.openComposerModalPopupForm()">Buat postingan di profil ini...</div>
-                            </div>
-                            <div class="minimal-composer-quick-actions">
-                                <div class="composer-quick-btn" onclick="document.getElementById('global-composer-direct-file-input').click()">
-                                    <span class="material-symbols-outlined" style="color:#10B981;">photo_library</span> Foto
-                                </div>
-                                <div class="composer-quick-btn" onclick="App.Features.triggerEmbeddedLinkModalPopup('youtube')">
-                                    <span class="material-symbols-outlined" style="color:#FF0000;">play_circle</span> YouTube
-                                </div>
-                                <div class="composer-quick-btn" onclick="App.Features.triggerEmbeddedLinkModalPopup('facebook')">
-                                    <span class="material-symbols-outlined" style="color:#1877F2;">smart_display</span> FB Video
-                                </div>
-                            </div>
+                        <!-- FORM MEMBUAT STATUS DARI PROFILE PERSIS TAMPILAN CONTOH -->
+                        <div class="fb-composer-box">
+                            <img src="${App.ProfileState.getCurrentAvatar()}" class="user-avatar" style="width:40px; height:40px; object-fit:cover;">
+                            <div class="fb-composer-input" onclick="App.Features.openComposerModalPopupForm()">Buat postingan di profil ini...</div>
+                            <span class="material-symbols-outlined fb-composer-gallery-icon" onclick="document.getElementById('global-composer-direct-file-input').click()">image</span>
                         </div>
 
                         <!-- FEED HISTORI POSTINGAN USER & MENTION -->
