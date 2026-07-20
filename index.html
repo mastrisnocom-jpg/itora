@@ -19,7 +19,8 @@
            1. CSS VARIABLES & CLEAN WHITE BLUE THEME CONFIGURATION
            ========================================================================== */
         :root {
-            --font-main: 'Plus Jakarta Sans', sans-serif;
+            /* MENGGUNAKAN FONT SISTEM ADAPTIF SESUAI HP PENGGUNA */
+            --font-main: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
             --bg-body: #ffffff;
             --bg-glass: rgba(255, 255, 255, 0.95);
             --bg-glass-hover: #f0f2f5;
@@ -44,7 +45,7 @@
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: var(--font-main); -webkit-tap-highlight-color: transparent; }
-        body { background-color: var(--bg-body); color: var(--text-main); overflow-x: hidden; transition: var(--trans-smooth); min-height: 100vh; }
+        body { background-color: var(--bg-body); color: var(--text-main); overflow-x: hidden; transition: var(--trans-smooth); min-height: 100vh; font-size: 16px; }
         a { text-decoration: none; color: inherit; } ul { list-style: none; } button, input, textarea { font-family: inherit; outline: none; border: none; }
         ::-webkit-scrollbar { width: 6px; height: 6px; } ::-webkit-scrollbar-track { background: transparent; } ::-webkit-scrollbar-thumb { background: #bcc0c4; border-radius: var(--radius-round); } ::-webkit-scrollbar-thumb:hover { background: var(--primary); }
 
@@ -150,6 +151,8 @@
         .noti-badge-sub_comment { background: #00a884; }
         .noti-badge-like_sub_comment { background: #1877f2; }
         .noti-badge-follow { background: #10B981; }
+        .noti-badge-mention { background: #8B5CF6; }
+        .noti-badge-post { background: #F59E0B; }
 
         .noti-content-text { flex: 1; font-size: 0.93rem; color: var(--text-main); line-height: 1.35; }
         .noti-content-text strong { font-weight: 700; color: #000; }
@@ -176,7 +179,7 @@
 
         .post-content { font-family: var(--font-main); font-size: 1.02rem; font-weight: 400; line-height: 1.6; letter-spacing: -0.1px; margin-bottom: 14px; color: var(--text-main); text-align: left; white-space: pre-wrap; word-break: break-word; max-width: 100%; background: transparent !important; padding: 0; border-radius: 0; border: none !important; box-shadow: none !important; }
         
-        /* MENTION STYLE */
+        /* MENTION STYLE UTAMA */
         .user-mention-link { color: var(--primary); font-weight: 700; cursor: pointer; text-decoration: none; }
         .user-mention-link:hover { text-decoration: underline; }
 
@@ -249,8 +252,9 @@
         .pic-composer-body { flex: 1; padding: 0 20px; display: flex; flex-direction: column; max-width: 100%; }
         .pic-composer-textarea { width: 100%; border: 1px solid var(--border-color); border-radius: var(--radius-md); background: #f0f2f5 !important; color: var(--text-main); font-size: 1.05rem; padding: 16px; min-height: 140px; font-family: var(--font-main); line-height: 1.5; box-sizing: border-box; resize: none; transition: var(--trans-smooth); }
         .pic-composer-textarea:focus { outline: none; border-color: var(--primary); background: #ffffff; box-shadow: 0 0 0 4px var(--primary-state); }
-        .pic-composer-preview-box { margin-top: 12px; border-radius: 12px; overflow: hidden; max-height: 140px; text-align: center; }
+        .pic-composer-preview-box { margin-top: 12px; border-radius: 12px; overflow: hidden; max-height: 240px; text-align: center; }
         .pic-composer-preview-box img { max-height: 130px; object-fit: cover; border: 2px solid var(--primary); border-radius: 8px; margin: 0 auto; display: block; max-width: 100%; }
+        .pic-composer-preview-box iframe { width: 100%; height: 200px; border-radius: 12px; border: 1px solid var(--border-color); }
 
         .pic-composer-dock-grid { display: flex; justify-content: space-around; padding: 20px; border-top: 1px solid var(--border-color); background: #ffffff; max-width: 100%; }
         .pic-dock-icon-only-item { display: flex; flex-direction: column; align-items: center; justify-content: center; width: 50px; height: 50px; border-radius: 50%; background: #f0f2f5; border: 1px solid var(--border-color); cursor: pointer; transition: var(--trans-smooth); }
@@ -314,7 +318,7 @@
         .popup-msg-stream { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 14px; min-height: 0; }
         .popup-chat-input-row { padding: 12px 16px; padding-bottom: max(12px, env(safe-area-inset-bottom)); border-top: 1px solid var(--border-color); display: flex; gap: 8px; align-items: center; background: #ffffff; flex-shrink: 0; }
         
-        /* RESTRUKTURISASI TAMPILAN CHAT: ATAS FOTO+NAMA, BAWAH TEKS FULL KANAN KIRI */
+        /* DESAIN CHAT: ATAS NAMA/PROFIL, BAWAH TEKS FULL KANAN-KIRI */
         .chat-row-item { display: flex; flex-direction: column; width: 100%; margin-bottom: 6px; }
         .chat-row-item.out { align-items: flex-end; }
         .chat-row-item.in { align-items: flex-start; }
@@ -571,7 +575,6 @@
         let activeReplyTargetCommentId = null;
         let activeReplyTargetUser = null;
 
-        // Cache lokal data profil Supabase di memori runtime
         window.mySupabaseProfileCache = {
             avatar_url: DEFAULT_AVATAR_IMAGE,
             display_name: '',
@@ -585,13 +588,28 @@
             return String(str || '').replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/"/g, '&quot;');
         }
 
-        // HELPER SIKAT PARSING @MENTION
+        // MENTION DENGAN OTOMATIS MENUTUP BOTTOM SHEET KOMENTAR KETIKA DIKLIK
         function parseMentionsToClickableLinks(text) {
             if (!text) return "";
             return text.replace(/@([a-zA-Z0-9_]+)/g, function(match, username) {
                 const safeUser = escapeJSString(username);
-                return `<span class="user-mention-link" onclick="App.Router.navigate('profil?name=${encodeURIComponent(safeUser)}')">@${username}</span>`;
+                return `<span class="user-mention-link" onclick="App.Features.closeCommentsBottomSheet(); App.Router.navigate('profil?name=${encodeURIComponent(safeUser)}')">@${username}</span>`;
             });
+        }
+
+        // DETEKSI DAN KIRIM NOTIFIKASI OTOMATIS KEPADA USER YANG DI-MENTION
+        async function detectAndNotifyMentions(textContext, actionType = 'mention') {
+            if (!textContext) return;
+            const matches = textContext.match(/@([a-zA-Z0-9_]+)/g);
+            if (matches && matches.length > 0) {
+                const myName = App.ProfileState.getCurrentName();
+                const uniqueMentionedUsers = [...new Set(matches.map(m => m.replace('@', '')))];
+                for (const targetUser of uniqueMentionedUsers) {
+                    if (targetUser !== myName) {
+                        await App.Features.pushCloudNotificationPayload(targetUser, 'mention', `menyebut (@mention) Anda dalam sebuah kiriman.`);
+                    }
+                }
+            }
         }
 
         const App = {
@@ -627,7 +645,7 @@
                     if (!userId) return;
 
                     try {
-                        let { data: profile, error } = await supabaseClient
+                        let { data: profile } = await supabaseClient
                             .from('profiles')
                             .select('*')
                             .eq('id', userId)
@@ -1266,7 +1284,7 @@
                                 </div>
                             </div>
                             <div class="pic-composer-body">
-                                <textarea class="pic-composer-textarea" id="composer-text" placeholder="Apa yang Anda pikirkan? Sisipkan tautan YouTube atau file musik .mp3 langsung di sini jika ada." oninput="App.Features.syncComposerSubmitButtonState()"></textarea>
+                                <textarea class="pic-composer-textarea" id="composer-text" placeholder="Apa yang Anda pikirkan? Sisipkan tautan YouTube atau file musik .mp3 langsung di sini jika ada." oninput="App.Features.handleComposerLiveTextChange()"></textarea>
                                 <div id="composer-upload-preview-area" class="pic-composer-preview-box"></div>
                                 <div id="composer-location-badge-preview-slot" style="margin-top:8px; text-align:left;"></div>
                             </div>
@@ -1282,11 +1300,27 @@
                     App.Features.syncComposerSubmitButtonState();
                 },
 
+                // HANDLER OTIK DETEKSI LINK YOUTUBE / MP3 DENGAN PREVIEW VIDEO LANGSUNG DI FORM POST
+                handleComposerLiveTextChange() {
+                    this.syncComposerSubmitButtonState();
+                    const txt = document.getElementById('composer-text')?.value || '';
+                    const previewArea = document.getElementById('composer-upload-preview-area');
+                    
+                    if (!composerSelectedFile && previewArea) {
+                        const embedHTML = this.extractAndRenderEmbeddedMedia(txt, window.lastEmbeddedMediaUrl);
+                        if (embedHTML) {
+                            previewArea.innerHTML = embedHTML;
+                        } else {
+                            previewArea.innerHTML = '';
+                        }
+                    }
+                },
+
                 syncComposerSubmitButtonState() {
                     const txt = document.getElementById('composer-text')?.value.trim();
                     const submitBtn = document.getElementById('pic-submit-btn');
                     if (!submitBtn) return;
-                    if (txt || composerSelectedFile) {
+                    if (txt || composerSelectedFile || window.lastEmbeddedMediaUrl) {
                         submitBtn.classList.add('ready');
                     } else {
                         submitBtn.classList.remove('ready');
@@ -1370,10 +1404,7 @@
                     App.Modal.closeSecondaryPopupModal();
                     if(url) {
                         App.Toast.show("Link media tersemat", "success");
-                        const txtBox = document.getElementById('composer-text');
-                        if (txtBox && !txtBox.value.includes(url)) {
-                            txtBox.value += "\n" + url;
-                        }
+                        App.Features.handleComposerLiveTextChange();
                     }
                 },
 
@@ -1497,7 +1528,6 @@
                     await App.Features.fetchChatMessagesAndRenderStream();
                 },
 
-                // TAMPILAN CHAT DIUPDATE: NAMA & FOTO DI ATAS, TEKS FULL KANAN-KIRI DI BAWAH
                 async fetchChatMessagesAndRenderStream() {
                     const viewport = document.getElementById('popup-msg-stream-viewport');
                     if (!viewport || !activeChatFriendName) return;
@@ -1586,6 +1616,7 @@
 
                     try {
                         await supabaseClient.from('chats').insert([{ sender: myName, receiver: activeChatFriendName, message: msgText }]);
+                        await detectAndNotifyMentions(msgText, 'mention');
                         await App.Features.fetchChatMessagesAndRenderStream();
 
                         if(activeChatFriendName === 'Mastrisno_AI') {
@@ -1747,6 +1778,7 @@
                     try {
                         const { error } = await supabaseClient.from('posts').update({ content: editedTextValue }).eq('id', Number(postId));
                         if (error) throw error;
+                        await detectAndNotifyMentions(editedTextValue, 'mention');
                         App.Modal.close(); App.Toast.show("Konten status Anda berhasil diperbarui!", "success"); this.renderPosts();
                     } catch(err) {
                         App.Toast.show("Gagal memperbarui status ke server", "danger");
@@ -1768,7 +1800,7 @@
                     }
                 },
 
-                // EKSTRAKSI EMBEDDED MEDIA DENGAN PLAYER BERSIH & BEBAS LINK TEKS
+                // EKSTRAKSI EMBEDDED MEDIA DENGAN PLAYER BERSIH & TANPA WATERMARK
                 extractAndRenderEmbeddedMedia(contentString, directMediaUrl) {
                     let textToCheck = contentString || "";
                     let combinedUrl = directMediaUrl || "";
@@ -1792,7 +1824,6 @@
                             } else if (combinedUrl.includes('youtu.be/')) {
                                 videoId = combinedUrl.split('youtu.be/')[1].split('?')[0];
                             }
-                            // modestbranding=1 & rel=0 untuk tampilan pemutar bersih
                             return videoId ? `<iframe src="https://www.youtube.com/embed/${videoId}?modestbranding=1&rel=0&showinfo=0" allowfullscreen></iframe>` : '';
                         } else if (/\.(mp3|wav|ogg)/i.test(combinedUrl)) {
                             return `<audio controls style="width:100%;"><source src="${combinedUrl}"></audio>`;
@@ -1801,7 +1832,7 @@
                     return "";
                 },
 
-                // PEMBERSIH RAW URL YOUTUBE/MP3 AGAR TIDAK MUNCUL DI TEKS STATUS
+                // PEMBERSIH UNTUK MEMASTIKAN LINK YOUTUBE/MP3 SAMA SEKALI TIDAK MUNCUL DI TEKS STATUS
                 cleanTextContentForDisplay(rawText) {
                     if (!rawText) return "";
                     const youtubeRegex = /(https?:\/\/(?:www\.)?(?:youtube\.com\/watch\?v=|youtu\.be\/)[^\s]+)/gi;
@@ -1865,12 +1896,10 @@
 
                             const safeAuthor = escapeJSString(p.author);
 
-                            // ICON PRIVASI DITAMPILKAN REAL TIME DI SEBELAH JAM
                             const privacyType = p.privacy || 'public';
                             const privacyIcon = privacyType === 'private' ? 'lock' : (privacyType === 'friends' ? 'group' : 'public');
                             const privacyTitle = privacyType === 'private' ? 'Privat' : (privacyType === 'friends' ? 'Teman' : 'Publik');
 
-                            // DIBERSIHKAN DARI LINK TEKS YOUTUBE & MP3 SERTA AKTIFKAN MENTION
                             const formattedPostText = this.cleanTextContentForDisplay(p.content || '');
 
                             return `
@@ -2081,11 +2110,13 @@
                             await supabaseClient.from('comments').update({ replies: currentReplies }).eq('id', activeReplyTargetCommentId);
                             
                             await this.pushCloudNotificationPayload(activeReplyTargetUser, 'sub_comment', 'membalas komentar Anda.');
+                            await detectAndNotifyMentions(text, 'mention');
                             activeReplyTargetCommentId = null;
                             activeReplyTargetUser = null;
                         } else {
                             await supabaseClient.from('comments').insert([{ post_id: activeBottomSheetPostId, user_name: myName, text: text, likes: [], replies: [] }]);
                             await this.pushCloudNotificationPayload(postAuthor, 'comment', 'mengomentari postingan Anda.');
+                            await detectAndNotifyMentions(text, 'mention');
                         }
                         input.value = ''; this.renderBottomSheetInputBar(postAuthor); this.reloadCommentsBottomSheetStreamOnly();
                     } catch(err) {}
@@ -2132,7 +2163,9 @@
                         const iconClass = n.action_type === 'like' ? 'thumb_up noti-badge-like' : 
                                           n.action_type === 'love' ? 'favorite noti-badge-love' : 
                                           n.action_type === 'comment' ? 'comment noti-badge-comment' : 
-                                          n.action_type === 'follow' ? 'person_add noti-badge-follow' : 'notifications noti-badge-like';
+                                          n.action_type === 'follow' ? 'person_add noti-badge-follow' : 
+                                          n.action_type === 'mention' ? 'alternate_email noti-badge-mention' :
+                                          n.action_type === 'new_post' ? 'campaign noti-badge-post' : 'notifications noti-badge-like';
                         const isUnread = n.is_unread ? 'unread' : '';
                         const timeStr = n.created_at ? App.UI.calculateRelativeTimeAgo(new Date(n.created_at).getTime()) : 'Baru saja';
 
@@ -2284,6 +2317,7 @@
                     }
                 },
 
+                // MEMBUAT POSTINGAN + NOTIFIKASI KE SEMUA PENGIKUT (FOLLOWERS) & USERS MENTION
                 async createPost() {
                     const content = document.getElementById('composer-text').value.trim();
                     const mediaUrl = window.lastEmbeddedMediaUrl || '';
@@ -2314,10 +2348,12 @@
                             publicImageUrl = urlData.publicUrl; 
                         }
 
+                        const myName = App.ProfileState.getCurrentName();
                         const myUuidId = localStorage.getItem('ns_user_id'); 
+                        
                         await supabaseClient.from('posts').insert([{ 
                             user_id: myUuidId, 
-                            author: App.ProfileState.getCurrentName(), 
+                            author: myName, 
                             avatar: App.ProfileState.getCurrentAvatar(), 
                             content, 
                             image: publicImageUrl, 
@@ -2329,6 +2365,21 @@
                             loved_users: [], 
                             shared_count: 0 
                         }]);
+
+                        // 1. Kirim notifikasi otomatis ke semua pengikut (Followers)
+                        const { data: myFollowers } = await supabaseClient
+                            .from('follows')
+                            .select('follower')
+                            .eq('following', myName);
+
+                        if (myFollowers && myFollowers.length > 0) {
+                            for (const f of myFollowers) {
+                                await this.pushCloudNotificationPayload(f.follower, 'new_post', 'menerbitkan postingan baru.');
+                            }
+                        }
+
+                        // 2. Deteksi mention @username di status dan beri notifikasi
+                        await detectAndNotifyMentions(content, 'mention');
 
                         composerSelectedFile = null; 
                         window.lastEmbeddedMediaUrl = ""; 
