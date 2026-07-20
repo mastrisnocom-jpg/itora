@@ -128,7 +128,7 @@
         .form-label { position: absolute; left: 16px; top: 50%; transform: translateY(-50%); color: var(--text-muted); pointer-events: none; transition: var(--trans-smooth); font-weight: 500; }
         .form-input:focus ~ .form-label, .form-input:not(:placeholder-shown) ~ .form-label { top: 12px; font-size: 0.75rem; color: var(--primary); font-weight: 700; }
 
-        /* FEED CONTAINER */
+        /* FEED CONTAINER & CARD POSTINGAN */
         .feed-container { margin-left: -32px; margin-right: -32px; background: transparent; max-width: calc(100% + 64px); }
         .post-card { padding: 24px 32px; position: relative; border-radius: 0; border: none !important; border-bottom: 1px solid rgba(128, 128, 128, 0.15) !important; background: var(--bg-glass-solid); margin-bottom: 12px; box-shadow: none; max-width: 100%; box-sizing: border-box; overflow-x: hidden; }
         
@@ -536,7 +536,7 @@
         @keyframes slideDownFade { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
         @keyframes fadeScale { from { opacity: 0; transform: scale(0.98); } to { opacity: 1; transform: scale(1); } }
 
-        /* RESPONSIVE MOBILE PHONES SCREEN */
+        /* RESPONSIVE MOBILE PHONES SCREEN & PERBAIKAN POPUP CHAT */
         @media (max-width: 768px) {
             :root {
                 --header-height: 120px;
@@ -561,7 +561,19 @@
             .minimal-composer-bar { padding: 12px 16px; margin-bottom: 16px; border-radius: var(--radius-lg); }
             .minimal-composer-input-mock { padding: 10px 16px; font-size: 0.95rem; }
             
-            .floating-chat-widget { width: 100vw; height: calc(100vh - var(--header-height)); top: var(--header-height); bottom: 0; right: 0; border-radius: 0; z-index: 6000; max-width: 100vw; }
+            /* DITINGKATKAN: Kontainers Chat Seluler Agar Tidak Tertutup Menu HP */
+            .floating-chat-widget { 
+                width: 100vw; 
+                height: calc(100dvh - var(--header-height)); 
+                top: var(--header-height); 
+                bottom: 0; 
+                left: 0;
+                right: 0; 
+                border-radius: 0; 
+                z-index: 6000; 
+                max-width: 100vw; 
+                border: none;
+            }
             .modal-content { width: 100%; max-width: 100%; border-radius: var(--radius-lg); margin: 0; box-sizing: border-box; }
             .modal-overlay { padding: 12px; top: var(--header-height); }
             .comments-bottom-sheet { top: var(--header-height); }
@@ -737,7 +749,6 @@
         let activeBottomSheetPostId = null;
         let activeReplyTargetCommentId = null;
 
-        // Array dinamis pertemanan realtime yang ditarik dari Cloud Supabase
         window.userFriendsList = [];
 
         String.prototype.hashCode = function() {
@@ -1093,7 +1104,7 @@
                             </div>
                             <div style="text-align: center; padding: 0 16px;">
                                 <h2 style="font-weight:800; font-size:1.5rem; color:var(--text-main);">${targetName} ${isSuperAdmin ? '<span style="font-size:0.75rem; background:var(--primary); color:white; padding:2px 8px; border-radius:10px; margin-left:6px; vertical-align:middle; font-weight:800;">SUPER ADMIN</span>' : ''}</h2>
-                                <p style="color: var(--text-muted); font-size: 0.85rem; margin-top: 6px; margin-bottom: 6px; font-weight:700;">Bergabung sejak: ${joinDate}</p>
+                                <p style="color: var(--text-muted); font-size: 0.85rem; margin-top: 6px; margin-bottom: 8px; font-weight:700;">Bergabung sejak: ${joinDate}</p>
                                 <p style="color: var(--primary); font-weight: 700; font-size:1.05rem; margin-bottom: 6px;">${targetBio}</p>
                                 <p style="color: var(--text-muted); font-size: 0.88rem; font-weight: 600; margin-bottom: 20px; display:flex; align-items:center; justify-content:center; gap:4px;">
                                     <span class="material-symbols-outlined" style="font-size:18px;">location_on</span> ${targetDomisili}
@@ -1945,4 +1956,3 @@
     </script>
 </body>
 </html>
-
