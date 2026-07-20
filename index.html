@@ -561,7 +561,6 @@
             .minimal-composer-bar { padding: 12px 16px; margin-bottom: 16px; border-radius: var(--radius-lg); }
             .minimal-composer-input-mock { padding: 10px 16px; font-size: 0.95rem; }
             
-            /* DITINGKATKAN: Kontainers Chat Seluler Agar Tidak Tertutup Menu HP */
             .floating-chat-widget { 
                 width: 100vw; 
                 height: calc(100dvh - var(--header-height)); 
@@ -867,7 +866,7 @@
                         .channel('realtime-chats')
                         .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'chats' }, async (payload) => {
                             const myName = App.ProfileState.getCurrentName();
-                            if (activeChatFriendName && payload.new.sender === activeChatFriendName && payload.new.receiver === myName) {
+                            if (activeChatFriendName && (payload.new.sender === activeChatFriendName || payload.new.sender === myName)) {
                                 App.Features.fetchChatMessagesAndRenderStream();
                             } else if (payload.new.receiver === myName) {
                                 unreadMessageCounters[payload.new.sender.toLowerCase()] = (unreadMessageCounters[payload.new.sender.toLowerCase()] || 0) + 1;
@@ -1428,7 +1427,9 @@
                     const mainArea = document.getElementById('popup-chat-main-area-pane'); if(!mainArea) return;
                     mainArea.classList.add('active');
                     mainArea.innerHTML = `
-                        <div class="popup-msg-stream" id="popup-msg-stream-viewport"></div>
+                        <div class="popup-msg-stream" id="popup-msg-stream-viewport">
+                            <div style="flex:1; display:flex; align-items:center; justify-content:center; color:var(--text-muted); font-size:0.85rem;">Memuat percakapan...</div>
+                        </div>
                         <div class="popup-chat-input-row">
                             <input type="text" class="form-input" placeholder="Ketik pesan..." id="popup-chat-input-field" onkeypress="if(event.key==='Enter') App.Features.sendPopupChatCloudAction()" style="border-radius:20px; padding:10px 14px; margin-bottom:0; font-size:0.9rem; background:#f8fafc;">
                             <button class="icon-btn" style="background:var(--primary); color:white; width:34px; height:34px;" onclick="App.Features.sendPopupChatCloudAction()"><span class="material-symbols-outlined" style="font-size:16px;">send</span></button>
@@ -1439,15 +1440,36 @@
                 },
 
                 async fetchChatMessagesAndRenderStream() {
+                    const viewport = document.getElementById('popup-msg-stream-viewport');
+                    if (!viewport || !activeChatFriendName) return;
+                    
+                    const myName = App.ProfileState.getCurrentName();
                     try {
-                        const myName = App.ProfileState.getCurrentName();
-                        const { data: messages } = await supabaseClient.from('chats').select('*').or(`and(sender.eq.${myName},receiver.eq.${activeChatFriendName}),and(sender.eq.${activeChatFriendName},receiver.eq.${myName})`).order('created_at', { ascending: true });
-                        const viewport = document.getElementById('popup-msg-stream-viewport');
-                        if(viewport && messages) {
-                            viewport.innerHTML = messages.map(m => `<div class="bubble ${m.sender === myName ? 'out' : 'in'}"><span>${m.message}</span></div>`).join('');
-                            viewport.scrollTop = viewport.scrollHeight;
+                        const { data: messages, error } = await supabaseClient
+                            .from('chats')
+                            .select('*')
+                            .or(`and(sender.eq."${myName}",receiver.eq."${activeChatFriendName}"),and(sender.eq."${activeChatFriendName}",receiver.eq."${myName}")`)
+                            .order('created_at', { ascending: true });
+
+                        if (error) throw error;
+
+                        if (!messages || messages.length === 0) {
+                            viewport.innerHTML = `
+                                <div style="flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; color:var(--text-muted); font-size:0.85rem; padding:20px; text-align:center;">
+                                    <span class="material-symbols-outlined" style="font-size:36px; color:var(--primary); margin-bottom:8px;">mark_chat_unread</span>
+                                    Belum ada pesan dengan <strong>${activeChatFriendName}</strong>.<br>Mulai obrolan sekarang!
+                                </div>`;
+                            return;
                         }
-                    } catch(err) {}
+
+                        viewport.innerHTML = messages.map(m => `<div class="bubble ${m.sender === myName ? 'out' : 'in'}"><span>${m.message}</span></div>`).join('');
+                        viewport.scrollTop = viewport.scrollHeight;
+                    } catch(err) {
+                        viewport.innerHTML = `
+                            <div style="flex:1; display:flex; align-items:center; justify-content:center; color:var(--text-muted); font-size:0.85rem; padding:20px; text-align:center;">
+                                Belum ada riwayat pesan tersimpan.
+                            </div>`;
+                    }
                 },
 
                 closeActiveChatSessionAndReturnToList() {
@@ -1460,11 +1482,28 @@
                 },
 
                 async sendPopupChatCloudAction() {
-                    const input = document.getElementById('popup-chat-input-field'); if(!input || !input.value.trim()) return;
+                    const input = document.getElementById('popup-chat-input-field'); 
+                    if (!input || !input.value.trim() || !activeChatFriendName) return;
+                    
                     const msgText = input.value.trim();
+                    const myName = App.ProfileState.getCurrentName();
+                    
+                    input.value = '';
+                    
+                    const viewport = document.getElementById('popup-msg-stream-viewport');
+                    if (viewport) {
+                        const emptyPlaceholder = viewport.querySelector('div[style*="flex:1"]');
+                        if (emptyPlaceholder) emptyPlaceholder.remove();
+
+                        const tempBubble = document.createElement('div');
+                        tempBubble.className = 'bubble out';
+                        tempBubble.innerHTML = `<span>${msgText}</span>`;
+                        viewport.appendChild(tempBubble);
+                        viewport.scrollTop = viewport.scrollHeight;
+                    }
+
                     try {
-                        await supabaseClient.from('chats').insert([{ sender: App.ProfileState.getCurrentName(), receiver: activeChatFriendName, message: msgText }]);
-                        input.value = '';
+                        await supabaseClient.from('chats').insert([{ sender: myName, receiver: activeChatFriendName, message: msgText }]);
                         await App.Features.fetchChatMessagesAndRenderStream();
                     } catch(err) {}
                 },
