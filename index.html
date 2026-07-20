@@ -536,7 +536,7 @@
         @keyframes slideDownFade { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
         @keyframes fadeScale { from { opacity: 0; transform: scale(0.98); } to { opacity: 1; transform: scale(1); } }
 
-        /* RESPONSIVE MOBILE PHONES SCREEN & PERBAIKAN POPUP CHAT */
+        /* RESPONSIVE MOBILE PHONES SCREEN */
         @media (max-width: 768px) {
             :root {
                 --header-height: 120px;
@@ -760,6 +760,11 @@
             return hash;
         };
 
+        // Utility pengaman karakter nama untuk event Handler HTML
+        function escapeJSString(str) {
+            return String(str || '').replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/"/g, '&quot;');
+        }
+
         const App = {
             init() {
                 this.Theme.init();
@@ -866,7 +871,7 @@
                         .channel('realtime-chats')
                         .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'chats' }, async (payload) => {
                             const myName = App.ProfileState.getCurrentName();
-                            if (activeChatFriendName && (payload.new.sender === activeChatFriendName || payload.new.sender === myName)) {
+                            if (activeChatFriendName && (payload.new.sender === activeChatFriendName || (payload.new.sender === myName && payload.new.receiver === activeChatFriendName))) {
                                 App.Features.fetchChatMessagesAndRenderStream();
                             } else if (payload.new.receiver === myName) {
                                 unreadMessageCounters[payload.new.sender.toLowerCase()] = (unreadMessageCounters[payload.new.sender.toLowerCase()] || 0) + 1;
@@ -1116,11 +1121,11 @@
                             </div>
                             <div style="padding: 0 24px 32px 24px; display:flex; justify-content:center; gap:12px; max-width:100%;">
                                 ${!isOwnProfile ? `
-                                    <button class="btn ripple-btn ${isFollowing ? 'btn-secondary' : 'btn-primary'}" style="${isFollowing ? 'color:#64748b; background:#f1f5f9;' : ''}" onclick="App.Features.toggleFollowInExploreFromProfileDOM('${targetName}', this)">
+                                    <button class="btn ripple-btn ${isFollowing ? 'btn-secondary' : 'btn-primary'}" style="${isFollowing ? 'color:#64748b; background:#f1f5f9;' : ''}" onclick="App.Features.toggleFollowInExploreFromProfileDOM('${escapeJSString(targetName)}', this)">
                                         <span class="material-symbols-outlined" style="font-size:18px;">${isFollowing ? 'done' : 'add'}</span> 
                                         <span>${isFollowing ? 'Mengikuti' : 'Ikuti'}</span>
                                     </button>
-                                    <button class="btn btn-primary ripple-btn" onclick="App.UI.toggleChatPopup(true); App.Features.openSpecificFriendPopupObrolan('${targetName.toLowerCase()}@nexsocial.id', '${targetName}')"><span class="material-symbols-outlined" style="font-size:18px;">mail</span> Kirim Pesan</button>
+                                    <button class="btn btn-primary ripple-btn" onclick="App.UI.toggleChatPopup(true); App.Features.openSpecificFriendPopupObrolan('${escapeJSString(targetName.toLowerCase())}@nexsocial.id', '${escapeJSString(targetName)}')"><span class="material-symbols-outlined" style="font-size:18px;">mail</span> Kirim Pesan</button>
                                 ` : ''}
                             </div>
                         </div>
@@ -1406,8 +1411,9 @@
                     let dynamicContacts = window.userFriendsList.length > 0 ? window.userFriendsList : ['Agung_Taufiq', 'Meta_AI'];
                     container.innerHTML = dynamicContacts.map(name => {
                         const hasUnread = unreadMessageCounters[name.toLowerCase()] || 0;
+                        const safeName = escapeJSString(name);
                         return `
-                            <div class="popup-friend-item" onclick="App.Features.openSpecificFriendPopupObrolan('${name.toLowerCase()}@nexsocial.id', '${name}')">
+                            <div class="popup-friend-item" onclick="App.Features.openSpecificFriendPopupObrolan('${safeName.toLowerCase()}@nexsocial.id', '${safeName}')">
                                 <div class="friend-avatar-wrapper"><img src="https://i.pravatar.cc/150?img=12" class="friend-avatar-node"><span class="friend-online-dot"></span></div>
                                 <div class="friend-chat-meta-info">
                                     <div class="friend-chat-meta-top"><strong>${name}</strong></div>
@@ -1426,20 +1432,24 @@
 
                     const mainArea = document.getElementById('popup-chat-main-area-pane'); if(!mainArea) return;
                     mainArea.classList.add('active');
-                    mainArea.innerHTML = `
-                        <div class="popup-msg-stream" id="popup-msg-stream-viewport">
-                            <div style="flex:1; display:flex; align-items:center; justify-content:center; color:var(--text-muted); font-size:0.85rem;">Memuat percakapan...</div>
-                        </div>
-                        <div class="popup-chat-input-row">
-                            <input type="text" class="form-input" placeholder="Ketik pesan..." id="popup-chat-input-field" onkeypress="if(event.key==='Enter') App.Features.sendPopupChatCloudAction()" style="border-radius:20px; padding:10px 14px; margin-bottom:0; font-size:0.9rem; background:#f8fafc;">
-                            <button class="icon-btn" style="background:var(--primary); color:white; width:34px; height:34px;" onclick="App.Features.sendPopupChatCloudAction()"><span class="material-symbols-outlined" style="font-size:16px;">send</span></button>
-                        </div>
-                    `;
+                    
+                    // Jangan mengosongkan jika pesan sudah tampil di DOM lokal
+                    if (!mainArea.querySelector('#popup-msg-stream-viewport')) {
+                        mainArea.innerHTML = `
+                            <div class="popup-msg-stream" id="popup-msg-stream-viewport">
+                                <div style="flex:1; display:flex; align-items:center; justify-content:center; color:var(--text-muted); font-size:0.85rem;">Memuat percakapan...</div>
+                            </div>
+                            <div class="popup-chat-input-row">
+                                <input type="text" class="form-input" placeholder="Ketik pesan..." id="popup-chat-input-field" onkeypress="if(event.key==='Enter') App.Features.sendPopupChatCloudAction()" style="border-radius:20px; padding:10px 14px; margin-bottom:0; font-size:0.9rem; background:#f8fafc;">
+                                <button class="icon-btn" style="background:var(--primary); color:white; width:34px; height:34px;" onclick="App.Features.sendPopupChatCloudAction()"><span class="material-symbols-outlined" style="font-size:16px;">send</span></button>
+                            </div>
+                        `;
+                    }
                     
                     await App.Features.fetchChatMessagesAndRenderStream();
                 },
 
-                // MEMPERBAIKI MASALAH CHAT HILANG SENDIRI BERAPA DETIK
+                // MEMPERBAIKI MASALAH DATA CHAT HILANG SEMENTARA
                 async fetchChatMessagesAndRenderStream() {
                     const viewport = document.getElementById('popup-msg-stream-viewport');
                     if (!viewport || !activeChatFriendName) return;
@@ -1465,11 +1475,10 @@
                             return;
                         }
 
-                        // Mengubah HTML hanya bila data pesan Supabase benar-benar tersedia
                         viewport.innerHTML = messages.map(m => `<div class="bubble ${m.sender === myName ? 'out' : 'in'}"><span>${m.message}</span></div>`).join('');
                         viewport.scrollTop = viewport.scrollHeight;
                     } catch(err) {
-                        // Jangan hapus tampilan lokal jika terjadi error query sementara
+                        // Jangan pernah menghapus elemen bubble lokal jika terjadi error koneksi
                     }
                 },
 
@@ -1505,7 +1514,6 @@
 
                     try {
                         await supabaseClient.from('chats').insert([{ sender: myName, receiver: activeChatFriendName, message: msgText }]);
-                        // Tunda pembacaan ulang sebentar untuk memberi waktu Supabase menulis data secara permanen
                         setTimeout(async () => {
                             await App.Features.fetchChatMessagesAndRenderStream();
                         }, 500);
@@ -1515,6 +1523,7 @@
                 openPostActionMenuDOM(postId, postAuthor) {
                     const myName = App.ProfileState.getCurrentName();
                     let html = '';
+                    const safeAuthor = escapeJSString(postAuthor);
                     
                     if (postAuthor === myName) {
                         html = `
@@ -1528,7 +1537,7 @@
                     } else {
                         html = `
                             <div style="display:flex; flex-direction:column; gap:10px;">
-                                <button class="btn btn-secondary btn-full" onclick="App.Modal.close(); App.Features.toggleLike(${postId}, '${postAuthor}')"><span class="material-symbols-outlined">thumb_up</span> Sukai Postingan</button>
+                                <button class="btn btn-secondary btn-full" onclick="App.Modal.close(); App.Features.toggleLike(${postId}, '${safeAuthor}')"><span class="material-symbols-outlined">thumb_up</span> Sukai Postingan</button>
                                 <button class="btn btn-secondary btn-full" onclick="App.Modal.close(); App.Router.navigate('profil?name=${encodeURIComponent(postAuthor)}')"><span class="material-symbols-outlined">account_circle</span> Lihat Profil ${postAuthor}</button>
                             </div>`;
                     }
@@ -1686,6 +1695,8 @@
                             if (p.privacy === 'friends') privacyIconName = 'group';
                             if (p.privacy === 'private') privacyIconName = 'lock';
 
+                            const safeAuthor = escapeJSString(p.author);
+
                             return `
                                 <div class="post-card" id="post-element-node-${p.id}">
                                     <div class="post-header">
@@ -1701,16 +1712,16 @@
                                                 </div>
                                             </div>
                                         </div>
-                                        <button class="post-menu-trigger" onclick="App.Features.openPostActionMenuDOM(${p.id}, '${p.author}')"><span class="material-symbols-outlined">more_vert</span></button>
+                                        <button class="post-menu-trigger" onclick="App.Features.openPostActionMenuDOM(${p.id}, '${safeAuthor}')"><span class="material-symbols-outlined">more_vert</span></button>
                                     </div>
                                     <div class="post-content">${p.content || ''}</div>
                                     ${p.location ? `<div style="color:var(--primary); font-size:0.8rem; margin-top:8px; font-weight:600; text-align:left;">📍 ${p.location.split(',')[0]}</div>` : ''}
                                     ${mediaHTML}
                                     <div class="post-actions-bar">
-                                        <div class="post-action-item ${hasLiked}" onclick="App.Features.toggleLike(${p.id}, '${p.author}')"><span class="material-symbols-outlined">thumb_up</span><span> ${accumulatedLikesCount}</span></div>
-                                        <div class="post-action-item ${hasLoved}" onclick="App.Features.toggleLoveReaction(${p.id}, '${p.author}')"><span class="material-symbols-outlined">favorite</span><span> ${(p.loved_users || []).length}</span></div>
-                                        <div class="post-action-item" onclick="App.Features.openCommentsBottomSheet(${p.id}, '${p.author}')"><span class="material-symbols-outlined">comment</span><span> Komentar (${totalCommentsCount})</span></div>
-                                        <div class="post-action-item" onclick="App.Features.openSocialMediaShareSheetModal(${p.id}, '${p.author}', '${(p.content || "").replace(/'/g, "\\'")}', ${!!p.image})"><span class="material-symbols-outlined">share</span><span> ${p.shared_count || 0}</span></div>
+                                        <div class="post-action-item ${hasLiked}" id="like-btn-node-${p.id}" onclick="App.Features.toggleLike(${p.id}, '${safeAuthor}')"><span class="material-symbols-outlined">thumb_up</span><span id="like-count-node-${p.id}"> ${accumulatedLikesCount}</span></div>
+                                        <div class="post-action-item ${hasLoved}" id="love-btn-node-${p.id}" onclick="App.Features.toggleLoveReaction(${p.id}, '${safeAuthor}')"><span class="material-symbols-outlined">favorite</span><span id="love-count-node-${p.id}"> ${(p.loved_users || []).length}</span></div>
+                                        <div class="post-action-item" onclick="App.Features.openCommentsBottomSheet(${p.id}, '${safeAuthor}')"><span class="material-symbols-outlined">comment</span><span id="comment-count-node-${p.id}"> Komentar (${totalCommentsCount})</span></div>
+                                        <div class="post-action-item" onclick="App.Features.openSocialMediaShareSheetModal(${p.id}, '${safeAuthor}', '${(p.content || "").replace(/'/g, "\\'")}', ${!!p.image})"><span class="material-symbols-outlined">share</span><span> ${p.shared_count || 0}</span></div>
                                     </div>
                                 </div>`;
                         }).join('') + `</div>`;
@@ -1774,6 +1785,66 @@
                     } catch (ex) {}
                 },
 
+                // PERBAIKAN TOMBOL LIKE INTERAKTIF DENGAN OPTIMISTIC UPDATE
+                async toggleLike(id, postAuthor) {
+                    const myName = App.ProfileState.getCurrentName();
+                    const btnNode = document.getElementById(`like-btn-node-${id}`);
+                    const countNode = document.getElementById(`like-count-node-${id}`);
+                    
+                    let isLikedNow = false;
+                    if (btnNode) {
+                        isLikedNow = btnNode.classList.toggle('liked');
+                        if (countNode) {
+                            let curr = parseInt(countNode.innerText.trim()) || 0;
+                            countNode.innerText = ` ${isLikedNow ? curr + 1 : Math.max(0, curr - 1)}`;
+                        }
+                    }
+
+                    try {
+                        const { data } = await supabaseClient.from('posts').select('liked_users').eq('id', Number(id)).single();
+                        let list = (data && Array.isArray(data.liked_users)) ? data.liked_users : [];
+                        
+                        if (list.includes(myName)) {
+                            list = list.filter(u => u !== myName);
+                        } else {
+                            list.push(myName); 
+                            if(postAuthor !== myName) await this.pushCloudNotificationPayload(postAuthor, 'like', 'menyukai postingan status Anda.'); 
+                        }
+                        
+                        await supabaseClient.from('posts').update({ liked_users: list }).eq('id', Number(id)); 
+                    } catch(e) {}
+                },
+
+                // PERBAIKAN TOMBOL LOVE REACTION DENGAN OPTIMISTIC UPDATE
+                async toggleLoveReaction(id, postAuthor) {
+                    const myName = App.ProfileState.getCurrentName();
+                    const btnNode = document.getElementById(`love-btn-node-${id}`);
+                    const countNode = document.getElementById(`love-count-node-${id}`);
+                    
+                    let isLovedNow = false;
+                    if (btnNode) {
+                        isLovedNow = btnNode.classList.toggle('loved');
+                        if (countNode) {
+                            let curr = parseInt(countNode.innerText.trim()) || 0;
+                            countNode.innerText = ` ${isLovedNow ? curr + 1 : Math.max(0, curr - 1)}`;
+                        }
+                    }
+
+                    try {
+                        const { data } = await supabaseClient.from('posts').select('loved_users').eq('id', Number(id)).single();
+                        let list = (data && Array.isArray(data.loved_users)) ? data.loved_users : [];
+                        
+                        if (list.includes(myName)) {
+                            list = list.filter(u => u !== myName);
+                        } else {
+                            list.push(myName); 
+                            if(postAuthor !== myName) await this.pushCloudNotificationPayload(postAuthor, 'love', 'menyukai status Anda dengan Cinta.'); 
+                        }
+                        
+                        await supabaseClient.from('posts').update({ loved_users: list }).eq('id', Number(id)); 
+                    } catch(e) {}
+                },
+
                 async renderExploreUsers() {
                     const container = document.getElementById('explore-users-stream'); if(!container) return;
                     try {
@@ -1796,6 +1867,7 @@
 
                         container.innerHTML = Object.keys(uniqueUsersMap).map(username => {
                             const isFollowed = window.userFriendsList.includes(username);
+                            const safeName = escapeJSString(username);
                             return `
                                 <div class="user-follow-card" style="border:none;">
                                     <img src="${uniqueUsersMap[username]}" style="width:44px; height:44px; border-radius:50%; object-fit:cover;">
@@ -1804,7 +1876,7 @@
                                     </div>
                                     <button class="btn ripple-btn" 
                                             style="padding:6px 16px; font-size:0.82rem; border-radius:12px; font-weight:700; ${isFollowed ? 'background:#f1f5f9; color:#64748b;' : 'background:var(--primary); color:white;'}" 
-                                            onclick="App.Features.toggleFollowInExploreFromExploreDOM('${username}', this)">
+                                            onclick="App.Features.toggleFollowInExploreFromExploreDOM('${safeName}', this)">
                                         ${isFollowed ? 'Mengikuti' : 'Ikuti'}
                                     </button>
                                 </div>
@@ -1872,6 +1944,188 @@
                     }
                     await App.Features.fetchMyFriendsData();
                     App.Features.loadFriendsCount();
+                },
+
+                async openCommentsBottomSheet(postId, postAuthor) {
+                    activeBottomSheetPostId = postId; activeReplyTargetCommentId = null; 
+                    document.getElementById('comments-overlay-bottom-sheet').classList.add('active');
+                    App.Features.renderBottomSheetInputBar(postAuthor);
+                    await App.Features.reloadCommentsBottomSheetStreamOnly();
+                },
+
+                renderBottomSheetInputBar(postAuthor = "") {
+                    const dockForm = document.getElementById('comments-sheet-input-dock-form'); if (!dockForm) return;
+                    const safeAuthor = escapeJSString(postAuthor);
+                    dockForm.innerHTML = `
+                        <input type="text" class="form-input" placeholder="${activeReplyTargetCommentId ? 'Membalas sub-komentar...' : 'Ketik komentar...'}" id="sheet-comment-input-field" style="border-radius:20px; padding:10px 14px; margin-bottom:0; font-size:0.9rem; background:var(--bg-body);">
+                        <button class="icon-btn" style="background:var(--primary); color:white; width:34px; height:34px;" onclick="App.Features.submitBottomSheetCommentAction('${safeAuthor}')"><span class="material-symbols-outlined" style="font-size:16px;">send</span></button>
+                    `;
+                    document.getElementById('sheet-comment-input-field').addEventListener('keypress', (e) => { if (e.key === 'Enter') App.Features.submitBottomSheetCommentAction(postAuthor); });
+                },
+
+                async reloadCommentsBottomSheetStreamOnly() {
+                    if (!activeBottomSheetPostId) return;
+                    const stream = document.getElementById('comments-sheet-stream-injector'); if (!stream) return;
+                    try {
+                        const { data: comments } = await supabaseClient.from('comments').select('*').eq('post_id', activeBottomSheetPostId).order('created_at', { ascending: true });
+                        const myName = App.ProfileState.getCurrentName();
+                        if (!comments || comments.length === 0) {
+                            stream.innerHTML = `<div style="text-align:center; padding:32px; color:var(--text-muted);">Belum ada komentar.</div>`; return;
+                        }
+                        stream.innerHTML = comments.map(c => {
+                            const isCommentLiked = (c.likes || []).includes(myName) ? 'active' : '';
+                            const commentLikesCount = (c.likes || []).length;
+                            const commentLikeBadgeHTML = commentLikesCount > 0 ? `👍 ${commentLikesCount} Suka` : `Suka`;
+                            const subRepliesList = c.replies || [];
+                            
+                            let nestedRepliesHTML = subRepliesList.map(r => {
+                                const isReplyLiked = (r.likes || []).includes(myName) ? 'active' : '';
+                                const replyLikesCount = (r.likes || []).length;
+                                const replyLikeBadgeHTML = replyLikesCount > 0 ? `👍 ${replyLikesCount} Suka` : `Suka`;
+
+                                return `
+                                    <div style="display:flex; gap:8px; align-items:flex-start; margin-top:8px; padding-left:12px; border-left:2px solid var(--border-color);">
+                                        <img src="https://i.pravatar.cc/150?img=13" style="width:26px; height:26px; border-radius:50%; object-fit:cover;">
+                                        <div>
+                                            <div style="background:var(--bg-body); padding:6px 10px; border-radius:12px; border:1px solid var(--border-color);">
+                                                <strong>${r.user}</strong>
+                                                <p style="font-size:0.85rem; margin-top:2px;">${r.text}</p>
+                                            </div>
+                                            <div style="display:flex; gap:12px; font-size:0.7rem; color:var(--text-muted); margin-top:3px; font-weight:700;">
+                                                <span class="reply-like-btn ${isReplyLiked}" style="cursor:pointer;color:var(--primary);" onclick="App.Features.toggleReplyLikeAction('${c.id}', '${r.id}')">${replyLikeBadgeHTML}</span>
+                                                <span style="cursor:pointer;" onclick="activeReplyTargetCommentId='${c.id}'; App.Features.renderBottomSheetInputBar();">Balas</span>
+                                            </div>
+                                        </div>
+                                    </div>`;
+                            }).join('');
+
+                            return `
+                            <div style="display:flex; gap:10px; margin-bottom:12px; text-align:left; flex-direction:column;">
+                                <div style="display:flex; gap:10px; align-items:flex-start;">
+                                    <img src="https://i.pravatar.cc/150?img=11" style="width:34px; height:34px; border-radius:50%; object-fit:cover;">
+                                    <div>
+                                        <div style="background:var(--bg-body); padding:8px 12px; border-radius:14px; border:1px solid var(--border-color);">
+                                            <strong>${c.user_name}</strong>
+                                            <p style="font-size:0.9rem; margin-top:2px;">${c.text}</p>
+                                        </div>
+                                        <div style="font-size:0.75rem; color:var(--text-muted); margin-top:4px; margin-left:6px; display:flex; gap:12px; font-weight:700;">
+                                            <span class="comment-like-btn ${isCommentLiked}" style="cursor:pointer;color:var(--primary);" onclick="App.Features.toggleCommentLikeAction('${c.id}')">${commentLikeBadgeHTML}</span>
+                                            <span style="cursor:pointer;" onclick="activeReplyTargetCommentId='${c.id}'; App.Features.renderBottomSheetInputBar();">Balas</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div style="padding-left:44px;">${nestedRepliesHTML}</div>
+                            </div>`;
+                        }).join('');
+                        stream.scrollTop = stream.scrollHeight;
+                    } catch(ex) {}
+                },
+
+                async toggleCommentLikeAction(commentId) {
+                    const myName = App.ProfileState.getCurrentName();
+                    try {
+                        const { data } = await supabaseClient.from('comments').select('likes').eq('id', commentId).single();
+                        let list = data?.likes || [];
+                        if (list.includes(myName)) list = list.filter(u => u !== myName);
+                        else list.push(myName);
+                        await supabaseClient.from('comments').update({ likes: list }).eq('id', commentId);
+                        this.reloadCommentsBottomSheetStreamOnly();
+                    } catch(e) {}
+                },
+
+                async toggleReplyLikeAction(commentId, replyId) {
+                    const myName = App.ProfileState.getCurrentName();
+                    try {
+                        const { data } = await supabaseClient.from('comments').select('replies').eq('id', commentId).single();
+                        let replies = data?.replies || [];
+                        replies = replies.map(r => {
+                            if (r.id === replyId) {
+                                let rLikes = r.likes || [];
+                                if (rLikes.includes(myName)) rLikes = rLikes.filter(u => u !== myName);
+                                else rLikes.push(myName);
+                                r.likes = rLikes;
+                            }
+                            return r;
+                        });
+                        await supabaseClient.from('comments').update({ replies: replies }).eq('id', commentId);
+                        this.reloadCommentsBottomSheetStreamOnly();
+                    } catch(e) {}
+                },
+
+                async submitBottomSheetCommentAction(postAuthor) {
+                    const input = document.getElementById('sheet-comment-input-field'); if (!input || !input.value.trim()) return;
+                    const text = input.value.trim(); const myName = App.ProfileState.getCurrentName();
+                    try {
+                        if (activeReplyTargetCommentId) {
+                            const { data } = await supabaseClient.from('comments').select('replies').eq('id', activeReplyTargetCommentId).single();
+                            let currentReplies = data?.replies || [];
+                            currentReplies.push({ id: `r_${Date.now()}`, user: myName, text: text, date: Date.now(), likes: [] });
+                            await supabaseClient.from('comments').update({ replies: currentReplies }).eq('id', activeReplyTargetCommentId);
+                            activeReplyTargetCommentId = null;
+                        } else {
+                            await supabaseClient.from('comments').insert([{ post_id: activeBottomSheetPostId, user_name: myName, text: text, likes: [], replies: [] }]);
+                            if (postAuthor !== myName) await this.pushCloudNotificationPayload(postAuthor, 'comment', `mengomentari postingan Anda.`);
+                        }
+                        input.value = ''; this.renderBottomSheetInputBar(postAuthor); this.reloadCommentsBottomSheetStreamOnly();
+                    } catch(err) {}
+                },
+
+                closeCommentsBottomSheet() { document.getElementById('comments-overlay-bottom-sheet').classList.remove('active'); activeBottomSheetPostId = null; },
+                initCommentsSwipeToCloseGesture() {
+                    const dragZone = document.getElementById('comments-sheet-drag-zone'), sheet = document.getElementById('comments-sheet-content-node');
+                    let startY = 0; if(!dragZone || !sheet) return;
+                    dragZone.addEventListener('touchstart', (e) => { startY = e.touches[0].clientY; }, {passive:true});
+                    dragZone.addEventListener('touchend', (e) => { if(e.changedTouches[0].clientY - startY > 150) App.Features.closeCommentsBottomSheet(); }, {passive:true});
+                },
+
+                async handleAvatarSelection(event) {
+                    const file = event.target.files[0]; if (!file) return;
+                    const reader = new FileReader(); reader.readAsDataURL(file);
+                    reader.onload = async (e) => {
+                        const base64 = e.target.result; App.ProfileState.saveCompressedAvatar(base64);
+                        document.getElementById('settings-avatar-preview').src = base64;
+                        await supabaseClient.from('posts').update({ avatar: base64 }).eq('author', App.ProfileState.getCurrentName());
+                        App.Toast.show("Avatar cloud ter-update!", "success");
+                    };
+                },
+
+                async createPost() {
+                    const content = document.getElementById('composer-text').value.trim();
+                    const mediaUrl = window.lastEmbeddedMediaUrl || '';
+                    if(!content && !composerAttachedImageBase64 && !mediaUrl) return;
+                    try {
+                        const myUuidId = localStorage.getItem('ns_user_id'); 
+                        await supabaseClient.from('posts').insert([{ 
+                            user_id: myUuidId, 
+                            author: App.ProfileState.getCurrentName(), 
+                            avatar: App.ProfileState.getCurrentAvatar(), 
+                            content, 
+                            image: composerAttachedImageBase64, 
+                            privacy: document.getElementById('composer-privacy-select').value, 
+                            location: activeComposerLocation, 
+                            media_url: mediaUrl, 
+                            bg_color: currentComposerBgColor, 
+                            liked_users: [], 
+                            loved_users: [], 
+                            shared_count: 0 
+                        }]);
+                        composerAttachedImageBase64 = null; window.lastEmbeddedMediaUrl = ""; activeComposerLocation = "";
+                        App.Modal.closeAllModalsSystem();
+                        App.Toast.show("Status diterbitkan!", "success"); this.renderPosts();
+                    } catch (err) {}
+                },
+
+                saveNameSettings() {
+                    const name = document.getElementById('settings-display-name').value.trim();
+                    const bio = document.getElementById('settings-bio-status').value.trim();
+                    const domisili = document.getElementById('settings-domisili').value.trim();
+                    if(!name) return;
+                    if(App.ProfileState.updateProfileDataConfiguration(name, bio, domisili).success) { App.Toast.show("Profil disimpan!", "success"); App.Router.navigate('feed'); }
+                },
+
+                saveAdminGlobalAdBannerAction(event) {
+                    event.preventDefault(); const code = document.getElementById('admin-ad-html-input').value.trim();
+                    localStorage.setItem('ns_ad_html_global', code); App.Toast.show("Iklan dirilis!", "success"); App.UI.renderGlobalBannerAdIfExists();
                 },
 
                 loadFriendsCount() { 
@@ -1974,9 +2228,16 @@
                     });
                 },
                 closeMobileSidebar() { document.getElementById('app-layout')?.classList.remove('sidebar-mobile-open'); document.getElementById('mobile-overlay')?.classList.remove('active'); },
+                
+                // PERBAIKAN POPUP CHAT BERTAHAN
                 toggleChatPopup(open) {
                     const box = document.getElementById('floating-chat-popup-box'); if(!box) return;
-                    if(open) { box.classList.add('active'); App.Features.closeActiveChatSessionAndReturnToList(); } 
+                    if(open) { 
+                        box.classList.add('active'); 
+                        if (!activeChatFriendName) {
+                            App.Features.closeActiveChatSessionAndReturnToList(); 
+                        }
+                    } 
                     else box.classList.remove('active');
                 },
                 refreshHeaderNotificationBadgeDOM() {
