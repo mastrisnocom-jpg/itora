@@ -5,6 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Tech Social - Workspace</title>
     
+    <!-- PWA META TAGS -->
+    <meta name="theme-color" content="#1877F2">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="TechSocial">
+    <meta name="description" content="Tech Social Workspace Network Platform">
+    <link rel="apple-touch-icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MTIgNTEyIj48cmVjdCB3aWR0aD0iNTEyIiBoZWlnaHQ9IjUxMiIgcng9IjEyOCIgZmlsbD0iIzE4NzdGMiIvPjx0ZXh0IHg9IjUwJSIgeT0iNTUlIiBmb250LXNpemU9IjI4MCIgZm9udC13ZWlnaHQ9IjgwMCIgZmlsbD0id2hpdGUiIGRvbWluYW50LWJhc2VsaW5lPSJjZW50ZXIiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZvbnQtZmFtaWx5PSJzYW5zLXNlcmlmIj5UPC90ZXh0Pjwvc3ZnPg==">
+
     <!-- Google Fonts & Material Symbols -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -373,6 +382,10 @@
         .toast { background: #ffffff; border: 1px solid var(--border-color); border-left: 4px solid var(--primary); padding: 14px 20px; border-radius: var(--radius-md); box-shadow: var(--shadow-soft); color: var(--text-main); font-weight: 600; font-size: 0.9rem; width: 100%; animation: slideDownFade 0.3s ease forwards; pointer-events: auto; }
         .global-workspace-ad-banner { background: #ffffff; border: 1px dashed var(--primary); border-radius: var(--radius-md); padding: 12px; margin-bottom: 20px; text-align: center; font-size: 0.85rem; max-width: 100%; box-sizing: border-box; }
 
+        /* PWA INSTALL PROMPT BANNER */
+        .pwa-install-banner { position: fixed; bottom: calc(var(--header-height) + 15px); left: 16px; right: 16px; background: #ffffff; border: 1px solid var(--primary); border-radius: var(--radius-lg); padding: 14px 18px; box-shadow: var(--shadow-float); z-index: 9998; display: none; align-items: center; justify-content: space-between; gap: 12px; animation: slideDownFade 0.4s ease; }
+        .pwa-install-banner.active { display: flex; }
+
         @keyframes slideDownFade { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
         @keyframes fadeScale { from { opacity: 0; transform: scale(0.98); } to { opacity: 1; transform: scale(1); } }
 
@@ -413,6 +426,7 @@
             .modal-content { width: 100%; max-width: 100%; border-radius: var(--radius-lg); margin: 0; box-sizing: border-box; }
             .modal-overlay { padding: 12px; top: var(--header-height); }
             .user-grid { grid-template-columns: 1fr; }
+            .pwa-install-banner { bottom: calc(75px + env(safe-area-inset-bottom)); }
         }
     </style>
 </head>
@@ -506,6 +520,21 @@
         </main>
     </div>
 
+    <!-- PWA INSTALL PROMPT BANNER -->
+    <div class="pwa-install-banner" id="pwa-install-banner-node">
+        <div style="display:flex; align-items:center; gap:10px;">
+            <div style="width:36px; height:36px; background:var(--primary); color:white; border-radius:8px; display:flex; align-items:center; justify-content:center; font-weight:800;">T</div>
+            <div style="display:flex; flex-direction:column;">
+                <strong style="font-size:0.9rem; color:var(--text-main);">Install Tech Social</strong>
+                <span style="font-size:0.75rem; color:var(--text-muted);">Gunakan aplikasi tanpa browser</span>
+            </div>
+        </div>
+        <div style="display:flex; gap:6px;">
+            <button class="btn btn-secondary" style="padding:6px 12px; font-size:0.8rem;" onclick="App.PWA.dismissInstallPrompt()">Nanti</button>
+            <button class="btn btn-primary" style="padding:6px 12px; font-size:0.8rem;" onclick="App.PWA.triggerInstall()">Install</button>
+        </div>
+    </div>
+
     <!-- FLOATING CHAT POP-UP -->
     <div class="floating-chat-widget" id="floating-chat-popup-box">
         <div class="popup-chat-header">
@@ -596,6 +625,8 @@
         let activeReplyTargetCommentId = null;
         let activeReplyTargetUser = null;
 
+        let deferredPwaPrompt = null;
+
         window.mySupabaseProfileCache = {
             avatar_url: DEFAULT_AVATAR_IMAGE,
             display_name: '',
@@ -656,6 +687,7 @@
 
         const App = {
             async init() {
+                this.PWA.init();
                 this.Theme.init();
                 this.Network.listen();
                 this.UI.bindGlobalEvents();
@@ -679,6 +711,102 @@
                         App.Features.renderNotificationsView();
                     }
                 }, 5000);
+            },
+
+            PWA: {
+                init() {
+                    this.injectManifest();
+                    this.registerServiceWorker();
+                    this.listenInstallPrompt();
+                },
+                injectManifest() {
+                    const iconSvg = `PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MTIgNTEyIj48cmVjdCB3aWR0aD0iNTEyIiBoZWlnaHQ9IjUxMiIgcng9IjEyOCIgZmlsbD0iIzE4NzdGMiIvPjx0ZXh0IHg9IjUwJSIgeT0iNTUlIiBmb250LXNpemU9IjI4MCIgZm9udC13ZWlnaHQ9IjgwMCIgZmlsbD0id2hpdGUiIGRvbWluYW50LWJhc2VsaW5lPSJjZW50ZXIiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZvbnQtZmFtaWx5PSJzYW5zLXNlcmlmIj5UPC90ZXh0Pjwvc3ZnPg==`;
+                    const manifestData = {
+                        name: "Tech Social Workspace",
+                        short_name: "TechSocial",
+                        description: "Tech Social Workspace Network Platform",
+                        start_url: "./",
+                        display: "standalone",
+                        background_color: "#ffffff",
+                        theme_color: "#1877F2",
+                        icons: [
+                            {
+                                src: `data:image/svg+xml;base64,${iconSvg}`,
+                                sizes: "192x192 512x512",
+                                type: "image/svg+xml",
+                                purpose: "any maskable"
+                            }
+                        ]
+                    };
+                    const blob = new Blob([JSON.stringify(manifestData)], { type: 'application/json' });
+                    const manifestUrl = URL.createObjectURL(blob);
+                    const link = document.createElement('link');
+                    link.rel = 'manifest';
+                    link.href = manifestUrl;
+                    document.head.appendChild(link);
+                },
+                registerServiceWorker() {
+                    if ('serviceWorker' in navigator) {
+                        const swCode = `
+                            const CACHE_NAME = 'techsocial-v1';
+                            const ASSETS = [
+                                './',
+                                'https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap',
+                                'https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200',
+                                'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2'
+                            ];
+
+                            self.addEventListener('install', (e) => {
+                                e.waitUntil(
+                                    caches.open(CACHE_NAME).then((cache) => cache.addAll(ASSETS))
+                                );
+                                self.skipWaiting();
+                            });
+
+                            self.addEventListener('activate', (e) => {
+                                e.waitUntil(
+                                    caches.keys().then((keys) => {
+                                        return Promise.all(keys.map((key) => {
+                                            if (key !== CACHE_NAME) return caches.delete(key);
+                                        }));
+                                    })
+                                );
+                                self.clients.claim();
+                            });
+
+                            self.addEventListener('fetch', (e) => {
+                                if (e.request.method !== 'GET') return;
+                                e.respondWith(
+                                    fetch(e.request).catch(() => caches.match(e.request))
+                                );
+                            });
+                        `;
+                        const blob = new Blob([swCode], { type: 'text/javascript' });
+                        const swUrl = URL.createObjectURL(blob);
+                        navigator.serviceWorker.register(swUrl).catch(() => {});
+                    }
+                },
+                listenInstallPrompt() {
+                    window.addEventListener('beforeinstallprompt', (e) => {
+                        e.preventDefault();
+                        deferredPwaPrompt = e;
+                        const banner = document.getElementById('pwa-install-banner-node');
+                        if(banner) banner.classList.add('active');
+                    });
+                },
+                triggerInstall() {
+                    if (deferredPwaPrompt) {
+                        deferredPwaPrompt.prompt();
+                        deferredPwaPrompt.userChoice.then(() => {
+                            deferredPwaPrompt = null;
+                            this.dismissInstallPrompt();
+                        });
+                    }
+                },
+                dismissInstallPrompt() {
+                    const banner = document.getElementById('pwa-install-banner-node');
+                    if(banner) banner.classList.remove('active');
+                }
             },
 
             ProfileState: {
@@ -1015,7 +1143,7 @@
                     sideHTML += `<li style="margin-top: auto;"><a class="menu-item ripple-btn" style="color: var(--danger);" onclick="App.Auth.logout()"><span class="material-symbols-outlined">logout</span><span class="menu-text">Keluar</span></a></li>`;
                     
                     if (side) side.innerHTML = sideHTML; 
-                    if (topInjectedNode) topInjectedNode.innerHTML = topInjectedHTML;
+                    if (topInjectedNode) topInjectedHTML = topInjectedHTML;
                     this.updateChatBadgeDOM();
                 },
                 updateChatBadgeDOM() {
