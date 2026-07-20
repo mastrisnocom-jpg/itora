@@ -734,7 +734,7 @@
                         .channel('realtime-posts')
                         .on('postgres_changes', { event: '*', schema: 'public', table: 'posts' }, async () => {
                             if (window.location.hash === '#/feed' || window.location.hash === '') App.Features.renderPosts();
-                            if (window.location.hash.includes('#/profil?name=')) App.Router.handleRoute();
+                            if (window.location.hash.includes('#/profil')) App.Router.handleRoute();
                         })
                         .subscribe();
 
@@ -742,6 +742,7 @@
                         .channel('realtime-profiles')
                         .on('postgres_changes', { event: '*', schema: 'public', table: 'profiles' }, async () => {
                             await App.ProfileState.syncUserProfileFromSupabase();
+                            if (window.location.hash.includes('#/profil')) App.Router.handleRoute();
                         })
                         .subscribe();
 
@@ -782,6 +783,7 @@
                         .on('postgres_changes', { event: '*', schema: 'public', table: 'follows' }, async () => {
                             await App.Features.fetchMyFriendsData();
                             if (window.location.hash === '#/explore') App.Features.renderExploreUsers();
+                            if (window.location.hash.includes('#/profil')) App.Router.handleRoute();
                         })
                         .subscribe();
                 }
@@ -890,7 +892,7 @@
                     if (fullHash.startsWith('profil?name=')) {
                         const targetUserDecoded = decodeURIComponent(fullHash.split('=')[1]);
                         viewport.innerHTML = `<div class="view-container">${await App.Views.profil(targetUserDecoded)}</div>`;
-                        App.ViewControllers.profil();
+                        App.ViewControllers.profil(targetUserDecoded);
                         window.scrollTo({ top: 0, behavior: 'smooth' });
                         return;
                     }
@@ -1046,9 +1048,9 @@
                                 </p>
                             </div>
                             <div class="profile-stats" style="background:#f0f2f5; border:1px solid var(--border-color); border-radius:16px; margin: 0 24px 24px 24px; display:flex; justify-content:space-around; padding:16px;">
-                                <div class="stat-item" style="text-align:center;"><span class="stat-val" id="profile-friends-count" style="display:block; font-weight:800; font-size:1.2rem; color:#050505;">0</span><span class="stat-lbl" style="font-size:0.8rem; color:var(--text-muted);">Mengikuti</span></div>
-                                <div class="stat-item" style="text-align:center;"><span class="stat-val" style="display:block; font-weight:800; font-size:1.2rem; color:#050505;">${isOwnProfile ? '2.5K' : '1.4K'}</span><span class="stat-lbl" style="font-size:0.8rem; color:var(--text-muted);">Pengikut</span></div>
-                                <div class="stat-item" style="text-align:center;"><span class="stat-val" style="display:block; font-weight:800; font-size:1.2rem; color:#050505;">84</span><span class="stat-lbl" style="font-size:0.8rem; color:var(--text-muted);">Postingan</span></div>
+                                <div class="stat-item" style="text-align:center;"><span class="stat-val" id="profile-friends-count" style="display:block; font-weight:800; font-size:1.2rem; color:#050505;">...</span><span class="stat-lbl" style="font-size:0.8rem; color:var(--text-muted);">Mengikuti</span></div>
+                                <div class="stat-item" style="text-align:center;"><span class="stat-val" id="profile-followers-count" style="display:block; font-weight:800; font-size:1.2rem; color:#050505;">...</span><span class="stat-lbl" style="font-size:0.8rem; color:var(--text-muted);">Pengikut</span></div>
+                                <div class="stat-item" style="text-align:center;"><span class="stat-val" id="profile-posts-count" style="display:block; font-weight:800; font-size:1.2rem; color:#050505;">...</span><span class="stat-lbl" style="font-size:0.8rem; color:var(--text-muted);">Postingan</span></div>
                             </div>
                             <div style="padding: 0 24px 32px 24px; display:flex; justify-content:center; gap:12px; max-width:100%;">
                                 ${!isOwnProfile ? `
@@ -1125,11 +1127,52 @@
                 explore() { App.Features.renderExploreUsers(); },
                 notifications() { App.Features.renderNotificationsView(); App.Features.markAllLocalNotificationsAsReadCloudAction(); },
                 groups() { App.Features.renderCommunityHubViewportList(); },
-                profil() { App.Features.loadFriendsCount(); },
+                profil(targetName = null) { App.Features.loadProfileStatsFromSupabase(targetName); },
                 settings() {}
             },
 
             Features: {
+                // HITUNG REAL STATISTIK PROFIL DARI DATABASE SUPABASE
+                async loadProfileStatsFromSupabase(targetName = null) {
+                    const name = targetName || App.ProfileState.getCurrentName();
+                    
+                    // 1. Mengikuti (Following)
+                    const followingEl = document.getElementById('profile-friends-count');
+                    try {
+                        const { count: followingCount } = await supabaseClient
+                            .from('follows')
+                            .select('*', { count: 'exact', head: true })
+                            .eq('follower', name);
+                        if (followingEl) followingEl.innerText = followingCount !== null ? followingCount : '0';
+                    } catch(e) {
+                        if (followingEl) followingEl.innerText = '0';
+                    }
+
+                    // 2. Pengikut (Followers)
+                    const followersEl = document.getElementById('profile-followers-count');
+                    try {
+                        const { count: followersCount } = await supabaseClient
+                            .from('follows')
+                            .select('*', { count: 'exact', head: true })
+                            .eq('following', name);
+                        if (followersEl) followersEl.innerText = followersCount !== null ? followersCount : '0';
+                    } catch(e) {
+                        if (followersEl) followersEl.innerText = '0';
+                    }
+
+                    // 3. Postingan (Posts)
+                    const postsEl = document.getElementById('profile-posts-count');
+                    try {
+                        const { count: postsCount } = await supabaseClient
+                            .from('posts')
+                            .select('*', { count: 'exact', head: true })
+                            .eq('author', name);
+                        if (postsEl) postsEl.innerText = postsCount !== null ? postsCount : '0';
+                    } catch(e) {
+                        if (postsEl) postsEl.innerText = '0';
+                    }
+                },
+
                 openGeminiApiKeyModalForm() {
                     const currentKey = localStorage.getItem('ns_gemini_api_key') || '';
                     const html = `
@@ -2144,7 +2187,6 @@
                         }
                         
                         await App.Features.fetchMyFriendsData();
-                        App.Features.loadFriendsCount();
 
                         if (btnElement) {
                             const nowFollowing = window.userFriendsList.includes(targetUser);
@@ -2155,6 +2197,7 @@
                         }
                         
                         if (window.location.hash === '#/explore') App.Features.renderExploreUsers();
+                        if (window.location.hash.includes('#/profil')) App.Features.loadProfileStatsFromSupabase(targetUser);
                     } catch(e) {
                         App.Toast.show("Gagal memproses permintaan ikuti.", "danger");
                     }
@@ -2169,6 +2212,7 @@
                     dragZone.addEventListener('touchend', (e) => { if(e.changedTouches[0].clientY - startY > 150) App.Features.closeCommentsBottomSheet(); }, {passive:true});
                 },
 
+                // UNGGAN FOTO PROFIL & SIMPAN KE SUPABASE PROFILES + POSTS
                 async handleAvatarSelection(event) {
                     const file = event.target.files[0]; if (!file) return;
                     App.Toast.show("Mengunggah foto profil ke Supabase...", "info");
@@ -2280,11 +2324,6 @@
                 saveAdminGlobalAdBannerAction(event) {
                     event.preventDefault(); const code = document.getElementById('admin-ad-html-input').value.trim();
                     localStorage.setItem('ns_ad_html_global', code); App.Toast.show("Iklan dirilis!", "success"); App.UI.renderGlobalBannerAdIfExists();
-                },
-
-                loadFriendsCount() { 
-                    const el = document.getElementById('profile-friends-count'); 
-                    if(el) el.innerText = window.userFriendsList ? window.userFriendsList.length : '0'; 
                 }
             },
 
