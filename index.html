@@ -5,7 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Tech Social - Workspace</title>
     
-    <!-- PWA META TAGS -->
+    <!-- LINK PWA MANIFEST & META TAGS -->
+    <link rel="manifest" href="./manifest.json">
     <meta name="theme-color" content="#1877F2">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -28,7 +29,6 @@
            1. CSS VARIABLES & CLEAN WHITE BLUE THEME CONFIGURATION
            ========================================================================== */
         :root {
-            /* MENGGUNAKAN FONT SISTEM ADAPTIF SESUAI HP PENGGUNA */
             --font-main: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
             --bg-body: #ffffff;
             --bg-glass: rgba(255, 255, 255, 0.95);
@@ -288,13 +288,13 @@
         .avatar-preview-circle { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; padding: 2px; }
         .avatar-upload-label { position: absolute; bottom: 0; right: 0; width: 32px; height: 32px; border-radius: 50%; background: var(--primary); color: white; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: var(--shadow-float); }
 
-        /* FB-STYLE MINIMAL COMPOSER BAR (SAMA DENGAN DOKUMEN FOTO) */
+        /* FB-STYLE MINIMAL COMPOSER BAR */
         .fb-composer-box { display: flex; align-items: center; gap: 12px; background: #ffffff; border: 1px solid var(--border-color); padding: 12px 16px; border-radius: var(--radius-xl); box-shadow: var(--shadow-soft); margin-bottom: 16px; width: 100%; box-sizing: border-box; }
         .fb-composer-input { flex: 1; border: 1px solid var(--border-color); padding: 10px 18px; border-radius: var(--radius-round); color: var(--text-muted); font-size: 0.95rem; font-weight: 500; background: #ffffff; cursor: pointer; transition: var(--trans-smooth); }
         .fb-composer-input:hover { background: #f0f2f5; }
         .fb-composer-gallery-icon { color: #10B981; font-size: 28px; cursor: pointer; display: flex; align-items: center; justify-content: center; user-select: none; }
 
-        /* STORIES CAROUSEL SYSTEM (FACEBOOK / FB LITE STYLE) */
+        /* STORIES CAROUSEL SYSTEM */
         .stories-container { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 8px; margin-bottom: 24px; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
         .stories-container::-webkit-scrollbar { display: none; }
         
@@ -606,7 +606,6 @@
         const SUPABASE_KEY = 'sb_publishable_1MQZs2Z7yOjywmGpYOk_Uw_Y9wZ7CXk'; 
         const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-        // DEFAULT AVATAR BASE64 SVG (AMAN DARI SYNTAX ERROR TANDA PETIK DOM)
         const DEFAULT_AVATAR_IMAGE = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0iIzE4NzdGMiI+PHBhdGggZD0iTTEyIDJDNi40OCAyIDIgNi40OCAyIDEyczQuNDggMTAgMTAgMTAgMTAtNC40OCAxMC0xMFMxNy41MiAyIDEyIDJ6bTAgNGMxLjkzIDAgMy41IDEuNTcgMy41IDMuNVMxMy45MyAxMyAxMiAxM3MtMy41LTEuNTctMy41LTMuNVMxMC4wNyA2 IDEyIDZ6bTAgMTRjLTIuMDMgMC0zLjguODUtNS4wNS0yLjIuMDMtMS42OCAzLjM3LTIuNiA1LjA1LTIuNnM1LjAyLjkyIDUuMDUgMi42QzE1LjggMTkuMTUgMTQuMDMgMjAgMTIgMjB6Ii8+PC9zdmc+';
 
         let liveNotifications = [];
@@ -635,13 +634,12 @@
         };
 
         window.userFriendsList = [];
-        window.registeredUsersList = []; // CACHE USER YANG TERDAFTAR DI SUPABASE
+        window.registeredUsersList = [];
 
         function escapeJSString(str) {
             return String(str || '').replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/"/g, '&quot;');
         }
 
-        // MEMUAT SELURUH USER TERDAFTAR DARI DATABASE SUPABASE UNTUK VALIDASI MENTION
         async function fetchRegisteredUsersListFromSupabase() {
             try {
                 const { data } = await supabaseClient.from('profiles').select('display_name');
@@ -653,7 +651,6 @@
             }
         }
 
-        // MENTION HANYA AKTIF JIKA USER TERDAFTAR DI DATABASE SUPABASE
         function parseMentionsToClickableLinks(text) {
             if (!text) return "";
             return text.replace(/@([a-zA-Z0-9_]+)/g, function(match, username) {
@@ -667,7 +664,6 @@
             });
         }
 
-        // DETEKSI DAN KIRIM NOTIFIKASI OTOMATIS KEPADA USER TERDAFTAR YANG DI-MENTION
         async function detectAndNotifyMentions(textContext, actionType = 'mention') {
             if (!textContext) return;
             const matches = textContext.match(/@([a-zA-Z0-9_]+)/g);
@@ -715,75 +711,14 @@
 
             PWA: {
                 init() {
-                    this.injectManifest();
                     this.registerServiceWorker();
                     this.listenInstallPrompt();
                 },
-                injectManifest() {
-                    const iconSvg = `PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MTIgNTEyIj48cmVjdCB3aWR0aD0iNTEyIiBoZWlnaHQ9IjUxMiIgcng9IjEyOCIgZmlsbD0iIzE4NzdGMiIvPjx0ZXh0IHg9IjUwJSIgeT0iNTUlIiBmb250LXNpemU9IjI4MCIgZm9udC13ZWlnaHQ9IjgwMCIgZmlsbD0id2hpdGUiIGRvbWluYW50LWJhc2VsaW5lPSJjZW50ZXIiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZvbnQtZmFtaWx5PSJzYW5zLXNlcmlmIj5UPC90ZXh0Pjwvc3ZnPg==`;
-                    const manifestData = {
-                        name: "Tech Social Workspace",
-                        short_name: "TechSocial",
-                        description: "Tech Social Workspace Network Platform",
-                        start_url: "./",
-                        display: "standalone",
-                        background_color: "#ffffff",
-                        theme_color: "#1877F2",
-                        icons: [
-                            {
-                                src: `data:image/svg+xml;base64,${iconSvg}`,
-                                sizes: "192x192 512x512",
-                                type: "image/svg+xml",
-                                purpose: "any maskable"
-                            }
-                        ]
-                    };
-                    const blob = new Blob([JSON.stringify(manifestData)], { type: 'application/json' });
-                    const manifestUrl = URL.createObjectURL(blob);
-                    const link = document.createElement('link');
-                    link.rel = 'manifest';
-                    link.href = manifestUrl;
-                    document.head.appendChild(link);
-                },
                 registerServiceWorker() {
                     if ('serviceWorker' in navigator) {
-                        const swCode = `
-                            const CACHE_NAME = 'techsocial-v1';
-                            const ASSETS = [
-                                './',
-                                'https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap',
-                                'https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200',
-                                'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2'
-                            ];
-
-                            self.addEventListener('install', (e) => {
-                                e.waitUntil(
-                                    caches.open(CACHE_NAME).then((cache) => cache.addAll(ASSETS))
-                                );
-                                self.skipWaiting();
-                            });
-
-                            self.addEventListener('activate', (e) => {
-                                e.waitUntil(
-                                    caches.keys().then((keys) => {
-                                        return Promise.all(keys.map((key) => {
-                                            if (key !== CACHE_NAME) return caches.delete(key);
-                                        }));
-                                    })
-                                );
-                                self.clients.claim();
-                            });
-
-                            self.addEventListener('fetch', (e) => {
-                                if (e.request.method !== 'GET') return;
-                                e.respondWith(
-                                    fetch(e.request).catch(() => caches.match(e.request))
-                                );
-                            });
-                        `;
-                        const blob = new Blob([swCode], { type: 'text/javascript' });
-                        const swUrl = URL.createObjectURL(blob);
-                        navigator.serviceWorker.register(swUrl).catch(() => {});
+                        navigator.serviceWorker.register('./sw.js')
+                            .then(() => console.log("PWA Service Worker terdaftar!"))
+                            .catch((err) => console.log("Gagal mendaftarkan Service Worker:", err));
                     }
                 },
                 listenInstallPrompt() {
@@ -1168,7 +1103,6 @@
                 feed() {
                     const myAvatar = App.ProfileState.getCurrentAvatar();
                     return `
-                        <!-- COMPOSER BAR PERSIS SEPERTI GAMBAR (FB STYLE) -->
                         <div class="fb-composer-box">
                             <div id="composer-avatar-slot">
                                 <img src="${myAvatar}" class="user-avatar" style="width:40px; height:40px; object-fit:cover;" onclick="App.Router.navigate('profil')">
@@ -1177,9 +1111,7 @@
                             <span class="material-symbols-outlined fb-composer-gallery-icon" onclick="document.getElementById('global-composer-direct-file-input').click()">image</span>
                         </div>
 
-                        <!-- CAROUSEL CERITA REALTIME DARI DATABASE SUPABASE -->
                         <div class="stories-container" id="stories-carousel-stream">
-                            <!-- KARTU 1: BUAT CERITA -->
                             <div class="story-card story-create-card" onclick="document.getElementById('global-composer-direct-file-input').click()">
                                 <img src="${myAvatar}" class="story-create-img-top" alt="Buat cerita">
                                 <div class="story-create-plus-wrapper">
@@ -1187,7 +1119,6 @@
                                 </div>
                                 <div class="story-create-label">Buat cerita</div>
                             </div>
-                            <!-- SLOT UNTUK STORY USER REALTIME -->
                             <div id="dynamic-stories-list-slot" style="display:flex; gap:10px;"></div>
                         </div>
 
@@ -1293,14 +1224,12 @@
                             </div>
                         </div>
 
-                        <!-- FORM MEMBUAT STATUS DARI PROFILE PERSIS TAMPILAN CONTOH -->
                         <div class="fb-composer-box">
                             <img src="${App.ProfileState.getCurrentAvatar()}" class="user-avatar" style="width:40px; height:40px; object-fit:cover;">
                             <div class="fb-composer-input" onclick="App.Features.openComposerModalPopupForm()">Buat postingan di profil ini...</div>
                             <span class="material-symbols-outlined fb-composer-gallery-icon" onclick="document.getElementById('global-composer-direct-file-input').click()">image</span>
                         </div>
 
-                        <!-- FEED HISTORI POSTINGAN USER & MENTION -->
                         <div style="margin-bottom: 12px; font-weight: 800; font-size: 1.1rem; color: var(--text-main); text-align: left; padding: 0 4px;">
                             Postingan & Mention ${targetName}
                         </div>
@@ -1418,13 +1347,11 @@
                     }
                 },
 
-                // MEMUAT CAROUSEL CERITA REALTIME DARI DATABASE SUPABASE BERDASARKAN STATUS BERGAMBAR
                 async renderRealtimeStoriesCarousel() {
                     const slot = document.getElementById('dynamic-stories-list-slot');
                     if (!slot) return;
 
                     try {
-                        // Mengambil status terbaru yang memiliki gambar dari database Supabase
                         const { data: postsWithImages } = await supabaseClient
                             .from('posts')
                             .select('author, avatar, image, created_at')
@@ -1437,7 +1364,6 @@
                             return;
                         }
 
-                        // Menyaring agar 1 user hanya tampil 1 cerita terbaru di karusel
                         const uniqueStoriesMap = {};
                         postsWithImages.forEach(p => {
                             if (p.image && !uniqueStoriesMap[p.author]) {
@@ -1465,7 +1391,6 @@
                     }
                 },
 
-                // RENDER HISTORI POSTINGAN USER SENDIRI DAN POSTINGAN YANG DI-MENTION
                 async renderProfilePosts(targetName = null) {
                     const stream = document.getElementById('profile-posts-stream');
                     if (!stream) return;
@@ -1649,7 +1574,6 @@
                     App.Features.syncComposerSubmitButtonState();
                 },
 
-                // HANDLER OTOMATIS DETEKSI LINK YOUTUBE / FB VIDEO / MP3 DENGAN PREVIEW LANGSUNG
                 handleComposerLiveTextChange() {
                     this.syncComposerSubmitButtonState();
                     const txt = document.getElementById('composer-text')?.value || '';
@@ -2169,7 +2093,6 @@
                     }
                 },
 
-                // EKSTRAKSI EMBEDDED MEDIA UNTUK YOUTUBE, FACEBOOK VIDEO, DAN FILE MP3
                 extractAndRenderEmbeddedMedia(contentString, directMediaUrl) {
                     let textToCheck = contentString || "";
                     let combinedUrl = directMediaUrl || "";
@@ -2207,7 +2130,6 @@
                     return "";
                 },
 
-                // PEMBERSIH KONTEN AGAR LINK MEDIA TIDAK TAMPIL GANDA DI TEKS STATUS
                 cleanTextContentForDisplay(rawText) {
                     if (!rawText) return "";
                     const youtubeRegex = /(https?:\/\/(?:www\.)?(?:youtube\.com\/watch\?v=|youtu\.be\/)[^\s]+)/gi;
@@ -2537,7 +2459,6 @@
                         return;
                     }
 
-                    // Ambil data profil pengirim notifikasi agar foto profil asli muncul
                     const { data: profiles } = await supabaseClient.from('profiles').select('display_name, avatar_url');
                     const profileMap = {};
                     if (profiles) {
@@ -2561,7 +2482,6 @@
                         const senderAvatar = profileMap[n.sender] || DEFAULT_AVATAR_IMAGE;
                         const safeSender = escapeJSString(n.sender);
 
-                        // Klik pada teks deskripsi akan mengarahkan ke postingan (Feed)
                         const clickTarget = (n.action_type === 'follow') 
                             ? `App.Router.navigate('profil?name=${encodeURIComponent(n.sender)}')` 
                             : `App.Router.navigate('feed')`;
@@ -2715,7 +2635,6 @@
                     }
                 },
 
-                // MEMBUAT POSTINGAN + NOTIFIKASI KE SEMUA PENGIKUT (FOLLOWERS) & USERS MENTION
                 async createPost() {
                     const content = document.getElementById('composer-text').value.trim();
                     const mediaUrl = window.lastEmbeddedMediaUrl || '';
@@ -2764,7 +2683,6 @@
                             shared_count: 0 
                         }]);
 
-                        // 1. Kirim notifikasi otomatis ke semua pengikut (Followers)
                         const { data: myFollowers } = await supabaseClient
                             .from('follows')
                             .select('follower')
@@ -2776,7 +2694,6 @@
                             }
                         }
 
-                        // 2. Deteksi mention @username di status dan beri notifikasi
                         await detectAndNotifyMentions(content, 'mention');
 
                         composerSelectedFile = null; 
