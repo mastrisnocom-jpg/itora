@@ -519,9 +519,16 @@
         .popup-msg-stream { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 10px; min-height: 0; }
         .popup-chat-input-row { padding: 12px 16px; padding-bottom: max(12px, env(safe-area-inset-bottom)); border-top: 1px solid var(--border-color); display: flex; gap: 8px; align-items: center; background: var(--bg-glass-solid); flex-shrink: 0; }
         
-        .bubble { max-width: 75%; padding: 10px 16px; border-radius: 18px; font-size: 0.9rem; line-height: 1.4; word-break: break-word; box-shadow: 0 1px 2px rgba(0,0,0,0.04); }
-        .bubble.in { background: #f1f5f9; color: var(--text-main); align-self: flex-start; border-top-left-radius: 4px; text-align: left; border: 1px solid var(--border-color); }
-        .bubble.out { background: var(--primary); color: white; align-self: flex-end; border-top-right-radius: 4px; text-align: left; }
+        .bubble-wrapper { display: flex; flex-direction: column; gap: 2px; max-width: 75%; position: relative; }
+        .bubble-wrapper.out { align-self: flex-end; align-items: flex-end; }
+        .bubble-wrapper.in { align-self: flex-start; align-items: flex-start; }
+
+        .bubble { padding: 10px 16px; border-radius: 18px; font-size: 0.9rem; line-height: 1.4; word-break: break-word; box-shadow: 0 1px 2px rgba(0,0,0,0.04); position: relative; }
+        .bubble.in { background: #f1f5f9; color: var(--text-main); border-top-left-radius: 4px; text-align: left; border: 1px solid var(--border-color); }
+        .bubble.out { background: var(--primary); color: white; border-top-right-radius: 4px; text-align: left; }
+
+        .bubble-action-btn { font-size: 0.7rem; color: var(--text-muted); cursor: pointer; border: none; background: transparent; padding: 2px 4px; opacity: 0.6; transition: var(--trans-smooth); }
+        .bubble-action-btn:hover { opacity: 1; color: var(--danger); }
 
         /* GLOBAL MODAL SYSTEM */
         .modal-overlay { position: fixed; top: var(--header-height); left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.4); backdrop-filter: blur(4px); z-index: 4000; display: none; align-items: center; justify-content: center; padding: 20px; transition: var(--trans-smooth); }
@@ -536,7 +543,7 @@
         @keyframes slideDownFade { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
         @keyframes fadeScale { from { opacity: 0; transform: scale(0.98); } to { opacity: 1; transform: scale(1); } }
 
-        /* RESPONSIVE MOBILE PHONES SCREEN */
+        /* RESPONSIVE MOBILE PHONES SCREEN & PERBAIKAN POPUP CHAT */
         @media (max-width: 768px) {
             :root {
                 --header-height: 120px;
@@ -677,6 +684,11 @@
                 </button>
                 <strong style="font-size:1.05rem; font-weight:800;" id="popup-chat-header-title">Obrolan</strong>
             </div>
+            <div id="chat-header-actions-slot" style="display:none;">
+                <button class="icon-btn" style="width:28px; height:28px; color:var(--danger);" title="Hapus Riwayat Obrolan" onclick="App.Features.triggerDeleteChatHistoryAction()">
+                    <span class="material-symbols-outlined" style="font-size:18px;">delete</span>
+                </button>
+            </div>
         </div>
         <div class="popup-chat-body-container">
             <!-- View 1: List Kontak Penuh -->
@@ -734,8 +746,8 @@
         const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
         let liveNotifications = [];
-        let activeChatFriendEmail = null;
-        let activeChatFriendName = null;
+        let activeChatFriendEmail = localStorage.getItem('ns_active_chat_email') || null;
+        let activeChatFriendName = localStorage.getItem('ns_active_chat_name') || null;
 
         let composerAttachedImageBase64 = null;
         let unreadMessageCounters = {}; 
@@ -760,7 +772,6 @@
             return hash;
         };
 
-        // Utility pengaman karakter nama untuk event Handler HTML
         function escapeJSString(str) {
             return String(str || '').replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/"/g, '&quot;');
         }
@@ -869,11 +880,14 @@
 
                     supabaseClient
                         .channel('realtime-chats')
-                        .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'chats' }, async (payload) => {
+                        .on('postgres_changes', { event: '*', schema: 'public', table: 'chats' }, async (payload) => {
                             const myName = App.ProfileState.getCurrentName();
-                            if (activeChatFriendName && (payload.new.sender === activeChatFriendName || (payload.new.sender === myName && payload.new.receiver === activeChatFriendName))) {
+                            if (activeChatFriendName && (
+                                (payload.new && (payload.new.sender === activeChatFriendName || payload.new.sender === myName)) ||
+                                payload.eventType === 'DELETE'
+                            )) {
                                 App.Features.fetchChatMessagesAndRenderStream();
-                            } else if (payload.new.receiver === myName) {
+                            } else if (payload.new && payload.new.receiver === myName) {
                                 unreadMessageCounters[payload.new.sender.toLowerCase()] = (unreadMessageCounters[payload.new.sender.toLowerCase()] || 0) + 1;
                                 App.Features.loadPopupFriendsListSidebar();
                             }
@@ -1423,33 +1437,39 @@
                     }).join('');
                 },
 
+                // MEMPERBAIKI PENYIMPANAN SESI CHAT BERTAHAN TERHUBUNG REALTIME
                 async openSpecificFriendPopupObrolan(friendEmail, friendName) {
-                    activeChatFriendEmail = friendEmail; activeChatFriendName = friendName;
+                    activeChatFriendEmail = friendEmail; 
+                    activeChatFriendName = friendName;
+                    
+                    localStorage.setItem('ns_active_chat_email', friendEmail);
+                    localStorage.setItem('ns_active_chat_name', friendName);
+
                     unreadMessageCounters[friendName.toLowerCase()] = 0;
                     document.getElementById('chat-contacts-list-sidebar-container').classList.add('hidden');
                     document.getElementById('popup-chat-header-title').innerText = friendName;
                     document.getElementById('chat-back-to-list-btn').style.display = "inline-flex";
+                    
+                    const actionSlot = document.getElementById('chat-header-actions-slot');
+                    if(actionSlot) actionSlot.style.display = "block";
 
                     const mainArea = document.getElementById('popup-chat-main-area-pane'); if(!mainArea) return;
                     mainArea.classList.add('active');
                     
-                    // Jangan mengosongkan jika pesan sudah tampil di DOM lokal
-                    if (!mainArea.querySelector('#popup-msg-stream-viewport')) {
-                        mainArea.innerHTML = `
-                            <div class="popup-msg-stream" id="popup-msg-stream-viewport">
-                                <div style="flex:1; display:flex; align-items:center; justify-content:center; color:var(--text-muted); font-size:0.85rem;">Memuat percakapan...</div>
-                            </div>
-                            <div class="popup-chat-input-row">
-                                <input type="text" class="form-input" placeholder="Ketik pesan..." id="popup-chat-input-field" onkeypress="if(event.key==='Enter') App.Features.sendPopupChatCloudAction()" style="border-radius:20px; padding:10px 14px; margin-bottom:0; font-size:0.9rem; background:#f8fafc;">
-                                <button class="icon-btn" style="background:var(--primary); color:white; width:34px; height:34px;" onclick="App.Features.sendPopupChatCloudAction()"><span class="material-symbols-outlined" style="font-size:16px;">send</span></button>
-                            </div>
-                        `;
-                    }
+                    mainArea.innerHTML = `
+                        <div class="popup-msg-stream" id="popup-msg-stream-viewport">
+                            <div style="flex:1; display:flex; align-items:center; justify-content:center; color:var(--text-muted); font-size:0.85rem;">Memuat percakapan...</div>
+                        </div>
+                        <div class="popup-chat-input-row">
+                            <input type="text" class="form-input" placeholder="Ketik pesan..." id="popup-chat-input-field" onkeypress="if(event.key==='Enter') App.Features.sendPopupChatCloudAction()" style="border-radius:20px; padding:10px 14px; margin-bottom:0; font-size:0.9rem; background:#f8fafc;">
+                            <button class="icon-btn" style="background:var(--primary); color:white; width:34px; height:34px;" onclick="App.Features.sendPopupChatCloudAction()"><span class="material-symbols-outlined" style="font-size:16px;">send</span></button>
+                        </div>
+                    `;
                     
                     await App.Features.fetchChatMessagesAndRenderStream();
                 },
 
-                // MEMPERBAIKI MASALAH DATA CHAT HILANG SEMENTARA
+                // SINKRONISASI PEMBACAAN DAN MENAMPILKAN TOMBOL HAPUS PESAN
                 async fetchChatMessagesAndRenderStream() {
                     const viewport = document.getElementById('popup-msg-stream-viewport');
                     if (!viewport || !activeChatFriendName) return;
@@ -1465,29 +1485,76 @@
                         if (error) throw error;
 
                         if (!messages || messages.length === 0) {
-                            if (!viewport.querySelector('.bubble')) {
-                                viewport.innerHTML = `
-                                    <div style="flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; color:var(--text-muted); font-size:0.85rem; padding:20px; text-align:center;">
-                                        <span class="material-symbols-outlined" style="font-size:36px; color:var(--primary); margin-bottom:8px;">mark_chat_unread</span>
-                                        Belum ada pesan dengan <strong>${activeChatFriendName}</strong>.<br>Mulai obrolan sekarang!
-                                    </div>`;
-                            }
+                            viewport.innerHTML = `
+                                <div style="flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; color:var(--text-muted); font-size:0.85rem; padding:20px; text-align:center;">
+                                    <span class="material-symbols-outlined" style="font-size:36px; color:var(--primary); margin-bottom:8px;">mark_chat_unread</span>
+                                    Belum ada pesan dengan <strong>${activeChatFriendName}</strong>.<br>Mulai obrolan sekarang!
+                                </div>`;
                             return;
                         }
 
-                        viewport.innerHTML = messages.map(m => `<div class="bubble ${m.sender === myName ? 'out' : 'in'}"><span>${m.message}</span></div>`).join('');
+                        viewport.innerHTML = messages.map(m => {
+                            const isOut = m.sender === myName;
+                            return `
+                                <div class="bubble-wrapper ${isOut ? 'out' : 'in'}">
+                                    <div class="bubble ${isOut ? 'out' : 'in'}">
+                                        <span>${m.message}</span>
+                                    </div>
+                                    ${isOut ? `<button class="bubble-action-btn" onclick="App.Features.deleteSingleChatMessageAction(${m.id})">Hapus</button>` : ''}
+                                </div>
+                            `;
+                        }).join('');
                         viewport.scrollTop = viewport.scrollHeight;
                     } catch(err) {
-                        // Jangan pernah menghapus elemen bubble lokal jika terjadi error koneksi
+                        // Memastikan tampilan tidak blank
+                    }
+                },
+
+                // FITUR HAPUS SATU PESAN CHAT
+                async deleteSingleChatMessageAction(messageId) {
+                    if (!confirm("Hapus pesan ini?")) return;
+                    try {
+                        await supabaseClient.from('chats').delete().eq('id', messageId);
+                        App.Toast.show("Pesan dihapus", "info");
+                        await App.Features.fetchChatMessagesAndRenderStream();
+                    } catch(err) {
+                        App.Toast.show("Gagal menghapus pesan", "danger");
+                    }
+                },
+
+                // FITUR MENU HAPUS SEMUA CHAT DENGAN TEMAN AKTIF
+                async triggerDeleteChatHistoryAction() {
+                    if (!activeChatFriendName) return;
+                    if (!confirm(`Hapus seluruh riwayat percakapan dengan ${activeChatFriendName}?`)) return;
+                    
+                    const myName = App.ProfileState.getCurrentName();
+                    try {
+                        await supabaseClient
+                            .from('chats')
+                            .delete()
+                            .or(`and(sender.eq."${myName}",receiver.eq."${activeChatFriendName}"),and(sender.eq."${activeChatFriendName}",receiver.eq."${myName}")`);
+                        
+                        App.Toast.show("Riwayat chat berhasil dibersihkan", "success");
+                        await App.Features.fetchChatMessagesAndRenderStream();
+                    } catch(err) {
+                        App.Toast.show("Gagal membersihkan percakapan", "danger");
                     }
                 },
 
                 closeActiveChatSessionAndReturnToList() {
-                    activeChatFriendEmail = null; activeChatFriendName = null;
+                    activeChatFriendEmail = null; 
+                    activeChatFriendName = null;
+                    localStorage.removeItem('ns_active_chat_email');
+                    localStorage.removeItem('ns_active_chat_name');
+
                     document.getElementById('chat-contacts-list-sidebar-container').classList.remove('hidden');
                     document.getElementById('popup-chat-main-area-pane').classList.remove('active');
                     document.getElementById('popup-chat-header-title').innerText = "Obrolan";
                     document.getElementById('chat-back-to-list-btn').style.display = "none";
+                    
+                    const actionSlot = document.getElementById('chat-header-actions-slot');
+                    if(actionSlot) actionSlot.style.display = "none";
+
                     this.loadPopupFriendsListSidebar();
                 },
 
@@ -1499,24 +1566,10 @@
                     const myName = App.ProfileState.getCurrentName();
                     
                     input.value = '';
-                    
-                    const viewport = document.getElementById('popup-msg-stream-viewport');
-                    if (viewport) {
-                        const emptyPlaceholder = viewport.querySelector('div[style*="flex:1"]');
-                        if (emptyPlaceholder) emptyPlaceholder.remove();
-
-                        const tempBubble = document.createElement('div');
-                        tempBubble.className = 'bubble out';
-                        tempBubble.innerHTML = `<span>${msgText}</span>`;
-                        viewport.appendChild(tempBubble);
-                        viewport.scrollTop = viewport.scrollHeight;
-                    }
 
                     try {
                         await supabaseClient.from('chats').insert([{ sender: myName, receiver: activeChatFriendName, message: msgText }]);
-                        setTimeout(async () => {
-                            await App.Features.fetchChatMessagesAndRenderStream();
-                        }, 500);
+                        await App.Features.fetchChatMessagesAndRenderStream();
                     } catch(err) {}
                 },
 
@@ -1785,7 +1838,6 @@
                     } catch (ex) {}
                 },
 
-                // PERBAIKAN TOMBOL LIKE INTERAKTIF DENGAN OPTIMISTIC UPDATE
                 async toggleLike(id, postAuthor) {
                     const myName = App.ProfileState.getCurrentName();
                     const btnNode = document.getElementById(`like-btn-node-${id}`);
@@ -1815,7 +1867,6 @@
                     } catch(e) {}
                 },
 
-                // PERBAIKAN TOMBOL LOVE REACTION DENGAN OPTIMISTIC UPDATE
                 async toggleLoveReaction(id, postAuthor) {
                     const myName = App.ProfileState.getCurrentName();
                     const btnNode = document.getElementById(`love-btn-node-${id}`);
@@ -2229,12 +2280,14 @@
                 },
                 closeMobileSidebar() { document.getElementById('app-layout')?.classList.remove('sidebar-mobile-open'); document.getElementById('mobile-overlay')?.classList.remove('active'); },
                 
-                // PERBAIKAN POPUP CHAT BERTAHAN
+                // POPUP CHAT MEMATUHI SESI OBROLAN AKTIF DAN MEMUAT CHAT SECARA SINKRON
                 toggleChatPopup(open) {
                     const box = document.getElementById('floating-chat-popup-box'); if(!box) return;
                     if(open) { 
                         box.classList.add('active'); 
-                        if (!activeChatFriendName) {
+                        if (activeChatFriendName && activeChatFriendEmail) {
+                            App.Features.openSpecificFriendPopupObrolan(activeChatFriendEmail, activeChatFriendName);
+                        } else {
                             App.Features.closeActiveChatSessionAndReturnToList(); 
                         }
                     } 
@@ -2260,3 +2313,5 @@
     </script>
 </body>
 </html>
+
+
