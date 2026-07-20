@@ -811,7 +811,10 @@
                     supabaseClient
                         .channel('realtime-posts')
                         .on('postgres_changes', { event: '*', schema: 'public', table: 'posts' }, async () => {
-                            if (window.location.hash === '#/feed' || window.location.hash === '') App.Features.renderPosts();
+                            if (window.location.hash === '#/feed' || window.location.hash === '') {
+                                App.Features.renderPosts();
+                                App.Features.renderRealtimeStoriesCarousel();
+                            }
                             if (window.location.hash.includes('#/profil')) App.Router.handleRoute();
                         })
                         .subscribe();
@@ -1046,7 +1049,7 @@
                             <span class="material-symbols-outlined fb-composer-gallery-icon" onclick="document.getElementById('global-composer-direct-file-input').click()">image</span>
                         </div>
 
-                        <!-- CAROUSEL CERITA (STORIES PERSIS FOTO CONTOH) -->
+                        <!-- CAROUSEL CERITA REALTIME DARI DATABASE SUPABASE -->
                         <div class="stories-container" id="stories-carousel-stream">
                             <!-- KARTU 1: BUAT CERITA -->
                             <div class="story-card story-create-card" onclick="document.getElementById('global-composer-direct-file-input').click()">
@@ -1056,28 +1059,8 @@
                                 </div>
                                 <div class="story-create-label">Buat cerita</div>
                             </div>
-
-                            <!-- KARTU CERITA DUMMY / TEMAN -->
-                            <div class="story-card" onclick="App.Toast.show('Melihat cerita Wanti Jie', 'info')">
-                                <img src="https://images.unsplash.com/photo-1517841905240-472988babdf9?w=300&q=80" class="story-card-bg" alt="Cerita Wanti Jie">
-                                <div class="story-gradient-overlay"></div>
-                                <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&q=80" class="story-user-avatar-ring" alt="Wanti Jie">
-                                <span class="story-user-name">Wanti Jie</span>
-                            </div>
-
-                            <div class="story-card" onclick="App.Toast.show('Melihat cerita R Marizkha', 'info')">
-                                <img src="https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=300&q=80" class="story-card-bg" alt="Cerita R Marizkha">
-                                <div class="story-gradient-overlay"></div>
-                                <img src="https://images.unsplash.com/photo-1517841905240-472988babdf9?w=100&q=80" class="story-user-avatar-ring" alt="R Marizkha">
-                                <span class="story-user-name">R Marizkha</span>
-                            </div>
-
-                            <div class="story-card" onclick="App.Toast.show('Melihat cerita Alfa', 'info')">
-                                <img src="https://images.unsplash.com/photo-1501785888041-af3ef285b470?w=300&q=80" class="story-card-bg" alt="Cerita Alfa">
-                                <div class="story-gradient-overlay"></div>
-                                <img src="https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?w=100&q=80" class="story-user-avatar-ring" alt="Alfa">
-                                <span class="story-user-name">Alfa</span>
-                            </div>
+                            <!-- SLOT UNTUK STORY USER REALTIME -->
+                            <div id="dynamic-stories-list-slot" style="display:flex; gap:10px;"></div>
                         </div>
 
                         <div id="feed-stream"></div>
@@ -1254,7 +1237,11 @@
             },
 
             ViewControllers: {
-                feed() { App.UI.syncGlobalAvatarAndName(); App.Features.renderPosts(); },
+                feed() { 
+                    App.UI.syncGlobalAvatarAndName(); 
+                    App.Features.renderPosts(); 
+                    App.Features.renderRealtimeStoriesCarousel();
+                },
                 explore() { App.Features.renderExploreUsers(); },
                 notifications() { App.Features.renderNotificationsView(); App.Features.markAllLocalNotificationsAsReadCloudAction(); },
                 groups() { App.Features.renderCommunityHubViewportList(); },
@@ -1300,6 +1287,53 @@
                         if (postsEl) postsEl.innerText = postsCount !== null ? postsCount : '0';
                     } catch(e) {
                         if (postsEl) postsEl.innerText = '0';
+                    }
+                },
+
+                // MEMUAT CAROUSEL CERITA REALTIME DARI DATABASE SUPABASE BERDASARKAN STATUS BERGAMBAR
+                async renderRealtimeStoriesCarousel() {
+                    const slot = document.getElementById('dynamic-stories-list-slot');
+                    if (!slot) return;
+
+                    try {
+                        // Mengambil status terbaru yang memiliki gambar dari database Supabase
+                        const { data: postsWithImages } = await supabaseClient
+                            .from('posts')
+                            .select('author, avatar, image, created_at')
+                            .not('image', 'is', null)
+                            .order('created_at', { ascending: false })
+                            .limit(10);
+
+                        if (!postsWithImages || postsWithImages.length === 0) {
+                            slot.innerHTML = '';
+                            return;
+                        }
+
+                        // Menyaring agar 1 user hanya tampil 1 cerita terbaru di karusel
+                        const uniqueStoriesMap = {};
+                        postsWithImages.forEach(p => {
+                            if (p.image && !uniqueStoriesMap[p.author]) {
+                                uniqueStoriesMap[p.author] = p;
+                            }
+                        });
+
+                        const uniqueStories = Object.values(uniqueStoriesMap);
+
+                        slot.innerHTML = uniqueStories.map(story => {
+                            const storyAvatar = (story.avatar && story.avatar !== 'null' && story.avatar !== 'undefined') ? story.avatar : DEFAULT_AVATAR_IMAGE;
+                            const safeAuthor = escapeJSString(story.author);
+
+                            return `
+                                <div class="story-card" onclick="App.Router.navigate('profil?name=${encodeURIComponent(story.author)}')">
+                                    <img src="${story.image}" class="story-card-bg" alt="Cerita ${story.author}">
+                                    <div class="story-gradient-overlay"></div>
+                                    <img src="${storyAvatar}" class="story-user-avatar-ring" alt="${story.author}">
+                                    <span class="story-user-name">${story.author}</span>
+                                </div>
+                            `;
+                        }).join('');
+                    } catch(e) {
+                        slot.innerHTML = '';
                     }
                 },
 
@@ -1998,7 +2032,10 @@
                         if (error) throw error;
                         
                         App.Toast.show("Postingan berhasil dihapus dari server", "success"); 
-                        setTimeout(() => { App.Features.renderPosts(); }, 200);
+                        setTimeout(() => { 
+                            App.Features.renderPosts();
+                            App.Features.renderRealtimeStoriesCarousel();
+                        }, 200);
                     } catch(e) {
                         App.Toast.show("Gagal menghapus postingan.", "danger");
                     }
@@ -2624,6 +2661,7 @@
                             App.Router.handleRoute();
                         } else {
                             this.renderPosts();
+                            this.renderRealtimeStoriesCarousel();
                         }
                     } catch (err) {
                         App.Toast.show("Gagal membuat postingan.", "danger");
