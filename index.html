@@ -544,8 +544,8 @@
         const SUPABASE_KEY = 'sb_publishable_1MQZs2Z7yOjywmGpYOk_Uw_Y9wZ7CXk'; 
         const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-        // DEFAULT AVATAR KARTUN BIRU
-        const DEFAULT_AVATAR_IMAGE = 'https://i.ibb.co/3k5f583/default-avatar.png';
+        // DEFAULT AVATAR SVG DATA URI (STABIL 100% TANPA DEPENDENSI LINK LUAR)
+        const DEFAULT_AVATAR_IMAGE = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%231877F2"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 4c1.93 0 3.5 1.57 3.5 3.5S13.93 13 12 13s-3.5-1.57-3.5-3.5S10.07 6 12 6zm0 14c-2.03 0-3.8-.85-5.05-2.2.03-1.68 3.37-2.6 5.05-2.6s5.02.92 5.05 2.6C15.8 19.15 14.03 20 12 20z"/></svg>';
 
         let liveNotifications = [];
         let activeChatFriendEmail = localStorage.getItem('ns_active_chat_email') || null;
@@ -563,6 +563,14 @@
         let activeReplyTargetCommentId = null;
         let activeReplyTargetUser = null;
 
+        // Cache lokal data profil Supabase di memori runtime (bukan localStorage)
+        window.mySupabaseProfileCache = {
+            avatar_url: DEFAULT_AVATAR_IMAGE,
+            display_name: '',
+            bio_status: '',
+            domisili: ''
+        };
+
         window.userFriendsList = [];
 
         function escapeJSString(str) {
@@ -570,12 +578,12 @@
         }
 
         const App = {
-            init() {
+            async init() {
                 this.Theme.init();
                 this.Network.listen();
                 this.UI.bindGlobalEvents();
                 this.Navigation.render();
-                this.Auth.checkCurrentSession();
+                await this.Auth.checkCurrentSession();
                 this.Realtime.subscribeRealtimeChannels();
                 this.Features.fetchMyFriendsData(); 
                 this.Features.initCommentsSwipeToCloseGesture();
@@ -596,21 +604,63 @@
             },
 
             ProfileState: {
+                // SINKRONISASI MURNI DARI DATABASE SUPABASE profiles
+                async syncUserProfileFromSupabase() {
+                    const userId = localStorage.getItem('ns_user_id');
+                    const userEmail = localStorage.getItem('ns_user_email');
+                    if (!userId) return;
+
+                    try {
+                        let { data: profile, error } = await supabaseClient
+                            .from('profiles')
+                            .select('*')
+                            .eq('id', userId)
+                            .maybeSingle();
+
+                        if (!profile) {
+                            // Buat entri profil default di Supabase jika belum ada
+                            const defaultDisplayName = (userEmail || 'User').split('@')[0];
+                            const { data: newProfile } = await supabaseClient
+                                .from('profiles')
+                                .insert([{
+                                    id: userId,
+                                    email: userEmail,
+                                    display_name: defaultDisplayName,
+                                    avatar_url: DEFAULT_AVATAR_IMAGE,
+                                    bio_status: 'Tech Workspace Member',
+                                    domisili: 'Surabaya, Indonesia'
+                                }])
+                                .select()
+                                .single();
+
+                            profile = newProfile;
+                        }
+
+                        if (profile) {
+                            window.mySupabaseProfileCache = {
+                                display_name: profile.display_name || (userEmail || 'User').split('@')[0],
+                                avatar_url: (profile.avatar_url && profile.avatar_url !== 'null' && profile.avatar_url !== 'undefined') ? profile.avatar_url : DEFAULT_AVATAR_IMAGE,
+                                bio_status: profile.bio_status || 'Tech Workspace Member',
+                                domisili: profile.domisili || 'Surabaya, Indonesia'
+                            };
+                            App.UI.syncGlobalAvatarAndName();
+                        }
+                    } catch (e) {}
+                },
+
                 getCurrentName() {
-                    const savedName = localStorage.getItem('ns_display_name');
-                    if (savedName) return savedName;
-                    return (localStorage.getItem('ns_user_email') || 'User').split('@')[0];
+                    return window.mySupabaseProfileCache.display_name || (localStorage.getItem('ns_user_email') || 'User').split('@')[0];
                 },
                 getCurrentRoleBioStatus() {
                     const email = (localStorage.getItem('ns_user_email') || '').toLowerCase();
                     if(email === 'mastrisnocom@gmail.com') return 'Super Administrator';
-                    return localStorage.getItem('ns_user_bio_status') || 'Tech Workspace Member';
+                    return window.mySupabaseProfileCache.bio_status || 'Tech Workspace Member';
                 },
                 getCurrentDomisili() {
-                    return localStorage.getItem('ns_user_domisili') || 'Surabaya, Indonesia';
+                    return window.mySupabaseProfileCache.domisili || 'Surabaya, Indonesia';
                 },
                 getCurrentAvatar() {
-                    const av = localStorage.getItem('ns_user_avatar_url');
+                    const av = window.mySupabaseProfileCache.avatar_url;
                     return (av && av !== 'null' && av !== 'undefined') ? av : DEFAULT_AVATAR_IMAGE;
                 },
                 getPremiumLevel() {
@@ -635,20 +685,47 @@
                     if (parsed.month !== new Date().getMonth()) return defaultLimit;
                     return parsed;
                 },
-                updateProfileDataConfiguration(newName, newBio, newDomisili) {
+                async updateProfileDataConfiguration(newName, newBio, newDomisili) {
                     const config = this.getLimitConfig();
                     if(config.count >= 5) return { success: false, message: "Batas pengeditan data profil bulan ini (5x) telah habis." };
-                    config.count += 1;
-                    localStorage.setItem('ns_display_name', newName);
-                    localStorage.setItem('ns_user_bio_status', newBio);
-                    localStorage.setItem('ns_user_domisili', newDomisili);
-                    localStorage.setItem('ns_edit_limit_log', JSON.stringify(config));
-                    App.UI.syncGlobalAvatarAndName();
-                    return { success: true };
+                    
+                    const userId = localStorage.getItem('ns_user_id');
+                    try {
+                        const { error } = await supabaseClient
+                            .from('profiles')
+                            .upsert({
+                                id: userId,
+                                display_name: newName,
+                                bio_status: newBio,
+                                domisili: newDomisili,
+                                updated_at: new Date()
+                            });
+
+                        if (error) throw error;
+
+                        config.count += 1;
+                        localStorage.setItem('ns_edit_limit_log', JSON.stringify(config));
+                        
+                        await this.syncUserProfileFromSupabase();
+                        return { success: true };
+                    } catch(err) {
+                        return { success: false, message: "Gagal menyimpan ke database Supabase." };
+                    }
                 },
-                saveAvatarUrl(publicUrl) {
-                    localStorage.setItem('ns_user_avatar_url', publicUrl);
-                    App.UI.syncGlobalAvatarAndName();
+                async saveAvatarUrlToSupabase(publicUrl) {
+                    const userId = localStorage.getItem('ns_user_id');
+                    try {
+                        await supabaseClient
+                            .from('profiles')
+                            .upsert({
+                                id: userId,
+                                avatar_url: publicUrl,
+                                updated_at: new Date()
+                            });
+
+                        window.mySupabaseProfileCache.avatar_url = publicUrl;
+                        App.UI.syncGlobalAvatarAndName();
+                    } catch(e) {}
                 }
             },
 
@@ -659,6 +736,13 @@
                         .on('postgres_changes', { event: '*', schema: 'public', table: 'posts' }, async () => {
                             if (window.location.hash === '#/feed' || window.location.hash === '') App.Features.renderPosts();
                             if (window.location.hash.includes('#/profil?name=')) App.Router.handleRoute();
+                        })
+                        .subscribe();
+
+                    supabaseClient
+                        .channel('realtime-profiles')
+                        .on('postgres_changes', { event: '*', schema: 'public', table: 'profiles' }, async () => {
+                            await App.ProfileState.syncUserProfileFromSupabase();
                         })
                         .subscribe();
 
@@ -713,8 +797,9 @@
                             localStorage.setItem('ns_logged_in', 'true');
                             localStorage.setItem('ns_user_id', data.session.user.id); 
                             localStorage.setItem('ns_user_email', data.session.user.email);
+                            
+                            await App.ProfileState.syncUserProfileFromSupabase();
                             App.ProfileState.getJoinDateText();
-                            App.UI.syncGlobalAvatarAndName();
                             App.Auth.showApp();
                             App.Features.fetchCloudNotificationsDataZone();
                             App.Router.init();
@@ -743,7 +828,8 @@
                         localStorage.setItem('ns_logged_in', 'true');
                         localStorage.setItem('ns_user_id', data.user.id);
                         localStorage.setItem('ns_user_email', data.user.email);
-                        App.UI.syncGlobalAvatarAndName();
+                        
+                        await App.ProfileState.syncUserProfileFromSupabase();
                         this.showApp();
                         App.Features.fetchCloudNotificationsDataZone();
                         App.Router.init();
@@ -913,18 +999,34 @@
                     const isOwnProfile = (!specifiedTargetName || specifiedTargetName === loggedInUser);
                     const targetName = isOwnProfile ? loggedInUser : specifiedTargetName;
                     let targetAvatar = DEFAULT_AVATAR_IMAGE;
+                    let targetBio = 'Tech Workspace Professional Member';
+                    let targetDomisili = 'Surabaya, Indonesia';
                     
                     if (isOwnProfile) {
                         targetAvatar = App.ProfileState.getCurrentAvatar();
+                        targetBio = App.ProfileState.getCurrentRoleBioStatus();
+                        targetDomisili = App.ProfileState.getCurrentDomisili();
                     } else {
                         try {
-                            const { data } = await supabaseClient.from('posts').select('avatar').eq('author', targetName).not('avatar', 'is', null).order('created_at', { ascending: false }).limit(1);
-                            if (data && data.length > 0 && data[0].avatar) targetAvatar = data[0].avatar;
+                            // Ambil data profil pengguna lain dari Supabase profiles
+                            const { data: profile } = await supabaseClient
+                                .from('profiles')
+                                .select('avatar_url, bio_status, domisili')
+                                .eq('display_name', targetName)
+                                .maybeSingle();
+
+                            if (profile) {
+                                if (profile.avatar_url && profile.avatar_url !== 'null' && profile.avatar_url !== 'undefined') targetAvatar = profile.avatar_url;
+                                if (profile.bio_status) targetBio = profile.bio_status;
+                                if (profile.domisili) targetDomisili = profile.domisili;
+                            } else {
+                                // Fallback cari avatar dari tabel posts
+                                const { data: pData } = await supabaseClient.from('posts').select('avatar').eq('author', targetName).not('avatar', 'is', null).order('created_at', { ascending: false }).limit(1);
+                                if (pData && pData.length > 0 && pData[0].avatar) targetAvatar = pData[0].avatar;
+                            }
                         } catch (err) {}
                     }
                     
-                    const targetBio = isOwnProfile ? App.ProfileState.getCurrentRoleBioStatus() : 'Tech Workspace Professional Member';
-                    const targetDomisili = isOwnProfile ? App.ProfileState.getCurrentDomisili() : 'Surabaya, Indonesia';
                     const joinDate = isOwnProfile ? App.ProfileState.getJoinDateText() : '18 Juli 2026';
                     const myEmail = (localStorage.getItem('ns_user_email') || '').toLowerCase();
                     const isSuperAdmin = (isOwnProfile && myEmail === 'mastrisnocom@gmail.com');
@@ -1031,7 +1133,6 @@
             },
 
             Features: {
-                // FUNGSI MANAJEMEN FORM API KEY GEMINI OLEH PENGGUNA
                 openGeminiApiKeyModalForm() {
                     const currentKey = localStorage.getItem('ns_gemini_api_key') || '';
                     const html = `
@@ -1355,9 +1456,15 @@
 
                     try {
                         if(activeChatFriendName !== 'Mastrisno_AI') {
-                            const { data: friendPosts } = await supabaseClient.from('posts').select('avatar').eq('author', activeChatFriendName).not('avatar', 'is', null).limit(1);
-                            if (friendPosts && friendPosts.length > 0 && friendPosts[0].avatar) {
-                                friendAvatar = friendPosts[0].avatar;
+                            // Ambil avatar teman secara presisi dari database Supabase profiles
+                            const { data: fProfile } = await supabaseClient.from('profiles').select('avatar_url').eq('display_name', activeChatFriendName).maybeSingle();
+                            if (fProfile && fProfile.avatar_url) {
+                                friendAvatar = fProfile.avatar_url;
+                            } else {
+                                const { data: friendPosts } = await supabaseClient.from('posts').select('avatar').eq('author', activeChatFriendName).not('avatar', 'is', null).limit(1);
+                                if (friendPosts && friendPosts.length > 0 && friendPosts[0].avatar) {
+                                    friendAvatar = friendPosts[0].avatar;
+                                }
                             }
                         }
 
@@ -1406,7 +1513,6 @@
                     } catch(err) {}
                 },
 
-                // KONEKSI REALTIME DENGAN MASTRISNO AI (PERSYARATAN BYOK API KEY GEMINI OLEH USER)
                 async sendPopupChatCloudAction() {
                     const input = document.getElementById('popup-chat-input-field'); 
                     if (!input || !input.value.trim() || !activeChatFriendName) return;
@@ -1414,7 +1520,6 @@
                     const msgText = input.value.trim();
                     const myName = App.ProfileState.getCurrentName();
                     
-                    // CEK API KEY GEMINI JIKA CHAT DENGAN MASTRISNO_AI
                     if(activeChatFriendName === 'Mastrisno_AI') {
                         const userApiKey = localStorage.getItem('ns_gemini_api_key');
                         if(!userApiKey) {
@@ -1429,7 +1534,6 @@
                         await supabaseClient.from('chats').insert([{ sender: myName, receiver: activeChatFriendName, message: msgText }]);
                         await App.Features.fetchChatMessagesAndRenderStream();
 
-                        // JIKA CHAT DENGAN MASTRISNO_AI: PANGGIL GEMINI API DENGAN KEY PENGGUNA
                         if(activeChatFriendName === 'Mastrisno_AI') {
                             const userApiKey = localStorage.getItem('ns_gemini_api_key');
                             const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${userApiKey}`;
@@ -1988,12 +2092,14 @@
                     const myName = App.ProfileState.getCurrentName();
                     
                     try {
-                        const { data: users } = await supabaseClient.from('posts').select('author, avatar');
+                        // Ambil daftar pengguna resmi dari tabel Supabase profiles
+                        const { data: usersProfileData } = await supabaseClient.from('profiles').select('display_name, avatar_url');
                         let uniqueUsersMap = {};
-                        if (users) {
-                            users.forEach(u => {
-                                if (u.author && u.author !== myName && !uniqueUsersMap[u.author]) {
-                                    uniqueUsersMap[u.author] = u.avatar || DEFAULT_AVATAR_IMAGE;
+                        
+                        if (usersProfileData) {
+                            usersProfileData.forEach(u => {
+                                if (u.display_name && u.display_name !== myName) {
+                                    uniqueUsersMap[u.display_name] = (u.avatar_url && u.avatar_url !== 'null' && u.avatar_url !== 'undefined') ? u.avatar_url : DEFAULT_AVATAR_IMAGE;
                                 }
                             });
                         }
@@ -2068,9 +2174,10 @@
                     dragZone.addEventListener('touchend', (e) => { if(e.changedTouches[0].clientY - startY > 150) App.Features.closeCommentsBottomSheet(); }, {passive:true});
                 },
 
+                // UNGGAN FOTO PROFIL & SIMPAN KE SUPABASE PROFILES + POSTS
                 async handleAvatarSelection(event) {
                     const file = event.target.files[0]; if (!file) return;
-                    App.Toast.show("Mengunggah foto profil...", "info");
+                    App.Toast.show("Mengunggah foto profil ke Supabase...", "info");
 
                     try {
                         const fileExt = file.name.split('.').pop();
@@ -2090,13 +2197,18 @@
 
                         const publicAvatarUrl = urlData.publicUrl;
 
-                        App.ProfileState.saveAvatarUrl(publicAvatarUrl);
-                        document.getElementById('settings-avatar-preview').src = publicAvatarUrl;
+                        // Simpan URL avatar baru ke Supabase Database (Tabel Profiles)
+                        await App.ProfileState.saveAvatarUrlToSupabase(publicAvatarUrl);
                         
+                        const imgPreview = document.getElementById('settings-avatar-preview');
+                        if (imgPreview) imgPreview.src = publicAvatarUrl;
+                        
+                        // Perbarui avatar di postingan milik sendiri secara realtime
                         await supabaseClient.from('posts').update({ avatar: publicAvatarUrl }).eq('author', App.ProfileState.getCurrentName());
-                        App.Toast.show("Foto profil berhasil ter-update!", "success");
+                        
+                        App.Toast.show("Foto profil berhasil disimpan ke Supabase!", "success");
                     } catch(err) {
-                        App.Toast.show("Gagal mengunggah foto profil.", "danger");
+                        App.Toast.show("Gagal mengunggah foto profil ke server.", "danger");
                     }
                 },
 
@@ -2158,12 +2270,19 @@
                     }
                 },
 
-                saveNameSettings() {
+                async saveNameSettings() {
                     const name = document.getElementById('settings-display-name').value.trim();
                     const bio = document.getElementById('settings-bio-status').value.trim();
                     const domisili = document.getElementById('settings-domisili').value.trim();
                     if(!name) return;
-                    if(App.ProfileState.updateProfileDataConfiguration(name, bio, domisili).success) { App.Toast.show("Profil disimpan!", "success"); App.Router.navigate('feed'); }
+                    
+                    const res = await App.ProfileState.updateProfileDataConfiguration(name, bio, domisili);
+                    if(res.success) { 
+                        App.Toast.show("Profil disimpan ke Supabase!", "success"); 
+                        App.Router.navigate('feed'); 
+                    } else {
+                        App.Toast.show(res.message || "Gagal menyimpan profil", "danger");
+                    }
                 },
 
                 saveAdminGlobalAdBannerAction(event) {
