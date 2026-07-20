@@ -83,7 +83,7 @@
         .header-mobile-menu-bar { display: none; width: 100%; padding-top: 8px; overflow-x: auto; gap: 8px; justify-content: space-around; }
         .header-mobile-menu-bar::-webkit-scrollbar { display: none; }
         
-        .mobile-menu-tab-btn { display: inline-flex; align-items: center; justify-content: center; padding: 8px; border-radius: var(--radius-md); background: #f1f5f9; color: var(--text-muted); cursor: pointer; transition: var(--trans-smooth); min-width: 40px; }
+        .mobile-menu-tab-btn { display: inline-flex; align-items: center; justify-content: center; padding: 8px; border-radius: var(--radius-md); background: #f1f5f9; color: var(--text-muted); cursor: pointer; transition: var(--trans-smooth); min-width: 40px; position: relative; }
         .mobile-menu-tab-btn.active { background: var(--primary); color: white; box-shadow: var(--shadow-float); }
         .mobile-menu-tab-btn .material-symbols-outlined { font-size: 22px; }
 
@@ -92,7 +92,7 @@
         .search-box input { width: 100%; background: var(--bg-body); border: 1px solid var(--border-color); padding: 12px 20px 12px 46px; border-radius: var(--radius-round); color: var(--text-main); transition: var(--trans-smooth); font-size: 0.9rem; }
         .search-box input:focus { border-color: var(--primary); box-shadow: 0 0 0 4px var(--primary-state); }
         .search-box .material-symbols-outlined { position: absolute; left: 16px; color: var(--text-muted); pointer-events: none; font-size: 22px; z-index: 2; }
-        .badge { position: absolute; top: 4px; right: 4px; background: var(--danger); color: white; min-width: 18px; height: 18px; padding: 0 5px; border-radius: 9px; font-size: 0.7rem; font-weight: 800; display: none; align-items: center; justify-content: center; box-shadow: 0 2px 6px rgba(238,93,80,0.4); }
+        .badge { position: absolute; top: 2px; right: 2px; background: var(--danger); color: white; min-width: 18px; height: 18px; padding: 0 5px; border-radius: 9px; font-size: 0.7rem; font-weight: 800; display: none; align-items: center; justify-content: center; box-shadow: 0 2px 6px rgba(238,93,80,0.4); z-index: 5; }
 
         /* SIDEBAR & NAV */
         .menu-item-wrapper { position: relative; width: 100%; }
@@ -127,6 +127,32 @@
         .form-input { width: 100%; padding: 16px; padding-top: 24px; background: var(--bg-body); border: 1px solid var(--border-color); border-radius: var(--radius-md); color: var(--text-main); font-size: 1rem; transition: var(--trans-smooth); max-width: 100%; box-sizing: border-box; }
         .form-label { position: absolute; left: 16px; top: 50%; transform: translateY(-50%); color: var(--text-muted); pointer-events: none; transition: var(--trans-smooth); font-weight: 500; }
         .form-input:focus ~ .form-label, .form-input:not(:placeholder-shown) ~ .form-label { top: 12px; font-size: 0.75rem; color: var(--primary); font-weight: 700; }
+
+        /* NOTIFICATION PAGE STYLE (STYLE FACEBOOK) */
+        .notification-page-container { max-width: 680px; margin: 0 auto; }
+        .noti-header-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; padding: 0 8px; }
+        .noti-header-title { font-size: 1.5rem; font-weight: 800; color: var(--text-main); }
+        .noti-section-title { font-size: 1rem; font-weight: 700; color: var(--text-main); margin: 16px 8px 12px 8px; }
+        
+        .noti-item-card { display: flex; align-items: center; gap: 14px; padding: 12px 16px; border-radius: var(--radius-md); transition: var(--trans-smooth); cursor: pointer; position: relative; margin-bottom: 4px; background: var(--bg-glass-solid); }
+        .noti-item-card.unread { background: #e6f7f0; }
+        .noti-item-card:hover { background: #f1f5f9; }
+        
+        .noti-avatar-box { position: relative; width: 56px; height: 56px; flex-shrink: 0; }
+        .noti-avatar-box img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; }
+        .noti-badge-icon { position: absolute; bottom: -2px; right: -2px; width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; border: 2px solid #ffffff; font-size: 14px; }
+        
+        .noti-badge-like { background: #1877f2; }
+        .noti-badge-love { background: #f33e5b; }
+        .noti-badge-comment { background: #2e89ff; }
+        .noti-badge-sub_comment { background: #00a884; }
+        .noti-badge-like_sub_comment { background: #1877f2; }
+        .noti-badge-follow { background: #10B981; }
+
+        .noti-content-text { flex: 1; font-size: 0.93rem; color: var(--text-main); line-height: 1.35; }
+        .noti-content-text strong { font-weight: 700; color: var(--text-main); }
+        .noti-time-text { font-size: 0.8rem; color: var(--text-muted); margin-top: 4px; font-weight: 600; }
+        .noti-unread-dot { width: 10px; height: 10px; background: var(--primary); border-radius: 50%; flex-shrink: 0; }
 
         /* FEED CONTAINER & CARD POSTINGAN */
         .feed-container { margin-left: -32px; margin-right: -32px; background: transparent; max-width: calc(100% + 64px); }
@@ -659,7 +685,7 @@
                 <div class="header-right">
                     <button class="icon-btn ripple-btn" id="btn-refresh" title="Refresh"><span class="material-symbols-outlined">refresh</span></button>
                     <button class="icon-btn ripple-btn" id="btn-theme" title="Ubah Tema"><span class="material-symbols-outlined">dark_mode</span></button>
-                    <button class="icon-btn ripple-btn" id="btn-notifications" title="Notifikasi Interaksi" onclick="App.Features.showNotificationsModalList()">
+                    <button class="icon-btn ripple-btn" id="btn-notifications" title="Notifikasi Interaksi" onclick="App.Router.navigate('notifications')">
                         <span class="material-symbols-outlined">notifications</span>
                         <span class="badge" id="noti-badge">0</span>
                     </button>
@@ -705,7 +731,7 @@
             <!-- View 1: List Kontak Penuh -->
             <div class="chat-sidebar-wrapper" id="chat-contacts-list-sidebar-container">
                 <div class="chat-sidebar-search">
-                    <input type="text" placeholder="Tanya Meta AI atau Cari">
+                    <input type="text" placeholder="Cari kontak obrolan">
                 </div>
                 <div class="popup-friends-list" id="popup-friends-sidebar-items"></div>
             </div>
@@ -800,17 +826,15 @@
                 
                 App.UI.renderGlobalBannerAdIfExists();
 
-                unreadMessageCounters = {
-                    'insight_ata': 1,
-                    'marketplace': 1
-                };
-
                 setInterval(() => {
                     if (window.location.hash.includes('#/feed')) {
                         document.querySelectorAll('.post-live-time-tracker').forEach(el => {
                             const ts = el.getAttribute('data-timestamp');
                             if (ts) el.innerText = App.UI.calculateRelativeTimeAgo(ts);
                         });
+                    }
+                    if (window.location.hash.includes('#/notifications')) {
+                        App.Features.renderNotificationsView();
                     }
                 }, 5000);
             },
@@ -898,6 +922,7 @@
                             } else if (payload.new && payload.new.receiver === myName) {
                                 unreadMessageCounters[payload.new.sender.toLowerCase()] = (unreadMessageCounters[payload.new.sender.toLowerCase()] || 0) + 1;
                                 App.Features.loadPopupFriendsListSidebar();
+                                App.Navigation.updateChatBadgeDOM();
                             }
                         })
                         .subscribe();
@@ -905,7 +930,10 @@
                     supabaseClient
                         .channel('realtime-notifications')
                         .on('postgres_changes', { event: '*', schema: 'public', table: 'notifications' }, async () => {
-                            App.Features.fetchCloudNotificationsDataZone();
+                            await App.Features.fetchCloudNotificationsDataZone();
+                            if (window.location.hash.includes('#/notifications')) {
+                                App.Features.renderNotificationsView();
+                            }
                         })
                         .subscribe();
 
@@ -1039,6 +1067,7 @@
                     { id: 'feed', label: 'Status', icon: 'home', isChatTrigger: false },
                     { id: 'explore', label: 'Cari Teman', icon: 'person_search', isChatTrigger: false },
                     { id: 'chat_trigger', label: 'Pesan', icon: 'chat', isChatTrigger: true }, 
+                    { id: 'notifications', label: 'Notifikasi', icon: 'notifications', isChatTrigger: false },
                     { id: 'groups', label: 'Komunitas', icon: 'groups', isChatTrigger: false },
                     { id: 'profil', label: 'Profil Saya', icon: 'account_circle', isChatTrigger: false },
                     { id: 'settings', label: 'Pengaturan', icon: 'settings', isChatTrigger: false }
@@ -1050,8 +1079,8 @@
 
                     this.menuConfig.forEach(m => {
                         if(m.isChatTrigger) {
-                            sideHTML += `<li class="menu-item-wrapper"><a class="menu-item ripple-btn" onclick="App.UI.toggleChatPopup(true)"><span class="material-symbols-outlined">${m.icon}</span><span class="menu-text">${m.label}</span></a></li>`;
-                            topInjectedHTML += `<div class="mobile-menu-tab-btn" onclick="App.UI.toggleChatPopup(true)" title="${m.label}"><span class="material-symbols-outlined">${m.icon}</span></div>`;
+                            sideHTML += `<li class="menu-item-wrapper"><a class="menu-item ripple-btn" onclick="App.UI.toggleChatPopup(true)"><span class="material-symbols-outlined">${m.icon}</span><span class="menu-text">${m.label}</span><span class="badge" id="sidebar-chat-badge">0</span></a></li>`;
+                            topInjectedHTML += `<div class="mobile-menu-tab-btn" onclick="App.UI.toggleChatPopup(true)" title="${m.label}"><span class="material-symbols-outlined">${m.icon}</span><span class="badge" id="mobile-chat-badge">0</span></div>`;
                         } else {
                             sideHTML += `<li><a class="menu-item option-node-link ripple-btn" data-route="${m.id}" onclick="App.Router.navigate('${m.id}')"><span class="material-symbols-outlined">${m.icon}</span><span class="menu-text">${m.label}</span></a></li>`;
                             topInjectedHTML += `<div class="mobile-menu-tab-btn" data-route="${m.id}" onclick="App.Router.navigate('${m.id}')" title="${m.label}"><span class="material-symbols-outlined">${m.icon}</span></div>`;
@@ -1062,6 +1091,23 @@
                     
                     if (side) side.innerHTML = sideHTML; 
                     if (topInjectedNode) topInjectedNode.innerHTML = topInjectedHTML;
+                    this.updateChatBadgeDOM();
+                },
+                updateChatBadgeDOM() {
+                    let totalUnread = 0;
+                    Object.values(unreadMessageCounters).forEach(cnt => totalUnread += (cnt || 0));
+                    
+                    const sideBadge = document.getElementById('sidebar-chat-badge');
+                    const mobBadge = document.getElementById('mobile-chat-badge');
+                    
+                    if(sideBadge) {
+                        sideBadge.innerText = totalUnread;
+                        sideBadge.style.display = totalUnread > 0 ? 'flex' : 'none';
+                    }
+                    if(mobBadge) {
+                        mobBadge.innerText = totalUnread;
+                        mobBadge.style.display = totalUnread > 0 ? 'flex' : 'none';
+                    }
                 }
             },
 
@@ -1082,6 +1128,17 @@
                             <h2 style="font-weight:800; margin-bottom:4px;">Cari Jaringan Pengguna Asli</h2>
                             <p style="color: var(--text-muted); font-size:0.85rem; margin-bottom: 24px;">Berikut adalah akun asli anggota ekosistem Tech Social.</p>
                             <div id="explore-users-stream" class="user-grid"></div>
+                        </div>
+                    `;
+                },
+                notifications() {
+                    return `
+                        <div class="notification-page-container">
+                            <div class="noti-header-row">
+                                <h2 class="noti-header-title">Notifikasi</h2>
+                            </div>
+                            <div class="noti-section-title">Terdahulu</div>
+                            <div id="notifications-viewport-list"></div>
                         </div>
                     `;
                 },
@@ -1203,6 +1260,7 @@
             ViewControllers: {
                 feed() { App.UI.syncGlobalAvatarAndName(); App.Features.renderPosts(); },
                 explore() { App.Features.renderExploreUsers(); },
+                notifications() { App.Features.renderNotificationsView(); App.Features.markAllLocalNotificationsAsReadCloudAction(); },
                 groups() { App.Features.renderCommunityHubViewportList(); },
                 profil() { App.Features.loadFriendsCount(); },
                 settings() {}
@@ -1453,6 +1511,8 @@
                     localStorage.setItem('ns_active_chat_name', friendName);
 
                     unreadMessageCounters[friendName.toLowerCase()] = 0;
+                    App.Navigation.updateChatBadgeDOM();
+
                     document.getElementById('chat-contacts-list-sidebar-container').classList.add('hidden');
                     document.getElementById('popup-chat-header-title').innerText = friendName;
                     document.getElementById('chat-back-to-list-btn').style.display = "inline-flex";
@@ -1476,7 +1536,6 @@
                     await App.Features.fetchChatMessagesAndRenderStream();
                 },
 
-                // MEMUAT CHAT DENGAN FOTO PROFIL SENDER + JAM REALTIME + TOMBOL EDIT & HAPUS
                 async fetchChatMessagesAndRenderStream() {
                     const viewport = document.getElementById('popup-msg-stream-viewport');
                     if (!viewport || !activeChatFriendName) return;
@@ -1486,7 +1545,6 @@
                     let friendAvatar = 'https://i.pravatar.cc/150?img=12';
 
                     try {
-                        // Coba ambil avatar teman dari postingan terakhir
                         const { data: friendPosts } = await supabaseClient.from('posts').select('avatar').eq('author', activeChatFriendName).not('avatar', 'is', null).limit(1);
                         if (friendPosts && friendPosts.length > 0 && friendPosts[0].avatar) {
                             friendAvatar = friendPosts[0].avatar;
@@ -1545,7 +1603,6 @@
                     }
                 },
 
-                // FITUR EDIT PESAN CHAT REALTME
                 async editSingleChatMessageAction(messageId, currentText) {
                     const newText = prompt("Edit pesan obrolan Anda:", currentText);
                     if (newText === null || !newText.trim() || newText.trim() === currentText) return;
@@ -1830,8 +1887,15 @@
                 },
 
                 async pushCloudNotificationPayload(targetUser, actionType, textDesc) {
+                    if(!targetUser || targetUser === App.ProfileState.getCurrentName()) return;
                     try {
-                        await supabaseClient.from('notifications').insert([{ sender: App.ProfileState.getCurrentName(), receiver: targetUser, action_type: actionType, description: textDesc }]);
+                        await supabaseClient.from('notifications').insert([{ 
+                            sender: App.ProfileState.getCurrentName(), 
+                            receiver: targetUser, 
+                            action_type: actionType, 
+                            description: textDesc,
+                            is_unread: true
+                        }]);
                     } catch (ex) {}
                 },
 
@@ -1840,49 +1904,68 @@
                         const myName = App.ProfileState.getCurrentName();
                         const { data } = await supabaseClient.from('notifications').select('*').eq('receiver', myName).order('created_at', { ascending: false });
                         if(data) {
-                            liveNotifications = data.map(n => ({ id: n.id, user: n.sender, type: n.action_type, desc: n.description, isUnread: n.is_unread, timestamp: new Date(n.created_at).getTime() }));
+                            liveNotifications = data.map(n => ({ 
+                                id: n.id, 
+                                user: n.sender, 
+                                type: n.action_type, 
+                                desc: n.description, 
+                                isUnread: n.is_unread, 
+                                timestamp: new Date(n.created_at).getTime() 
+                            }));
                             liveHeaderNotificationCount = liveNotifications.filter(n => n.isUnread).length;
                             App.UI.refreshHeaderNotificationBadgeDOM();
                         }
                     } catch (err) {}
                 },
 
-                async showNotificationsModalList() {
-                    await App.Features.markAllLocalNotificationsAsReadCloudAction();
+                async renderNotificationsView() {
+                    const viewport = document.getElementById('notifications-viewport-list');
+                    if(!viewport) return;
+                    
                     if(liveNotifications.length === 0) {
-                        App.Modal.open("Notifikasi", `<div style="padding:24px; text-align:center; color:var(--text-muted);">Tidak ada notifikasi interaksi terbaru.</div>`, true, false);
+                        viewport.innerHTML = `<div class="glass-card" style="text-align:center; padding:32px; color:var(--text-muted); border:none;">Belum ada notifikasi.</div>`;
                         return;
                     }
-                    
-                    const listHTML = `
-                        <div style="display:flex; flex-direction:column; gap:12px; text-align:left;">
-                            ${liveNotifications.map(n => {
-                                let iconName = 'notifications';
-                                if(n.type === 'like') iconName = 'thumb_up';
-                                if(n.type === 'comment') iconName = 'comment';
-                                if(n.type === 'love') iconName = 'favorite';
-                                if(n.type === 'share') iconName = 'share';
-                                return `
-                                    <div style="display:flex; gap:12px; align-items:center; padding:12px; background:var(--bg-body); border-radius:12px; border:1px solid var(--border-color);">
-                                        <div style="width:36px; height:36px; border-radius:50%; background:var(--primary-state); display:flex; align-items:center; justify-content:center; color:var(--primary); flex-shrink:0;">
-                                            <span class="material-symbols-outlined" style="font-size:18px;">${iconName}</span>
-                                        </div>
-                                        <div style="flex:1; overflow:hidden;">
-                                            <p style="font-size:0.9rem; color:var(--text-main);"><strong>${n.user}</strong> ${n.desc}</p>
-                                        </div>
+
+                    viewport.innerHTML = liveNotifications.map(n => {
+                        let iconName = 'notifications';
+                        let badgeClass = 'noti-badge-like';
+                        let actionText = n.desc;
+
+                        if (n.type === 'like') { iconName = 'thumb_up'; badgeClass = 'noti-badge-like'; }
+                        else if (n.type === 'love') { iconName = 'favorite'; badgeClass = 'noti-badge-love'; }
+                        else if (n.type === 'comment') { iconName = 'chat_bubble'; badgeClass = 'noti-badge-comment'; }
+                        else if (n.type === 'sub_comment') { iconName = 'reply'; badgeClass = 'noti-badge-sub_comment'; }
+                        else if (n.type === 'like_sub_comment') { iconName = 'thumb_up'; badgeClass = 'noti-badge-like_sub_comment'; }
+                        else if (n.type === 'follow') { iconName = 'person_add'; badgeClass = 'noti-badge-follow'; }
+
+                        const timeAgo = App.UI.calculateRelativeTimeAgo(n.timestamp);
+
+                        return `
+                            <div class="noti-item-card ${n.isUnread ? 'unread' : ''}" onclick="App.Router.navigate('profil?name=${encodeURIComponent(n.user)}')">
+                                <div class="noti-avatar-box">
+                                    <img src="https://i.pravatar.cc/150?u=${encodeURIComponent(n.user)}" alt="${n.user}">
+                                    <div class="noti-badge-icon ${badgeClass}">
+                                        <span class="material-symbols-outlined" style="font-size:13px;">${iconName}</span>
                                     </div>
-                                `;
-                            }).join('')}
-                        </div>
-                    `;
-                    App.Modal.open("Notifikasi Masuk", listHTML, true, false);
+                                </div>
+                                <div class="noti-content-text">
+                                    <strong>${n.user}</strong> ${actionText}
+                                    <div class="noti-time-text">${timeAgo}</div>
+                                </div>
+                                ${n.isUnread ? '<div class="noti-unread-dot"></div>' : ''}
+                            </div>
+                        `;
+                    }).join('');
                 },
 
                 async markAllLocalNotificationsAsReadCloudAction() {
                     try {
                         const myName = App.ProfileState.getCurrentName();
                         await supabaseClient.from('notifications').update({ is_unread: false }).eq('receiver', myName);
-                        App.Features.fetchCloudNotificationsDataZone();
+                        liveNotifications.forEach(n => n.isUnread = false);
+                        liveHeaderNotificationCount = 0;
+                        App.UI.refreshHeaderNotificationBadgeDOM();
                     } catch (ex) {}
                 },
 
@@ -1908,7 +1991,7 @@
                             list = list.filter(u => u !== myName);
                         } else {
                             list.push(myName); 
-                            if(postAuthor !== myName) await this.pushCloudNotificationPayload(postAuthor, 'like', 'menyukai postingan status Anda.'); 
+                            await this.pushCloudNotificationPayload(postAuthor, 'like', 'menyukai postingan Anda.'); 
                         }
                         
                         await supabaseClient.from('posts').update({ liked_users: list }).eq('id', Number(id)); 
@@ -1937,7 +2020,7 @@
                             list = list.filter(u => u !== myName);
                         } else {
                             list.push(myName); 
-                            if(postAuthor !== myName) await this.pushCloudNotificationPayload(postAuthor, 'love', 'menyukai status Anda dengan Cinta.'); 
+                            await this.pushCloudNotificationPayload(postAuthor, 'love', 'menyukai postingan Anda dengan Love.'); 
                         }
                         
                         await supabaseClient.from('posts').update({ loved_users: list }).eq('id', Number(id)); 
@@ -2008,7 +2091,7 @@
                                 buttonNode.style.background = '#f1f5f9';
                                 buttonNode.style.color = '#64748b';
                                 App.Toast.show("Sekarang mengikuti " + targetUsername, "success");
-                                await App.Features.pushCloudNotificationPayload(targetUsername, 'follow', `mulai mengikuti Anda.`);
+                                await App.Features.pushCloudNotificationPayload(targetUsername, 'follow', `mengikuti Anda.`);
                             }
                         } catch(e){}
                     }
@@ -2037,7 +2120,7 @@
                                 buttonNode.className = "btn btn-secondary ripple-btn";
                                 buttonNode.style.background = "#f1f5f9";
                                 buttonNode.style.color = "#64748b";
-                                await App.Features.pushCloudNotificationPayload(targetUsername, 'follow', `mulai mengikuti Anda.`);
+                                await App.Features.pushCloudNotificationPayload(targetUsername, 'follow', `mengikuti Anda.`);
                             }
                         } catch(e){}
                     }
@@ -2084,14 +2167,14 @@
 
                                 return `
                                     <div style="display:flex; gap:8px; align-items:flex-start; margin-top:8px; padding-left:12px; border-left:2px solid var(--border-color);">
-                                        <img src="https://i.pravatar.cc/150?img=13" style="width:26px; height:26px; border-radius:50%; object-fit:cover;">
+                                        <img src="https://i.pravatar.cc/150?u=${encodeURIComponent(r.user)}" style="width:26px; height:26px; border-radius:50%; object-fit:cover;">
                                         <div>
                                             <div style="background:var(--bg-body); padding:6px 10px; border-radius:12px; border:1px solid var(--border-color);">
                                                 <strong>${r.user}</strong>
                                                 <p style="font-size:0.85rem; margin-top:2px;">${r.text}</p>
                                             </div>
                                             <div style="display:flex; gap:12px; font-size:0.7rem; color:var(--text-muted); margin-top:3px; font-weight:700;">
-                                                <span class="reply-like-btn ${isReplyLiked}" style="cursor:pointer;color:var(--primary);" onclick="App.Features.toggleReplyLikeAction('${c.id}', '${r.id}')">${replyLikeBadgeHTML}</span>
+                                                <span class="reply-like-btn ${isReplyLiked}" style="cursor:pointer;color:var(--primary);" onclick="App.Features.toggleReplyLikeAction('${c.id}', '${r.id}', '${escapeJSString(r.user)}')">${replyLikeBadgeHTML}</span>
                                                 <span style="cursor:pointer;" onclick="activeReplyTargetCommentId='${c.id}'; App.Features.renderBottomSheetInputBar();">Balas</span>
                                             </div>
                                         </div>
@@ -2101,14 +2184,14 @@
                             return `
                             <div style="display:flex; gap:10px; margin-bottom:12px; text-align:left; flex-direction:column;">
                                 <div style="display:flex; gap:10px; align-items:flex-start;">
-                                    <img src="https://i.pravatar.cc/150?img=11" style="width:34px; height:34px; border-radius:50%; object-fit:cover;">
+                                    <img src="https://i.pravatar.cc/150?u=${encodeURIComponent(c.user_name)}" style="width:34px; height:34px; border-radius:50%; object-fit:cover;">
                                     <div>
                                         <div style="background:var(--bg-body); padding:8px 12px; border-radius:14px; border:1px solid var(--border-color);">
                                             <strong>${c.user_name}</strong>
                                             <p style="font-size:0.9rem; margin-top:2px;">${c.text}</p>
                                         </div>
                                         <div style="font-size:0.75rem; color:var(--text-muted); margin-top:4px; margin-left:6px; display:flex; gap:12px; font-weight:700;">
-                                            <span class="comment-like-btn ${isCommentLiked}" style="cursor:pointer;color:var(--primary);" onclick="App.Features.toggleCommentLikeAction('${c.id}')">${commentLikeBadgeHTML}</span>
+                                            <span class="comment-like-btn ${isCommentLiked}" style="cursor:pointer;color:var(--primary);" onclick="App.Features.toggleCommentLikeAction('${c.id}', '${escapeJSString(c.user_name)}')">${commentLikeBadgeHTML}</span>
                                             <span style="cursor:pointer;" onclick="activeReplyTargetCommentId='${c.id}'; App.Features.renderBottomSheetInputBar();">Balas</span>
                                         </div>
                                     </div>
@@ -2120,19 +2203,23 @@
                     } catch(ex) {}
                 },
 
-                async toggleCommentLikeAction(commentId) {
+                async toggleCommentLikeAction(commentId, commentAuthor) {
                     const myName = App.ProfileState.getCurrentName();
                     try {
                         const { data } = await supabaseClient.from('comments').select('likes').eq('id', commentId).single();
                         let list = data?.likes || [];
-                        if (list.includes(myName)) list = list.filter(u => u !== myName);
-                        else list.push(myName);
+                        if (list.includes(myName)) {
+                            list = list.filter(u => u !== myName);
+                        } else {
+                            list.push(myName);
+                            await this.pushCloudNotificationPayload(commentAuthor, 'like', 'menyukai komentar Anda.');
+                        }
                         await supabaseClient.from('comments').update({ likes: list }).eq('id', commentId);
                         this.reloadCommentsBottomSheetStreamOnly();
                     } catch(e) {}
                 },
 
-                async toggleReplyLikeAction(commentId, replyId) {
+                async toggleReplyLikeAction(commentId, replyId, replyAuthor) {
                     const myName = App.ProfileState.getCurrentName();
                     try {
                         const { data } = await supabaseClient.from('comments').select('replies').eq('id', commentId).single();
@@ -2140,8 +2227,12 @@
                         replies = replies.map(r => {
                             if (r.id === replyId) {
                                 let rLikes = r.likes || [];
-                                if (rLikes.includes(myName)) rLikes = rLikes.filter(u => u !== myName);
-                                else rLikes.push(myName);
+                                if (rLikes.includes(myName)) {
+                                    rLikes = rLikes.filter(u => u !== myName);
+                                } else {
+                                    rLikes.push(myName);
+                                    this.pushCloudNotificationPayload(replyAuthor, 'like_sub_comment', 'menyukai balasan komentar Anda.');
+                                }
                                 r.likes = rLikes;
                             }
                             return r;
@@ -2156,14 +2247,16 @@
                     const text = input.value.trim(); const myName = App.ProfileState.getCurrentName();
                     try {
                         if (activeReplyTargetCommentId) {
-                            const { data } = await supabaseClient.from('comments').select('replies').eq('id', activeReplyTargetCommentId).single();
+                            const { data } = await supabaseClient.from('comments').select('user_name, replies').eq('id', activeReplyTargetCommentId).single();
                             let currentReplies = data?.replies || [];
                             currentReplies.push({ id: `r_${Date.now()}`, user: myName, text: text, date: Date.now(), likes: [] });
                             await supabaseClient.from('comments').update({ replies: currentReplies }).eq('id', activeReplyTargetCommentId);
+                            
+                            await this.pushCloudNotificationPayload(data?.user_name, 'sub_comment', 'membalas komentar Anda.');
                             activeReplyTargetCommentId = null;
                         } else {
                             await supabaseClient.from('comments').insert([{ post_id: activeBottomSheetPostId, user_name: myName, text: text, likes: [], replies: [] }]);
-                            if (postAuthor !== myName) await this.pushCloudNotificationPayload(postAuthor, 'comment', `mengomentari postingan Anda.`);
+                            await this.pushCloudNotificationPayload(postAuthor, 'comment', 'mengomentari postingan Anda.');
                         }
                         input.value = ''; this.renderBottomSheetInputBar(postAuthor); this.reloadCommentsBottomSheetStreamOnly();
                     } catch(err) {}
@@ -2293,7 +2386,7 @@
                 calculateRelativeTimeAgo(ts) {
                     const sec = Math.floor((Date.now() - parseInt(ts)) / 1000);
                     if (sec < 60) return `Baru saja`;
-                    if (sec < 3600) return `${Math.floor(sec/60)}m`;
+                    if (sec < 3600) return `${Math.floor(sec/60)}j`;
                     if (sec < 86400) return `${Math.floor(sec/3600)}j`;
                     return `${Math.floor(sec/86400)}h`;
                 },
