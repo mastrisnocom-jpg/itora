@@ -882,10 +882,7 @@
                         .channel('realtime-chats')
                         .on('postgres_changes', { event: '*', schema: 'public', table: 'chats' }, async (payload) => {
                             const myName = App.ProfileState.getCurrentName();
-                            if (activeChatFriendName && (
-                                (payload.new && (payload.new.sender === activeChatFriendName || payload.new.sender === myName)) ||
-                                payload.eventType === 'DELETE'
-                            )) {
+                            if (activeChatFriendName) {
                                 App.Features.fetchChatMessagesAndRenderStream();
                             } else if (payload.new && payload.new.receiver === myName) {
                                 unreadMessageCounters[payload.new.sender.toLowerCase()] = (unreadMessageCounters[payload.new.sender.toLowerCase()] || 0) + 1;
@@ -1437,7 +1434,6 @@
                     }).join('');
                 },
 
-                // MEMPERBAIKI PENYIMPANAN SESI CHAT BERTAHAN TERHUBUNG REALTIME
                 async openSpecificFriendPopupObrolan(friendEmail, friendName) {
                     activeChatFriendEmail = friendEmail; 
                     activeChatFriendName = friendName;
@@ -1469,7 +1465,6 @@
                     await App.Features.fetchChatMessagesAndRenderStream();
                 },
 
-                // SINKRONISASI PEMBACAAN DAN MENAMPILKAN TOMBOL HAPUS PESAN
                 async fetchChatMessagesAndRenderStream() {
                     const viewport = document.getElementById('popup-msg-stream-viewport');
                     if (!viewport || !activeChatFriendName) return;
@@ -1506,11 +1501,16 @@
                         }).join('');
                         viewport.scrollTop = viewport.scrollHeight;
                     } catch(err) {
-                        // Memastikan tampilan tidak blank
+                        if (!viewport.querySelector('.bubble')) {
+                            viewport.innerHTML = `
+                                <div style="flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; color:var(--text-muted); font-size:0.85rem; padding:20px; text-align:center;">
+                                    <span class="material-symbols-outlined" style="font-size:36px; color:var(--primary); margin-bottom:8px;">chat</span>
+                                    Ruang obrolan siap. Ketik pesan Anda di bawah!
+                                </div>`;
+                        }
                     }
                 },
 
-                // FITUR HAPUS SATU PESAN CHAT
                 async deleteSingleChatMessageAction(messageId) {
                     if (!confirm("Hapus pesan ini?")) return;
                     try {
@@ -1522,7 +1522,6 @@
                     }
                 },
 
-                // FITUR MENU HAPUS SEMUA CHAT DENGAN TEMAN AKTIF
                 async triggerDeleteChatHistoryAction() {
                     if (!activeChatFriendName) return;
                     if (!confirm(`Hapus seluruh riwayat percakapan dengan ${activeChatFriendName}?`)) return;
@@ -1567,9 +1566,23 @@
                     
                     input.value = '';
 
+                    const viewport = document.getElementById('popup-msg-stream-viewport');
+                    if (viewport) {
+                        const emptyPlaceholder = viewport.querySelector('div[style*="flex:1"]');
+                        if (emptyPlaceholder) emptyPlaceholder.remove();
+
+                        const tempWrapper = document.createElement('div');
+                        tempWrapper.className = 'bubble-wrapper out';
+                        tempWrapper.innerHTML = `<div class="bubble out"><span>${msgText}</span></div>`;
+                        viewport.appendChild(tempWrapper);
+                        viewport.scrollTop = viewport.scrollHeight;
+                    }
+
                     try {
                         await supabaseClient.from('chats').insert([{ sender: myName, receiver: activeChatFriendName, message: msgText }]);
-                        await App.Features.fetchChatMessagesAndRenderStream();
+                        setTimeout(async () => {
+                            await App.Features.fetchChatMessagesAndRenderStream();
+                        }, 500);
                     } catch(err) {}
                 },
 
@@ -2280,7 +2293,6 @@
                 },
                 closeMobileSidebar() { document.getElementById('app-layout')?.classList.remove('sidebar-mobile-open'); document.getElementById('mobile-overlay')?.classList.remove('active'); },
                 
-                // POPUP CHAT MEMATUHI SESI OBROLAN AKTIF DAN MEMUAT CHAT SECARA SINKRON
                 toggleChatPopup(open) {
                     const box = document.getElementById('floating-chat-popup-box'); if(!box) return;
                     if(open) { 
@@ -2313,5 +2325,3 @@
     </script>
 </body>
 </html>
-
-
