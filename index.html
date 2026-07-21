@@ -162,6 +162,7 @@
         .noti-badge-follow { background: #10B981; }
         .noti-badge-mention { background: #8B5CF6; }
         .noti-badge-post { background: #F59E0B; }
+        .noti-badge-share { background: #10B981; }
 
         .noti-content-text { flex: 1; font-size: 0.93rem; color: var(--text-main); line-height: 1.35; }
         .noti-user-link { color: var(--primary); font-weight: 800; cursor: pointer; text-decoration: none; }
@@ -1393,7 +1394,7 @@
                     sideHTML += `<li style="margin-top: auto;"><a class="menu-item ripple-btn" style="color: var(--danger);" onclick="App.Auth.logout()"><span class="material-symbols-outlined">logout</span><span class="menu-text">Keluar</span></a></li>`;
                     
                     if (side) side.innerHTML = sideHTML; 
-                    if (topInjectedNode) topInjectedNode.innerHTML = topInjectedHTML;
+                    if (topInjectedNode) topInjectedHTML = topInjectedHTML;
                     this.updateChatBadgeDOM();
                 },
                 updateChatBadgeDOM() {
@@ -3218,8 +3219,11 @@
                         const iconClass = n.action_type === 'like' ? 'thumb_up noti-badge-like' : 
                                           n.action_type === 'love' ? 'favorite noti-badge-love' : 
                                           n.action_type === 'comment' ? 'comment noti-badge-comment' : 
+                                          n.action_type === 'sub_comment' ? 'comment noti-badge-sub_comment' : 
+                                          n.action_type === 'like_sub_comment' ? 'thumb_up noti-badge-like_sub_comment' : 
                                           n.action_type === 'follow' ? 'person_add noti-badge-follow' : 
                                           n.action_type === 'mention' ? 'alternate_email noti-badge-mention' :
+                                          n.action_type === 'share' ? 'share noti-badge-share' :
                                           n.action_type === 'new_post' ? 'campaign noti-badge-post' : 'notifications noti-badge-like';
                         const isUnread = n.is_unread ? 'unread' : '';
                         const timeStr = n.created_at ? App.UI.calculateRelativeTimeAgo(new Date(n.created_at).getTime()) : 'Baru saja';
