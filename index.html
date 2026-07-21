@@ -940,7 +940,7 @@
             });
         }
 
-        async function detectAndNotifyMentions(textContext, actionType = 'mention') {
+        async function detectAndNotifyMentions(textContext, actionType = 'mention', postId = null) {
             if (!textContext) return;
             const matches = textContext.match(/@([a-zA-Z0-9_]+)/g);
             if (matches && matches.length > 0) {
@@ -951,7 +951,7 @@
                     const isRegistered = window.registeredUsersList && window.registeredUsersList.some(u => u.toLowerCase() === targetUser.toLowerCase());
                     if (isRegistered && targetUser.toLowerCase() !== myName.toLowerCase()) {
                         const matchedProfile = window.registeredUsersList.find(u => u.toLowerCase() === targetUser.toLowerCase());
-                        await App.Features.pushCloudNotificationPayload(matchedProfile || targetUser, 'mention', `menyebut (@mention) Anda dalam sebuah kiriman.`);
+                        await App.Features.pushCloudNotificationPayload(matchedProfile || targetUser, 'mention', `menyebut (@mention) Anda dalam sebuah kiriman.`, postId);
                     }
                 }
             }
@@ -2347,7 +2347,7 @@
                         const currentCount = data ? (data.shared_count || 0) : 0;
                         await supabaseClient.from('posts').update({ shared_count: currentCount + 1 }).eq('id', Number(postId));
                         if (postAuthor !== App.ProfileState.getCurrentName()) {
-                            await App.Features.pushCloudNotificationPayload(postAuthor, 'share', `membagikan postingan status Anda.`);
+                            await App.Features.pushCloudNotificationPayload(postAuthor, 'share', `membagikan postingan status Anda.`, postId);
                         }
                         this.renderPosts(false);
                     } catch(e) {}
@@ -2693,7 +2693,7 @@
                     try {
                         const { error } = await supabaseClient.from('posts').update({ content: editedTextValue }).eq('id', Number(postId));
                         if (error) throw error;
-                        await detectAndNotifyMentions(editedTextValue, 'mention');
+                        await detectAndNotifyMentions(editedTextValue, 'mention', postId);
                         App.Modal.close(); App.Toast.show("Konten status Anda berhasil diperbarui!", "success"); this.renderPosts(false);
                     } catch(err) {
                         App.Toast.show("Gagal memperbarui status ke server", "danger");
@@ -2912,7 +2912,7 @@
                         }
                         await supabaseClient.from('posts').update({ liked_users: currentLikes }).eq('id', Number(postId));
                         if (isAdding && postAuthor !== myName) {
-                            await App.Features.pushCloudNotificationPayload(postAuthor, 'like', 'menyukai postingan Anda.');
+                            await App.Features.pushCloudNotificationPayload(postAuthor, 'like', 'menyukai postingan Anda.', postId);
                         }
                         this.renderPosts(false);
                         if (window.location.hash.includes('#/profil')) App.Router.handleRoute();
@@ -2933,7 +2933,7 @@
                         }
                         await supabaseClient.from('posts').update({ loved_users: currentLoves }).eq('id', Number(postId));
                         if (isAdding && postAuthor !== myName) {
-                            await App.Features.pushCloudNotificationPayload(postAuthor, 'love', 'memberikan reaksi cinta pada postingan Anda.');
+                            await App.Features.pushCloudNotificationPayload(postAuthor, 'love', 'memberikan reaksi cinta pada postingan Anda.', postId);
                         }
                         this.renderPosts(false);
                         if (window.location.hash.includes('#/profil')) App.Router.handleRoute();
@@ -2943,7 +2943,7 @@
                 async toggleCommentLikeAction(commentId, commentAuthor) {
                     const myName = App.ProfileState.getCurrentName();
                     try {
-                        const { data: comment } = await supabaseClient.from('comments').select('likes').eq('id', commentId).single();
+                        const { data: comment } = await supabaseClient.from('comments').select('likes, post_id').eq('id', commentId).single();
                         let currentLikes = comment?.likes || [];
                         let isAdding = false;
                         if (currentLikes.includes(myName)) {
@@ -2954,7 +2954,7 @@
                         }
                         await supabaseClient.from('comments').update({ likes: currentLikes }).eq('id', commentId);
                         if (isAdding && commentAuthor !== myName) {
-                            await App.Features.pushCloudNotificationPayload(commentAuthor, 'like_sub_comment', 'menyukai komentar Anda.');
+                            await App.Features.pushCloudNotificationPayload(commentAuthor, 'like_sub_comment', 'menyukai komentar Anda.', comment?.post_id);
                         }
                         this.reloadCommentsBottomSheetStreamOnly();
                     } catch(e) {}
@@ -2963,7 +2963,7 @@
                 async toggleReplyLikeAction(commentId, replyId, replyAuthor) {
                     const myName = App.ProfileState.getCurrentName();
                     try {
-                        const { data: comment } = await supabaseClient.from('comments').select('replies').eq('id', commentId).single();
+                        const { data: comment } = await supabaseClient.from('comments').select('replies, post_id').eq('id', commentId).single();
                         let replies = comment?.replies || [];
                         let isAdding = false;
                         replies = replies.map(r => {
@@ -2981,7 +2981,7 @@
                         });
                         await supabaseClient.from('comments').update({ replies: replies }).eq('id', commentId);
                         if (isAdding && replyAuthor !== myName) {
-                            await App.Features.pushCloudNotificationPayload(replyAuthor, 'like_sub_comment', 'menyukai balasan komentar Anda.');
+                            await App.Features.pushCloudNotificationPayload(replyAuthor, 'like_sub_comment', 'menyukai balasan komentar Anda.', comment?.post_id);
                         }
                         this.reloadCommentsBottomSheetStreamOnly();
                     } catch(e) {}
@@ -3103,20 +3103,20 @@
                             currentReplies.push({ id: `r_${Date.now()}`, user: myName, text: text, date: Date.now(), likes: [] });
                             await supabaseClient.from('comments').update({ replies: currentReplies }).eq('id', activeReplyTargetCommentId);
                             
-                            await this.pushCloudNotificationPayload(activeReplyTargetUser, 'sub_comment', 'membalas komentar Anda.');
-                            await detectAndNotifyMentions(text, 'mention');
+                            await this.pushCloudNotificationPayload(activeReplyTargetUser, 'sub_comment', 'membalas komentar Anda.', activeBottomSheetPostId);
+                            await detectAndNotifyMentions(text, 'mention', activeBottomSheetPostId);
                             activeReplyTargetCommentId = null;
                             activeReplyTargetUser = null;
                         } else {
                             await supabaseClient.from('comments').insert([{ post_id: activeBottomSheetPostId, user_name: myName, text: text, likes: [], replies: [] }]);
-                            await this.pushCloudNotificationPayload(postAuthor, 'comment', 'mengomentari postingan Anda.');
-                            await detectAndNotifyMentions(text, 'mention');
+                            await this.pushCloudNotificationPayload(postAuthor, 'comment', 'mengomentari postingan Anda.', activeBottomSheetPostId);
+                            await detectAndNotifyMentions(text, 'mention', activeBottomSheetPostId);
                         }
                         input.value = ''; this.renderBottomSheetInputBar(postAuthor); this.reloadCommentsBottomSheetStreamOnly();
                     } catch(err) {}
                 },
 
-                async pushCloudNotificationPayload(targetUser, actionType, textDesc) {
+                async pushCloudNotificationPayload(targetUser, actionType, textDesc, postId = null) {
                     if(!targetUser || targetUser === App.ProfileState.getCurrentName()) return;
                     try {
                         await supabaseClient.from('notifications').insert([{ 
@@ -3124,7 +3124,8 @@
                             receiver: targetUser, 
                             action_type: actionType, 
                             description: textDesc,
-                            is_unread: true
+                            is_unread: true,
+                            post_id: postId ? Number(postId) : null
                         }]);
                     } catch (ex) {}
                 },
@@ -3144,17 +3145,54 @@
                     } catch(e) {}
                 },
 
-                async markSingleNotificationAsRead(notifId, senderName, actionType) {
+                // KLIK NOTIFIKASI LANGSUNG SCROLL KE POSTINGAN DITUDU
+                async markSingleNotificationAsRead(notifId, senderName, actionType, postId = null) {
                     try {
                         await supabaseClient.from('notifications').update({ is_unread: false }).eq('id', notifId);
                         await this.fetchCloudNotificationsDataZone();
                         
                         if (actionType === 'follow') {
                             App.Router.navigate(`profil?name=${encodeURIComponent(senderName)}`);
+                        } else if (postId) {
+                            App.Router.navigate('feed');
+                            setTimeout(() => {
+                                this.scrollToPostAndHighlight(postId, actionType);
+                            }, 400);
                         } else {
                             App.Router.navigate('feed');
                         }
                     } catch(e) {}
+                },
+
+                // FITUR SCROLL OTOMATIS KE POSTINGAN & HIGHLIGHT
+                async scrollToPostAndHighlight(postId, actionType) {
+                    let targetEl = document.getElementById(`post-element-node-${postId}`);
+                    
+                    if (!targetEl) {
+                        await this.renderPosts(false);
+                        targetEl = document.getElementById(`post-element-node-${postId}`);
+                    }
+
+                    if (targetEl) {
+                        targetEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        targetEl.style.transition = 'background-color 0.5s ease, border-color 0.5s ease';
+                        targetEl.style.backgroundColor = '#e7f3ff';
+                        targetEl.style.border = '2px solid var(--primary)';
+                        
+                        setTimeout(() => {
+                            targetEl.style.backgroundColor = '#ffffff';
+                            targetEl.style.border = 'none';
+                            targetEl.style.borderBottom = '1px solid var(--border-color)';
+                        }, 2500);
+
+                        if (['comment', 'sub_comment', 'like_sub_comment'].includes(actionType)) {
+                            const authorHeader = targetEl.querySelector('.post-author-row h4');
+                            const postAuthor = authorHeader ? authorHeader.innerText.trim() : '';
+                            this.openCommentsBottomSheet(postId, postAuthor);
+                        }
+                    } else {
+                        App.Toast.show("Postingan tidak ditemukan atau telah dihapus.", "info");
+                    }
                 },
 
                 async renderNotificationsView() {
@@ -3188,9 +3226,10 @@
                         
                         const senderAvatar = profileMap[n.sender] || DEFAULT_AVATAR_IMAGE;
                         const safeSender = escapeJSString(n.sender);
+                        const targetPostId = n.post_id || 'null';
 
                         return `
-                            <div class="noti-item-card ${isUnread}" onclick="App.Features.markSingleNotificationAsRead(${n.id}, '${safeSender}', '${n.action_type}')">
+                            <div class="noti-item-card ${isUnread}" onclick="App.Features.markSingleNotificationAsRead(${n.id}, '${safeSender}', '${n.action_type}', ${targetPostId})">
                                 <div class="noti-avatar-box">
                                     <img src="${senderAvatar}" alt="${sanitizeHTML(n.sender)}">
                                     <div class="noti-badge-icon ${iconClass.split(' ')[1]}">
@@ -3371,7 +3410,7 @@
                         const myName = App.ProfileState.getCurrentName();
                         const myUuidId = localStorage.getItem('ns_user_id'); 
                         
-                        await supabaseClient.from('posts').insert([{ 
+                        const { data: createdPost } = await supabaseClient.from('posts').insert([{ 
                             user_id: myUuidId, 
                             author: myName, 
                             avatar: App.ProfileState.getCurrentAvatar(), 
@@ -3384,7 +3423,9 @@
                             liked_users: [], 
                             loved_users: [], 
                             shared_count: 0 
-                        }]);
+                        }]).select().single();
+
+                        const newPostId = createdPost ? createdPost.id : null;
 
                         const { data: myFollowers } = await supabaseClient
                             .from('follows')
@@ -3393,11 +3434,11 @@
 
                         if (myFollowers && myFollowers.length > 0) {
                             for (const f of myFollowers) {
-                                await this.pushCloudNotificationPayload(f.follower, 'new_post', 'menerbitkan postingan baru.');
+                                await this.pushCloudNotificationPayload(f.follower, 'new_post', 'menerbitkan postingan baru.', newPostId);
                             }
                         }
 
-                        await detectAndNotifyMentions(content, 'mention');
+                        await detectAndNotifyMentions(content, 'mention', newPostId);
 
                         composerSelectedFile = null; 
                         window.lastEmbeddedMediaUrl = ""; 
