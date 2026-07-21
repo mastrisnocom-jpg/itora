@@ -9,7 +9,7 @@
       "purpose": "any maskable"
     }
   ],
-  "start_url": "./",
+  "start_url": "./index.html?pwa=true",
   "background_color": "#ffffff",
   "theme_color": "#1877F2",
   "display": "standalone",
