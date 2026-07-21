@@ -1672,7 +1672,7 @@
                     sideHTML += `<li style="margin-top: auto;"><a class="menu-item ripple-btn" style="color: var(--danger);" onclick="App.Auth.logout()"><span class="material-symbols-outlined">logout</span><span class="menu-text">Keluar</span></a></li>`;
                     
                     if (side) side.innerHTML = sideHTML; 
-                    if (topInjectedNode) topInjectedHTML = topInjectedHTML;
+                    if (topInjectedNode) topInjectedNode.innerHTML = topInjectedHTML;
                     this.updateChatBadgeDOM();
                 },
                 updateChatBadgeDOM() {
@@ -3003,7 +3003,7 @@
                     
                     if (!combinedUrl) {
                         const youtubeRegex = /(https?:\/\/(?:www\.)?(?:youtube\.com\/watch\?v=|youtu\.be\/)[^\s]+)/gi;
-                        const facebookRegex = /(https?:\/\/(?:www\.|m\.|web\.)?(?:facebook\.com\/(?:[^\s]+\/videos\/[^\s]+|watch[^\s]*|share\/[vr]\/[^\s]+|reel\/[^\s]+)|fb\.watch\/[^\s]+))/gi;
+                        const facebookRegex = /(https?:\/\/(?:www\.)?(?:facebook\.com\/[^\s]+\/videos\/[^\s]+|facebook\.com\/watch[^\s]*|fb\.watch\/[^\s]+))/gi;
                         const mp3Regex = /(https?:\/\/[^\s]+\.(?:mp3|wav|ogg))/gi;
                         
                         const ytMatch = textToCheck.match(youtubeRegex);
@@ -3040,15 +3040,7 @@
                             }
                             return videoId ? `<iframe src="https://www.youtube.com/embed/${videoId}?modestbranding=1&rel=0&showinfo=0" allowfullscreen></iframe>` : '';
                         } else if (combinedUrl.includes('facebook.com') || combinedUrl.includes('fb.watch')) {
-                            let cleanFbUrl = combinedUrl;
-                            if (cleanFbUrl.includes('/share/v/') || cleanFbUrl.includes('/share/r/')) {
-                                const shareParts = cleanFbUrl.split(/\/share\/[vr]\//);
-                                if (shareParts[1]) {
-                                    const rawId = shareParts[1].split('/')[0].split('?')[0];
-                                    cleanFbUrl = `https://www.facebook.com/watch/?v=${rawId}`;
-                                }
-                            }
-                            const fbEmbedUrl = `https://www.facebook.com/plugins/video.php?href=${encodeURIComponent(cleanFbUrl)}&show_text=false&width=500`;
+                            const fbEmbedUrl = `https://www.facebook.com/plugins/video.php?href=${encodeURIComponent(combinedUrl)}&show_text=false&width=500`;
                             return `<iframe src="${fbEmbedUrl}" style="border:none;overflow:hidden" scrolling="no" frameborder="0" allowfullscreen="true" allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"></iframe>`;
                         } else if (/\.(mp3|wav|ogg)/i.test(combinedUrl)) {
                             return `<audio controls style="width:100%; margin: 12px 0;"><source src="${combinedUrl}"></audio>`;
@@ -3066,7 +3058,7 @@
                 cleanTextContentForDisplay(rawText) {
                     if (!rawText) return "";
                     const youtubeRegex = /(https?:\/\/(?:www\.)?(?:youtube\.com\/watch\?v=|youtu\.be\/)[^\s]+)/gi;
-                    const facebookRegex = /(https?:\/\/(?:www\.|m\.|web\.)?(?:facebook\.com\/(?:[^\s]+\/videos\/[^\s]+|watch[^\s]*|share\/[vr]\/[^\s]+|reel\/[^\s]+)|fb\.watch\/[^\s]+))/gi;
+                    const facebookRegex = /(https?:\/\/(?:www\.)?(?:facebook\.com\/[^\s]+\/videos\/[^\s]+|facebook\.com\/watch[^\s]*|fb\.watch\/[^\s]+))/gi;
                     const mp3Regex = /(https?:\/\/[^\s]+\.(?:mp3|wav|ogg))/gi;
                     
                     let cleaned = rawText.replace(youtubeRegex, '').replace(facebookRegex, '').replace(mp3Regex, '').trim();
@@ -3507,7 +3499,7 @@
                                         </div>`;
 
                                     container.insertAdjacentHTML('afterbegin', customPostHTML);
-                                    targetEl = document.getElementById(`post-element-node-${numericPostId}`);
+                                    targetEl = document.getElementById(`post-element-node-${singlePost.id}`);
                                 }
                             }
                         } catch(err) {}
