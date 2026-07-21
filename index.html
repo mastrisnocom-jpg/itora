@@ -75,7 +75,7 @@
         .header-top-row { width: 100%; display: flex; align-items: center; justify-content: space-between; }
         .header-left, .header-right { display: flex; align-items: center; gap: 14px; }
         
-        /* BOTTOM NAVIGATION BAR MOBILE - DIPERBAIKI Z-INDEX KE 10005 AGAR TIDAK TERTUTUP POPUP KOMENTAR */
+        /* BOTTOM NAVIGATION BAR MOBILE */
         .header-mobile-menu-bar { 
             display: none; 
             width: 100%; 
@@ -414,6 +414,45 @@
         .bubble-action-btn:hover { text-decoration: underline; }
         .bubble-action-btn.delete:hover { color: var(--danger); }
 
+        /* MODAL VOICE CALL UI OVERLAY */
+        .call-card-box {
+            background: linear-gradient(135deg, #1e293b, #0f172a);
+            color: #ffffff;
+            border-radius: var(--radius-xl);
+            padding: 32px 24px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        .call-avatar-pulse {
+            position: relative;
+            width: 100px;
+            height: 100px;
+            margin-bottom: 20px;
+        }
+        .call-avatar-img {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 4px solid var(--primary);
+            position: relative;
+            z-index: 2;
+        }
+        .call-pulse-ring {
+            position: absolute;
+            top: -10px; left: -10px; right: -10px; bottom: -10px;
+            border-radius: 50%;
+            border: 2px solid var(--primary);
+            animation: ringPulse 1.8s infinite ease-out;
+            z-index: 1;
+        }
+        @keyframes ringPulse { 0% { transform: scale(0.95); opacity: 1; } 100% { transform: scale(1.4); opacity: 0; } }
+
         /* GLOBAL MODAL SYSTEM */
         .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); backdrop-filter: blur(4px); z-index: 4000; display: none; align-items: center; justify-content: center; padding: 20px; transition: var(--trans-smooth); }
         .modal-overlay.active { display: flex; }
@@ -727,7 +766,7 @@
         </div>
     </div>
 
-    <!-- FLOATING CHAT POP-UP -->
+    <!-- FLOATING CHAT POP-UP WITH CALL BUTTON -->
     <div class="floating-chat-widget" id="floating-chat-popup-box">
         <div class="popup-chat-header">
             <div style="display:flex; align-items:center; gap:10px;">
@@ -737,6 +776,10 @@
                 <strong style="font-size:1.05rem; font-weight:800; color:#000;" id="popup-chat-header-title">Obrolan</strong>
             </div>
             <div id="chat-header-actions-slot" style="display:none; display:flex; gap:6px;">
+                <!-- TOMBOL PANGGILAN SUARA BARU -->
+                <button class="icon-btn" id="btn-start-voice-call" style="display:inline-flex; width:28px; height:28px; color:var(--primary);" title="Panggilan Suara" onclick="App.Call.startCall()">
+                    <span class="material-symbols-outlined" style="font-size:18px;">call</span>
+                </button>
                 <button class="icon-btn" id="btn-manage-ai-key" style="display:inline-flex; width:28px; height:28px; color:var(--primary);" title="Atur API Key Gemini" onclick="App.Features.openGeminiApiKeyModalForm()">
                     <span class="material-symbols-outlined" style="font-size:18px;">key</span>
                 </button>
@@ -774,6 +817,25 @@
             </div>
             <div class="comments-sheet-stream" id="comments-sheet-stream-injector"></div>
             <div class="comments-sheet-input-row" id="comments-sheet-input-dock-form"></div>
+        </div>
+    </div>
+
+    <!-- GLOBAL CALL OVERLAY MODAL -->
+    <div id="call-overlay-modal" class="modal-overlay" style="z-index: 20000; display:none;">
+        <div class="call-card-box" style="width: 100%; max-width: 380px;">
+            <div class="call-avatar-pulse">
+                <img id="call-user-avatar" src="" class="call-avatar-img" alt="Avatar">
+                <div class="call-pulse-ring"></div>
+            </div>
+            <h3 id="call-user-name" style="font-size: 1.25rem; font-weight: 800; margin-bottom: 4px;">Nama Pengguna</h3>
+            <p id="call-status-text" style="font-size: 0.88rem; color: #94a3b8; margin-bottom: 28px;">Memanggil...</p>
+            
+            <!-- ELEMENT AUDIO WEBRTC HIDDEN -->
+            <audio id="remote-rtc-audio" autoplay></audio>
+            
+            <div id="call-action-buttons-row" style="display: flex; gap: 16px; align-items: center; justify-content: center; width: 100%;">
+                <!-- TOMBOL AKSI OTOMATIS BERUBAH TERIMA/TOLAK/MUTE/AKHIRI -->
+            </div>
         </div>
     </div>
 
@@ -972,6 +1034,7 @@
                 this.Features.initCommentsSwipeToCloseGesture();
                 this.UI.initInfiniteScrollListener();
                 this.UI.initBackButtonCloseSystem();
+                this.Call.init();
                 
                 App.UI.renderGlobalBannerAdIfExists();
 
@@ -1050,6 +1113,221 @@
                         banner.classList.remove('active');
                         banner.style.display = 'none';
                     }
+                }
+            },
+
+            // MODULE WEBRTC CALL PANGGUNG PANGGILAN SUARA SUPABASE
+            Call: {
+                peerConnection: null,
+                localStream: null,
+                remoteStream: null,
+                callChannel: null,
+                currentCaller: null,
+                pendingOffer: null,
+
+                rtcConfig: {
+                    iceServers: [{ urls: 'stun:stun.l.google.com:19302' }]
+                },
+
+                init() {
+                    const myName = App.ProfileState.getCurrentName();
+                    if (!myName) return;
+
+                    // Saluran signaling panggilan khusus user ini
+                    this.callChannel = supabaseClient.channel(`call_signaling_${myName.toLowerCase()}`);
+                    this.callChannel
+                        .on('broadcast', { event: 'call-offer' }, payload => this.handleIncomingOffer(payload.payload))
+                        .on('broadcast', { event: 'call-answer' }, payload => this.handleCallAnswer(payload.payload))
+                        .on('broadcast', { event: 'ice-candidate' }, payload => this.handleNewICECandidate(payload.payload))
+                        .on('broadcast', { event: 'call-end' }, () => this.endCall(false))
+                        .subscribe();
+                },
+
+                async startCall() {
+                    if (!activeChatFriendName || activeChatFriendName === 'Mastrisno_AI') {
+                        App.Toast.show("Fitur panggilan suara tidak dapat digunakan dengan Bot AI", "info");
+                        return;
+                    }
+
+                    try {
+                        this.localStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
+                        this.currentCaller = activeChatFriendName;
+                        this.setupPeerConnection();
+
+                        this.localStream.getTracks().forEach(track => {
+                            this.peerConnection.addTrack(track, this.localStream);
+                        });
+
+                        const offer = await this.peerConnection.createOffer();
+                        await this.peerConnection.setLocalDescription(offer);
+
+                        const targetChannel = supabaseClient.channel(`call_signaling_${activeChatFriendName.toLowerCase()}`);
+                        await targetChannel.subscribe();
+                        await targetChannel.send({
+                            type: 'broadcast',
+                            event: 'call-offer',
+                            payload: {
+                                caller: App.ProfileState.getCurrentName(),
+                                callerAvatar: App.ProfileState.getCurrentAvatar(),
+                                offer: offer
+                            }
+                        });
+
+                        this.showCallUI(activeChatFriendName, App.ProfileState.getCurrentAvatar(), 'Memanggil...', 'outgoing');
+                    } catch (err) {
+                        App.Toast.show("Gagal mengakses mikrofon HP Anda: " + err.message, "danger");
+                        this.endCall(false);
+                    }
+                },
+
+                setupPeerConnection() {
+                    this.peerConnection = new RTCPeerConnection(this.rtcConfig);
+
+                    this.peerConnection.onicecandidate = (event) => {
+                        if (event.candidate && this.currentCaller) {
+                            const targetChannel = supabaseClient.channel(`call_signaling_${this.currentCaller.toLowerCase()}`);
+                            targetChannel.send({
+                                type: 'broadcast',
+                                event: 'ice-candidate',
+                                payload: { candidate: event.candidate }
+                            });
+                        }
+                    };
+
+                    this.peerConnection.ontrack = (event) => {
+                        const remoteAudio = document.getElementById('remote-rtc-audio');
+                        if (remoteAudio) {
+                            remoteAudio.srcObject = event.streams[0];
+                        }
+                    };
+                },
+
+                async handleIncomingOffer(payload) {
+                    this.currentCaller = payload.caller;
+                    this.pendingOffer = payload.offer;
+
+                    triggerNativeDevicePushNotification("Panggilan Suara Masuk", `${payload.caller} memanggil Anda...`);
+                    this.showCallUI(payload.caller, payload.callerAvatar || DEFAULT_AVATAR_IMAGE, 'Panggilan suara masuk...', 'incoming');
+                },
+
+                async acceptCall() {
+                    try {
+                        this.localStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
+                        this.setupPeerConnection();
+
+                        this.localStream.getTracks().forEach(track => {
+                            this.peerConnection.addTrack(track, this.localStream);
+                        });
+
+                        await this.peerConnection.setRemoteDescription(new RTCSessionDescription(this.pendingOffer));
+                        const answer = await this.peerConnection.createAnswer();
+                        await this.peerConnection.setLocalDescription(answer);
+
+                        const targetChannel = supabaseClient.channel(`call_signaling_${this.currentCaller.toLowerCase()}`);
+                        await targetChannel.send({
+                            type: 'broadcast',
+                            event: 'call-answer',
+                            payload: { answer: answer }
+                        });
+
+                        document.getElementById('call-status-text').innerText = 'Terhubung 00:00';
+                        this.renderActiveCallButtons();
+                    } catch (err) {
+                        App.Toast.show("Gagal menerima panggilan.", "danger");
+                        this.endCall(true);
+                    }
+                },
+
+                async handleCallAnswer(payload) {
+                    if (this.peerConnection) {
+                        await this.peerConnection.setRemoteDescription(new RTCSessionDescription(payload.answer));
+                        document.getElementById('call-status-text').innerText = 'Terhubung 00:00';
+                        this.renderActiveCallButtons();
+                    }
+                },
+
+                async handleNewICECandidate(payload) {
+                    if (this.peerConnection && payload.candidate) {
+                        try {
+                            await this.peerConnection.addIceCandidate(new RTCIceCandidate(payload.candidate));
+                        } catch(e) {}
+                    }
+                },
+
+                endCall(notifyRemote = true) {
+                    if (notifyRemote && this.currentCaller) {
+                        const targetChannel = supabaseClient.channel(`call_signaling_${this.currentCaller.toLowerCase()}`);
+                        targetChannel.send({
+                            type: 'broadcast',
+                            event: 'call-end',
+                            payload: {}
+                        });
+                    }
+
+                    if (this.localStream) {
+                        this.localStream.getTracks().forEach(track => track.stop());
+                        this.localStream = null;
+                    }
+                    if (this.peerConnection) {
+                        this.peerConnection.close();
+                        this.peerConnection = null;
+                    }
+
+                    this.currentCaller = null;
+                    this.pendingOffer = null;
+
+                    const modal = document.getElementById('call-overlay-modal');
+                    if (modal) modal.style.display = 'none';
+                    App.Toast.show("Panggilan berakhir", "info");
+                },
+
+                toggleMuteMic(btn) {
+                    if (this.localStream) {
+                        const audioTrack = this.localStream.getAudioTracks()[0];
+                        if (audioTrack) {
+                            audioTrack.enabled = !audioTrack.enabled;
+                            btn.style.background = audioTrack.enabled ? 'rgba(255,255,255,0.2)' : 'var(--danger)';
+                            App.Toast.show(audioTrack.enabled ? "Mikrofon Aktif" : "Mikrofon Diheningkan", "info");
+                        }
+                    }
+                },
+
+                showCallUI(name, avatar, statusText, type = 'outgoing') {
+                    const modal = document.getElementById('call-overlay-modal');
+                    document.getElementById('call-user-name').innerText = name;
+                    document.getElementById('call-user-avatar').src = avatar;
+                    document.getElementById('call-status-text').innerText = statusText;
+
+                    const buttonsRow = document.getElementById('call-action-buttons-row');
+                    if (type === 'incoming') {
+                        buttonsRow.innerHTML = `
+                            <button class="btn btn-danger" style="border-radius:50%; width:56px; height:56px; padding:0;" onclick="App.Call.endCall(true)">
+                                <span class="material-symbols-outlined" style="font-size:28px;">call_end</span>
+                            </button>
+                            <button class="btn btn-primary" style="border-radius:50%; width:56px; height:56px; padding:0; background:#10B981;" onclick="App.Call.acceptCall()">
+                                <span class="material-symbols-outlined" style="font-size:28px;">call</span>
+                            </button>
+                        `;
+                    } else {
+                        buttonsRow.innerHTML = `
+                            <button class="btn btn-danger" style="border-radius:50%; width:56px; height:56px; padding:0;" onclick="App.Call.endCall(true)">
+                                <span class="material-symbols-outlined" style="font-size:28px;">call_end</span>
+                            </button>
+                        `;
+                    }
+                    modal.style.display = 'flex';
+                },
+
+                renderActiveCallButtons() {
+                    const buttonsRow = document.getElementById('call-action-buttons-row');
+                    buttonsRow.innerHTML = `
+                        <button class="btn" style="border-radius:50%; width:52px; height:52px; padding:0; background:rgba(255,255,255,0.2); color:white;" onclick="App.Call.toggleMuteMic(this)">
+                            <span class="material-symbols-outlined" style="font-size:24px;">mic</span>
+                        </button>
+                        <button class="btn btn-danger" style="border-radius:50%; width:56px; height:56px; padding:0;" onclick="App.Call.endCall(true)">
+                            <span class="material-symbols-outlined" style="font-size:28px;">call_end</span>
+                        </button>
+                    `;
                 }
             },
 
@@ -3704,9 +3982,14 @@
                     const commentsSheet = document.getElementById('comments-overlay-bottom-sheet')?.classList.contains('active');
                     const chatWidget = document.getElementById('floating-chat-popup-box')?.classList.contains('active');
                     const lightbox = !!document.getElementById('fullscreen-lightbox-container')?.children.length;
-                    return globalModal || secondaryModal || commentsSheet || chatWidget || lightbox;
+                    const callOverlay = document.getElementById('call-overlay-modal')?.style.display === 'flex';
+                    return globalModal || secondaryModal || commentsSheet || chatWidget || lightbox || callOverlay;
                 },
                 closeTopmostModalOrPopup() {
+                    if (document.getElementById('call-overlay-modal')?.style.display === 'flex') {
+                        App.Call.endCall(true);
+                        return true;
+                    }
                     if (document.getElementById('fullscreen-lightbox-container')?.children.length) {
                         this.closeImageLightbox();
                         return true;
