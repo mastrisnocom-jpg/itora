@@ -736,7 +736,7 @@
                 <strong style="font-size:1.05rem; font-weight:800; color:#000;" id="popup-chat-header-title">Obrolan</strong>
             </div>
             <div id="chat-header-actions-slot" style="display:none; display:flex; gap:6px;">
-                <button class="icon-btn" id="btn-manage-ai-key" style="display:none; width:28px; height:28px; color:var(--primary);" title="Atur API Key Gemini" onclick="App.Features.openGeminiApiKeyModalForm()">
+                <button class="icon-btn" id="btn-manage-ai-key" style="display:inline-flex; width:28px; height:28px; color:var(--primary);" title="Atur API Key Gemini" onclick="App.Features.openGeminiApiKeyModalForm()">
                     <span class="material-symbols-outlined" style="font-size:18px;">key</span>
                 </button>
                 <button class="icon-btn" style="width:28px; height:28px; color:var(--danger);" title="Hapus Riwayat Obrolan" onclick="App.Features.triggerDeleteChatHistoryAction()">
@@ -800,7 +800,7 @@
         const SUPABASE_KEY = 'sb_publishable_1MQZs2Z7yOjywmGpYOk_Uw_Y9wZ7CXk'; 
         const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-        const DEFAULT_AVATAR_IMAGE = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0iIzE4NzdGMiI+PHBhdGggZD0iTTEyIDJDNi44OCAyIDIgNi40OCAyIDEyczQuNDggMTAgMTAgMTAgMTAtNC40OCAxMC0xMFMxNy41MiAyIDEyIDJ6bTAgNGMxLjkzIDAgMy41 IDEuNTcgMy41IDMuNVMxMy45MyAxMyAxMiAxM3MtMy41LTEuNTctMy41LTMuNVMxMC4wNyA2 IDEyIDZ6bTAgMTRjLTIuMDMgMC0zLjguODUtNS4wNS0yLjIuMDMtMS42OCAzLjM3LTIuNiA1LjA1LTIuNnM1LjAyLjkyIDUuMDUgMi42QzE1LjggMTkuMTUgMTQuMDMgMjAgMTIgMjB6Ii8+PC9zdmc+';
+        const DEFAULT_AVATAR_IMAGE = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0iIzE4NzdGMiI+PHBhdGggZD0iTTEyIDJDNi44OCAyIDIgNi44OCAyIDEyczQuNDggMTAgMTAgMTAgMTAtNC40OCAxMC0xMFMxNy41MiAyIDEyIDJ6bTAgNGMxLjkzIDAgMy41 IDEuNTcgMy41IDMuNVMxMy45MyAxMyAxMiAxM3MtMy41LTEuNTctMy41LTMuNVMxMC4wNyA2 IDEyIDZ6bTAgMTRjLTIuMDMgMC0zLjguODUtNS4wNS0yLjIuMDMtMS42OCAzLjM3LTIuNiA1LjA1LTIuNnM1LjAyLjkyIDUuMDUgMi42QzE1LjggMTkuMTUgMTQuMDMgMjAgMTIgMjB6Ii8+PC9zdmc+';
 
         let liveNotifications = [];
         let activeChatFriendEmail = localStorage.getItem('ns_active_chat_email') || null;
@@ -834,6 +834,22 @@
 
         window.userFriendsList = [];
         window.registeredUsersList = [];
+
+        // MINTA IZIN NOTIFIKASI PUSH HANDPHONE
+        if ('Notification' in window && Notification.permission !== 'granted' && Notification.permission !== 'denied') {
+            Notification.requestPermission();
+        }
+
+        function triggerNativeDevicePushNotification(title, bodyText) {
+            if ('Notification' in window && Notification.permission === 'granted') {
+                try {
+                    new Notification(title, {
+                        body: bodyText,
+                        icon: './manifest.json'
+                    });
+                } catch(e) {}
+            }
+        }
 
         // CEK REFRESH: Jika pengguna sudah login, langsung aktifkan layout utama tanpa flash login
         if (localStorage.getItem('ns_logged_in') === 'true') {
@@ -1197,13 +1213,18 @@
                                 unreadMessageCounters[payload.new.sender.toLowerCase()] = (unreadMessageCounters[payload.new.sender.toLowerCase()] || 0) + 1;
                                 App.Features.loadPopupFriendsListSidebar();
                                 App.Navigation.updateChatBadgeDOM();
+                                triggerNativeDevicePushNotification(`Pesan baru dari ${payload.new.sender}`, payload.new.message);
                             }
                         })
                         .subscribe();
 
                     supabaseClient
                         .channel('realtime-notifications')
-                        .on('postgres_changes', { event: '*', schema: 'public', table: 'notifications' }, async () => {
+                        .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'notifications' }, async (payload) => {
+                            const myName = App.ProfileState.getCurrentName();
+                            if (payload.new && payload.new.receiver === myName) {
+                                triggerNativeDevicePushNotification(`Notifikasi Tech Social`, `${payload.new.sender} ${payload.new.description}`);
+                            }
                             await App.Features.fetchCloudNotificationsDataZone();
                             if (window.location.hash.includes('#/notifications')) {
                                 App.Features.renderNotificationsView();
@@ -1586,7 +1607,7 @@
                                         </label>
                                         <input type="file" id="avatar-file-input" style="display:none;" accept="image/*" onchange="App.Features.handleAvatarSelection(event)">
                                     </div>
-                                    <span style="font-size:0.8rem; color:var(--text-muted); font-weight:600;">Klik kamera untuk mengunggah foto baru</span>
+                                    <span style="font-size:0.8rem; color:var(--text-muted); font-weight:600;">Maksimal upload foto: 5MB</span>
                                 </div>
                                 <div class="form-group"><input type="text" class="form-input" id="settings-display-name" placeholder=" " value="${sanitizeHTML(currentName)}"><label class="form-label">Nama Tampilan</label></div>
                                 <div class="form-group"><input type="text" class="form-input" id="settings-bio-status" placeholder=" " value="${sanitizeHTML(currentBioRole)}"><label class="form-label">Pekerjaan / Jabatan Profesional</label></div>
@@ -1605,7 +1626,10 @@
                                     <input type="password" class="form-input" id="settings-gemini-api-key-field" placeholder=" " value="${savedGeminiApiKey}">
                                     <label class="form-label">Gemini API Key</label>
                                 </div>
-                                <button class="btn btn-secondary btn-full" onclick="App.Features.saveGeminiApiKeyAction()" style="border:1px solid var(--primary); color:var(--primary);">Simpan API Key Gemini</button>
+                                <div style="display:flex; flex-direction:column; gap:10px;">
+                                    <button class="btn btn-secondary btn-full" onclick="App.Features.saveGeminiApiKeyAction()" style="border:1px solid var(--primary); color:var(--primary);">Simpan API Key Gemini</button>
+                                    <a href="https://aistudio.google.com/app/apikey" target="_blank" class="btn btn-secondary btn-full" style="font-size:0.85rem; text-decoration:none;"><span class="material-symbols-outlined" style="font-size:18px;">open_in_new</span> Dapatkan API Key Gratis di Google AI Studio</a>
+                                </div>
                             </div>
 
                             ${isSuperAdmin ? `
@@ -1956,8 +1980,10 @@
                                 <input type="password" id="modal-gemini-key-input-field" class="form-input" placeholder=" " value="${currentKey}">
                                 <label class="form-label">Gemini API Key</label>
                             </div>
-                            <div style="display:flex; justify-content:space-between; align-items:center;">
-                                <a href="https://aistudio.google.com/app/apikey" target="_blank" style="font-size:0.8rem; color:var(--primary); font-weight:700; text-decoration:underline;">Dapatkan API Key Gratis</a>
+                            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
+                                <a href="https://aistudio.google.com/app/apikey" target="_blank" style="font-size:0.8rem; color:var(--primary); font-weight:700; text-decoration:underline; display:inline-flex; align-items:center; gap:4px;">
+                                    <span class="material-symbols-outlined" style="font-size:16px;">open_in_new</span> Buat Key di AI Studio
+                                </a>
                                 <button class="btn btn-primary" onclick="App.Features.saveGeminiApiKeyFromModalAction()">Simpan API Key</button>
                             </div>
                         </div>
@@ -1989,6 +2015,13 @@
                 async handleGlobalDirectFileSelection(event) {
                     const file = event.target.files[0]; if (!file) return;
                     
+                    // VALIDASI UKURAN FOTO MAKSIMAL 5MB
+                    if (file.size > 5 * 1024 * 1024) {
+                        App.Toast.show("Ukuran foto melebihi batas maksimal 5MB!", "danger");
+                        event.target.value = '';
+                        return;
+                    }
+
                     App.Toast.show("Mengompresi gambar...", "info");
                     const compressedFile = await compressImageNative(file, 1080, 0.75);
                     composerSelectedFile = compressedFile;
@@ -2283,7 +2316,7 @@
                     if(actionSlot) actionSlot.style.display = "flex";
 
                     const keyBtn = document.getElementById('btn-manage-ai-key');
-                    if(keyBtn) keyBtn.style.display = (friendName === 'Mastrisno_AI') ? 'inline-flex' : 'none';
+                    if(keyBtn) keyBtn.style.display = 'inline-flex';
 
                     const mainArea = document.getElementById('popup-chat-main-area-pane'); if(!mainArea) return;
                     mainArea.classList.add('active');
@@ -3154,6 +3187,14 @@
 
                 async handleAvatarSelection(event) {
                     const file = event.target.files[0]; if (!file) return;
+                    
+                    // VALIDASI UKURAN FOTO PROFIL MAKSIMAL 5MB
+                    if (file.size > 5 * 1024 * 1024) {
+                        App.Toast.show("Ukuran foto profil melebihi batas 5MB!", "danger");
+                        event.target.value = '';
+                        return;
+                    }
+
                     App.Toast.show("Mengompresi & mengunggah foto...", "info");
 
                     try {
