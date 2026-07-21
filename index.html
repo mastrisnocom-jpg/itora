@@ -191,7 +191,6 @@
 
         .post-content { font-family: var(--font-main); font-size: 1.02rem; font-weight: 400; line-height: 1.6; letter-spacing: -0.1px; margin-bottom: 14px; color: var(--text-main); text-align: left; white-space: pre-wrap; word-break: break-word; max-width: 100%; background: transparent !important; padding: 0; border-radius: 0; border: none !important; box-shadow: none !important; }
         
-        /* MENTION STYLE UTAMA */
         .user-mention-link { color: var(--primary); font-weight: 700; cursor: pointer; text-decoration: none; }
         .user-mention-link:hover { text-decoration: underline; }
 
@@ -206,7 +205,18 @@
         .post-action-item.loved { color: var(--danger) !important; }
         .post-action-item.loved .material-symbols-outlined { font-variation-settings: 'FILL' 1; color: var(--danger) !important; }
 
-        .post-attached-image { max-width: 100%; border-radius: var(--radius-md); margin: 12px 0; display: block; max-height: 380px; object-fit: cover; cursor: zoom-in; border: 1px solid var(--border-color); }
+        /* GAMBAR MEMANJANG KIRI DAN KANAN PENUH NAMUN RASIO TETAP PAS */
+        .post-attached-image { 
+            width: calc(100% + 48px); 
+            margin: 12px -24px; 
+            display: block; 
+            max-height: 520px; 
+            object-fit: contain; 
+            background: #f8fafc;
+            cursor: zoom-in; 
+            border-top: 1px solid var(--border-color); 
+            border-bottom: 1px solid var(--border-color); 
+        }
         .post-card iframe { display: block; margin: 12px 0; width: 100%; max-width: 100%; height: 260px; border-radius: 12px; border: 1px solid var(--border-color); }
         .post-card audio { display: block; margin: 12px 0; width: 100%; max-width: 100%; background: #f0f2f5; border-radius: var(--radius-round); padding: 8px; }
 
@@ -428,13 +438,118 @@
         }
         .modern-stat-box {
             text-align: center;
-            padding: 8px 4px;
+            padding: 10px 4px;
             border-radius: 12px;
             background: #ffffff;
             border: 1px solid var(--border-color);
+            cursor: pointer;
+            transition: var(--trans-smooth);
         }
-        .modern-stat-val { font-size: 1.2rem; font-weight: 800; color: var(--primary); }
-        .modern-stat-lbl { font-size: 0.75rem; color: var(--text-muted); font-weight: 700; margin-top: 2px; }
+        .modern-stat-box:hover {
+            border-color: var(--primary);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-float);
+        }
+        .modern-stat-val { font-size: 1.25rem; font-weight: 800; color: var(--primary); display: block; }
+        .modern-stat-lbl { font-size: 0.75rem; color: var(--text-muted); font-weight: 700; margin-top: 2px; display: block; }
+
+        /* FULLSCREEN IMAGE LIGHTBOX MODAL WITH OVERLAY */
+        .fullscreen-lightbox-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0, 0, 0, 0.95);
+            backdrop-filter: blur(10px);
+            z-index: 15000;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            animation: fadeScale 0.25s ease;
+        }
+        .lightbox-top-header {
+            padding: 16px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: linear-gradient(180deg, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0) 100%);
+            color: #ffffff;
+            z-index: 2;
+        }
+        .lightbox-author-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            cursor: pointer;
+        }
+        .lightbox-author-avatar {
+            width: 42px; height: 42px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid #ffffff;
+        }
+        .lightbox-image-center-stage {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 12px;
+            overflow: hidden;
+        }
+        .lightbox-image-center-stage img {
+            max-width: 100%;
+            max-height: 80vh;
+            object-fit: contain;
+            border-radius: 8px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+        .lightbox-bottom-actions-bar {
+            padding: 16px 24px;
+            background: linear-gradient(0deg, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0) 100%);
+            display: flex;
+            align-items: center;
+            justify-content: space-around;
+            color: #ffffff;
+            z-index: 2;
+        }
+        .lightbox-action-btn {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.9rem;
+            font-weight: 700;
+            color: #ffffff;
+            cursor: pointer;
+            background: rgba(255,255,255,0.15);
+            padding: 8px 16px;
+            border-radius: 20px;
+            backdrop-filter: blur(4px);
+            transition: var(--trans-smooth);
+        }
+        .lightbox-action-btn:hover {
+            background: var(--primary);
+        }
+
+        /* NEW SETTINGS UI STYLES */
+        .settings-section-card {
+            background: #ffffff;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: var(--shadow-soft);
+        }
+        .settings-section-title {
+            font-size: 1.05rem;
+            font-weight: 800;
+            color: var(--text-main);
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .settings-section-title .material-symbols-outlined {
+            color: var(--primary);
+            font-size: 22px;
+        }
 
         @keyframes slideDownFade { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
         @keyframes fadeScale { from { opacity: 0; transform: scale(0.98); } to { opacity: 1; transform: scale(1); } }
@@ -460,6 +575,7 @@
             
             .feed-container { margin-left: -16px; margin-right: -16px; background: transparent; max-width: calc(100% + 32px); }
             .post-card { padding: 16px; border-bottom: 1px solid var(--border-color) !important; background: #ffffff; margin-bottom: 0; }
+            .post-attached-image { width: calc(100% + 32px); margin: 12px -16px; }
             
             .floating-chat-widget { 
                 width: 100vw; 
@@ -639,6 +755,10 @@
             </div>
         </div>
     </div>
+
+    <!-- FULLSCREEN IMAGE LIGHTBOX MODAL WITH OVERLAY -->
+    <div id="fullscreen-lightbox-container" unselectable="on"></div>
+
     <div class="toast-container" id="toast-container"></div>
 
     <input type="file" id="global-composer-direct-file-input" accept="image/*" style="display:none;" onchange="App.Features.handleGlobalDirectFileSelection(event)">
@@ -1316,6 +1436,7 @@
                     const isSuperAdmin = (isOwnProfile && myEmail === 'mastrisnocom@gmail.com');
 
                     const isFollowing = window.userFriendsList.includes(targetName);
+                    const safeTargetName = escapeJSString(targetName);
 
                     return `
                         <div class="modern-profile-card">
@@ -1326,11 +1447,11 @@
                                 <img src="${targetAvatar}" class="modern-profile-avatar" alt="Profile">
                                 ${!isOwnProfile ? `
                                     <div style="display:flex; gap:8px;">
-                                        <button class="btn ripple-btn ${isFollowing ? 'btn-secondary' : 'btn-primary'}" onclick="App.Features.toggleFollowInFollowFromProfileDOM('${escapeJSString(targetName)}', this)">
+                                        <button class="btn ripple-btn ${isFollowing ? 'btn-secondary' : 'btn-primary'}" onclick="App.Features.toggleFollowInFollowFromProfileDOM('${safeTargetName}', this)">
                                             <span class="material-symbols-outlined" style="font-size:18px;">${isFollowing ? 'done' : 'add'}</span> 
                                             <span>${isFollowing ? 'Mengikuti' : 'Ikuti'}</span>
                                         </button>
-                                        <button class="btn btn-primary ripple-btn" onclick="App.UI.toggleChatPopup(true); App.Features.openSpecificFriendPopupObrolan('${escapeJSString(targetName.toLowerCase())}@nexsocial.id', '${escapeJSString(targetName)}')"><span class="material-symbols-outlined" style="font-size:18px;">mail</span> Pesan</button>
+                                        <button class="btn btn-primary ripple-btn" onclick="App.UI.toggleChatPopup(true); App.Features.openSpecificFriendPopupObrolan('${escapeJSString(targetName.toLowerCase())}@nexsocial.id', '${safeTargetName}')"><span class="material-symbols-outlined" style="font-size:18px;">mail</span> Pesan</button>
                                     </div>
                                 ` : `
                                     <button class="btn btn-secondary ripple-btn" onclick="App.Router.navigate('settings')" style="font-size:0.85rem; padding:8px 16px;"><span class="material-symbols-outlined" style="font-size:16px;">edit</span> Edit Profil</button>
@@ -1348,10 +1469,20 @@
                                 </div>
                             </div>
 
+                            <!-- STATISTIK INTERAKTIF BISA DIKLIK -->
                             <div class="modern-profile-stats-grid">
-                                <div class="modern-stat-box"><span class="modern-stat-val" id="profile-friends-count">...</span><span class="modern-stat-lbl">Mengikuti</span></div>
-                                <div class="modern-stat-box"><span class="modern-stat-val" id="profile-followers-count">...</span><span class="modern-stat-lbl">Pengikut</span></div>
-                                <div class="modern-stat-box"><span class="modern-stat-val" id="profile-posts-count">...</span><span class="modern-stat-lbl">Postingan</span></div>
+                                <div class="modern-stat-box" onclick="App.Features.openFollowingModalAction('${safeTargetName}')" title="Klik untuk lihat yang diikuti">
+                                    <span class="modern-stat-val" id="profile-friends-count">...</span>
+                                    <span class="modern-stat-lbl">Mengikuti</span>
+                                </div>
+                                <div class="modern-stat-box" onclick="App.Features.openFollowersModalAction('${safeTargetName}')" title="Klik untuk lihat pengikut">
+                                    <span class="modern-stat-val" id="profile-followers-count">...</span>
+                                    <span class="modern-stat-lbl">Pengikut</span>
+                                </div>
+                                <div class="modern-stat-box" onclick="document.getElementById('profile-posts-stream')?.scrollIntoView({behavior:'smooth'})" title="Klik untuk ke daftar postingan">
+                                    <span class="modern-stat-val" id="profile-posts-count">...</span>
+                                    <span class="modern-stat-lbl">Postingan</span>
+                                </div>
                             </div>
                         </div>
 
@@ -1367,6 +1498,8 @@
                         <div id="profile-posts-stream"></div>
                     `;
                 },
+
+                // TAMPILAN DESAIN PENGATURAN BARU MODERN & ELEGAN
                 settings() {
                     const currentName = App.ProfileState.getCurrentName();
                     const currentAvatar = App.ProfileState.getCurrentAvatar();
@@ -1378,47 +1511,74 @@
                     const savedGeminiApiKey = localStorage.getItem('ns_gemini_api_key') || '';
 
                     return `
-                        <div class="glass-card" style="max-width: 650px; margin: 0 auto; position: relative; border:none; background:#ffffff;">
-                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; border-bottom: 1px solid var(--border-color); padding-bottom: 12px;">
-                                <h2 style="display: flex; align-items: center; gap: 8px; margin: 0; font-weight:800; color:#050505;"><span class="material-symbols-outlined" style="font-size: 28px; color: var(--primary);">settings</span><span>Pengaturan Akun</span></h2>
+                        <div style="max-width: 650px; margin: 0 auto;">
+                            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px;">
+                                <h2 style="font-weight:800; font-size:1.5rem; color:#050505; display:flex; align-items:center; gap:10px;">
+                                    <span class="material-symbols-outlined" style="font-size:32px; color:var(--primary);">tune</span>
+                                    <span>Pengaturan Akun</span>
+                                </h2>
                             </div>
-                            
-                            <div class="glass-card" style="border: 1px solid var(--primary); text-align: left; margin-bottom: 24px; background: #ffffff;">
-                                <h3 style="margin-bottom: 12px; color: var(--primary); display: flex; align-items: center; gap: 6px;"><span class="material-symbols-outlined">smart_toy</span>Konfigurasi Gemini API Key (Mastrisno AI)</h3>
-                                <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 14px;">Masukkan Google Gemini API Key Anda agar fitur kecerdasan buatan Mastrisno AI dapat aktif secara penuh.</p>
+
+                            <!-- CARD 1: FOTO & INFORMASI PROFIL -->
+                            <div class="settings-section-card">
+                                <div class="settings-section-title">
+                                    <span class="material-symbols-outlined">person</span>
+                                    <span>Informasi & Identitas Diri</span>
+                                </div>
+                                <div class="avatar-edit-container" style="margin-bottom: 20px;">
+                                    <div class="avatar-preview-wrapper" style="width: 100px; height: 100px;">
+                                        <img src="${currentAvatar}" id="settings-avatar-preview" class="avatar-preview-circle" style="background:#f0f2f5;" alt="Preview">
+                                        <label for="avatar-file-input" class="avatar-upload-label" title="Ganti Foto Profil">
+                                            <span class="material-symbols-outlined" style="font-size:18px;">photo_camera</span>
+                                        </label>
+                                        <input type="file" id="avatar-file-input" style="display:none;" accept="image/*" onchange="App.Features.handleAvatarSelection(event)">
+                                    </div>
+                                    <span style="font-size:0.8rem; color:var(--text-muted); font-weight:600;">Klik kamera untuk mengunggah foto baru</span>
+                                </div>
+                                <div class="form-group"><input type="text" class="form-input" id="settings-display-name" placeholder=" " value="${sanitizeHTML(currentName)}"><label class="form-label">Nama Tampilan</label></div>
+                                <div class="form-group"><input type="text" class="form-input" id="settings-bio-status" placeholder=" " value="${sanitizeHTML(currentBioRole)}"><label class="form-label">Pekerjaan / Jabatan Profesional</label></div>
+                                <div class="form-group" style="margin-bottom:12px;"><input type="text" class="form-input" id="settings-domisili" placeholder=" " value="${sanitizeHTML(currentDomisili)}"><label class="form-label">Domisili / Lokasi</label></div>
+                                <button class="btn btn-primary ripple-btn btn-full" onclick="App.Features.saveNameSettings()">Simpan Perubahan Profil</button>
+                            </div>
+
+                            <!-- CARD 2: INTEGRASI AI (GEMINI) -->
+                            <div class="settings-section-card">
+                                <div class="settings-section-title">
+                                    <span class="material-symbols-outlined">smart_toy</span>
+                                    <span>Asisten Pintar Mastrisno AI</span>
+                                </div>
+                                <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 16px; line-height: 1.5;">Masukkan Google Gemini API Key Anda agar fitur obrolan AI pintar dapat merespons secara otomatis.</p>
                                 <div class="form-group" style="margin-bottom: 14px;">
                                     <input type="password" class="form-input" id="settings-gemini-api-key-field" placeholder=" " value="${savedGeminiApiKey}">
                                     <label class="form-label">Gemini API Key</label>
                                 </div>
-                                <button class="btn btn-primary btn-full" onclick="App.Features.saveGeminiApiKeyAction()">Simpan API Key Gemini</button>
+                                <button class="btn btn-secondary btn-full" onclick="App.Features.saveGeminiApiKeyAction()" style="border:1px solid var(--primary); color:var(--primary);">Simpan API Key Gemini</button>
                             </div>
 
                             ${isSuperAdmin ? `
-                                <div class="glass-card" style="border: 1px solid var(--primary); text-align: left; margin-bottom: 24px; background: #ffffff;">
-                                    <h3 style="margin-bottom: 12px; color: var(--primary); display: flex; align-items: center; gap: 6px;"><span class="material-symbols-outlined">campaign</span>Panel Pasang Iklan Super Admin</h3>
+                                <!-- CARD 3: ADMIN AD PANEL -->
+                                <div class="settings-section-card" style="border-color: var(--primary);">
+                                    <div class="settings-section-title">
+                                        <span class="material-symbols-outlined">campaign</span>
+                                        <span>Panel Iklan Global (Super Admin)</span>
+                                    </div>
                                     <form id="global-admin-ad-form" onsubmit="App.Features.saveAdminGlobalAdBannerAction(event)">
                                         <div class="form-group" style="margin-bottom: 14px;">
                                             <textarea class="form-input" id="admin-ad-html-input" placeholder=" " required style="min-height: 100px;">${savedAdHTML}</textarea>
                                             <label class="form-label">Kode Iklan HTML/JS</label>
                                         </div>
-                                        <button type="submit" class="btn btn-primary btn-full">Publikasikan Banner Iklan</button>
+                                        <button type="submit" class="btn btn-primary btn-full">Rilis Iklan Secara Global</button>
                                     </form>
-                                    ${savedAdHTML ? `<div id="admin-live-ad-preview-slot" style="margin-top:20px; border-top:1px dashed var(--border-color); padding-top:15px;"><strong>Live Preview Form Iklan:</strong><div class="global-workspace-ad-banner" style="margin-top:8px; margin-bottom:0;">${savedAdHTML}</div></div>` : ''}
                                 </div>
                             ` : ''}
 
-                            <div class="avatar-edit-container">
-                                <div class="avatar-preview-wrapper" style="width: 110px; height: 110px;">
-                                    <img src="${currentAvatar}" id="settings-avatar-preview" class="avatar-preview-circle" style="background:#f0f2f5;" alt="Preview">
-                                    <label for="avatar-file-input" class="avatar-upload-label"><span class="material-symbols-outlined" style="font-size:18px;">photo_camera</span></label>
-                                    <input type="file" id="avatar-file-input" style="display:none;" accept="image/*" onchange="App.Features.handleAvatarSelection(event)">
-                                </div>
+                            <!-- CARD 4: KELUAR AKUN -->
+                            <div class="settings-section-card" style="border:1px solid var(--danger);">
+                                <button class="btn btn-danger btn-full ripple-btn" onclick="App.Auth.logout()">
+                                    <span class="material-symbols-outlined">logout</span> 
+                                    <span>Keluar dari Akun Tech Social</span>
+                                </button>
                             </div>
-                            <div class="form-group"><input type="text" class="form-input" id="settings-display-name" placeholder=" " value="${sanitizeHTML(currentName)}"><label class="form-label">Nama Tampilan</label></div>
-                            <div class="form-group"><input type="text" class="form-input" id="settings-bio-status" placeholder=" " value="${sanitizeHTML(currentBioRole)}"><label class="form-label">Pekerjaan / Jabatan Profesional</label></div>
-                            <div class="form-group"><input type="text" class="form-input" id="settings-domisili" placeholder=" " value="${sanitizeHTML(currentDomisili)}"><label class="form-label">Domisili / Lokasi</label></div>
-                            <button class="btn btn-primary ripple-btn btn-full" onclick="App.Features.saveNameSettings()" style="margin-bottom: 16px;">Simpan Profil Data</button>
-                            <button class="btn btn-danger btn-full ripple-btn" onclick="App.Auth.logout()"><span class="material-symbols-outlined">logout</span> Keluar dari Akun</button>
                         </div>
                     `;
                 }
@@ -1478,6 +1638,94 @@
                     } catch(e) {
                         if (postsEl) postsEl.innerText = '0';
                     }
+                },
+
+                // KLIK MEMBUAT MODAL DAFTAR USER YANG DIIKUTI
+                async openFollowingModalAction(targetUser) {
+                    try {
+                        const { data: followsData } = await supabaseClient
+                            .from('follows')
+                            .select('following')
+                            .eq('follower', targetUser);
+
+                        const list = followsData ? followsData.map(f => f.following) : [];
+                        if (list.length === 0) {
+                            App.Modal.open(`Pengguna yang Diikuti`, `<div style="text-align:center; padding:20px; color:var(--text-muted);">${sanitizeHTML(targetUser)} belum mengikuti siapa pun.</div>`, true, false);
+                            return;
+                        }
+
+                        const { data: profiles } = await supabaseClient.from('profiles').select('display_name, avatar_url, bio_status');
+                        const profMap = {};
+                        if (profiles) profiles.forEach(p => profMap[p.display_name] = p);
+
+                        const htmlList = list.map(uName => {
+                            const p = profMap[uName] || {};
+                            const av = (p.avatar_url && p.avatar_url !== 'null') ? p.avatar_url : DEFAULT_AVATAR_IMAGE;
+                            const isFollowing = window.userFriendsList.includes(uName);
+                            const safeUName = escapeJSString(uName);
+
+                            return `
+                                <div style="display:flex; align-items:center; justify-content:space-between; gap:12px; padding:10px 0; border-bottom:1px solid var(--border-color);">
+                                    <div style="display:flex; align-items:center; gap:10px; cursor:pointer;" onclick="App.Modal.close(); App.Router.navigate('profil?name=${encodeURIComponent(uName)}')">
+                                        <img src="${av}" style="width:40px; height:40px; border-radius:50%; object-fit:cover;">
+                                        <div>
+                                            <strong style="font-size:0.9rem; color:#050505; display:block;">${sanitizeHTML(uName)}</strong>
+                                            <span style="font-size:0.75rem; color:var(--text-muted);">${sanitizeHTML(p.bio_status || 'Member')}</span>
+                                        </div>
+                                    </div>
+                                    <button class="btn ${isFollowing ? 'btn-secondary' : 'btn-primary'}" style="padding:6px 12px; font-size:0.75rem;" onclick="App.Features.toggleFollowInFollowFromProfileDOM('${safeUName}', this)">
+                                        ${isFollowing ? 'Mengikuti' : 'Ikuti'}
+                                    </button>
+                                </div>
+                            `;
+                        }).join('');
+
+                        App.Modal.open(`Pengguna yang Diikuti (${list.length})`, `<div style="max-height:60vh; overflow-y:auto;">${htmlList}</div>`, true, false);
+                    } catch(e) {}
+                },
+
+                // KLIK MEMBUAT MODAL DAFTAR PENGIKUT
+                async openFollowersModalAction(targetUser) {
+                    try {
+                        const { data: followersData } = await supabaseClient
+                            .from('follows')
+                            .select('follower')
+                            .eq('following', targetUser);
+
+                        const list = followersData ? followersData.map(f => f.follower) : [];
+                        if (list.length === 0) {
+                            App.Modal.open(`Pengikut ${targetUser}`, `<div style="text-align:center; padding:20px; color:var(--text-muted);">${sanitizeHTML(targetUser)} belum memiliki pengikut.</div>`, true, false);
+                            return;
+                        }
+
+                        const { data: profiles } = await supabaseClient.from('profiles').select('display_name, avatar_url, bio_status');
+                        const profMap = {};
+                        if (profiles) profiles.forEach(p => profMap[p.display_name] = p);
+
+                        const htmlList = list.map(uName => {
+                            const p = profMap[uName] || {};
+                            const av = (p.avatar_url && p.avatar_url !== 'null') ? p.avatar_url : DEFAULT_AVATAR_IMAGE;
+                            const isFollowing = window.userFriendsList.includes(uName);
+                            const safeUName = escapeJSString(uName);
+
+                            return `
+                                <div style="display:flex; align-items:center; justify-content:space-between; gap:12px; padding:10px 0; border-bottom:1px solid var(--border-color);">
+                                    <div style="display:flex; align-items:center; gap:10px; cursor:pointer;" onclick="App.Modal.close(); App.Router.navigate('profil?name=${encodeURIComponent(uName)}')">
+                                        <img src="${av}" style="width:40px; height:40px; border-radius:50%; object-fit:cover;">
+                                        <div>
+                                            <strong style="font-size:0.9rem; color:#050505; display:block;">${sanitizeHTML(uName)}</strong>
+                                            <span style="font-size:0.75rem; color:var(--text-muted);">${sanitizeHTML(p.bio_status || 'Member')}</span>
+                                        </div>
+                                    </div>
+                                    <button class="btn ${isFollowing ? 'btn-secondary' : 'btn-primary'}" style="padding:6px 12px; font-size:0.75rem;" onclick="App.Features.toggleFollowInFollowFromProfileDOM('${safeUName}', this)">
+                                        ${isFollowing ? 'Mengikuti' : 'Ikuti'}
+                                    </button>
+                                </div>
+                            `;
+                        }).join('');
+
+                        App.Modal.open(`Pengikut (${list.length})`, `<div style="max-height:60vh; overflow-y:auto;">${htmlList}</div>`, true, false);
+                    } catch(e) {}
                 },
 
                 async renderRealtimeStoriesCarousel() {
@@ -1565,10 +1813,10 @@
                             const hasLiked = postLikesArray.includes(myName) ? 'liked' : '';
                             const hasLoved = (p.loved_users || []).includes(myName) ? 'loved' : '';
                             
-                            const mediaHTML = this.extractAndRenderEmbeddedMedia(p.content || "", p.media_url) || (p.image ? `<img src="${p.image}" class="post-attached-image" onclick="App.UI.openImageLightbox('${p.image}')">` : '');
-                            const postAvatar = (p.avatar && p.avatar !== 'null' && p.avatar !== 'undefined') ? p.avatar : DEFAULT_AVATAR_IMAGE;
-
                             const safeAuthor = escapeJSString(p.author);
+                            const postAvatar = (p.avatar && p.avatar !== 'null' && p.avatar !== 'undefined') ? p.avatar : DEFAULT_AVATAR_IMAGE;
+                            
+                            const mediaHTML = this.extractAndRenderEmbeddedMedia(p.content || "", p.media_url) || (p.image ? `<img src="${p.image}" class="post-attached-image" onclick="App.UI.openImageLightbox('${p.image}', ${p.id}, '${safeAuthor}', '${p.avatar || DEFAULT_AVATAR_IMAGE}')">` : '');
 
                             const privacyType = p.privacy || 'public';
                             const privacyIcon = privacyType === 'private' ? 'lock' : (privacyType === 'friends' ? 'group' : 'public');
@@ -2346,10 +2594,10 @@
                             const hasLiked = postLikesArray.includes(myName) ? 'liked' : '';
                             const hasLoved = (p.loved_users || []).includes(myName) ? 'loved' : '';
                             
-                            const mediaHTML = this.extractAndRenderEmbeddedMedia(p.content || "", p.media_url) || (p.image ? `<img src="${p.image}" class="post-attached-image" onclick="App.UI.openImageLightbox('${p.image}')">` : '');
+                            const safeAuthor = escapeJSString(p.author);
                             const postAvatar = (p.avatar && p.avatar !== 'null' && p.avatar !== 'undefined') ? p.avatar : DEFAULT_AVATAR_IMAGE;
 
-                            const safeAuthor = escapeJSString(p.author);
+                            const mediaHTML = this.extractAndRenderEmbeddedMedia(p.content || "", p.media_url) || (p.image ? `<img src="${p.image}" class="post-attached-image" onclick="App.UI.openImageLightbox('${p.image}', ${p.id}, '${safeAuthor}', '${postAvatar}')">` : '');
 
                             const privacyType = p.privacy || 'public';
                             const privacyIcon = privacyType === 'private' ? 'lock' : (privacyType === 'friends' ? 'group' : 'public');
@@ -2983,10 +3231,63 @@
                     const src = (url && url !== 'null' && url !== 'undefined') ? url : DEFAULT_AVATAR_IMAGE;
                     return `<div class="avatar-wrapper" onclick="App.Router.navigate('${inPost ? 'profil?name=' + encodeURIComponent(name) : 'profil'}')"><img src="${src}" class="user-avatar" style="width:${size}; height:${size}; object-fit:cover;" alt="Avatar"></div>`;
                 },
-                openImageLightbox(imageUrl) {
-                    const html = `<img src="${imageUrl}" style="width:100%; height:auto; max-height:80vh; object-fit:contain; border-radius:12px; display:block; margin:0 auto;">`;
-                    App.Modal.open("Pratinjau Gambar", html, true, true);
+
+                // FITUR MODAL LIGHTBOX FULLSCREEN DENGAN OVERLAY INTERAKSI LENGKAP
+                openImageLightbox(imageUrl, postId = null, authorName = '', authorAvatar = '') {
+                    const container = document.getElementById('fullscreen-lightbox-container');
+                    if (!container) return;
+
+                    const safeAuthor = escapeJSString(authorName);
+                    const avSrc = (authorAvatar && authorAvatar !== 'null' && authorAvatar !== 'undefined') ? authorAvatar : DEFAULT_AVATAR_IMAGE;
+
+                    container.innerHTML = `
+                        <div class="fullscreen-lightbox-overlay">
+                            <!-- HEADER ATAS: PROFIL USER & TOMBOL TUTUP -->
+                            <div class="lightbox-top-header">
+                                <div class="lightbox-author-info" onclick="App.UI.closeImageLightbox(); App.Router.navigate('profil?name=${encodeURIComponent(authorName)}')">
+                                    <img src="${avSrc}" class="lightbox-author-avatar">
+                                    <strong style="font-size:1rem;">${sanitizeHTML(authorName)}</strong>
+                                </div>
+                                <button class="icon-btn" style="background:rgba(255,255,255,0.2); color:white;" onclick="App.UI.closeImageLightbox()">
+                                    <span class="material-symbols-outlined">close</span>
+                                </button>
+                            </div>
+
+                            <!-- PANGGUNG FOTO UTAMA -->
+                            <div class="lightbox-image-center-stage" onclick="App.UI.closeImageLightbox()">
+                                <img src="${imageUrl}" onclick="event.stopPropagation()">
+                            </div>
+
+                            <!-- BILAH AKSI BAWAH: LIKE, LOVE, KOMEN, SHARE -->
+                            <div class="lightbox-bottom-actions-bar">
+                                ${postId ? `
+                                    <div class="lightbox-action-btn" onclick="App.Features.toggleLike(${postId}, '${safeAuthor}')">
+                                        <span class="material-symbols-outlined">thumb_up</span>
+                                        <span>Suka</span>
+                                    </div>
+                                    <div class="lightbox-action-btn" onclick="App.Features.toggleLoveReaction(${postId}, '${safeAuthor}')">
+                                        <span class="material-symbols-outlined" style="color:#EE5D50;">favorite</span>
+                                        <span>Cinta</span>
+                                    </div>
+                                    <div class="lightbox-action-btn" onclick="App.UI.closeImageLightbox(); App.Features.openCommentsBottomSheet(${postId}, '${safeAuthor}')">
+                                        <span class="material-symbols-outlined">comment</span>
+                                        <span>Komen</span>
+                                    </div>
+                                    <div class="lightbox-action-btn" onclick="App.Features.openSocialMediaShareSheetModal(${postId}, '${safeAuthor}', '', true)">
+                                        <span class="material-symbols-outlined">share</span>
+                                        <span>Bagikan</span>
+                                    </div>
+                                ` : ''}
+                            </div>
+                        </div>
+                    `;
                 },
+
+                closeImageLightbox() {
+                    const container = document.getElementById('fullscreen-lightbox-container');
+                    if (container) container.innerHTML = '';
+                },
+
                 handleHeaderAvatarToggleAction() { App.Router.navigate('profil'); },
                 calculateRelativeTimeAgo(ts) {
                     const sec = Math.floor((Date.now() - parseInt(ts)) / 1000);
