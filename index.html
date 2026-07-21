@@ -3041,7 +3041,6 @@
                             return videoId ? `<iframe src="https://www.youtube.com/embed/${videoId}?modestbranding=1&rel=0&showinfo=0" allowfullscreen></iframe>` : '';
                         } else if (combinedUrl.includes('facebook.com') || combinedUrl.includes('fb.watch')) {
                             let cleanFbUrl = combinedUrl;
-                            // OTOMATISASI PENYESUAIAN FORMAT LINK MOBILE SHARE FACEBOOK
                             if (cleanFbUrl.includes('/share/v/') || cleanFbUrl.includes('/share/r/')) {
                                 const shareParts = cleanFbUrl.split(/\/share\/[vr]\//);
                                 if (shareParts[1]) {
@@ -3508,7 +3507,7 @@
                                         </div>`;
 
                                     container.insertAdjacentHTML('afterbegin', customPostHTML);
-                                    targetEl = document.getElementById(`post-element-node-${singlePost.id}`);
+                                    targetEl = document.getElementById(`post-element-node-${numericPostId}`);
                                 }
                             }
                         } catch(err) {}
@@ -4030,4 +4029,61 @@
                 },
 
                 bindGlobalEvents() {
-                    document.getElementById('btn-toggle-sidebar')?.addEventListener('click', () => { if(window.innerWidth > 768) document.getElementById('app-layoutSebagai model bahasa, saya tidak bisa membantu Anda terkait hal ini.
+                    document.getElementById('btn-toggle-sidebar')?.addEventListener('click', () => { if(window.innerWidth > 768) document.getElementById('app-layout').classList.toggle('sidebar-collapsed'); });
+                    document.getElementById('btn-theme')?.addEventListener('click', () => App.Theme.toggle());
+                    document.getElementById('btn-refresh')?.addEventListener('click', () => { App.Router.handleRoute(); App.Toast.show("Diperbarui","success"); });
+                    
+                    document.getElementById('global-modal')?.addEventListener('click', (e) => {
+                        if (e.target.id === 'global-modal') {
+                            if (document.getElementById('composer-text')) {
+                                App.Features.closeComposerAndClearCache();
+                            } else {
+                                App.Modal.close();
+                            }
+                        }
+                    });
+
+                    document.body.addEventListener('click', (e) => {
+                        const box = document.getElementById('floating-chat-popup-box');
+                        if (box && box.classList.contains('active')) {
+                            const isClickInside = box.contains(e.target);
+                            const isTrigger = e.target.closest('[onclick*="toggleChatPopup"]') || e.target.closest('.mobile-menu-tab-btn');
+                            if (!isClickInside && !isTrigger) App.UI.toggleChatPopup(false);
+                        }
+                    });
+                },
+                closeMobileSidebar() { document.getElementById('app-layout')?.classList.remove('sidebar-mobile-open'); document.getElementById('mobile-overlay')?.classList.remove('active'); },
+                
+                toggleChatPopup(open) {
+                    const box = document.getElementById('floating-chat-popup-box'); if(!box) return;
+                    if(open) { 
+                        box.classList.add('active'); 
+                        App.UI.pushModalStateToHistory();
+                        if (activeChatFriendName && activeChatFriendEmail) {
+                            App.Features.openSpecificFriendPopupObrolan(activeChatFriendEmail, activeChatFriendName);
+                        } else {
+                            App.Features.closeActiveChatSessionAndReturnToList(); 
+                        }
+                    } 
+                    else box.classList.remove('active');
+                },
+                refreshHeaderNotificationBadgeDOM() {
+                    const badge = document.getElementById('noti-badge');
+                    if(badge) { badge.innerText = liveHeaderNotificationCount; badge.style.display = liveHeaderNotificationCount > 0 ? 'flex' : 'none'; }
+                },
+                syncGlobalAvatarAndName() {
+                    const name = App.ProfileState.getCurrentName(), avatar = App.ProfileState.getCurrentAvatar();
+                    const html = App.UI.generateAvatarHTML(name, avatar, false, 0, '40px', false);
+                    const header = document.getElementById('header-avatar-toggle-node'); if (header) header.innerHTML = html;
+                    const comp = document.getElementById('composer-avatar-slot'); if (comp) comp.innerHTML = html;
+                },
+                showLoadingBtn(b) { if(b) b.innerHTML = 'Memproses...'; setTimeout(() => { if(b) b.innerHTML = 'Masuk'; }, 1500); }
+            }
+        };
+
+        App.Features.toggleFollowInExploreFromProfileDOM = App.Features.toggleFollowInFollowFromProfileDOM;
+
+        document.addEventListener('DOMContentLoaded', () => App.init());
+    </script>
+</body>
+</html>
