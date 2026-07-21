@@ -382,7 +382,7 @@
         .bubble-action-btn.delete:hover { color: var(--danger); }
 
         /* GLOBAL MODAL SYSTEM */
-        .modal-overlay { position: fixed; top: var(--header-height); left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); backdrop-filter: blur(4px); z-index: 4000; display: none; align-items: center; justify-content: center; padding: 20px; transition: var(--trans-smooth); }
+        .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); backdrop-filter: blur(4px); z-index: 4000; display: none; align-items: center; justify-content: center; padding: 20px; transition: var(--trans-smooth); }
         .modal-overlay.active { display: flex; }
         .modal-content { background: #ffffff; border: 1px solid var(--border-color); border-radius: var(--radius-xl); padding: 24px; width: 100%; max-width: 500px; position: relative; box-shadow: var(--shadow-soft); max-height: calc(90vh - var(--header-height)); overflow-y: auto; box-sizing: border-box; }
         
@@ -589,7 +589,7 @@
                 border: none;
             }
             .modal-content { width: 100%; max-width: 100%; border-radius: var(--radius-lg); margin: 0; box-sizing: border-box; }
-            .modal-overlay { padding: 12px; top: var(--header-height); }
+            .modal-overlay { padding: 12px; top: 0; }
             .user-grid { grid-template-columns: 1fr; }
             .pwa-install-banner { bottom: calc(75px + env(safe-area-inset-bottom)); }
         }
@@ -757,7 +757,7 @@
     </div>
 
     <!-- FULLSCREEN IMAGE LIGHTBOX MODAL WITH OVERLAY -->
-    <div id="fullscreen-lightbox-container" unselectable="on"></div>
+    <div id="fullscreen-lightbox-container"></div>
 
     <div class="toast-container" id="toast-container"></div>
 
@@ -768,7 +768,7 @@
         const SUPABASE_KEY = 'sb_publishable_1MQZs2Z7yOjywmGpYOk_Uw_Y9wZ7CXk'; 
         const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-        const DEFAULT_AVATAR_IMAGE = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0iIzE4NzdGMiI+PHBhdGggZD0iTTEyIDJDNi44OCAyIDIgNi40OCAyIDEyczQuNDggMTAgMTAgMTAgMTAtNC40OCAxMC0xMFMxNy41MiAyIDEyIDJ6bTAgNGMxLjkzIDAgMy41IDEuNTcgMy41IDMuNVMxMy45MyAxMyAxMiAxM3MtMy41LTEuNTctMy41LTMuNVMxMC4wNyA2 IDEyIDZ6bTAgMTRjLTIuMDMgMC0zLjguODUtNS4wNS0yLjIuMDMtMS42OCAzLjM3LTIuNiA1LjA1LTIuNnM1LjAyLjkyIDUuMDUgMi42QzE1LjggMTkuMTUgMTQuMDMgMjAgMTIgMjB6Ii8+PC9zdmc+';
+        const DEFAULT_AVATAR_IMAGE = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0iIzE4NzdGMiI+PHBhdGggZD0iTTEyIDJDNi44OCAyIDIgNi40OCAyIDEyczQuNDggMTAgMTAgMTAgMTAtNC40OCAxMC0xMFMxNy41MiAyIDEyIDJ6bTAgNGMxLjkzIDAgMy41 IDEuNTcgMy41IDMuNVMxMy45MyAxMyAxMiAxM3MtMy41LTEuNTctMy41LTMuNVMxMC4wNyA2 IDEyIDZ6bTAgMTRjLTIuMDMgMC0zLjguODUtNS4wNS0yLjIuMDMtMS42OCAzLjM3LTIuNiA1LjA1LTIuNnM1LjAyLjkyIDUuMDUgMi42QzE1LjggMTkuMTUgMTQuMDMgMjAgMTIgMjB6Ii8+PC9zdmc+';
 
         let liveNotifications = [];
         let activeChatFriendEmail = localStorage.getItem('ns_active_chat_email') || null;
@@ -1660,7 +1660,7 @@
 
                         const htmlList = list.map(uName => {
                             const p = profMap[uName] || {};
-                            const av = (p.avatar_url && p.avatar_url !== 'null') ? p.avatar_url : DEFAULT_AVATAR_IMAGE;
+                            const av = (p.avatar_url && p.avatar_url !== 'null' && p.avatar_url !== 'undefined') ? p.avatar_url : DEFAULT_AVATAR_IMAGE;
                             const isFollowing = window.userFriendsList.includes(uName);
                             const safeUName = escapeJSString(uName);
 
@@ -1704,7 +1704,7 @@
 
                         const htmlList = list.map(uName => {
                             const p = profMap[uName] || {};
-                            const av = (p.avatar_url && p.avatar_url !== 'null') ? p.avatar_url : DEFAULT_AVATAR_IMAGE;
+                            const av = (p.avatar_url && p.avatar_url !== 'null' && p.avatar_url !== 'undefined') ? p.avatar_url : DEFAULT_AVATAR_IMAGE;
                             const isFollowing = window.userFriendsList.includes(uName);
                             const safeUName = escapeJSString(uName);
 
@@ -3193,7 +3193,7 @@
                     App.Modal.closeSecondaryPopupModal();
                     const secondaryOverlay = document.createElement('div');
                     secondaryOverlay.id = 'premium-secondary-modal-overlay';
-                    secondaryOverlay.style = 'position:fixed; top:var(--header-height); left:0; right:0; bottom:0; background:rgba(0,0,0,0.4); backdrop-filter:blur(4px); z-index:4500; display:flex; align-items:center; justify-content:center; padding:20px;';
+                    secondaryOverlay.style = 'position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.4); backdrop-filter:blur(4px); z-index:4500; display:flex; align-items:center; justify-content:center; padding:20px;';
                     
                     secondaryOverlay.addEventListener('click', (e) => {
                         if(e.target.id === 'premium-secondary-modal-overlay') App.Modal.closeSecondaryPopupModal();
