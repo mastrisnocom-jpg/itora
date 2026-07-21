@@ -75,7 +75,7 @@
         .header-top-row { width: 100%; display: flex; align-items: center; justify-content: space-between; }
         .header-left, .header-right { display: flex; align-items: center; gap: 14px; }
         
-        /* BOTTOM NAVIGATION BAR MOBILE */
+        /* BOTTOM NAVIGATION BAR MOBILE - DIPERBAIKI Z-INDEX KE 10005 AGAR TIDAK TERTUTUP POPUP KOMENTAR */
         .header-mobile-menu-bar { 
             display: none; 
             width: 100%; 
@@ -90,7 +90,7 @@
             right: 0 !important;
             background: #ffffff !important;
             border-top: 1px solid var(--border-color) !important;
-            z-index: 9999 !important;
+            z-index: 10005 !important;
             box-shadow: 0 -4px 16px rgba(0,0,0,0.06) !important;
         }
         .header-mobile-menu-bar::-webkit-scrollbar { display: none; }
@@ -1394,7 +1394,7 @@
                     sideHTML += `<li style="margin-top: auto;"><a class="menu-item ripple-btn" style="color: var(--danger);" onclick="App.Auth.logout()"><span class="material-symbols-outlined">logout</span><span class="menu-text">Keluar</span></a></li>`;
                     
                     if (side) side.innerHTML = sideHTML; 
-                    if (topInjectedNode) topInjectedHTML = topInjectedHTML;
+                    if (topInjectedNode) topInjectedNode.innerHTML = topInjectedHTML;
                     this.updateChatBadgeDOM();
                 },
                 updateChatBadgeDOM() {
