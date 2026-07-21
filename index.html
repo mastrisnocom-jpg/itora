@@ -1573,7 +1573,7 @@
                     `;
                 },
 
-                // TAMPILAN DESAIN PENGATURAN BARU MODERN & ELEGAN
+                // TAMPILAN DESAIN PENGATURAN BARU MODERN & ELEGAN (LENGKAP)
                 settings() {
                     const currentName = App.ProfileState.getCurrentName();
                     const currentAvatar = App.ProfileState.getCurrentAvatar();
@@ -1583,6 +1583,7 @@
                     const isSuperAdmin = (myEmail === 'mastrisnocom@gmail.com');
                     const savedAdHTML = localStorage.getItem('ns_ad_html_global') || '';
                     const savedGeminiApiKey = localStorage.getItem('ns_gemini_api_key') || '';
+                    const defaultPrivacy = localStorage.getItem('ns_default_privacy') || 'public';
 
                     return `
                         <div style="max-width: 650px; margin: 0 auto;">
@@ -1615,7 +1616,52 @@
                                 <button class="btn btn-primary ripple-btn btn-full" onclick="App.Features.saveNameSettings()">Simpan Perubahan Profil</button>
                             </div>
 
-                            <!-- CARD 2: INTEGRASI AI (GEMINI) -->
+                            <!-- CARD 2: KONTROL NOTIFIKASI HP -->
+                            <div class="settings-section-card">
+                                <div class="settings-section-title">
+                                    <span class="material-symbols-outlined">notifications_active</span>
+                                    <span>Notifikasi Sistem Handphone</span>
+                                </div>
+                                <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 16px; line-height: 1.5;">Kelola izin notifikasi bawaan HP untuk menerima pesan dan interaksi secara realtime.</p>
+                                <div style="display:flex; gap:10px; flex-wrap:wrap;">
+                                    <button class="btn btn-secondary" onclick="App.Features.requestNotificationPermissionAction()" style="flex:1;">
+                                        <span class="material-symbols-outlined" style="font-size:18px;">notifications</span> Izinkan Notifikasi
+                                    </button>
+                                    <button class="btn btn-secondary" onclick="triggerNativeDevicePushNotification('Tes Notifikasi HP', 'Notifikasi sistem berhasil aktif di HP Anda!')" style="flex:1;">
+                                        <span class="material-symbols-outlined" style="font-size:18px;">send</span> Tes Notifikasi HP
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- CARD 3: KEAMANAN & GANTI PASSWORD -->
+                            <div class="settings-section-card">
+                                <div class="settings-section-title">
+                                    <span class="material-symbols-outlined">lock_reset</span>
+                                    <span>Keamanan & Sandi Akun</span>
+                                </div>
+                                <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 16px; line-height: 1.5;">Perbarui kata sandi login Supabase Auth Anda untuk menjaga keamanan akun.</p>
+                                <button class="btn btn-secondary btn-full" onclick="App.Features.changeUserPasswordAction()" style="border:1px solid var(--border-color);">
+                                    <span class="material-symbols-outlined" style="font-size:18px;">key</span> Ganti Kata Sandi Akun
+                                </button>
+                            </div>
+
+                            <!-- CARD 4: PRIVASI DEFAULT POSTINGAN -->
+                            <div class="settings-section-card">
+                                <div class="settings-section-title">
+                                    <span class="material-symbols-outlined">visibility</span>
+                                    <span>Privasi Posting Default</span>
+                                </div>
+                                <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 16px; line-height: 1.5;">Pilih opsi visibilitas otomatis setiap kali Anda membuat postingan baru.</p>
+                                <div class="form-group" style="margin-bottom:0;">
+                                    <select id="settings-default-privacy-select" class="form-input" style="padding-top:16px; cursor:pointer;" onchange="localStorage.setItem('ns_default_privacy', this.value); App.Toast.show('Privasi default diperbarui!', 'success');">
+                                        <option value="public" ${defaultPrivacy === 'public' ? 'selected' : ''}>Publik (Bisa dilihat semua orang)</option>
+                                        <option value="friends" ${defaultPrivacy === 'friends' ? 'selected' : ''}>Teman (Hanya pengguna yang diikuti)</option>
+                                        <option value="private" ${defaultPrivacy === 'private' ? 'selected' : ''}>Privat (Hanya Saya)</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <!-- CARD 5: INTEGRASI AI (GEMINI) -->
                             <div class="settings-section-card">
                                 <div class="settings-section-title">
                                     <span class="material-symbols-outlined">smart_toy</span>
@@ -1633,7 +1679,7 @@
                             </div>
 
                             ${isSuperAdmin ? `
-                                <!-- CARD 3: ADMIN AD PANEL -->
+                                <!-- CARD 6: ADMIN AD PANEL -->
                                 <div class="settings-section-card" style="border-color: var(--primary);">
                                     <div class="settings-section-title">
                                         <span class="material-symbols-outlined">campaign</span>
@@ -1649,7 +1695,19 @@
                                 </div>
                             ` : ''}
 
-                            <!-- CARD 4: KELUAR AKUN -->
+                            <!-- CARD 7: BERSIHKAN CACHE & RESET -->
+                            <div class="settings-section-card">
+                                <div class="settings-section-title">
+                                    <span class="material-symbols-outlined">cleaning_services</span>
+                                    <span>Penyimpanan Lokal & Cache</span>
+                                </div>
+                                <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 16px; line-height: 1.5;">Bersihkan cache lokal browser jika terjadi kendala tampilan tanpa mengeluarkan akun Anda.</p>
+                                <button class="btn btn-secondary btn-full" onclick="App.Features.clearAppLocalCacheAction()">
+                                    <span class="material-symbols-outlined" style="font-size:18px;">restart_alt</span> Bersihkan Cache Aplikasi
+                                </button>
+                            </div>
+
+                            <!-- CARD 8: KELUAR AKUN -->
                             <div class="settings-section-card" style="border:1px solid var(--danger);">
                                 <button class="btn btn-danger btn-full ripple-btn" onclick="App.Auth.logout()">
                                     <span class="material-symbols-outlined">logout</span> 
@@ -1680,13 +1738,63 @@
             },
 
             Features: {
+                // MINTA IZIN NOTIFIKASI
+                async requestNotificationPermissionAction() {
+                    if (!('Notification' in window)) {
+                        App.Toast.show("Browser tidak mendukung notifikasi push.", "danger");
+                        return;
+                    }
+                    const permission = await Notification.requestPermission();
+                    if (permission === 'granted') {
+                        App.Toast.show("Notifikasi HP berhasil diizinkan!", "success");
+                    } else if (permission === 'denied') {
+                        App.Toast.show("Izin notifikasi ditolak di browser HP Anda.", "danger");
+                    }
+                },
+
+                // GANTI PASSWORD SUPABASE
+                async changeUserPasswordAction() {
+                    const newPassword = prompt("Masukkan password baru Anda (minimal 6 karakter):");
+                    if (!newPassword) return;
+                    if (newPassword.length < 6) {
+                        App.Toast.show("Password minimal harus 6 karakter!", "danger");
+                        return;
+                    }
+                    try {
+                        const { error } = await supabaseClient.auth.updateUser({ password: newPassword });
+                        if (error) throw error;
+                        App.Toast.show("Password akun berhasil diperbarui!", "success");
+                    } catch (err) {
+                        App.Toast.show("Gagal mengubah password: " + err.message, "danger");
+                    }
+                },
+
+                // BERSIHKAN CACHE LOKAL
+                clearAppLocalCacheAction() {
+                    if (confirm("Bersihkan cache lokal aplikasi? (Sesi login & API Key tersimpan tetap aman)")) {
+                        const apiKey = localStorage.getItem('ns_gemini_api_key');
+                        const loggedIn = localStorage.getItem('ns_logged_in');
+                        const userId = localStorage.getItem('ns_user_id');
+                        const userEmail = localStorage.getItem('ns_user_email');
+
+                        localStorage.clear();
+
+                        if (apiKey) localStorage.setItem('ns_gemini_api_key', apiKey);
+                        if (loggedIn) localStorage.setItem('ns_logged_in', loggedIn);
+                        if (userId) localStorage.setItem('ns_user_id', userId);
+                        if (userEmail) localStorage.setItem('ns_user_email', userEmail);
+
+                        App.Toast.show("Cache aplikasi berhasil dibersihkan!", "success");
+                        setTimeout(() => window.location.reload(), 800);
+                    }
+                },
+
                 // SOKET INTEGRASI PLAY/PAUSE MUSIK PADA FOTO
                 toggleAudioPhotoPlayback(postId, audioUrl) {
                     const audioEl = document.getElementById(`photo-audio-${postId}`);
                     const badgeEl = document.getElementById(`audio-badge-${postId}`);
                     if (!audioEl) return;
 
-                    // Hentikan pemutaran audio lain yang sedang berjalan
                     document.querySelectorAll('.post-audio-node').forEach(a => {
                         if (a.id !== `photo-audio-${postId}`) {
                             a.pause();
@@ -2041,6 +2149,7 @@
                     const currentName = App.ProfileState.getCurrentName();
                     const avatarHTML = App.UI.generateAvatarHTML(currentName, App.ProfileState.getCurrentAvatar(), false, 0, '52px', false);
                     currentComposerBgColor = "#ffffff"; activeComposerLocation = "";
+                    const defaultPrivacy = localStorage.getItem('ns_default_privacy') || 'public';
 
                     const popupFormHTML = `
                         <div class="pic-composer-card">
@@ -2053,11 +2162,11 @@
                                 <div style="display:flex; flex-direction:column; gap:2px; margin-left: 8px;">
                                     <span class="pic-composer-username">${sanitizeHTML(currentName)}</span>
                                     <div class="pic-status-pill" style="border:1px solid var(--border-color); display:inline-flex; align-items:center; border-radius:12px; background:#f0f2f5;">
-                                        <span class="material-symbols-outlined" style="margin-left: 8px; font-size: 14px; color:var(--primary);" id="composer-privacy-icon">public</span>
+                                        <span class="material-symbols-outlined" style="margin-left: 8px; font-size: 14px; color:var(--primary);" id="composer-privacy-icon">${defaultPrivacy === 'private' ? 'lock' : (defaultPrivacy === 'friends' ? 'group' : 'public')}</span>
                                         <select id="composer-privacy-select" onchange="document.getElementById('composer-privacy-icon').innerText = this.options[this.selectedIndex].getAttribute('data-icon')" style="background:transparent; border:none; font-weight:700; color:#050505; font-size:0.75rem; padding:4px 8px 4px 4px; outline:none; cursor:pointer;">
-                                            <option value="public" data-icon="public">Publik</option>
-                                            <option value="friends" data-icon="group">Teman</option>
-                                            <option value="private" data-icon="lock">Privat</option>
+                                            <option value="public" data-icon="public" ${defaultPrivacy === 'public' ? 'selected' : ''}>Publik</option>
+                                            <option value="friends" data-icon="group" ${defaultPrivacy === 'friends' ? 'selected' : ''}>Teman</option>
+                                            <option value="private" data-icon="lock" ${defaultPrivacy === 'private' ? 'selected' : ''}>Privat</option>
                                         </select>
                                     </div>
                                 </div>
