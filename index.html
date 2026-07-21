@@ -58,7 +58,7 @@
         a { text-decoration: none; color: inherit; } ul { list-style: none; } button, input, textarea { font-family: inherit; outline: none; border: none; }
         ::-webkit-scrollbar { width: 6px; height: 6px; } ::-webkit-scrollbar-track { background: transparent; } ::-webkit-scrollbar-thumb { background: #bcc0c4; border-radius: var(--radius-round); } ::-webkit-scrollbar-thumb:hover { background: var(--primary); }
 
-        /* AUTH LAYOUT (Set display none sebagai default untuk cegah flash login) */
+        /* AUTH LAYOUT */
         #auth-layout { display: none; align-items: center; justify-content: center; min-height: 100vh; padding: 24px; position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 2000; background: var(--bg-body); transition: var(--trans-smooth); }
         .auth-card { background: #ffffff; border: 1px solid var(--border-color); border-radius: var(--radius-xl); padding: 40px; width: 100%; max-width: 450px; box-shadow: var(--shadow-soft); text-align: center; }
         .auth-logo { width: 64px; height: 64px; background: linear-gradient(135deg, var(--primary), #42b72a); border-radius: var(--radius-lg); display: flex; align-items: center; justify-content: center; color: white; font-size: 32px; font-weight: 800; margin: 0 auto 24px auto; box-shadow: var(--shadow-float); }
@@ -205,18 +205,50 @@
         .post-action-item.loved { color: var(--danger) !important; }
         .post-action-item.loved .material-symbols-outlined { font-variation-settings: 'FILL' 1; color: var(--danger) !important; }
 
-        /* GAMBAR MEMANJANG KIRI DAN KANAN PENUH TANPA TERPOTONG */
+        /* WIDGET FOTO DENGAN INTEGRASI MUSIK OTOMATIS */
+        .post-image-audio-wrapper {
+            position: relative;
+            width: calc(100% + 48px);
+            margin: 12px -24px;
+            cursor: pointer;
+            overflow: hidden;
+            background: #000;
+        }
         .post-attached-image { 
-            width: calc(100% + 48px); 
-            margin: 12px -24px; 
+            width: 100%; 
             display: block; 
             max-height: none; 
             height: auto; 
             object-fit: cover; 
-            cursor: zoom-in; 
             border-top: 1px solid var(--border-color); 
             border-bottom: 1px solid var(--border-color); 
+            transition: var(--trans-smooth);
         }
+        .audio-photo-badge {
+            position: absolute;
+            bottom: 16px;
+            left: 16px;
+            background: rgba(0, 0, 0, 0.65);
+            backdrop-filter: blur(8px);
+            color: #ffffff;
+            padding: 8px 14px;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.82rem;
+            font-weight: 700;
+            z-index: 5;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            border: 1px solid rgba(255,255,255,0.2);
+            transition: var(--trans-smooth);
+        }
+        .audio-photo-badge .material-symbols-outlined { font-size: 20px; color: #10B981; }
+        .audio-photo-badge.playing { background: var(--primary); border-color: transparent; }
+        .audio-photo-badge.playing .material-symbols-outlined { color: #ffffff; animation: pulse 1.2s infinite; }
+
+        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.2); } 100% { transform: scale(1); } }
+
         .post-card iframe { display: block; margin: 12px 0; width: 100%; max-width: 100%; height: 260px; border-radius: 12px; border: 1px solid var(--border-color); }
         .post-card audio { display: block; margin: 12px 0; width: 100%; max-width: 100%; background: #f0f2f5; border-radius: var(--radius-round); padding: 8px; }
 
@@ -1340,7 +1372,7 @@
                     sideHTML += `<li style="margin-top: auto;"><a class="menu-item ripple-btn" style="color: var(--danger);" onclick="App.Auth.logout()"><span class="material-symbols-outlined">logout</span><span class="menu-text">Keluar</span></a></li>`;
                     
                     if (side) side.innerHTML = sideHTML; 
-                    if (topInjectedNode) topInjectedNode.innerHTML = topInjectedHTML; // FIX: Perbaikan render tab bottom bar
+                    if (topInjectedNode) topInjectedNode.innerHTML = topInjectedHTML;
                     this.updateChatBadgeDOM();
                 },
                 updateChatBadgeDOM() {
@@ -1624,6 +1656,44 @@
             },
 
             Features: {
+                // SOKET INTEGRASI PLAY/PAUSE MUSIK PADA FOTO
+                toggleAudioPhotoPlayback(postId, audioUrl) {
+                    const audioEl = document.getElementById(`photo-audio-${postId}`);
+                    const badgeEl = document.getElementById(`audio-badge-${postId}`);
+                    if (!audioEl) return;
+
+                    // Hentikan pemutaran audio lain yang sedang berjalan
+                    document.querySelectorAll('.post-audio-node').forEach(a => {
+                        if (a.id !== `photo-audio-${postId}`) {
+                            a.pause();
+                            a.currentTime = 0;
+                            const otherId = a.id.replace('photo-audio-', '');
+                            const otherBadge = document.getElementById(`audio-badge-${otherId}`);
+                            if (otherBadge) {
+                                otherBadge.classList.remove('playing');
+                                otherBadge.querySelector('.material-symbols-outlined').innerText = 'music_note';
+                                otherBadge.querySelector('.audio-text-lbl').innerText = 'Klik Foto Untuk Lagu 🎵';
+                            }
+                        }
+                    });
+
+                    if (audioEl.paused) {
+                        audioEl.play();
+                        if (badgeEl) {
+                            badgeEl.classList.add('playing');
+                            badgeEl.querySelector('.material-symbols-outlined').innerText = 'graphic_eq';
+                            badgeEl.querySelector('.audio-text-lbl').innerText = 'Memutar Musik... 🎵';
+                        }
+                    } else {
+                        audioEl.pause();
+                        if (badgeEl) {
+                            badgeEl.classList.remove('playing');
+                            badgeEl.querySelector('.material-symbols-outlined').innerText = 'music_note';
+                            badgeEl.querySelector('.audio-text-lbl').innerText = 'Klik Foto Untuk Lagu 🎵';
+                        }
+                    }
+                },
+
                 async loadProfileStatsFromSupabase(targetName = null) {
                     const name = targetName || App.ProfileState.getCurrentName();
                     
@@ -1837,7 +1907,7 @@
                             const safeAuthor = escapeJSString(p.author);
                             const postAvatar = (p.avatar && p.avatar !== 'null' && p.avatar !== 'undefined') ? p.avatar : DEFAULT_AVATAR_IMAGE;
                             
-                            const mediaHTML = this.extractAndRenderEmbeddedMedia(p.content || "", p.media_url) || (p.image ? `<img src="${p.image}" class="post-attached-image" onclick="App.UI.openImageLightbox('${p.image}', ${p.id}, '${safeAuthor}', '${p.avatar || DEFAULT_AVATAR_IMAGE}')">` : '');
+                            const mediaHTML = this.extractAndRenderEmbeddedMedia(p.content || "", p.media_url, p.image, p.id, safeAuthor, postAvatar);
 
                             const privacyType = p.privacy || 'public';
                             const privacyIcon = privacyType === 'private' ? 'lock' : (privacyType === 'friends' ? 'group' : 'public');
@@ -2066,8 +2136,8 @@
                 },
 
                 triggerEmbeddedLinkModalPopup(type = 'all') {
-                    let title = "Sematkan Link Media";
-                    let label = "Sematkan URL Link Youtube / FB Video / File MP3";
+                    let title = "Sematkan Link Media / Lagu";
+                    let label = "Sematkan URL Link Youtube / FB Video / File MP3 Lagu";
                     let placeholder = "https://...";
 
                     if (type === 'youtube') {
@@ -2506,7 +2576,7 @@
                     }
                 },
 
-                extractAndRenderEmbeddedMedia(contentString, directMediaUrl) {
+                extractAndRenderEmbeddedMedia(contentString, directMediaUrl, attachedImage = null, postId = null, postAuthor = '', postAvatar = '') {
                     let textToCheck = contentString || "";
                     let combinedUrl = directMediaUrl || "";
                     
@@ -2524,6 +2594,21 @@
                         else if (mp3Match && mp3Match.length > 0) combinedUrl = mp3Match[0];
                     }
 
+                    // SKENARIO 1: Memiliki Foto DAN Lagu (Audio-Photo Interactive)
+                    if (attachedImage && combinedUrl && /\.(mp3|wav|ogg)/i.test(combinedUrl)) {
+                        return `
+                            <div class="post-image-audio-wrapper" onclick="App.Features.toggleAudioPhotoPlayback('${postId}', '${combinedUrl}')">
+                                <img src="${attachedImage}" class="post-attached-image">
+                                <div class="audio-photo-badge" id="audio-badge-${postId}">
+                                    <span class="material-symbols-outlined">music_note</span>
+                                    <span class="audio-text-lbl">Klik Foto Untuk Lagu 🎵</span>
+                                </div>
+                                <audio id="photo-audio-${postId}" class="post-audio-node" src="${combinedUrl}" preload="none" loop></audio>
+                            </div>
+                        `;
+                    }
+
+                    // SKENARIO 2: Hanya Tautan Media (YouTube / Facebook Video / MP3 biasa)
                     if (combinedUrl) {
                         if (combinedUrl.includes('youtube.com') || combinedUrl.includes('youtu.be')) {
                             let videoId = "";
@@ -2537,9 +2622,15 @@
                             const fbEmbedUrl = `https://www.facebook.com/plugins/video.php?href=${encodeURIComponent(combinedUrl)}&show_text=false&width=500`;
                             return `<iframe src="${fbEmbedUrl}" style="border:none;overflow:hidden" scrolling="no" frameborder="0" allowfullscreen="true" allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"></iframe>`;
                         } else if (/\.(mp3|wav|ogg)/i.test(combinedUrl)) {
-                            return `<audio controls style="width:100%;"><source src="${combinedUrl}"></audio>`;
+                            return `<audio controls style="width:100%; margin: 12px 0;"><source src="${combinedUrl}"></audio>`;
                         }
                     }
+
+                    // SKENARIO 3: Hanya Foto Biasa
+                    if (attachedImage) {
+                        return `<img src="${attachedImage}" class="post-attached-image" onclick="App.UI.openImageLightbox('${attachedImage}', ${postId}, '${postAuthor}', '${postAvatar}')">`;
+                    }
+
                     return "";
                 },
 
@@ -2618,7 +2709,7 @@
                             const safeAuthor = escapeJSString(p.author);
                             const postAvatar = (p.avatar && p.avatar !== 'null' && p.avatar !== 'undefined') ? p.avatar : DEFAULT_AVATAR_IMAGE;
 
-                            const mediaHTML = this.extractAndRenderEmbeddedMedia(p.content || "", p.media_url) || (p.image ? `<img src="${p.image}" class="post-attached-image" onclick="App.UI.openImageLightbox('${p.image}', ${p.id}, '${safeAuthor}', '${postAvatar}')">` : '');
+                            const mediaHTML = this.extractAndRenderEmbeddedMedia(p.content || "", p.media_url, p.image, p.id, safeAuthor, postAvatar);
 
                             const privacyType = p.privacy || 'public';
                             const privacyIcon = privacyType === 'private' ? 'lock' : (privacyType === 'friends' ? 'group' : 'public');
@@ -3256,13 +3347,21 @@
                     return `<div class="avatar-wrapper" onclick="App.Router.navigate('${inPost ? 'profil?name=' + encodeURIComponent(name) : 'profil'}')"><img src="${src}" class="user-avatar" style="width:${size}; height:${size}; object-fit:cover;" alt="Avatar"></div>`;
                 },
 
-                // FITUR MODAL LIGHTBOX FULLSCREEN DENGAN OVERLAY INTERAKSI LENGKAP
+                // FITUR MODAL LIGHTBOX FULLSCREEN DENGAN DUKUNGAN AUDIO OTOMATIS
                 openImageLightbox(imageUrl, postId = null, authorName = '', authorAvatar = '') {
                     const container = document.getElementById('fullscreen-lightbox-container');
                     if (!container) return;
 
                     const safeAuthor = escapeJSString(authorName);
                     const avSrc = (authorAvatar && authorAvatar !== 'null' && authorAvatar !== 'undefined') ? authorAvatar : DEFAULT_AVATAR_IMAGE;
+
+                    // Putar audio jika ada audio terkait postingan ini
+                    const existingAudio = document.getElementById(`photo-audio-${postId}`);
+                    let audioControlsHTML = '';
+                    if (existingAudio) {
+                        const audioSrc = existingAudio.getAttribute('src');
+                        audioControlsHTML = `<audio src="${audioSrc}" autoplay controls style="width:260px; height:32px; border-radius:20px;"></audio>`;
+                    }
 
                     container.innerHTML = `
                         <div class="fullscreen-lightbox-overlay">
@@ -3272,9 +3371,12 @@
                                     <img src="${avSrc}" class="lightbox-author-avatar">
                                     <strong style="font-size:1rem;">${sanitizeHTML(authorName)}</strong>
                                 </div>
-                                <button class="icon-btn" style="background:rgba(255,255,255,0.2); color:white;" onclick="App.UI.closeImageLightbox()">
-                                    <span class="material-symbols-outlined">close</span>
-                                </button>
+                                <div style="display:flex; align-items:center; gap:12px;">
+                                    ${audioControlsHTML}
+                                    <button class="icon-btn" style="background:rgba(255,255,255,0.2); color:white;" onclick="App.UI.closeImageLightbox()">
+                                        <span class="material-symbols-outlined">close</span>
+                                    </button>
+                                </div>
                             </div>
 
                             <!-- PANGGUNG FOTO UTAMA -->
