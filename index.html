@@ -25,6 +25,9 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     
     <style>
+        /* ==========================================================================
+           1. CSS VARIABLES & CLEAN WHITE BLUE THEME CONFIGURATION
+           ========================================================================== */
         :root {
             --font-main: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
             --bg-body: #ffffff;
@@ -34,7 +37,7 @@
             --border-color: #e4e6eb;
             --text-main: #050505;
             --text-muted: #65676b;
-            --primary: #1877F2;          
+            --primary: #1877F2;          /* DOMINAN BIRU */
             --primary-hover: #166FE5;
             --primary-state: rgba(24, 119, 242, 0.1);
             --secondary: #e4e6eb;
@@ -72,6 +75,7 @@
         .header-top-row { width: 100%; display: flex; align-items: center; justify-content: space-between; }
         .header-left, .header-right { display: flex; align-items: center; gap: 14px; }
         
+        /* BOTTOM NAVIGATION BAR MOBILE */
         .header-mobile-menu-bar { 
             display: none; 
             width: 100%; 
@@ -187,6 +191,7 @@
 
         .post-content { font-family: var(--font-main); font-size: 1.02rem; font-weight: 400; line-height: 1.6; letter-spacing: -0.1px; margin-bottom: 14px; color: var(--text-main); text-align: left; white-space: pre-wrap; word-break: break-word; max-width: 100%; background: transparent !important; padding: 0; border-radius: 0; border: none !important; box-shadow: none !important; }
         
+        /* MENTION STYLE UTAMA */
         .user-mention-link { color: var(--primary); font-weight: 700; cursor: pointer; text-decoration: none; }
         .user-mention-link:hover { text-decoration: underline; }
 
@@ -803,7 +808,7 @@
             PWA: {
                 init() {
                     this.registerServiceWorker();
-                    this.checkIfAlreadyStandalone();
+                    this.checkStrictInstallationStatus();
                 },
                 registerServiceWorker() {
                     if ('serviceWorker' in navigator) {
@@ -812,31 +817,44 @@
                             .catch((err) => console.log("Gagal mendaftarkan Service Worker:", err));
                     }
                 },
-                checkIfAlreadyStandalone() {
-                    const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
-                    if (isStandalone || localStorage.getItem('pwa_installed_flag') === 'true') {
+                checkStrictInstallationStatus() {
+                    const isStandalone = window.matchMedia('(display-mode: standalone)').matches 
+                        || window.navigator.standalone === true 
+                        || window.location.search.includes('utm_source=pwa');
+
+                    const isAlreadyInstalled = localStorage.getItem('pwa_is_installed') === 'true';
+
+                    if (isStandalone || isAlreadyInstalled) {
                         this.dismissInstallPrompt();
                     } else {
                         this.listenInstallPrompt();
                     }
+
+                    window.addEventListener('appinstalled', () => {
+                        localStorage.setItem('pwa_is_installed', 'true');
+                        this.dismissInstallPrompt();
+                    });
                 },
                 listenInstallPrompt() {
                     window.addEventListener('beforeinstallprompt', (e) => {
                         e.preventDefault();
-                        deferredPwaPrompt = e;
                         const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
-                        if (!isStandalone && localStorage.getItem('pwa_installed_flag') !== 'true') {
-                            const banner = document.getElementById('pwa-install-banner-node');
-                            if(banner) banner.classList.add('active');
+                        if (isStandalone || localStorage.getItem('pwa_is_installed') === 'true') {
+                            this.dismissInstallPrompt();
+                            return;
                         }
+
+                        deferredPwaPrompt = e;
+                        const banner = document.getElementById('pwa-install-banner-node');
+                        if (banner) banner.classList.add('active');
                     });
                 },
                 triggerInstall() {
                     if (deferredPwaPrompt) {
                         deferredPwaPrompt.prompt();
-                        deferredPwaPrompt.userChoice.then((choice) => {
-                            if (choice.outcome === 'accepted') {
-                                localStorage.setItem('pwa_installed_flag', 'true');
+                        deferredPwaPrompt.userChoice.then((choiceResult) => {
+                            if (choiceResult.outcome === 'accepted') {
+                                localStorage.setItem('pwa_is_installed', 'true');
                             }
                             deferredPwaPrompt = null;
                             this.dismissInstallPrompt();
@@ -845,7 +863,10 @@
                 },
                 dismissInstallPrompt() {
                     const banner = document.getElementById('pwa-install-banner-node');
-                    if(banner) banner.classList.remove('active');
+                    if (banner) {
+                        banner.classList.remove('active');
+                        banner.style.display = 'none';
+                    }
                 }
             },
 
@@ -1259,7 +1280,6 @@
                         </div>
                     `;
                 },
-                // PROFIL DESAIN BARU MODERN MODIS
                 async profil(specifiedTargetName = null) {
                     const loggedInUser = App.ProfileState.getCurrentName();
                     const isOwnProfile = (!specifiedTargetName || specifiedTargetName === loggedInUser);
@@ -1488,7 +1508,6 @@
 
                         slot.innerHTML = uniqueStories.map(story => {
                             const storyAvatar = (story.avatar && story.avatar !== 'null' && story.avatar !== 'undefined') ? story.avatar : DEFAULT_AVATAR_IMAGE;
-                            const safeAuthor = escapeJSString(story.author);
 
                             return `
                                 <div class="story-card" onclick="App.Router.navigate('profil?name=${encodeURIComponent(story.author)}')">
@@ -2622,7 +2641,6 @@
                     } catch(e) {}
                 },
 
-                // NOTIFIKASI HANYA DITANDAI TERBACA JIKA DIKLIK OLEH PENGGUNA
                 async markSingleNotificationAsRead(notifId, senderName, actionType) {
                     try {
                         await supabaseClient.from('notifications').update({ is_unread: false }).eq('id', notifId);
