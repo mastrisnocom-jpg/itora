@@ -1,4 +1,4 @@
-              <!DOCTYPE html>
+               <!DOCTYPE html>
 <html lang="id" data-theme="light">
 <head>
     <meta charset="UTF-8">
@@ -1569,6 +1569,11 @@
                     } catch (e) {}
                 },
 
+                isSuperAdmin() {
+                    const email = (localStorage.getItem('ns_user_email') || '').toLowerCase();
+                    return email === 'mastrisnocom@gmail.com';
+                },
+
                 getCurrentName() {
                     return window.mySupabaseProfileCache.display_name || (localStorage.getItem('ns_user_email') || 'User').split('@')[0];
                 },
@@ -1614,9 +1619,12 @@
                 },
                 async updateProfileDataConfiguration(newData) {
                     const config = this.getLimitConfig();
-                    if(config.count >= 5) return { success: false, message: "Batas pengeditan data profil bulan ini (5x) telah habis." };
+                    if(config.count >= 5 && !this.isSuperAdmin()) return { success: false, message: "Batas pengeditan data profil bulan ini (5x) telah habis." };
                     
                     const userId = localStorage.getItem('ns_user_id');
+                    const oldName = this.getCurrentName();
+                    const newName = newData.display_name;
+
                     try {
                         const { error } = await supabaseClient
                             .from('profiles')
@@ -1628,6 +1636,17 @@
 
                         if (error) throw error;
 
+                        if (oldName && newName && oldName !== newName) {
+                            await supabaseClient.from('posts').update({ author: newName }).eq('author', oldName);
+                            await supabaseClient.from('comments').update({ user_name: newName }).eq('user_name', oldName);
+                            await supabaseClient.from('follows').update({ follower: newName }).eq('follower', oldName);
+                            await supabaseClient.from('follows').update({ following: newName }).eq('following', oldName);
+                            await supabaseClient.from('chats').update({ sender: newName }).eq('sender', oldName);
+                            await supabaseClient.from('chats').update({ receiver: newName }).eq('receiver', oldName);
+                            await supabaseClient.from('notifications').update({ sender: newName }).eq('sender', oldName);
+                            await supabaseClient.from('notifications').update({ receiver: newName }).eq('receiver', oldName);
+                        }
+
                         config.count += 1;
                         localStorage.setItem('ns_edit_limit_log', JSON.stringify(config));
                         
@@ -1635,7 +1654,7 @@
                         await this.syncUserProfileFromSupabase();
                         return { success: true };
                     } catch(err) {
-                        return { success: false, message: "Gagal menyimpan ke database Supabase." };
+                        return { success: false, message: "Gagal menyimpan ke database Supabase: " + err.message };
                     }
                 },
                 async saveAvatarUrlToSupabase(publicUrl) {
@@ -1974,6 +1993,7 @@
                 async profil(specifiedTargetName = null) {
                     const loggedInUser = App.ProfileState.getCurrentName();
                     const isOwnProfile = (!specifiedTargetName || specifiedTargetName === loggedInUser);
+                    const isSuperAdmin = App.ProfileState.isSuperAdmin();
                     const targetName = isOwnProfile ? loggedInUser : specifiedTargetName;
                     
                     let targetAvatar = DEFAULT_AVATAR_IMAGE;
@@ -2075,7 +2095,7 @@
                                     </div>
                                 </div>
 
-                                <!-- TOMBOL AKSI UTAMA -->
+                                <!-- TOMBOL AKSI UTAMA & KONTROL SUPER ADMIN -->
                                 <div class="social-profile-action-btns">
                                     ${!isOwnProfile ? `
                                         <button class="social-btn-gray" onclick="App.Features.toggleFollowInFollowFromProfileDOM('${safeTargetName}', this)">
@@ -2086,6 +2106,11 @@
                                             <span class="material-symbols-outlined" style="font-size:20px;">storefront</span>
                                             <span>Storefront</span>
                                         </button>
+                                        ${isSuperAdmin ? `
+                                            <button class="btn btn-danger" onclick="App.Features.adminDeleteTargetUserAccount('${safeTargetName}')" style="font-size:0.85rem; padding:8px 12px; border-radius:8px;">
+                                                <span class="material-symbols-outlined" style="font-size:18px;">admin_panel_settings</span> Banned Akun
+                                            </button>
+                                        ` : ''}
                                     ` : `
                                         <button class="social-btn-gray" onclick="App.Router.navigate('settings')">
                                             <span class="material-symbols-outlined" style="font-size:20px;">edit</span>
@@ -2151,7 +2176,7 @@
                     `;
                 },
 
-  // TAMPILAN DESAIN PENGATURAN BARU DENGAN FIELD PROFIL LENGKAP
+ // TAMPILAN DESAIN PENGATURAN BARU DENGAN FIELD PROFIL LENGKAP & MENU HAPUS AKUN
                 settings() {
                     const currentName = App.ProfileState.getCurrentName();
                     const currentAvatar = App.ProfileState.getCurrentAvatar();
@@ -2162,8 +2187,7 @@
                     const currentPendidikan = App.ProfileState.getCurrentPendidikan();
                     const currentGender = App.ProfileState.getCurrentGender();
                     
-                    const myEmail = (localStorage.getItem('ns_user_email') || '').toLowerCase();
-                    const isSuperAdmin = (myEmail === 'mastrisnocom@gmail.com');
+                    const isSuperAdmin = App.ProfileState.isSuperAdmin();
                     const savedAdHTML = localStorage.getItem('ns_ad_html_global') || '';
                     const savedGeminiApiKey = localStorage.getItem('ns_gemini_api_key') || '';
                     const defaultPrivacy = localStorage.getItem('ns_default_privacy') || 'public';
@@ -2175,6 +2199,7 @@
                                     <span class="material-symbols-outlined" style="font-size:32px; color:var(--primary);">tune</span>
                                     <span>Pengaturan Akun</span>
                                 </h2>
+                                ${isSuperAdmin ? '<span style="background:var(--danger); color:white; font-size:0.75rem; font-weight:800; padding:4px 10px; border-radius:12px;">KONTROL SUPER ADMIN</span>' : ''}
                             </div>
 
                             <!-- CARD 1: FOTO AVATAR & BANNER PROFIL -->
@@ -2324,10 +2349,25 @@
                             </div>
 
                             <!-- CARD 9: KELUAR AKUN -->
-                            <div class="settings-section-card" style="border:1px solid var(--danger);">
-                                <button class="btn btn-danger btn-full ripple-btn" onclick="App.Auth.logout()">
+                            <div class="settings-section-card">
+                                <button class="btn btn-secondary btn-full ripple-btn" onclick="App.Auth.logout()" style="color:var(--text-main);">
                                     <span class="material-symbols-outlined">logout</span> 
                                     <span>Keluar dari Akun Tech Social</span>
+                                </button>
+                            </div>
+
+                            <!-- CARD 10: ZONA BAHAYA - HAPUS AKUN PERMANEN -->
+                            <div class="settings-section-card" style="border: 1px solid var(--danger); background: #fff5f5;">
+                                <div class="settings-section-title" style="color: var(--danger);">
+                                    <span class="material-symbols-outlined" style="color: var(--danger);">warning</span>
+                                    <span>Zona Bahaya: Hapus Akun</span>
+                                </div>
+                                <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 16px; line-height: 1.5;">
+                                    Menghapus akun Anda akan menghapus seluruh data profil, postingan, komentar, pesan, dan pengikut secara permanen dari server. Tindakan ini <strong>tidak dapat dibatalkan</strong>.
+                                </p>
+                                <button class="btn btn-danger btn-full ripple-btn" onclick="App.Features.deleteAccountPermanently()">
+                                    <span class="material-symbols-outlined">delete_forever</span> 
+                                    <span>Hapus Akun Saya Secara Permanen</span>
                                 </button>
                             </div>
                         </div>
@@ -2354,6 +2394,72 @@
             },
 
             Features: {
+                // HAK KONTROL SUPER ADMIN: Hapus Akun Pengguna Lain
+                async adminDeleteTargetUserAccount(targetName) {
+                    if (!App.ProfileState.isSuperAdmin()) {
+                        App.Toast.show("Akses ditolak. Anda bukan Super Admin.", "danger");
+                        return;
+                    }
+
+                    if (!confirm(`[SUPER ADMIN] Apakah Anda yakin ingin BANNED / Hapus Akun '${targetName}' beserta SELURUH datanya secara permanen?`)) return;
+
+                    App.Toast.show(`Memproses penghapusan akun '${targetName}'...`, "info");
+
+                    try {
+                        await supabaseClient.from('posts').delete().eq('author', targetName);
+                        await supabaseClient.from('comments').delete().eq('user_name', targetName);
+                        await supabaseClient.from('follows').delete().or(`follower.eq."${targetName}",following.eq."${targetName}"`);
+                        await supabaseClient.from('chats').delete().or(`sender.eq."${targetName}",receiver.eq."${targetName}"`);
+                        await supabaseClient.from('notifications').delete().or(`sender.eq."${targetName}",receiver.eq."${targetName}"`);
+                        await supabaseClient.from('profiles').delete().eq('display_name', targetName);
+
+                        App.Toast.show(`Akun '${targetName}' berhasil dihapus dari sistem!`, "success");
+                        setTimeout(() => App.Router.navigate('feed'), 1000);
+                    } catch(err) {
+                        App.Toast.show("Gagal menghapus akun pengguna: " + err.message, "danger");
+                    }
+                },
+
+                // FITUR HAPUS AKUN PERMANEN (Milik Sendiri)
+                async deleteAccountPermanently() {
+                    const myName = App.ProfileState.getCurrentName();
+                    const userId = localStorage.getItem('ns_user_id');
+
+                    const confirmFirst = confirm(`Peringatan! Apakah Anda yakin ingin menghapus akun '${myName}' secara permanen?\n\nSemua postingan, foto, komentar, dan obrolan Anda akan dihapus total.`);
+                    if (!confirmFirst) return;
+
+                    const confirmWord = prompt(`Untuk mengonfirmasi penghapusan akun, ketik nama akun Anda [${myName}] di bawah ini:`);
+                    if (confirmWord !== myName) {
+                        App.Toast.show("Konfirmasi gagal. Nama yang Anda ketik tidak cocok.", "danger");
+                        return;
+                    }
+
+                    App.Toast.show("Menghapus seluruh data akun Anda...", "info");
+
+                    try {
+                        await supabaseClient.from('posts').delete().eq('author', myName);
+                        await supabaseClient.from('comments').delete().eq('user_name', myName);
+                        await supabaseClient.from('follows').delete().or(`follower.eq."${myName}",following.eq."${myName}"`);
+                        await supabaseClient.from('chats').delete().or(`sender.eq."${myName}",receiver.eq."${myName}"`);
+                        await supabaseClient.from('notifications').delete().or(`sender.eq."${myName}",receiver.eq."${myName}"`);
+
+                        if (userId) {
+                            await supabaseClient.from('profiles').delete().eq('id', userId);
+                        } else {
+                            await supabaseClient.from('profiles').delete().eq('display_name', myName);
+                        }
+
+                        App.Toast.show("Akun Anda berhasil dihapus sepenuhnya.", "success");
+
+                        setTimeout(async () => {
+                            await App.Auth.logout();
+                        }, 1200);
+
+                    } catch (err) {
+                        App.Toast.show("Gagal menghapus akun: " + err.message, "danger");
+                    }
+                },
+
                 async requestNotificationPermissionAction() {
                     if (!('Notification' in window)) {
                         App.Toast.show("Browser tidak mendukung notifikasi push.", "danger");
@@ -2739,7 +2845,6 @@
 
                 async handleGlobalDirectFileSelection(event) {
                     const file = event.target.files[0]; if (!file) return;
-                    
                     if (file.size > 5 * 1024 * 1024) {
                         App.Toast.show("Ukuran foto melebihi batas maksimal 5MB!", "danger");
                         event.target.value = '';
@@ -3115,7 +3220,7 @@
                                         </div>
                                         <div class="chat-time-stamp">
                                             <span>${timeStr}</span>
-                                            ${isOut ? `
+                                            ${isOut || App.ProfileState.isSuperAdmin() ? `
                                                 • <button class="bubble-action-btn" onclick="App.Features.editSingleChatMessageAction(${m.id}, '${safeMsg}')">Edit</button>
                                                 • <button class="bubble-action-btn delete" onclick="App.Features.deleteSingleChatMessageAction(${m.id})">Hapus</button>
                                             ` : ''}
@@ -3186,7 +3291,7 @@
                 },
 
                 async editSingleChatMessageAction(messageId, currentText) {
-                    const newText = prompt("Edit pesan obrolan Anda:", currentText);
+                    const newText = prompt("Edit pesan obrolan:", currentText);
                     if (newText === null || !newText.trim() || newText.trim() === currentText) return;
                     
                     try {
@@ -3245,14 +3350,17 @@
                     this.loadPopupFriendsListSidebar();
                 },
 
+                // OPSI MENU POSTINGAN (DENGAN DUKUNGAN HAK KONTROL SUPER ADMIN)
                 openPostActionMenuDOM(postId, postAuthor) {
                     const myName = App.ProfileState.getCurrentName();
+                    const isSuperAdmin = App.ProfileState.isSuperAdmin();
                     let html = '';
                     const safeAuthor = escapeJSString(postAuthor);
                     
-                    if (postAuthor === myName) {
+                    if (postAuthor === myName || isSuperAdmin) {
                         html = `
                             <div style="display:flex; flex-direction:column; gap:10px;">
+                                ${isSuperAdmin ? '<div style="font-size:0.75rem; color:var(--danger); font-weight:800; text-align:center;">--- MODE KONTROL SUPER ADMIN ---</div>' : ''}
                                 <button class="btn btn-secondary btn-full" onclick="App.Features.updatePostPrivacy(${postId}, 'public')"><span class="material-symbols-outlined">public</span> Privasi: Publik</button>
                                 <button class="btn btn-secondary btn-full" onclick="App.Features.updatePostPrivacy(${postId}, 'friends')"><span class="material-symbols-outlined">group</span> Privasi: Teman</button>
                                 <button class="btn btn-secondary btn-full" onclick="App.Features.updatePostPrivacy(${postId}, 'private')"><span class="material-symbols-outlined">lock</span> Privasi: Privat</button>
@@ -3285,7 +3393,7 @@
 
                         const editFormHTML = `
                             <div style="text-align: left; background: var(--bg-glass-solid); display: flex; flex-direction: column; gap: 16px;">
-                                <p style="color: var(--text-muted); font-size: 0.88rem; font-weight: 500;">Modifikasi narasi atau status kiriman Anda secara realtime.</p>
+                                <p style="color: var(--text-muted); font-size: 0.88rem; font-weight: 500;">Modifikasi narasi atau status kiriman secara realtime.</p>
                                 <div class="form-group" style="margin-bottom: 0;">
                                     <textarea id="custom-edit-textarea-field" class="form-input" style="min-height: 150px; padding-top: 16px; resize: none; line-height: 1.5; border-radius: var(--radius-md);" required>${post.content || ''}</textarea>
                                 </div>
@@ -3310,7 +3418,7 @@
                         const { error } = await supabaseClient.from('posts').update({ content: editedTextValue }).eq('id', Number(postId));
                         if (error) throw error;
                         await detectAndNotifyMentions(editedTextValue, 'mention', postId);
-                        App.Modal.close(); App.Toast.show("Konten status Anda berhasil diperbarui!", "success"); this.renderPosts(false);
+                        App.Modal.close(); App.Toast.show("Konten status berhasil diperbarui!", "success"); this.renderPosts(false);
                     } catch(err) {
                         App.Toast.show("Gagal memperbarui status ke server", "danger");
                     }
@@ -3427,7 +3535,7 @@
                         await App.Features.fetchMyFriendsData();
 
                         fetched = fetched.filter(p => {
-                            if (!p.privacy || p.privacy === 'public') return true;
+                            if (!p.privacy || p.privacy === 'public' || App.ProfileState.isSuperAdmin()) return true;
                             if (p.privacy === 'private') return p.author === myName;
                             if (p.privacy === 'friends') {
                                 return (p.author === myName || window.userFriendsList.includes(p.author));
@@ -3601,7 +3709,7 @@
                 },
 
                 async editSingleCommentAction(commentId, currentText) {
-                    const newText = prompt("Edit komentar Anda:", currentText);
+                    const newText = prompt("Edit komentar:", currentText);
                     if (newText === null || !newText.trim() || newText.trim() === currentText) return;
                     try {
                         await supabaseClient.from('comments').update({ text: newText.trim() }).eq('id', commentId);
@@ -3647,6 +3755,8 @@
                     try {
                         const { data: comments } = await supabaseClient.from('comments').select('*').eq('post_id', activeBottomSheetPostId).order('created_at', { ascending: true });
                         const myName = App.ProfileState.getCurrentName();
+                        const isSuperAdmin = App.ProfileState.isSuperAdmin();
+
                         if (!comments || comments.length === 0) {
                             stream.innerHTML = `<div style="text-align:center; padding:32px; color:var(--text-muted);">Belum ada komentar.</div>`; return;
                         }
@@ -3691,7 +3801,7 @@
                                         <div style="font-size:0.75rem; color:var(--text-muted); margin-top:4px; margin-left:6px; display:flex; gap:12px; font-weight:700;">
                                             <span class="comment-like-btn ${isCommentLiked}" style="cursor:pointer;color:var(--primary);" onclick="App.Features.toggleCommentLikeAction('${c.id}', '${escapeJSString(c.user_name)}')">${commentLikeBadgeHTML}</span>
                                             <span style="cursor:pointer;" onclick="activeReplyTargetCommentId='${c.id}'; activeReplyTargetUser='${escapeJSString(c.user_name)}'; App.Features.renderBottomSheetInputBar();">Balas</span>
-                                            ${isMyComment ? `
+                                            ${isMyComment || isSuperAdmin ? `
                                                 <span style="cursor:pointer;" onclick="App.Features.editSingleCommentAction('${c.id}', '${safeCommentText}')">Edit</span>
                                                 <span style="cursor:pointer; color:var(--danger);" onclick="App.Features.deleteSingleCommentAction('${c.id}')">Hapus</span>
                                             ` : ''}
