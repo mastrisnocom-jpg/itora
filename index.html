@@ -205,14 +205,14 @@
         .post-action-item.loved { color: var(--danger) !important; }
         .post-action-item.loved .material-symbols-outlined { font-variation-settings: 'FILL' 1; color: var(--danger) !important; }
 
-        /* GAMBAR MEMANJANG KIRI DAN KANAN PENUH NAMUN RASIO TETAP PAS */
+        /* GAMBAR MEMANJANG KIRI DAN KANAN PENUH TANPA TERPOTONG */
         .post-attached-image { 
             width: calc(100% + 48px); 
             margin: 12px -24px; 
             display: block; 
-            max-height: 520px; 
-            object-fit: contain; 
-            background: #f8fafc;
+            max-height: none; 
+            height: auto; 
+            object-fit: cover; 
             cursor: zoom-in; 
             border-top: 1px solid var(--border-color); 
             border-bottom: 1px solid var(--border-color); 
@@ -1319,7 +1319,7 @@
                     sideHTML += `<li style="margin-top: auto;"><a class="menu-item ripple-btn" style="color: var(--danger);" onclick="App.Auth.logout()"><span class="material-symbols-outlined">logout</span><span class="menu-text">Keluar</span></a></li>`;
                     
                     if (side) side.innerHTML = sideHTML; 
-                    if (topInjectedNode) topInjectedNode.innerHTML = topInjectedHTML;
+                    if (topInjectedNode) topInjectedHTML = topInjectedHTML;
                     this.updateChatBadgeDOM();
                 },
                 updateChatBadgeDOM() {
