@@ -3156,9 +3156,7 @@
                             App.Router.navigate(`profil?name=${encodeURIComponent(senderName)}`);
                         } else if (postId) {
                             App.Router.navigate('feed');
-                            setTimeout(() => {
-                                this.scrollToPostAndHighlight(postId, actionType);
-                            }, 400);
+                            await this.scrollToPostAndHighlight(postId, actionType);
                         } else {
                             App.Router.navigate('feed');
                         }
@@ -3167,30 +3165,87 @@
 
                 // FITUR SCROLL OTOMATIS KE POSTINGAN & HIGHLIGHT
                 async scrollToPostAndHighlight(postId, actionType) {
-                    let targetEl = document.getElementById(`post-element-node-${postId}`);
-                    
+                    const numericPostId = Number(postId);
+                    let targetEl = document.getElementById(`post-element-node-${numericPostId}`);
+
                     if (!targetEl) {
-                        await this.renderPosts(false);
-                        targetEl = document.getElementById(`post-element-node-${postId}`);
+                        await new Promise(resolve => setTimeout(resolve, 300));
+                        targetEl = document.getElementById(`post-element-node-${numericPostId}`);
+                    }
+
+                    if (!targetEl) {
+                        try {
+                            const { data: singlePost } = await supabaseClient
+                                .from('posts')
+                                .select('*')
+                                .eq('id', numericPostId)
+                                .maybeSingle();
+
+                            if (singlePost) {
+                                const stream = document.getElementById('feed-stream');
+                                const container = stream ? stream.querySelector('.feed-container') : null;
+
+                                if (container) {
+                                    const myName = App.ProfileState.getCurrentName();
+                                    const postLikesArray = singlePost.liked_users || [];
+                                    const hasLiked = postLikesArray.includes(myName) ? 'liked' : '';
+                                    const hasLoved = (singlePost.loved_users || []).includes(myName) ? 'loved' : '';
+                                    const safeAuthor = escapeJSString(singlePost.author);
+                                    const postAvatar = (singlePost.avatar && singlePost.avatar !== 'null' && singlePost.avatar !== 'undefined') ? singlePost.avatar : DEFAULT_AVATAR_IMAGE;
+                                    const mediaHTML = this.extractAndRenderEmbeddedMedia(singlePost.content || "", singlePost.media_url, singlePost.image, singlePost.id, safeAuthor, postAvatar);
+                                    const formattedPostText = this.cleanTextContentForDisplay(singlePost.content || '');
+
+                                    const customPostHTML = `
+                                        <div class="post-card" id="post-element-node-${singlePost.id}">
+                                            <div class="post-header">
+                                                <div class="post-author">
+                                                    <img src="${postAvatar}" class="post-avatar" onclick="App.Router.navigate('profil?name=${encodeURIComponent(singlePost.author)}')">
+                                                    <div class="post-meta-container">
+                                                        <div class="post-author-row">
+                                                            <h4 onclick="App.Router.navigate('profil?name=${encodeURIComponent(singlePost.author)}')">${sanitizeHTML(singlePost.author)}</h4>
+                                                            <span class="post-meta-dot">•</span>
+                                                            <span class="post-live-time-tracker" data-timestamp="${new Date(singlePost.created_at).getTime()}">${App.UI.calculateRelativeTimeAgo(new Date(singlePost.created_at).getTime())}</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <button class="post-menu-trigger" onclick="App.Features.openPostActionMenuDOM(${singlePost.id}, '${safeAuthor}')"><span class="material-symbols-outlined">more_vert</span></button>
+                                            </div>
+                                            <div class="post-content">${formattedPostText}</div>
+                                            ${mediaHTML}
+                                            <div class="post-actions-bar">
+                                                <div class="post-action-item ${hasLiked}" id="like-btn-node-${singlePost.id}" onclick="App.Features.toggleLike(${singlePost.id}, '${safeAuthor}')"><span class="material-symbols-outlined">thumb_up</span><span id="like-count-node-${singlePost.id}"> ${postLikesArray.length}</span></div>
+                                                <div class="post-action-item ${hasLoved}" id="love-btn-node-${singlePost.id}" onclick="App.Features.toggleLoveReaction(${singlePost.id}, '${safeAuthor}')"><span class="material-symbols-outlined">favorite</span><span id="love-count-node-${singlePost.id}"> ${(singlePost.loved_users || []).length}</span></div>
+                                                <div class="post-action-item" onclick="App.Features.openCommentsBottomSheet(${singlePost.id}, '${safeAuthor}')"><span class="material-symbols-outlined">comment</span><span id="comment-count-node-${singlePost.id}"> Komentar</span></div>
+                                                <div class="post-action-item" onclick="App.Features.openSocialMediaShareSheetModal(${singlePost.id}, '${safeAuthor}', '${(singlePost.content || "").replace(/'/g, "\\'")}', ${!!singlePost.image})"><span class="material-symbols-outlined">share</span><span> ${singlePost.shared_count || 0}</span></div>
+                                            </div>
+                                        </div>`;
+
+                                    container.insertAdjacentHTML('afterbegin', customPostHTML);
+                                    targetEl = document.getElementById(`post-element-node-${numericPostId}`);
+                                }
+                            }
+                        } catch(err) {}
                     }
 
                     if (targetEl) {
-                        targetEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                        targetEl.style.transition = 'background-color 0.5s ease, border-color 0.5s ease';
-                        targetEl.style.backgroundColor = '#e7f3ff';
-                        targetEl.style.border = '2px solid var(--primary)';
-                        
                         setTimeout(() => {
-                            targetEl.style.backgroundColor = '#ffffff';
-                            targetEl.style.border = 'none';
-                            targetEl.style.borderBottom = '1px solid var(--border-color)';
-                        }, 2500);
+                            targetEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                            targetEl.style.transition = 'background-color 0.5s ease, border-color 0.5s ease';
+                            targetEl.style.backgroundColor = '#e7f3ff';
+                            targetEl.style.border = '2px solid var(--primary)';
+                            
+                            setTimeout(() => {
+                                targetEl.style.backgroundColor = '#ffffff';
+                                targetEl.style.border = 'none';
+                                targetEl.style.borderBottom = '1px solid var(--border-color)';
+                            }, 2500);
 
-                        if (['comment', 'sub_comment', 'like_sub_comment'].includes(actionType)) {
-                            const authorHeader = targetEl.querySelector('.post-author-row h4');
-                            const postAuthor = authorHeader ? authorHeader.innerText.trim() : '';
-                            this.openCommentsBottomSheet(postId, postAuthor);
-                        }
+                            if (['comment', 'sub_comment', 'like_sub_comment'].includes(actionType)) {
+                                const authorHeader = targetEl.querySelector('.post-author-row h4');
+                                const postAuthor = authorHeader ? authorHeader.innerText.trim() : '';
+                                this.openCommentsBottomSheet(numericPostId, postAuthor);
+                            }
+                        }, 150);
                     } else {
                         App.Toast.show("Postingan tidak ditemukan atau telah dihapus.", "info");
                     }
