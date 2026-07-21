@@ -58,8 +58,8 @@
         a { text-decoration: none; color: inherit; } ul { list-style: none; } button, input, textarea { font-family: inherit; outline: none; border: none; }
         ::-webkit-scrollbar { width: 6px; height: 6px; } ::-webkit-scrollbar-track { background: transparent; } ::-webkit-scrollbar-thumb { background: #bcc0c4; border-radius: var(--radius-round); } ::-webkit-scrollbar-thumb:hover { background: var(--primary); }
 
-        /* AUTH LAYOUT */
-        #auth-layout { display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 24px; position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 2000; background: var(--bg-body); transition: var(--trans-smooth); }
+        /* AUTH LAYOUT (Set display none sebagai default untuk cegah flash login) */
+        #auth-layout { display: none; align-items: center; justify-content: center; min-height: 100vh; padding: 24px; position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 2000; background: var(--bg-body); transition: var(--trans-smooth); }
         .auth-card { background: #ffffff; border: 1px solid var(--border-color); border-radius: var(--radius-xl); padding: 40px; width: 100%; max-width: 450px; box-shadow: var(--shadow-soft); text-align: center; }
         .auth-logo { width: 64px; height: 64px; background: linear-gradient(135deg, var(--primary), #42b72a); border-radius: var(--radius-lg); display: flex; align-items: center; justify-content: center; color: white; font-size: 32px; font-weight: 800; margin: 0 auto 24px auto; box-shadow: var(--shadow-float); }
 
@@ -803,6 +803,19 @@
         window.userFriendsList = [];
         window.registeredUsersList = [];
 
+        // CEK REFRESH: Jika pengguna sudah login, langsung aktifkan layout utama tanpa flash login
+        if (localStorage.getItem('ns_logged_in') === 'true') {
+            const appLayout = document.getElementById('app-layout');
+            if (appLayout) {
+                appLayout.style.display = 'grid';
+                appLayout.style.opacity = '1';
+                appLayout.classList.add('active');
+            }
+        } else {
+            const authLayout = document.getElementById('auth-layout');
+            if (authLayout) authLayout.style.display = 'flex';
+        }
+
         function sanitizeHTML(str) {
             return String(str || '')
                 .replace(/&/g, '&amp;')
@@ -909,6 +922,7 @@
                 this.Features.fetchMyFriendsData(); 
                 this.Features.initCommentsSwipeToCloseGesture();
                 this.UI.initInfiniteScrollListener();
+                this.UI.initBackButtonCloseSystem();
                 
                 App.UI.renderGlobalBannerAdIfExists();
 
@@ -1193,9 +1207,13 @@
                             App.Router.init();
                         } else {
                             localStorage.removeItem('ns_logged_in');
+                            const app = document.getElementById('app-layout');
+                            if (app) { app.style.display = 'none'; app.classList.remove('active'); }
                             document.getElementById('auth-layout').style.display = 'flex';
                         }
                     } catch (err) {
+                        const app = document.getElementById('app-layout');
+                        if (app) { app.style.display = 'none'; app.classList.remove('active'); }
                         document.getElementById('auth-layout').style.display = 'flex';
                     }
                 },
@@ -1244,8 +1262,11 @@
                     if(auth) auth.style.opacity = '0';
                     setTimeout(() => { 
                         if(auth) auth.style.display = 'none'; 
-                        if(app) app.classList.add('active'); 
-                    }, 400);
+                        if(app) {
+                            app.style.display = 'grid';
+                            app.classList.add('active'); 
+                        }
+                    }, 300);
                 },
                 async logout() {
                     try { await supabaseClient.auth.signOut(); } catch(e){}
@@ -1319,7 +1340,7 @@
                     sideHTML += `<li style="margin-top: auto;"><a class="menu-item ripple-btn" style="color: var(--danger);" onclick="App.Auth.logout()"><span class="material-symbols-outlined">logout</span><span class="menu-text">Keluar</span></a></li>`;
                     
                     if (side) side.innerHTML = sideHTML; 
-                    if (topInjectedNode) topInjectedHTML = topInjectedHTML;
+                    if (topInjectedNode) topInjectedNode.innerHTML = topInjectedHTML; // FIX: Perbaikan render tab bottom bar
                     this.updateChatBadgeDOM();
                 },
                 updateChatBadgeDOM() {
@@ -2757,6 +2778,7 @@
                     activeReplyTargetCommentId = null; 
                     activeReplyTargetUser = null;
                     document.getElementById('comments-overlay-bottom-sheet').classList.add('active');
+                    App.UI.pushModalStateToHistory();
                     App.Features.renderBottomSheetInputBar(postAuthor);
                     App.Features.reloadCommentsBottomSheetStreamOnly();
                 },
@@ -3188,6 +3210,7 @@
                     if (rawMode) { area.style.padding = '0'; area.style.background = '#ffffff'; area.style.border = '1px solid var(--border-color)'; tEl.style.display = 'none'; fEl.style.display = 'none'; } 
                     else { area.style.padding = '24px'; area.style.background = '#ffffff'; area.style.border = '1px solid var(--border-color)'; tEl.style.display = title ? 'block' : 'none'; tEl.innerText = title || ''; fEl.style.display = hideFooter ? 'none' : 'flex'; }
                     bEl.innerHTML = bodyHTML; document.getElementById('global-modal').classList.add('active'); 
+                    App.UI.pushModalStateToHistory();
                 },
                 openSecondary(title, innerHTML) {
                     App.Modal.closeSecondaryPopupModal();
@@ -3206,6 +3229,7 @@
                         </div>
                     `;
                     document.body.appendChild(secondaryOverlay);
+                    App.UI.pushModalStateToHistory();
                 },
                 closeSecondaryPopupModal() {
                     document.getElementById('premium-secondary-modal-overlay')?.remove();
@@ -3281,6 +3305,7 @@
                             </div>
                         </div>
                     `;
+                    App.UI.pushModalStateToHistory();
                 },
 
                 closeImageLightbox() {
@@ -3316,6 +3341,50 @@
                         }
                     });
                 },
+
+                // FITUR MENUTUP MODAL DENGAN TOMBOL BACK HP
+                pushModalStateToHistory() {
+                    window.history.pushState({ modalOpen: true }, "");
+                },
+                hasAnyActiveModalOrPopup() {
+                    const globalModal = document.getElementById('global-modal')?.classList.contains('active');
+                    const secondaryModal = !!document.getElementById('premium-secondary-modal-overlay');
+                    const commentsSheet = document.getElementById('comments-overlay-bottom-sheet')?.classList.contains('active');
+                    const chatWidget = document.getElementById('floating-chat-popup-box')?.classList.contains('active');
+                    const lightbox = !!document.getElementById('fullscreen-lightbox-container')?.children.length;
+                    return globalModal || secondaryModal || commentsSheet || chatWidget || lightbox;
+                },
+                closeTopmostModalOrPopup() {
+                    if (document.getElementById('fullscreen-lightbox-container')?.children.length) {
+                        this.closeImageLightbox();
+                        return true;
+                    }
+                    if (document.getElementById('premium-secondary-modal-overlay')) {
+                        App.Modal.closeSecondaryPopupModal();
+                        return true;
+                    }
+                    if (document.getElementById('global-modal')?.classList.contains('active')) {
+                        App.Modal.close();
+                        return true;
+                    }
+                    if (document.getElementById('comments-overlay-bottom-sheet')?.classList.contains('active')) {
+                        App.Features.closeCommentsBottomSheet();
+                        return true;
+                    }
+                    if (document.getElementById('floating-chat-popup-box')?.classList.contains('active')) {
+                        this.toggleChatPopup(false);
+                        return true;
+                    }
+                    return false;
+                },
+                initBackButtonCloseSystem() {
+                    window.addEventListener('popstate', (e) => {
+                        if (this.hasAnyActiveModalOrPopup()) {
+                            this.closeTopmostModalOrPopup();
+                        }
+                    });
+                },
+
                 bindGlobalEvents() {
                     document.getElementById('btn-toggle-sidebar')?.addEventListener('click', () => { if(window.innerWidth > 768) document.getElementById('app-layout').classList.toggle('sidebar-collapsed'); });
                     document.getElementById('btn-theme')?.addEventListener('click', () => App.Theme.toggle());
@@ -3346,6 +3415,7 @@
                     const box = document.getElementById('floating-chat-popup-box'); if(!box) return;
                     if(open) { 
                         box.classList.add('active'); 
+                        App.UI.pushModalStateToHistory();
                         if (activeChatFriendName && activeChatFriendEmail) {
                             App.Features.openSpecificFriendPopupObrolan(activeChatFriendEmail, activeChatFriendName);
                         } else {
