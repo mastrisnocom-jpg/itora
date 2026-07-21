@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+              <!DOCTYPE html>
 <html lang="id" data-theme="light">
 <head>
     <meta charset="UTF-8">
@@ -467,9 +467,7 @@
         .pwa-install-banner { position: fixed; bottom: calc(var(--header-height) + 15px); left: 16px; right: 16px; background: #ffffff; border: 1px solid var(--primary); border-radius: var(--radius-lg); padding: 14px 18px; box-shadow: var(--shadow-float); z-index: 9998; display: none; align-items: center; justify-content: space-between; gap: 12px; animation: slideDownFade 0.4s ease; }
         .pwa-install-banner.active { display: flex; }
 
-        /* ==========================================================================
-           DESAIN PROFIL BARU SESUAI GAMBAR ACUAN
-           ========================================================================== */
+        /* DESAIN PROFIL BARU SESUAI GAMBAR ACUAN */
         .social-profile-view {
             background: #ffffff;
             margin: -32px -32px 24px -32px;
@@ -662,7 +660,7 @@
             border-color: transparent;
         }
 
-        /* PROFILE SECTIONS (DETAIL PRIBADI & PENDIDIKAN) */
+        /* PROFILE SECTIONS */
         .social-section-title {
             font-size: 1.1rem;
             font-weight: 800;
@@ -1052,6 +1050,7 @@
         const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
         const DEFAULT_AVATAR_IMAGE = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0iIzE4NzdGMiI+PHBhdGggZD0iTTEyIDJDNi44OCAyIDIgNi44OCAyIDEyczQuNDggMTAgMTAgMTAgMTAtNC40QBITCDEwLVNEUy41MiAyIDEyIDJ6bTAgNGMxLjkzIDAgMy41IDEuNTcgMy41IDMuNVMxMy45MyAxMyAxMiAxM3MtMy41LTEuNTctMy41LTMuNVMxMC4wNyA2 IDEyIDZ6bTAgMTRjLTIuMDMgMC0zLjguODUtNS4wNS0yLjIuMDMtMS42OCAzLjM3LTIuNiA1LjA1LTIuNnM1LjAyLjkyIDUuMDUgMi42QzE1LjggMTkuMTUgMTQuMDMgMjAgMTIgMjB6Ii8+PC9zdmc+';
+        const DEFAULT_BANNER_IMAGE = 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=1000&auto=format&fit=crop';
 
         let liveNotifications = [];
         let activeChatFriendEmail = localStorage.getItem('ns_active_chat_email') || null;
@@ -1078,15 +1077,18 @@
 
         window.mySupabaseProfileCache = {
             avatar_url: DEFAULT_AVATAR_IMAGE,
+            banner_url: DEFAULT_BANNER_IMAGE,
             display_name: '',
-            bio_status: '',
-            domisili: ''
+            bio_status: 'Hallo👋',
+            category: 'Profil · Kreator digital',
+            domisili: 'Bandar Lampung',
+            pendidikan: 'SMA Negri 1 kalirejo',
+            gender: 'Perempuan'
         };
 
         window.userFriendsList = [];
         window.registeredUsersList = [];
 
-        // MINTA IZIN NOTIFIKASI PUSH HANDPHONE
         if ('Notification' in window && Notification.permission !== 'granted' && Notification.permission !== 'denied') {
             Notification.requestPermission();
         }
@@ -1102,7 +1104,6 @@
             }
         }
 
-        // CEK REFRESH: Jika pengguna sudah login, langsung aktifkan layout utama tanpa flash login
         if (localStorage.getItem('ns_logged_in') === 'true') {
             const appLayout = document.getElementById('app-layout');
             if (appLayout) {
@@ -1304,7 +1305,6 @@
                 }
             },
 
-            // MODULE WEBRTC CALL PANGGUNG PANGGILAN SUARA SUPABASE
             Call: {
                 peerConnection: null,
                 localStream: null,
@@ -1321,7 +1321,6 @@
                     const myName = App.ProfileState.getCurrentName();
                     if (!myName) return;
 
-                    // Saluran signaling panggilan khusus user ini
                     this.callChannel = supabaseClient.channel(`call_signaling_${myName.toLowerCase()}`);
                     this.callChannel
                         .on('broadcast', { event: 'call-offer' }, payload => this.handleIncomingOffer(payload.payload))
@@ -1541,8 +1540,12 @@
                                     email: userEmail,
                                     display_name: defaultDisplayName,
                                     avatar_url: DEFAULT_AVATAR_IMAGE,
-                                    bio_status: 'Kreator digital',
-                                    domisili: 'Bandar Lampung'
+                                    banner_url: DEFAULT_BANNER_IMAGE,
+                                    bio_status: 'Hallo👋',
+                                    category: 'Profil · Kreator digital',
+                                    domisili: 'Bandar Lampung',
+                                    pendidikan: 'SMA Negri 1 kalirejo',
+                                    gender: 'Perempuan'
                                 }])
                                 .select()
                                 .single();
@@ -1554,8 +1557,12 @@
                             window.mySupabaseProfileCache = {
                                 display_name: profile.display_name || (userEmail || 'User').split('@')[0],
                                 avatar_url: (profile.avatar_url && profile.avatar_url !== 'null' && profile.avatar_url !== 'undefined') ? profile.avatar_url : DEFAULT_AVATAR_IMAGE,
-                                bio_status: profile.bio_status || 'Kreator digital',
-                                domisili: profile.domisili || 'Bandar Lampung'
+                                banner_url: (profile.banner_url && profile.banner_url !== 'null' && profile.banner_url !== 'undefined') ? profile.banner_url : DEFAULT_BANNER_IMAGE,
+                                bio_status: profile.bio_status || 'Hallo👋',
+                                category: profile.category || 'Profil · Kreator digital',
+                                domisili: profile.domisili || 'Bandar Lampung',
+                                pendidikan: profile.pendidikan || 'SMA Negri 1 kalirejo',
+                                gender: profile.gender || 'Perempuan'
                             };
                             App.UI.syncGlobalAvatarAndName();
                         }
@@ -1566,16 +1573,27 @@
                     return window.mySupabaseProfileCache.display_name || (localStorage.getItem('ns_user_email') || 'User').split('@')[0];
                 },
                 getCurrentRoleBioStatus() {
-                    const email = (localStorage.getItem('ns_user_email') || '').toLowerCase();
-                    if(email === 'mastrisnocom@gmail.com') return 'Super Administrator';
-                    return window.mySupabaseProfileCache.bio_status || 'Kreator digital';
+                    return window.mySupabaseProfileCache.bio_status || 'Hallo👋';
+                },
+                getCurrentCategory() {
+                    return window.mySupabaseProfileCache.category || 'Profil · Kreator digital';
                 },
                 getCurrentDomisili() {
                     return window.mySupabaseProfileCache.domisili || 'Bandar Lampung';
                 },
+                getCurrentPendidikan() {
+                    return window.mySupabaseProfileCache.pendidikan || 'SMA Negri 1 kalirejo';
+                },
+                getCurrentGender() {
+                    return window.mySupabaseProfileCache.gender || 'Perempuan';
+                },
                 getCurrentAvatar() {
                     const av = window.mySupabaseProfileCache.avatar_url;
                     return (av && av !== 'null' && av !== 'undefined') ? av : DEFAULT_AVATAR_IMAGE;
+                },
+                getCurrentBanner() {
+                    const bn = window.mySupabaseProfileCache.banner_url;
+                    return (bn && bn !== 'null' && bn !== 'undefined') ? bn : DEFAULT_BANNER_IMAGE;
                 },
                 getJoinDateText() {
                     let dateStr = localStorage.getItem('ns_user_join_date');
@@ -1594,7 +1612,7 @@
                     if (parsed.month !== new Date().getMonth()) return defaultLimit;
                     return parsed;
                 },
-                async updateProfileDataConfiguration(newName, newBio, newDomisili) {
+                async updateProfileDataConfiguration(newData) {
                     const config = this.getLimitConfig();
                     if(config.count >= 5) return { success: false, message: "Batas pengeditan data profil bulan ini (5x) telah habis." };
                     
@@ -1604,9 +1622,7 @@
                             .from('profiles')
                             .upsert({
                                 id: userId,
-                                display_name: newName,
-                                bio_status: newBio,
-                                domisili: newDomisili,
+                                ...newData,
                                 updated_at: new Date()
                             });
 
@@ -1635,6 +1651,20 @@
 
                         window.mySupabaseProfileCache.avatar_url = publicUrl;
                         App.UI.syncGlobalAvatarAndName();
+                    } catch(e) {}
+                },
+                async saveBannerUrlToSupabase(publicUrl) {
+                    const userId = localStorage.getItem('ns_user_id');
+                    try {
+                        await supabaseClient
+                            .from('profiles')
+                            .upsert({
+                                id: userId,
+                                banner_url: publicUrl,
+                                updated_at: new Date()
+                            });
+
+                        window.mySupabaseProfileCache.banner_url = publicUrl;
                     } catch(e) {}
                 }
             },
@@ -1947,29 +1977,37 @@
                     const targetName = isOwnProfile ? loggedInUser : specifiedTargetName;
                     
                     let targetAvatar = DEFAULT_AVATAR_IMAGE;
-                    let targetBioCategory = 'Profil · Kreator digital';
+                    let targetBanner = DEFAULT_BANNER_IMAGE;
+                    let targetCategory = 'Profil · Kreator digital';
                     let targetBioStatus = 'Hallo👋';
                     let targetDomisili = 'Bandar Lampung';
                     let targetPendidikan = 'SMA Negri 1 kalirejo';
                     let targetGender = 'Perempuan';
-                    let bannerImg = 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=1000&auto=format&fit=crop';
                     
                     if (isOwnProfile) {
                         targetAvatar = App.ProfileState.getCurrentAvatar();
-                        targetBioStatus = App.ProfileState.getCurrentRoleBioStatus() || 'Hallo👋';
-                        targetDomisili = App.ProfileState.getCurrentDomisili() || 'Bandar Lampung';
+                        targetBanner = App.ProfileState.getCurrentBanner();
+                        targetBioStatus = App.ProfileState.getCurrentRoleBioStatus();
+                        targetCategory = App.ProfileState.getCurrentCategory();
+                        targetDomisili = App.ProfileState.getCurrentDomisili();
+                        targetPendidikan = App.ProfileState.getCurrentPendidikan();
+                        targetGender = App.ProfileState.getCurrentGender();
                     } else {
                         try {
                             const { data: profile } = await supabaseClient
                                 .from('profiles')
-                                .select('avatar_url, bio_status, domisili')
+                                .select('avatar_url, banner_url, bio_status, category, domisili, pendidikan, gender')
                                 .eq('display_name', targetName)
                                 .maybeSingle();
 
                             if (profile) {
                                 if (profile.avatar_url && profile.avatar_url !== 'null' && profile.avatar_url !== 'undefined') targetAvatar = profile.avatar_url;
+                                if (profile.banner_url && profile.banner_url !== 'null' && profile.banner_url !== 'undefined') targetBanner = profile.banner_url;
                                 if (profile.bio_status) targetBioStatus = profile.bio_status;
+                                if (profile.category) targetCategory = profile.category;
                                 if (profile.domisili) targetDomisili = profile.domisili;
+                                if (profile.pendidikan) targetPendidikan = profile.pendidikan;
+                                if (profile.gender) targetGender = profile.gender;
                             } else {
                                 const { data: pData } = await supabaseClient.from('posts').select('avatar').eq('author', targetName).not('avatar', 'is', null).order('created_at', { ascending: false }).limit(1);
                                 if (pData && pData.length > 0 && pData[0].avatar) targetAvatar = pData[0].avatar;
@@ -1984,7 +2022,7 @@
                         <div class="social-profile-view">
                             <!-- 1. FOTO BANNER PROFIL DENGAN NAVIGASI MELAYANG -->
                             <div class="social-profile-banner-container">
-                                <img src="${bannerImg}" class="social-profile-banner-img" alt="Banner Profil">
+                                <img src="${targetBanner}" class="social-profile-banner-img" alt="Banner Profil">
                                 <div class="social-banner-nav-actions">
                                     <button class="social-banner-nav-btn" onclick="window.history.back()" title="Kembali">
                                         <span class="material-symbols-outlined" style="font-size:20px;">chevron_left</span>
@@ -2010,7 +2048,7 @@
                                 <!-- NAMA PENGGUNA -->
                                 <h1 class="social-profile-name-title">${sanitizeHTML(targetName)}</h1>
 
-                                <!-- STATISTIK PROFIL SEBARIS PERSIK DI GAMBAR -->
+                                <!-- STATISTIK PROFIL SEBARIS -->
                                 <div class="social-profile-stats-inline">
                                     <span onclick="App.Features.openFollowersModalAction('${safeTargetName}')"><strong id="profile-followers-count">...</strong> pengikut</span> · 
                                     <span onclick="App.Features.openFollowingModalAction('${safeTargetName}')"><strong id="profile-friends-count">...</strong> mengikuti</span> · 
@@ -2018,14 +2056,14 @@
                                 </div>
 
                                 <!-- BIO & KATEGORI -->
-                                <div class="social-profile-meta-category">${targetBioCategory}</div>
+                                <div class="social-profile-meta-category">${sanitizeHTML(targetCategory)}</div>
                                 <div class="social-profile-bio-text">${sanitizeHTML(targetBioStatus)}</div>
 
                                 <!-- IKON RINGKASAN HIGHLIGHT -->
                                 <div class="social-profile-highlights-row">
                                     <div class="social-highlight-item">
                                         <span class="material-symbols-outlined">work</span>
-                                        <span>Kreator digital</span>
+                                        <span>${sanitizeHTML(targetCategory.replace('Profil · ', ''))}</span>
                                     </div>
                                     <div class="social-highlight-item">
                                         <span class="material-symbols-outlined">location_on</span>
@@ -2086,7 +2124,7 @@
                                         <div class="social-detail-icon-circle">
                                             <span class="material-symbols-outlined">group</span>
                                         </div>
-                                        <div>${targetGender}</div>
+                                        <div>${sanitizeHTML(targetGender)}</div>
                                     </div>
                                 </div>
                                 <div class="social-link-see-more">Lihat detail selengkapnya</div>
@@ -2113,12 +2151,17 @@
                     `;
                 },
 
-                                // TAMPILAN DESAIN PENGATURAN BARU MODERN & ELEGAN (LENGKAP)
+  // TAMPILAN DESAIN PENGATURAN BARU DENGAN FIELD PROFIL LENGKAP
                 settings() {
                     const currentName = App.ProfileState.getCurrentName();
                     const currentAvatar = App.ProfileState.getCurrentAvatar();
-                    const currentBioRole = App.ProfileState.getCurrentRoleBioStatus();
+                    const currentBanner = App.ProfileState.getCurrentBanner();
+                    const currentBioStatus = App.ProfileState.getCurrentRoleBioStatus();
+                    const currentCategory = App.ProfileState.getCurrentCategory();
                     const currentDomisili = App.ProfileState.getCurrentDomisili();
+                    const currentPendidikan = App.ProfileState.getCurrentPendidikan();
+                    const currentGender = App.ProfileState.getCurrentGender();
+                    
                     const myEmail = (localStorage.getItem('ns_user_email') || '').toLowerCase();
                     const isSuperAdmin = (myEmail === 'mastrisnocom@gmail.com');
                     const savedAdHTML = localStorage.getItem('ns_ad_html_global') || '';
@@ -2134,12 +2177,26 @@
                                 </h2>
                             </div>
 
-                            <!-- CARD 1: FOTO & INFORMASI PROFIL -->
+                            <!-- CARD 1: FOTO AVATAR & BANNER PROFIL -->
                             <div class="settings-section-card">
                                 <div class="settings-section-title">
-                                    <span class="material-symbols-outlined">person</span>
-                                    <span>Informasi & Identitas Diri</span>
+                                    <span class="material-symbols-outlined">image</span>
+                                    <span>Foto Profil & Banner Cover</span>
                                 </div>
+                                
+                                <!-- UPLOAD BANNER COVER -->
+                                <div style="margin-bottom: 20px;">
+                                    <label style="font-size:0.85rem; font-weight:700; color:var(--text-muted); display:block; margin-bottom:8px;">Foto Sampul / Banner</label>
+                                    <div style="position:relative; width:100%; height:130px; border-radius:12px; overflow:hidden; border:1px solid var(--border-color); background:#e2e8f0;">
+                                        <img src="${currentBanner}" id="settings-banner-preview" style="width:100%; height:100%; object-fit:cover;">
+                                        <label for="banner-file-input" style="position:absolute; bottom:10px; right:10px; background:rgba(0,0,0,0.6); color:white; padding:6px 12px; border-radius:20px; font-size:0.8rem; font-weight:700; cursor:pointer; display:flex; align-items:center; gap:6px;">
+                                            <span class="material-symbols-outlined" style="font-size:16px;">photo_camera</span> Ubah Sampul
+                                        </label>
+                                        <input type="file" id="banner-file-input" style="display:none;" accept="image/*" onchange="App.Features.handleBannerSelection(event)">
+                                    </div>
+                                </div>
+
+                                <!-- UPLOAD FOTO PROFIL -->
                                 <div class="avatar-edit-container" style="margin-bottom: 20px;">
                                     <div class="avatar-preview-wrapper" style="width: 100px; height: 100px;">
                                         <img src="${currentAvatar}" id="settings-avatar-preview" class="avatar-preview-circle" style="background:#f0f2f5;" alt="Preview">
@@ -2148,15 +2205,34 @@
                                         </label>
                                         <input type="file" id="avatar-file-input" style="display:none;" accept="image/*" onchange="App.Features.handleAvatarSelection(event)">
                                     </div>
-                                    <span style="font-size:0.8rem; color:var(--text-muted); font-weight:600;">Maksimal upload foto: 5MB</span>
+                                    <span style="font-size:0.8rem; color:var(--text-muted); font-weight:600;">Maksimal upload foto/banner: 5MB</span>
                                 </div>
-                                <div class="form-group"><input type="text" class="form-input" id="settings-display-name" placeholder=" " value="${sanitizeHTML(currentName)}"><label class="form-label">Nama Tampilan</label></div>
-                                <div class="form-group"><input type="text" class="form-input" id="settings-bio-status" placeholder=" " value="${sanitizeHTML(currentBioRole)}"><label class="form-label">Pekerjaan / Jabatan Profesional</label></div>
-                                <div class="form-group" style="margin-bottom:12px;"><input type="text" class="form-input" id="settings-domisili" placeholder=" " value="${sanitizeHTML(currentDomisili)}"><label class="form-label">Domisili / Lokasi</label></div>
+                            </div>
+
+                            <!-- CARD 2: INFORMASI & IDENTITAS DIRI LENGKAP -->
+                            <div class="settings-section-card">
+                                <div class="settings-section-title">
+                                    <span class="material-symbols-outlined">person</span>
+                                    <span>Informasi & Identitas Profil</span>
+                                </div>
+                                <div class="form-group"><input type="text" class="form-input" id="settings-display-name" placeholder=" " value="${sanitizeHTML(currentName)}"><label class="form-label">Nama Lengkap</label></div>
+                                <div class="form-group"><input type="text" class="form-input" id="settings-category" placeholder=" " value="${sanitizeHTML(currentCategory)}"><label class="form-label">Kategori (Cth: Profil · Kreator digital)</label></div>
+                                <div class="form-group"><input type="text" class="form-input" id="settings-bio-status" placeholder=" " value="${sanitizeHTML(currentBioStatus)}"><label class="form-label">Bio Singkat (Cth: Hallo👋)</label></div>
+                                <div class="form-group"><input type="text" class="form-input" id="settings-domisili" placeholder=" " value="${sanitizeHTML(currentDomisili)}"><label class="form-label">Kota / Tempat Tinggal</label></div>
+                                <div class="form-group"><input type="text" class="form-input" id="settings-pendidikan" placeholder=" " value="${sanitizeHTML(currentPendidikan)}"><label class="form-label">Riwayat Pendidikan</label></div>
+                                
+                                <div class="form-group" style="margin-bottom:20px;">
+                                    <select id="settings-gender" class="form-input" style="padding-top:16px; cursor:pointer;">
+                                        <option value="Perempuan" ${currentGender === 'Perempuan' ? 'selected' : ''}>Perempuan</option>
+                                        <option value="Laki-laki" ${currentGender === 'Laki-laki' ? 'selected' : ''}>Laki-laki</option>
+                                    </select>
+                                    <label class="form-label" style="top:12px; font-size:0.75rem; color:var(--primary); font-weight:700;">Jenis Kelamin</label>
+                                </div>
+
                                 <button class="btn btn-primary ripple-btn btn-full" onclick="App.Features.saveNameSettings()">Simpan Perubahan Profil</button>
                             </div>
 
-                            <!-- CARD 2: KONTROL NOTIFIKASI HP -->
+                            <!-- CARD 3: KONTROL NOTIFIKASI HP -->
                             <div class="settings-section-card">
                                 <div class="settings-section-title">
                                     <span class="material-symbols-outlined">notifications_active</span>
@@ -2173,7 +2249,7 @@
                                 </div>
                             </div>
 
-                            <!-- CARD 3: KEAMANAN & GANTI PASSWORD -->
+                            <!-- CARD 4: KEAMANAN & GANTI PASSWORD -->
                             <div class="settings-section-card">
                                 <div class="settings-section-title">
                                     <span class="material-symbols-outlined">lock_reset</span>
@@ -2185,7 +2261,7 @@
                                 </button>
                             </div>
 
-                            <!-- CARD 4: PRIVASI DEFAULT POSTINGAN -->
+                            <!-- CARD 5: PRIVASI DEFAULT POSTINGAN -->
                             <div class="settings-section-card">
                                 <div class="settings-section-title">
                                     <span class="material-symbols-outlined">visibility</span>
@@ -2201,7 +2277,7 @@
                                 </div>
                             </div>
 
-                            <!-- CARD 5: INTEGRASI AI (GEMINI) -->
+                            <!-- CARD 6: INTEGRASI AI (GEMINI) -->
                             <div class="settings-section-card">
                                 <div class="settings-section-title">
                                     <span class="material-symbols-outlined">smart_toy</span>
@@ -2219,7 +2295,7 @@
                             </div>
 
                             ${isSuperAdmin ? `
-                                <!-- CARD 6: ADMIN AD PANEL -->
+                                <!-- CARD 7: ADMIN AD PANEL -->
                                 <div class="settings-section-card" style="border-color: var(--primary);">
                                     <div class="settings-section-title">
                                         <span class="material-symbols-outlined">campaign</span>
@@ -2235,7 +2311,7 @@
                                 </div>
                             ` : ''}
 
-                            <!-- CARD 7: BERSIHKAN CACHE & RESET -->
+                            <!-- CARD 8: BERSIHKAN CACHE & RESET -->
                             <div class="settings-section-card">
                                 <div class="settings-section-title">
                                     <span class="material-symbols-outlined">cleaning_services</span>
@@ -2247,7 +2323,7 @@
                                 </button>
                             </div>
 
-                            <!-- CARD 8: KELUAR AKUN -->
+                            <!-- CARD 9: KELUAR AKUN -->
                             <div class="settings-section-card" style="border:1px solid var(--danger);">
                                 <button class="btn btn-danger btn-full ripple-btn" onclick="App.Auth.logout()">
                                     <span class="material-symbols-outlined">logout</span> 
@@ -2278,7 +2354,6 @@
             },
 
             Features: {
-                // MINTA IZIN NOTIFIKASI
                 async requestNotificationPermissionAction() {
                     if (!('Notification' in window)) {
                         App.Toast.show("Browser tidak mendukung notifikasi push.", "danger");
@@ -2292,7 +2367,6 @@
                     }
                 },
 
-                // GANTI PASSWORD SUPABASE
                 async changeUserPasswordAction() {
                     const newPassword = prompt("Masukkan password baru Anda (minimal 6 karakter):");
                     if (!newPassword) return;
@@ -2309,7 +2383,6 @@
                     }
                 },
 
-                // BERSIHKAN CACHE LOKAL
                 clearAppLocalCacheAction() {
                     if (confirm("Bersihkan cache lokal aplikasi? (Sesi login & API Key tersimpan tetap aman)")) {
                         const apiKey = localStorage.getItem('ns_gemini_api_key');
@@ -2329,7 +2402,6 @@
                     }
                 },
 
-                // SOKET INTEGRASI PLAY/PAUSE MUSIK PADA FOTO
                 toggleAudioPhotoPlayback(postId, audioUrl) {
                     const audioEl = document.getElementById(`photo-audio-${postId}`);
                     const badgeEl = document.getElementById(`audio-badge-${postId}`);
@@ -2410,7 +2482,6 @@
                     }
                 },
 
-                // KLIK MEMBUAT MODAL DAFTAR USER YANG DIIKUTI
                 async openFollowingModalAction(targetUser) {
                     try {
                         const { data: followsData } = await supabaseClient
@@ -2454,7 +2525,6 @@
                     } catch(e) {}
                 },
 
-                // KLIK MEMBUAT MODAL DAFTAR PENGIKUT
                 async openFollowersModalAction(targetUser) {
                     try {
                         const { data: followersData } = await supabaseClient
@@ -2670,7 +2740,6 @@
                 async handleGlobalDirectFileSelection(event) {
                     const file = event.target.files[0]; if (!file) return;
                     
-                    // VALIDASI UKURAN FOTO MAKSIMAL 5MB
                     if (file.size > 5 * 1024 * 1024) {
                         App.Toast.show("Ukuran foto melebihi batas maksimal 5MB!", "danger");
                         event.target.value = '';
@@ -3283,7 +3352,6 @@
                         else if (mp3Match && mp3Match.length > 0) combinedUrl = mp3Match[0];
                     }
 
-                    // SKENARIO 1: Memiliki Foto DAN Lagu (Audio-Photo Interactive)
                     if (attachedImage && combinedUrl && /\.(mp3|wav|ogg)/i.test(combinedUrl)) {
                         return `
                             <div class="post-image-audio-wrapper" onclick="App.Features.toggleAudioPhotoPlayback('${postId}', '${combinedUrl}')">
@@ -3297,7 +3365,6 @@
                         `;
                     }
 
-                    // SKENARIO 2: Hanya Tautan Media (YouTube / Facebook Video / MP3 biasa)
                     if (combinedUrl) {
                         if (combinedUrl.includes('youtube.com') || combinedUrl.includes('youtu.be')) {
                             let videoId = "";
@@ -3315,7 +3382,6 @@
                         }
                     }
 
-                    // SKENARIO 3: Hanya Foto Biasa
                     if (attachedImage) {
                         return `<img src="${attachedImage}" class="post-attached-image" onclick="App.UI.openImageLightbox('${attachedImage}', ${postId}, '${postAuthor}', '${postAvatar}')">`;
                     }
@@ -3692,7 +3758,6 @@
                     } catch(e) {}
                 },
 
-                // KLIK NOTIFIKASI LANGSUNG SCROLL KE POSTINGAN DITUDU
                 async markSingleNotificationAsRead(notifId, senderName, actionType, postId = null) {
                     try {
                         await supabaseClient.from('notifications').update({ is_unread: false }).eq('id', notifId);
@@ -3709,7 +3774,6 @@
                     } catch(e) {}
                 },
 
-                // FITUR SCROLL OTOMATIS KE POSTINGAN & HIGHLIGHT
                 async scrollToPostAndHighlight(postId, actionType) {
                     const numericPostId = Number(postId);
                     let targetEl = document.getElementById(`post-element-node-${numericPostId}`);
@@ -3867,10 +3931,6 @@
                                 }
                             });
                         }
-                        
-                        if (!uniqueUsersMap['Agung_Taufiq'] && myName !== 'Agung_Taufiq') {
-                            uniqueUsersMap['Agung_Taufiq'] = DEFAULT_AVATAR_IMAGE;
-                        }
 
                         const userKeys = Object.keys(uniqueUsersMap);
                         if (userKeys.length === 0) {
@@ -3940,8 +4000,6 @@
 
                 async handleAvatarSelection(event) {
                     const file = event.target.files[0]; if (!file) return;
-                    
-                    // VALIDASI UKURAN FOTO PROFIL MAKSIMAL 5MB
                     if (file.size > 5 * 1024 * 1024) {
                         App.Toast.show("Ukuran foto profil melebihi batas 5MB!", "danger");
                         event.target.value = '';
@@ -3976,9 +4034,49 @@
                         
                         await supabaseClient.from('posts').update({ avatar: publicAvatarUrl }).eq('author', App.ProfileState.getCurrentName());
                         
-                        App.Toast.show("Foto profil berhasil disimpan ke Supabase!", "success");
+                        App.Toast.show("Foto profil berhasil disimpan!", "success");
                     } catch(err) {
-                        App.Toast.show("Gagal mengunggah foto profil ke server.", "danger");
+                        App.Toast.show("Gagal mengunggah foto profil.", "danger");
+                    }
+                },
+
+                async handleBannerSelection(event) {
+                    const file = event.target.files[0]; if (!file) return;
+                    if (file.size > 5 * 1024 * 1024) {
+                        App.Toast.show("Ukuran foto sampul melebihi 5MB!", "danger");
+                        event.target.value = '';
+                        return;
+                    }
+
+                    App.Toast.show("Mengunggah foto sampul...", "info");
+
+                    try {
+                        const compressedFile = await compressImageNative(file, 1200, 0.8);
+                        const fileExt = compressedFile.name.split('.').pop();
+                        const fileName = `${Date.now()}_banner.${fileExt}`;
+
+                        const { error: uploadError } = await supabaseClient
+                            .storage
+                            .from('avatars')
+                            .upload(fileName, compressedFile, { upsert: true });
+
+                        if (uploadError) throw uploadError;
+
+                        const { data: urlData } = supabaseClient
+                            .storage
+                            .from('avatars')
+                            .getPublicUrl(fileName);
+
+                        const publicBannerUrl = urlData.publicUrl;
+
+                        await App.ProfileState.saveBannerUrlToSupabase(publicBannerUrl);
+                        
+                        const bannerPreview = document.getElementById('settings-banner-preview');
+                        if (bannerPreview) bannerPreview.src = publicBannerUrl;
+                        
+                        App.Toast.show("Foto sampul berhasil disimpan!", "success");
+                    } catch(err) {
+                        App.Toast.show("Gagal mengunggah foto sampul.", "danger");
                     }
                 },
 
@@ -4064,15 +4162,30 @@
                 },
 
                 async saveNameSettings() {
-                    const name = document.getElementById('settings-display-name').value.trim();
-                    const bio = document.getElementById('settings-bio-status').value.trim();
+                    const display_name = document.getElementById('settings-display-name').value.trim();
+                    const category = document.getElementById('settings-category').value.trim();
+                    const bio_status = document.getElementById('settings-bio-status').value.trim();
                     const domisili = document.getElementById('settings-domisili').value.trim();
-                    if(!name) return;
+                    const pendidikan = document.getElementById('settings-pendidikan').value.trim();
+                    const gender = document.getElementById('settings-gender').value;
+
+                    if(!display_name) {
+                        App.Toast.show("Nama tidak boleh kosong!", "danger");
+                        return;
+                    }
                     
-                    const res = await App.ProfileState.updateProfileDataConfiguration(name, bio, domisili);
+                    const res = await App.ProfileState.updateProfileDataConfiguration({
+                        display_name,
+                        category,
+                        bio_status,
+                        domisili,
+                        pendidikan,
+                        gender
+                    });
+
                     if(res.success) { 
-                        App.Toast.show("Profil disimpan ke Supabase!", "success"); 
-                        App.Router.navigate('feed'); 
+                        App.Toast.show("Profil berhasil diperbarui di Supabase!", "success"); 
+                        App.Router.navigate('profil'); 
                     } else {
                         App.Toast.show(res.message || "Gagal menyimpan profil", "danger");
                     }
@@ -4143,7 +4256,6 @@
                     return `<div class="avatar-wrapper" onclick="App.Router.navigate('${inPost ? 'profil?name=' + encodeURIComponent(name) : 'profil'}')"><img src="${src}" class="user-avatar" style="width:${size}; height:${size}; object-fit:cover;" alt="Avatar"></div>`;
                 },
 
-                // FITUR MODAL LIGHTBOX FULLSCREEN DENGAN DUKUNGAN AUDIO OTOMATIS
                 openImageLightbox(imageUrl, postId = null, authorName = '', authorAvatar = '') {
                     const container = document.getElementById('fullscreen-lightbox-container');
                     if (!container) return;
@@ -4151,7 +4263,6 @@
                     const safeAuthor = escapeJSString(authorName);
                     const avSrc = (authorAvatar && authorAvatar !== 'null' && authorAvatar !== 'undefined') ? authorAvatar : DEFAULT_AVATAR_IMAGE;
 
-                    // Putar audio jika ada audio terkait postingan ini
                     const existingAudio = document.getElementById(`photo-audio-${postId}`);
                     let audioControlsHTML = '';
                     if (existingAudio) {
@@ -4161,7 +4272,6 @@
 
                     container.innerHTML = `
                         <div class="fullscreen-lightbox-overlay">
-                            <!-- HEADER ATAS: PROFIL USER & TOMBOL TUTUP -->
                             <div class="lightbox-top-header">
                                 <div class="lightbox-author-info" onclick="App.UI.closeImageLightbox(); App.Router.navigate('profil?name=${encodeURIComponent(authorName)}')">
                                     <img src="${avSrc}" class="lightbox-author-avatar">
@@ -4175,12 +4285,10 @@
                                 </div>
                             </div>
 
-                            <!-- PANGGUNG FOTO UTAMA -->
                             <div class="lightbox-image-center-stage" onclick="App.UI.closeImageLightbox()">
                                 <img src="${imageUrl}" onclick="event.stopPropagation()">
                             </div>
 
-                            <!-- BILAH AKSI BAWAH: LIKE, LOVE, KOMEN, SHARE -->
                             <div class="lightbox-bottom-actions-bar">
                                 ${postId ? `
                                     <div class="lightbox-action-btn" onclick="App.Features.toggleLike(${postId}, '${safeAuthor}')">
@@ -4240,7 +4348,6 @@
                     });
                 },
 
-                // FITUR MENUTUP MODAL DENGAN TOMBOL BACK HP
                 pushModalStateToHistory() {
                     window.history.pushState({ modalOpen: true }, "");
                 },
