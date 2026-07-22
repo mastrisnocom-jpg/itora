@@ -1838,42 +1838,10 @@ const App = {
                         App.Features.fetchChatMessagesAndRenderStream();
                     } else if (payload.new && payload.new.receiver === myName) {
                         unreadMessageCounters[payload.new.sender.toLowerCase()] = (unreadMessageCounters[payload.new.sender.toLowerCase()] || 0) + 1;
-                                async loadPopupFriendsListSidebar() {
-            const container = document.getElementById('popup-friends-sidebar-items'); if(!container) return;
-            await App.Features.fetchMyFriendsData();
-            
-            let dynamicContacts = window.userFriendsList.length > 0 ? ['Mastrisno_AI', ...window.userFriendsList] : ['Mastrisno_AI', 'Agung_Taufiq'];
-            
-            container.innerHTML = dynamicContacts.map(name => {
-                const hasUnread = unreadMessageCounters[name.toLowerCase()] || 0;
-                const safeName = escapeJSString(name);
-                const isAI = (name === 'Mastrisno_AI');
-                const friendAvatar = isAI ? 'https://cdn-icons-png.flaticon.com/512/8943/8943377.png' : getUserAvatarUrl(name);
-                
-                let bDayFound = false;
-                if (!isAI) {
-                    let prof = window.userProfilesMap[name];
-                    if (!prof) {
-                        const fk = Object.keys(window.userProfilesMap).find(k => k.toLowerCase() === name.toLowerCase());
-                        if (fk) prof = window.userProfilesMap[fk];
+                        App.Features.loadPopupFriendsListSidebar();
+                        App.Navigation.updateChatBadgeDOM();
+                        triggerNativeDevicePushNotification(`Pesan baru dari ${payload.new.sender}`, payload.new.message);
                     }
-                    bDayFound = isUserBirthdayToday(prof?.birth_date);
-                }
-
-                return `
-                    <div class="popup-friend-item" onclick="App.Features.openSpecificFriendPopupObrolan('${safeName.toLowerCase()}@nexsocial.id', '${safeName}')">
-                        <div class="friend-avatar-wrapper">
-                            <img src="${friendAvatar}" class="friend-avatar-node" onerror="this.onerror=null; this.src='${DEFAULT_AVATAR_IMAGE}'">
-                            <span class="friend-online-dot"></span>
-                        </div>
-                        <div class="friend-chat-meta-info">
-                            <div class="friend-chat-meta-top"><strong>${name === 'Mastrisno_AI' ? 'Mastrisno AI' : sanitizeHTML(name)} ${isAI ? '🤖' : (bDayFound ? '🎂' : '')}</strong></div>
-                            <div class="friend-chat-meta-bottom"><span class="friend-chat-meta-preview">${isAI ? 'Asisten AI Pintar' : 'Klik untuk mengobrol'}</span>${hasUnread > 0 ? `<div class="chat-unread-badge">${hasUnread}</div>` : ''}</div>
-                        </div>
-                    </div>`;
-            }).join('');
-        },
-
                 })
                 .subscribe();
 
@@ -3259,7 +3227,7 @@ const App = {
             } catch(e) { window.userFriendsList = []; }
         }, 
 
-        async loadPopupFriendsListSidebar() {
+                async loadPopupFriendsListSidebar() {
             const container = document.getElementById('popup-friends-sidebar-items'); if(!container) return;
             await App.Features.fetchMyFriendsData();
             
@@ -3270,21 +3238,31 @@ const App = {
                 const safeName = escapeJSString(name);
                 const isAI = (name === 'Mastrisno_AI');
                 const friendAvatar = isAI ? 'https://cdn-icons-png.flaticon.com/512/8943/8943377.png' : getUserAvatarUrl(name);
-                const isBday = isAI ? false : isUserBirthdayToday(window.userProfilesMap[name]?.birth_date);
+                
+                let bDayFound = false;
+                if (!isAI) {
+                    let prof = window.userProfilesMap[name];
+                    if (!prof) {
+                        const fk = Object.keys(window.userProfilesMap).find(k => k.toLowerCase() === name.toLowerCase());
+                        if (fk) prof = window.userProfilesMap[fk];
+                    }
+                    bDayFound = isUserBirthdayToday(prof?.birth_date);
+                }
 
                 return `
                     <div class="popup-friend-item" onclick="App.Features.openSpecificFriendPopupObrolan('${safeName.toLowerCase()}@nexsocial.id', '${safeName}')">
                         <div class="friend-avatar-wrapper">
-                            <img src="${friendAvatar}" class="friend-avatar-node">
+                            <img src="${friendAvatar}" class="friend-avatar-node" onerror="this.onerror=null; this.src='${DEFAULT_AVATAR_IMAGE}'">
                             <span class="friend-online-dot"></span>
                         </div>
                         <div class="friend-chat-meta-info">
-                            <div class="friend-chat-meta-top"><strong>${name === 'Mastrisno_AI' ? 'Mastrisno AI' : sanitizeHTML(name)} ${isAI ? '🤖' : (isBday ? '🎂' : '')}</strong></div>
+                            <div class="friend-chat-meta-top"><strong>${name === 'Mastrisno_AI' ? 'Mastrisno AI' : sanitizeHTML(name)} ${isAI ? '🤖' : (bDayFound ? '🎂' : '')}</strong></div>
                             <div class="friend-chat-meta-bottom"><span class="friend-chat-meta-preview">${isAI ? 'Asisten AI Pintar' : 'Klik untuk mengobrol'}</span>${hasUnread > 0 ? `<div class="chat-unread-badge">${hasUnread}</div>` : ''}</div>
                         </div>
                     </div>`;
             }).join('');
         },
+
 
         async openSpecificFriendPopupObrolan(friendEmail, friendName) {
             activeChatFriendEmail = friendEmail; 
