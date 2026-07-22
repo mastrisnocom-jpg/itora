@@ -3257,7 +3257,7 @@
 
                         if(activeChatFriendName === 'Mastrisno_AI') {
                             const userApiKey = localStorage.getItem('ns_gemini_api_key');
-                            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:generateContent?key=${userApiKey}`;
+                            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${userApiKey}`;
                             
                             try {
                                 const response = await fetch(url, {
